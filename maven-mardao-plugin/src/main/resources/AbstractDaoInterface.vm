@@ -8,7 +8,7 @@ import ${entity.className};
  * DAO interface with finder methods for ${entity.simpleName} entities.
  *
  * Generated on ${currentDate}.
- * @author Cybercom JPA DAO generator (${helper.class.name})
+ * @author mardao DAO generator (${helper.class.name})
  */
 public interface Abstract${entity.simpleName}DaoInterface extends GenericDao<${entity.simpleName}, ${entity.pk.type}> {
 

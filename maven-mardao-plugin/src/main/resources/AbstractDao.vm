@@ -10,11 +10,10 @@ import ${entity.className};
  * Abstract implementation of Abstract${entity.simpleName}DaoInterface methods.
  *
  * Generated on ${currentDate}.
- * @author Cybercom JPA DAO generator (${helper.class.name})
+ * @author mardao DAO generator (${helper.class.name})
  */
 public abstract class Abstract${entity.simpleName}Dao 
-	extends GenericDaoJPA<${entity.simpleName}, ${entity.pk.type}>
-		implements Abstract${entity.simpleName}DaoInterface 
+	implements Abstract${entity.simpleName}DaoInterface, GenericDao<${entity.simpleName}, ${entity.pk.type}> 
 {
 #foreach( $field in $entity.allFields )
 	/** Column name for attribute ${field.name} is "${field.name}" */
@@ -24,14 +23,16 @@ public abstract class Abstract${entity.simpleName}Dao
 	private static final String[] COLUMN_NAMES_S = {
 		#foreach( $field in $entity.allFields )COLUMN_NAME_${field.name.toUpperCase()}, #end};
 	/** The list of attribute names */
-	public static final List<String> COLUMN_NAMES = Arrays.asList(COLUMN_NAMES_S); 
+	public static final List<String> COLUMN_NAMES = Arrays.asList(COLUMN_NAMES_S);
+	
+	private final GenericDao${persistenceType}<${entity.simpleName}, ${entity.pk.type}> genericDao;
 	
 	// ----------------------- Constructor ---------------------------------
 	/**
 	 * Default constructor.
 	 */
-	Abstract${entity.simpleName}Dao() {
-		super(${entity.simpleName}.class);
+	Abstract${entity.simpleName}Dao(GenericDao${persistenceType}<${entity.simpleName}, ${entity.pk.type}> genericDao) {
+		this.genericDao = genericDao;
 	}
 
 	// ----------------------- field finders -------------------------------
@@ -43,7 +44,7 @@ public abstract class Abstract${entity.simpleName}Dao
 	 * @return the unique ${entity.simpleName} for the specified attribute
 	 */
 	public final ${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		return findUniqueBy("${field.name}", ${field.name});
+		return genericDao.findUniqueBy("${field.name}", ${field.name});
 	}
 #else
 	/**
@@ -52,7 +53,7 @@ public abstract class Abstract${entity.simpleName}Dao
 	 * @return a List of ${entity.simpleName}s with the specified attribute
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		return findBy("${field.name}", ${field.name});
+		return genericDao.findBy("${field.name}", ${field.name});
 	}
 #end	
 	 
@@ -67,7 +68,7 @@ public abstract class Abstract${entity.simpleName}Dao
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		return findBy("${field.name}", ${field.name});
+		return genericDao.findBy("${field.name}", ${field.name});
 	}
 	
 #if( $foreign )  
@@ -77,7 +78,7 @@ public abstract class Abstract${entity.simpleName}Dao
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
-		return findByKey("${field.name}", ${field.type}.class, ${foreign.pk.name});
+		return genericDao.findByKey("${field.name}", ${field.type}.class, ${foreign.pk.name});
 	}	
 #end	
 	
@@ -93,7 +94,7 @@ public abstract class Abstract${entity.simpleName}Dao
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
+		return genericDao.findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
 	}
 	
 	/**
@@ -134,13 +135,12 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #foreach( $field in $uniqueFields )
 		args.put("${field.name}", ${field.name});
 #end
-		return findBy(args);
+		return genericDao.findBy(args);
 	}
 #end
 	
-	// ----------------------- overrides -------------------------
+	// ----------------------- implements GenericDao -------------------------
 	
-	@Override
 	protected final List<${entity.simpleName}> findBy(Map<String, Object> args, String orderBy,
 			boolean ascending) {
 		if (!COLUMN_NAMES.contains(orderBy))
@@ -150,6 +150,6 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 		if (!COLUMN_NAMES.containsAll(args.keySet())) {
 			throw new IllegalArgumentException("No such WHERE column " + args.keySet());
 		}
-		return super.findBy(args, orderBy, ascending);
+		return genericDao.findBy(args, orderBy, ascending);
 	}
 }

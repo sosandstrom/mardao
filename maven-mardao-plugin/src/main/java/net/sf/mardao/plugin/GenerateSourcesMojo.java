@@ -17,7 +17,7 @@ public class GenerateSourcesMojo extends AbstractMardaoMojo {
 		mergeTemplate("GenericDao.vm", targetDaoFolder, "GenericDao.java");
 		
 		// GenericDaoJpa implementation in src dao folder
-		mergeTemplate("GenericDaoJPA.vm", srcDaoFolder, "GenericDaoJPA.java");
+		mergeTemplate("GenericDao" + persistenceType + ".vm", srcDaoFolder, "GenericDao" + persistenceType + ".java");
 		
 		// SingletonEntityManagerFactory in src dao folder
 		if (false == containerManagedEntityManager) {

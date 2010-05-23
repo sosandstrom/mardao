@@ -93,6 +93,11 @@ public class AbstractMardaoMojo extends AbstractMojo {
 	 */
 	protected boolean containerManagedTransactionManager;
 	
+	/**
+	 * @parameter expression="${generate.persistenceType}" default-value="Spring"
+	 */
+	protected String persistenceType;
+	
 	public static final java.text.DateFormat DATEFORMAT = new java.text.SimpleDateFormat(
 		"yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	
@@ -140,6 +145,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
 		vc.put("persistenceUnitName", persistenceUnitName);
 		vc.put("containerManagedEntityManager", containerManagedEntityManager);
       vc.put("containerManagedTransactionManager", containerManagedTransactionManager);
+        vc.put("persistenceType", persistenceType);
 		
 		getLog().debug("templateFolder=" + templateFolder);
 		final Properties p = new Properties();

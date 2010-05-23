@@ -1,6 +1,11 @@
 package net.sf.mardao.domain;
 
 
+/**
+ * The domain object for fields in the class graph.
+ * @author f94os
+ *
+ */
 public class Field implements Comparable<Field> {
 	private String name;
 	private String type;

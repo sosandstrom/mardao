@@ -10,6 +10,7 @@
 
 	<modules>
 		<module>maven-mardao-plugin</module>
+		<module>basic-plugin-test</module>
 	</modules>
 
 	<dependencyManagement>

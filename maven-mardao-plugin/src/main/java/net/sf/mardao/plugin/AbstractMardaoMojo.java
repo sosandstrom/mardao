@@ -17,6 +17,9 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
 /**
+ * The abstract Mojo for the mardao generator. 
+ * First pass is parsing the domain classes and build a graph,
+ * second pass is generating DAO classes while traversing the graph. 
  * @author f94os
  *
  */
@@ -126,6 +129,9 @@ public class AbstractMardaoMojo extends AbstractMojo {
 
 	}
 
+	/**
+	 * Creates and populates the velocity context, then calls mkdirs to create output directories.
+	 */
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		Velocity.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, this);
 		vc.put("helper", this);
@@ -168,6 +174,12 @@ public class AbstractMardaoMojo extends AbstractMojo {
 		mkdirs();
 	}
 
+	/**
+	 * Merges a Velocity template for a specified file, unless it already exists.
+	 * @param templateFilename
+	 * @param folder
+	 * @param javaFilename
+	 */
 	protected void mergeTemplate(String templateFilename, File folder, String javaFilename) {
 		final File javaFile = new File(folder, javaFilename);
 		// up-to-date?

@@ -26,15 +26,20 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
 /**
+ * This is the Mojo that scans the domain classes and builds a graph. Then, it 
+ * traverses the graph and generates DAO source files.
  * @goal process-classes
  * @author f94os
  *
  */
-public class ParseDomainMojo extends AbstractMardaoMojo {
+public class ProcessDomainMojo extends AbstractMardaoMojo {
 	private EntityClassVisitor classVisitor;
 	private final Map<String,Group> packages = new HashMap<String,Group>();
 	private final Map<String,Entity> entities = new HashMap<String,Entity>();
 
+	/**
+	 * Calls super.execute(), then process the configured classpaths
+	 */
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		super.execute();
 		
@@ -87,6 +92,11 @@ public class ParseDomainMojo extends AbstractMardaoMojo {
 		mergeTemplate("spring-beans-xml.vm", resourceFolder, "spring-dao.xml");
 	}
 	
+	/**
+	 * Processes the default classpath (classpathElement), then any additional elements (additionalClasspathElements).
+	 * @return
+	 * @throws Exception
+	 */
 	protected Map<String,Group> processClasspaths() throws Exception {
 		classVisitor = new EntityClassVisitor();
 		
@@ -103,6 +113,13 @@ public class ParseDomainMojo extends AbstractMardaoMojo {
 		return packages;
 	}
 	
+	/**
+	 * Process the classes for a specified package
+	 * @param classpathElement
+	 * @throws ResourceNotFoundException
+	 * @throws ParseErrorException
+	 * @throws Exception
+	 */
 	private void processClasspath(String classpathElement) throws ResourceNotFoundException, ParseErrorException, Exception {
 		if (classpathElement.endsWith(".jar")) {
 			// TODO: implement JAR scanning
@@ -114,6 +131,12 @@ public class ParseDomainMojo extends AbstractMardaoMojo {
 		}
 	}
 
+	/**
+	 * Recursive method to process a folder or file; if a folder, call recursively for each file. 
+	 * If for a file, process the file using the classVisitor.
+	 * @param root base folder
+	 * @param dir this (sub-)packages folder
+	 */
 	private void processPackage(File root, File dir) {
 		getLog().debug("- package: " + dir);
 		for (File f : dir.listFiles(new FileFilter() {

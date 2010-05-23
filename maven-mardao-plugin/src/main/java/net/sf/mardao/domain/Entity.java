@@ -8,6 +8,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+/**
+ * The domain object for Entities in the class graph.
+ * @author f94os
+ *
+ */
 public class Entity {
 	private String className;
 	private String simpleName;

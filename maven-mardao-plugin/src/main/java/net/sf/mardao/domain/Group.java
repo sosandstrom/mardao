@@ -3,6 +3,12 @@ package net.sf.mardao.domain;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The domain object for Groups, corresponding to packages, in the class graph.
+ * @author f94os
+ *
+ */
+
 public class Group {
 	private String name;
 	private String daoPackageName;

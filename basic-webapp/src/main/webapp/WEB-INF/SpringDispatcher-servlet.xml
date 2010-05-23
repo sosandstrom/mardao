@@ -9,8 +9,10 @@
 	<import resource="classpath:spring-dao.xml"/>
 
 	<!-- Controllers -->
-	<bean name="helloController" class="net.sf.mardao.basic.webapp.web.HelloController"
-		autowire="byType" />
+	<bean name="employeeController" class="net.sf.mardao.test.webapp.mvc.EmployeeController"
+		autowire="byType">
+		<property name="commandClass" value="net.sf.mardao.test.webapp.mvc.EmployeeCommand" />
+	</bean>
 
 	<!-- View resolvers -->
 	<bean id="simpleUrlHandlerMapping"
@@ -18,7 +20,7 @@
 		<property name="order" value="0" />
 		<property name="mappings">
 			<value>
-				/**=helloController
+				/**=employeeController
             </value>
 		</property>
 	</bean>

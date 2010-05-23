@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	
+#if( $containerManagedEntityManager )
+	<!-- EntityManagerFactory is managed by the container. -->
+#else	
+	<!-- EntityManagerFactory should be created only once! -->
+	<bean id="entityManagerFactory" class="${daoPackage}.SingletonEntityManagerFactory" destroy-method="close">
+		<constructor-arg value="${persistenceUnitName}" />
+	</bean>
+#end	
+
+#foreach( $group in $packages.values() )
+	<!-- ============== DaoBeans for entities in package ${group.name} ============ -->
+#foreach( $entity in $group.entities.values() )	
+	<bean id="${helper.firstToLower($entity.simpleName)}Dao" class="${daoPackage}.${entity.simpleName}DaoBean" autowire="byType" />
+#end
+	
+#end
+
+</beans>

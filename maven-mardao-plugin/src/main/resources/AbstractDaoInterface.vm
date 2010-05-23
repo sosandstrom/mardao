@@ -1,0 +1,93 @@
+package ${daoPackage};
+
+import java.util.List;
+
+import ${entity.className};
+
+/**
+ * DAO interface with finder methods for ${entity.simpleName} entities.
+ *
+ * Generated on ${currentDate}.
+ * @author Cybercom JPA DAO generator (${helper.class.name})
+ */
+public interface Abstract${entity.simpleName}DaoInterface extends GenericDao<${entity.simpleName}, ${entity.pk.type}> {
+
+	// ----------------------- field finders -------------------------------
+#foreach( $field in $entity.fields )
+#if( $entity.isUnique($field.name) )
+	/**
+	 * find-by method for unique attribute field ${field.name}
+	 * @param ${field.name} the unique attribute
+	 * @return the unique ${entity.simpleName} for the specified attribute
+	 */
+	${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+#else
+	/**
+	 * find-by method for attribute field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return a List of ${entity.simpleName}s with the specified attribute
+	 */
+	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+#end	
+	 
+#end	
+		  
+	// ----------------------- many-to-one finders -------------------------
+#foreach( $field in $entity.manyToOnes )
+#set( $foreign = $entities.get($field.type)) 
+	/**
+	 * find-by method for many-to-one field ${field.name}
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
+	 */
+	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+
+#if( $foreign )	
+	/**
+	 * find-by method for many-to-one field ${field.name}
+	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
+	 */
+	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
+#end	
+	
+#end	
+	
+	// ----------------------- many-to-many finders -------------------------
+#foreach( $field in $entity.manyToManys )
+#set( $foreign = $entities.get($field.type))
+	/**
+	 * find-by method for many-to-many field ${field.name}
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+	
+#if( $foreign )  
+	/**
+	 * find-by method for many-to-many field ${field.name}
+	 * @param ${foreign.pk.type} the related ${field.type} entity's primary key
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
+#end	
+	
+#end	
+
+	// ----------------------- uniqueFields finders -------------------------
+#foreach( $uniqueFields in $entity.uniqueFieldsSets )
+	/**
+	 * find-by method for unique fields
+#foreach( $field in $uniqueFields )	 
+	 * @param ${field.name} the specified ${field.name}
+#end	 
+	 * @return the unique ${entity.simpleName} for the specified fields
+	 */
+	${entity.simpleName} findBy#foreach( $field in $uniqueFields )
+${helper.firstToUpper($field.name)}#end(#foreach( $field in $uniqueFields )
+${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
+#end);
+
+#end
+	
+}

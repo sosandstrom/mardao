@@ -1,0 +1,18 @@
+package ${daoBasePackage};
+
+import java.io.Serializable;
+import java.util.List;
+
+public interface GenericDao<T, ID extends Serializable> {
+	  
+	T findByPrimaryKey(ID id);
+	
+	void persist(T entity);
+	
+	void update(T entity);
+	
+	void delete(T entity);
+	
+	List<T> findAll();
+
+}

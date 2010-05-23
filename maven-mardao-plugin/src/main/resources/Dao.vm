@@ -1,0 +1,10 @@
+package ${daoPackage};
+
+/**
+ * Business Methods interface for entity ${entity.simpleName}.
+ */
+public interface ${entity.simpleName}Dao extends Abstract${entity.simpleName}DaoInterface {
+
+	// TODO: declare your Business Methods here
+	
+}

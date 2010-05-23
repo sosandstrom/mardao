@@ -1,0 +1,155 @@
+package ${daoPackage};
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import ${entity.className};
+
+/**
+ * Abstract implementation of Abstract${entity.simpleName}DaoInterface methods.
+ *
+ * Generated on ${currentDate}.
+ * @author Cybercom JPA DAO generator (${helper.class.name})
+ */
+public abstract class Abstract${entity.simpleName}Dao 
+	extends GenericDaoJPA<${entity.simpleName}, ${entity.pk.type}>
+		implements Abstract${entity.simpleName}DaoInterface 
+{
+#foreach( $field in $entity.allFields )
+	/** Column name for attribute ${field.name} is "${field.name}" */
+	public static final String COLUMN_NAME_${field.name.toUpperCase()} = "${field.name}";
+#end
+
+	private static final String[] COLUMN_NAMES_S = {
+		#foreach( $field in $entity.allFields )COLUMN_NAME_${field.name.toUpperCase()}, #end};
+	/** The list of attribute names */
+	public static final List<String> COLUMN_NAMES = Arrays.asList(COLUMN_NAMES_S); 
+	
+	// ----------------------- Constructor ---------------------------------
+	/**
+	 * Default constructor.
+	 */
+	Abstract${entity.simpleName}Dao() {
+		super(${entity.simpleName}.class);
+	}
+
+	// ----------------------- field finders -------------------------------
+#foreach( $field in $entity.fields )
+#if( $entity.isUnique($field.name) )
+	/**
+	 * find-by method for unique attribute field ${field.name}
+	 * @param ${field.name} the unique attribute
+	 * @return the unique ${entity.simpleName} for the specified attribute
+	 */
+	public final ${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		return findUniqueBy("${field.name}", ${field.name});
+	}
+#else
+	/**
+	 * find-by method for attribute field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return a List of ${entity.simpleName}s with the specified attribute
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		return findBy("${field.name}", ${field.name});
+	}
+#end	
+	 
+#end	
+		  
+	// ----------------------- many-to-one finders -------------------------
+#foreach( $field in $entity.manyToOnes )
+#set( $foreign = $entities.get($field.type))
+	/**
+	 * find-by method for many-to-one field ${field.name}
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		return findBy("${field.name}", ${field.name});
+	}
+	
+#if( $foreign )  
+	/**
+	 * find-by method for many-to-one field ${field.name}
+	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+		return findByKey("${field.name}", ${field.type}.class, ${foreign.pk.name});
+	}	
+#end	
+	
+#end	
+
+	// ----------------------- many-to-many finders -------------------------
+#foreach( $field in $entity.manyToManys )
+#if( $entities.get($field.type) )  
+#set( $foreign = $entities.get($field.type))
+	/**
+	 * find-by method for many-to-many field ${field.name}
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
+	}
+	
+	/**
+	 * find-by method for many-to-many field ${field.name}
+	 * @param ${foreign.pk.type} the related ${field.type} entity's primary key
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+		return findByManyToMany("${entity.pk.name}", // primaryKeyName
+#if( $field.mappedBy )		 
+			"${field.mappedBy}_${entity.pk.name}", // this side's column in the join table (mappedBy="${field.mappedBy}")
+#else
+#set( $relatedField = $foreign.mappedBy.get($field.name) )
+			"${helper.firstToLower($relatedField.name)}_${entity.pk.name}", // this side's column in the join table  
+#end
+			"${field.simpleType}", // related entity class simple name
+			"${field.name}_${foreign.pk.name}", // the related side's column in the join table
+			${foreign.pk.name}); 			 
+	}
+#end	
+	
+#end	
+
+	// ----------------------- uniqueFields finders -------------------------
+#foreach( $uniqueFields in $entity.uniqueFieldsSets )
+	/**
+	 * find-by method for unique attributes
+#foreach( $field in $uniqueFields )	 
+	 * @param ${field.name} the specified ${field.name}
+#end	 
+	 * @return the unique ${entity.simpleName} for the specified fields
+	 */
+	public final ${entity.simpleName} findBy#foreach( $field in $uniqueFields )
+${helper.firstToUpper($field.name)}#end(#foreach( $field in $uniqueFields )
+${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
+#end) {
+		final java.util.Map<String,Object> args = new java.util.HashMap<String,Object>($uniqueFields.size());
+#foreach( $field in $uniqueFields )
+		args.put("${field.name}", ${field.name});
+#end
+		return findBy(args);
+	}
+#end
+	
+	// ----------------------- overrides -------------------------
+	
+	@Override
+	protected final List<${entity.simpleName}> findBy(Map<String, Object> args, String orderBy,
+			boolean ascending) {
+		if (!COLUMN_NAMES.contains(orderBy))
+		{
+			throw new IllegalArgumentException("No such ORDER BY column " + orderBy);
+		}
+		if (!COLUMN_NAMES.containsAll(args.keySet())) {
+			throw new IllegalArgumentException("No such WHERE column " + args.keySet());
+		}
+		return super.findBy(args, orderBy, ascending);
+	}
+}

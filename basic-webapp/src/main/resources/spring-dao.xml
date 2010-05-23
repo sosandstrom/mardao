@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	
+	<!-- EntityManagerFactory is managed by the container. -->
+
+	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.webapp.domain ============ -->
+	<bean id="organizationDao" class="net.sf.mardao.test.webapp.dao.OrganizationDaoBean" autowire="byType" />
+	<bean id="employeeDao" class="net.sf.mardao.test.webapp.dao.EmployeeDaoBean" autowire="byType" />
+	
+
+</beans>

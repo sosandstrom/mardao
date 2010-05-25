@@ -1,12 +1,53 @@
 package ${daoBasePackage};
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.List;
 
 public interface AbstractHelper<T, ID extends Serializable> extends GenericDao<T,ID> {
 	  
-	T findBy(String name, Object value);
+	/**
+	 * find-by method for generic unique attribute field 
+	 * @param fieldName the generic unique attribute's field name
+	 * @param param the generic unique attribute
+	 * @return the unique entity for the specified attribute
+	 */
+	T findUniqueBy(String fieldName, Object param);
 	
+	/**
+	 * find-by method for generic attribute field
+	 * @param fieldName the generic unique attribute's field name
+	 * @param param the specified generic attribute
+	 * @return a List of entities with the specified attribute
+	 */
+	List<T> findBy(String fieldName, Object param);
+	
+	/**
+	 * find-by method for generic field
+	 * @param fieldName the generic unique attribute's field name
+	 * @param foreignClass the related entity's class
+	 * @param key the specified foreign key
+	 * @return a List of entities with the specified foreign key
+	 */
+	@SuppressWarnings("unchecked")
+	List<T> findByKey(String fieldName, Class foreignClass, Object key);
+   
+	/**
+	 * find-by method for unique attributes
+	 * @param args the specified attribute name-value map
+	 * @return the unique entity for the specified attributes
+	 */
+	T findBy(Map<String,Object> args);
+
+	/**
+	 * find-by method for unique attributes
+	 * @param args the specified attribute name-value map
+	 * @param orderBy the attribute to order by
+	 * @param ascending true if ascending
+	 * @return the unique entity for the specified attributes
+	 */
+	List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending);
+
 	/**
 	 * find-by method for many-to-many fields
 	 * @param primaryKeyName name of this entity class' primary key, e.g. "id"

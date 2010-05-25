@@ -5,13 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
 public class AbstractSpringHelper<T, ID extends Serializable>  implements AbstractHelper<T, ID> {
 
    protected final Class<T> persistentClass;
@@ -34,23 +27,11 @@ public class AbstractSpringHelper<T, ID extends Serializable>  implements Abstra
 #end      
 	}   
 
-   protected EntityTransaction beginTransaction() {
-#if( $containerManagedTransactionManager )
-      return null;
-#else
-#end
-   }
-
-   protected void commitTransaction(EntityTransaction tx) {
-#if( $containerManagedTransactionManager )
-      // Do nothing
-#else
-#end
-   }
-
    protected Class<T> getPersistentClass() {
       return persistentClass;
    }
+   
+   // ------ GenericDao implementation -----------------------------
 
    public T findByPrimaryKey(ID id) {
    		// TODO: implement
@@ -87,7 +68,7 @@ public class AbstractSpringHelper<T, ID extends Serializable>  implements Abstra
 //      close();
    }
 
-   @SuppressWarnings("unchecked")
+   //@SuppressWarnings("unchecked")
    public List<T> findAll() {
    		// TODO: implement
       final List<T> returnValue = null;
@@ -98,14 +79,16 @@ public class AbstractSpringHelper<T, ID extends Serializable>  implements Abstra
       return returnValue;
    }
    
+   // ------ AbstractHelper implementation -----------------------------
+
 	/**
 	 * find-by method for generic unique attribute field 
 	 * @param fieldName the generic unique attribute's field name
 	 * @param param the generic unique attribute
 	 * @return the unique entity for the specified attribute
 	 */
-	@SuppressWarnings("unchecked")
-	protected final T findUniqueBy(String fieldName, Object param) {
+	// @SuppressWarnings("unchecked")
+	public final T findUniqueBy(String fieldName, Object param) {
 		// TODO: implement
 		//try {
 		//    final EntityManager em = getEntityManager();
@@ -128,8 +111,8 @@ public class AbstractSpringHelper<T, ID extends Serializable>  implements Abstra
 	 * @param param the specified generic attribute
 	 * @return a List of entities with the specified attribute
 	 */
-	@SuppressWarnings("unchecked")
-	protected final List<T> findBy(String fieldName, Object param) {
+	//@SuppressWarnings("unchecked")
+	public final List<T> findBy(String fieldName, Object param) {
 		// TODO: implement
 	    //final EntityManager em = getEntityManager();
 		//final Query query =	em.createQuery("SELECT t FROM " + persistentClass.getName() + " t WHERE t." + fieldName + " = :param");
@@ -150,8 +133,8 @@ public class AbstractSpringHelper<T, ID extends Serializable>  implements Abstra
 	 * @param key the specified foreign key
 	 * @return a List of entities with the specified foreign key
 	 */
-	@SuppressWarnings("unchecked")
-	protected final List<T> findByKey(String fieldName, Class foreignClass, Object key) {
+	//@SuppressWarnings("unchecked")
+	public final List<T> findByKey(String fieldName, Class foreignClass, Object key) {
 		// TODO: implement
 	    //final EntityManager em = getEntityManager();
 		//final Object lazy = em.getReference(foreignClass, key);
@@ -169,8 +152,8 @@ public class AbstractSpringHelper<T, ID extends Serializable>  implements Abstra
 	 * @param args the specified attribute name-value map
 	 * @return the unique entity for the specified attributes
 	 */
-	@SuppressWarnings("unchecked")
-	protected final T findBy(Map<String,Object> args) {
+	//@SuppressWarnings("unchecked")
+	public final T findBy(Map<String,Object> args) {
 		// TODO: implement
 	    //final EntityManager em = getEntityManager();
 	    //final StringBuffer ql = new StringBuffer("SELECT t FROM ");
@@ -200,8 +183,8 @@ public class AbstractSpringHelper<T, ID extends Serializable>  implements Abstra
 	 * @param ascending true if ascending
 	 * @return the unique entity for the specified attributes
 	 */
-	@SuppressWarnings("unchecked")
-	protected List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending) {
+	//@SuppressWarnings("unchecked")
+	public List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending) {
 		// TODO: implement
 	    //final EntityManager em = getEntityManager();
 	    //final StringBuffer ql = new StringBuffer("SELECT t FROM ");
@@ -242,8 +225,8 @@ public class AbstractSpringHelper<T, ID extends Serializable>  implements Abstra
 	 * @param foreignId the related entity's primary key value
 	 * @return a List of entities belonging to the many-to-many relation
 	 */
-	@SuppressWarnings("unchecked")
-	protected final List<T> findByManyToMany(String primaryKeyName, 
+	//@SuppressWarnings("unchecked")
+	public final List<T> findByManyToMany(String primaryKeyName, 
 			String fieldName, 
 			String foreignSimpleClass, String foreignFieldName, Object foreignId) {
 		// TODO: implement

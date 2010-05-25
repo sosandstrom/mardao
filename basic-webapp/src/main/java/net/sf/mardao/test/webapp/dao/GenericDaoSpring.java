@@ -1,4 +1,4 @@
-package ${daoBasePackage};
+package net.sf.mardao.test.webapp.dao;
 
 import java.io.Serializable;
 import java.util.List;
@@ -25,27 +25,17 @@ public abstract class GenericDaoSpring<T, ID extends Serializable> implements Ge
     * @see getEntityManager
     */
    public void close() {
-#if( $containerManagedEntityManager )
       // As the EntityManager is managed by the Container,
       // we should do nothing here.
       // This setting is controlled by generator plugin configuration <containerManagedEntityManager>.
-#else
-      // close?
-#end      
 	}   
 
    protected EntityTransaction beginTransaction() {
-#if( $containerManagedTransactionManager )
       return null;
-#else
-#end
    }
 
    protected void commitTransaction(EntityTransaction tx) {
-#if( $containerManagedTransactionManager )
       // Do nothing
-#else
-#end
    }
 
    protected Class<T> getPersistentClass() {

@@ -1,0 +1,22 @@
+package ${daoBasePackage};
+
+import java.io.Serializable;
+import java.util.List;
+
+public interface AbstractHelper<T, ID extends Serializable> extends GenericDao<T,ID> {
+	  
+	T findBy(String name, Object value);
+	
+	/**
+	 * find-by method for many-to-many fields
+	 * @param primaryKeyName name of this entity class' primary key, e.g. "id"
+	 * @param fieldName name of this side's column in the join table
+	 * @param foreignSimpleClass name of the related entity class (simple name) e.g. "role"
+	 * @param foreignFieldName name of the related side's column in the join table
+	 * @param foreignId the related entity's primary key value
+	 * @return a List of entities belonging to the many-to-many relation
+	 */
+	List<T> findByManyToMany(String primaryKeyName, 
+			String fieldName, 
+			String foreignSimpleClass, String foreignFieldName, Object foreignId);	
+}

@@ -5,7 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Properties;
+
+import net.sf.mardao.domain.MergeScheme;
+import net.sf.mardao.domain.MergeTemplate;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -15,6 +19,9 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
+
 
 /**
  * The abstract Mojo for the mardao generator. 
@@ -109,6 +116,10 @@ public class AbstractMardaoMojo extends AbstractMojo {
 	protected File targetDaoFolder;
 
 	protected File srcDaoFolder;
+	
+	protected MergeScheme mergeScheme;
+
+	private HashMap<String, File> destFolders;
 
 	private void mkdirs() {
 		// create target/generated-sources/dao folder
@@ -132,6 +143,11 @@ public class AbstractMardaoMojo extends AbstractMojo {
 			srcDaoFolder.mkdirs();
 		}
 
+		// create destFolders
+		destFolders = new HashMap<String, File>();
+		destFolders.put("srcDao", srcDaoFolder);
+		destFolders.put("targetDao", targetDaoFolder);
+		destFolders.put("resources", resourceFolder);
 	}
 
 	/**
@@ -145,7 +161,11 @@ public class AbstractMardaoMojo extends AbstractMojo {
 		vc.put("persistenceUnitName", persistenceUnitName);
 		vc.put("containerManagedEntityManager", containerManagedEntityManager);
       vc.put("containerManagedTransactionManager", containerManagedTransactionManager);
+      
+      	// persistence type and merge scheme:
         vc.put("persistenceType", persistenceType);
+		ApplicationContext springCtx = new GenericXmlApplicationContext("/META-INF/merge-scheme-beans.xml");
+		mergeScheme = (MergeScheme) springCtx.getBean("mergeScheme" + persistenceType);
 		
 		getLog().debug("templateFolder=" + templateFolder);
 		final Properties p = new Properties();
@@ -179,6 +199,35 @@ public class AbstractMardaoMojo extends AbstractMojo {
 		
 		mkdirs();
 	}
+	
+	protected void mergeTemplate(MergeTemplate mt, String entityName) {
+		// {prefix} {entitiyName} {middle} {persistenceType} {suffix}
+		// Abstract Employee Dao Spring .java
+
+		// compose template name:
+		StringBuffer templateName = new StringBuffer(mt.getTemplatePrefix());
+		// no entityName in template filename!
+		templateName.append(mt.getTemplateMiddle());
+		if (mt.isTypeSpecific()) {
+			templateName.append(persistenceType);
+		}
+		templateName.append(mt.getTemplateSuffix());
+		
+		// compose output filename:
+		StringBuffer fileName = new StringBuffer(mt.getFilePrefix());
+		if (mt.isEntity()) {
+			fileName.append(entityName);
+		}
+		fileName.append(mt.getFileMiddle());
+		if (mt.isTypeSpecific()) {
+			fileName.append(persistenceType);
+		}
+		fileName.append(mt.getFileSuffix());
+		
+		// lookup destination folder, and merge the template:
+		File folder = destFolders.get(mt.getDestFolder());
+		mergeTemplate(templateName.toString(), folder, fileName.toString());
+	}
 
 	/**
 	 * Merges a Velocity template for a specified file, unless it already exists.
@@ -186,7 +235,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
 	 * @param folder
 	 * @param javaFilename
 	 */
-	protected void mergeTemplate(String templateFilename, File folder, String javaFilename) {
+	private void mergeTemplate(String templateFilename, File folder, String javaFilename) {
 		final File javaFile = new File(folder, javaFilename);
 		// up-to-date?
 		if (false == javaFile.exists())

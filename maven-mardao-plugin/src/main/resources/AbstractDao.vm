@@ -25,13 +25,13 @@ public abstract class Abstract${entity.simpleName}Dao
 	/** The list of attribute names */
 	public static final List<String> COLUMN_NAMES = Arrays.asList(COLUMN_NAMES_S);
 	
-	private final GenericDao${persistenceType}<${entity.simpleName}, ${entity.pk.type}> genericDao;
+	private final AbstractHelper<${entity.simpleName}, ${entity.pk.type}> genericDao;
 	
 	// ----------------------- Constructor ---------------------------------
 	/**
 	 * Default constructor.
 	 */
-	Abstract${entity.simpleName}Dao(GenericDao${persistenceType}<${entity.simpleName}, ${entity.pk.type}> genericDao) {
+	Abstract${entity.simpleName}Dao(AbstractHelper<${entity.simpleName}, ${entity.pk.type}> genericDao) {
 		this.genericDao = genericDao;
 	}
 

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+
+	<bean id="mergeSchemeRoot" class="net.sf.mardao.domain.MergeScheme">
+		<property name="templates" ref="rootTemplates" />
+	</bean>
+	<bean id="rootTemplates" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<!-- GenericDao interface -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="GenericDao" />
+					<property name="entity" value="false" />
+					<property name="filePrefix" value="GenericDao" />
+				</bean>
+				<!-- AbstractHelper interface -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="AbstractHelper" />
+					<property name="entity" value="false" />
+					<property name="filePrefix" value="AbstractHelper" />
+				</bean>
+				<!-- TypeHelper -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templateSuffix" value="Helper.vm" />
+					<property name="typeSpecific" value="true" />
+					<property name="destFolder" value="targetDao" />
+					<property name="fileSuffix" value="Helper.java" />
+				</bean>
+				<!-- spring-dao.xml bean context -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="spring-dao-xml" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="resources" />
+					<property name="entity" value="false" />
+					<property name="filePrefix" value="spring-dao" />
+					<property name="fileSuffix" value=".xml" />
+				</bean>
+				<!-- AbstractEntityDaoInterface.java -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="Abstract" />
+					<property name="templateMiddle" value="DaoInterface" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="targetDao" />
+					<property name="filePrefix" value="Abstract" />
+					<property name="fileMiddle" value="DaoInterface" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+				<!-- AbstractEntityDao.java -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="Abstract" />
+					<property name="templateMiddle" value="Dao" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="targetDao" />
+					<property name="filePrefix" value="Abstract" />
+					<property name="fileMiddle" value="Dao" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="mergeSchemeJPA" class="net.sf.mardao.domain.MergeScheme">
+		<constructor-arg name="parent" ref="mergeSchemeRoot" />
+	</bean>
+	
+	<bean id="mergeSchemeSpring" class="net.sf.mardao.domain.MergeScheme">
+		<constructor-arg name="parent" ref="mergeSchemeRoot" />
+		<property name="templates">
+			<list>
+				<!-- AbstractTypeHelper -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="Abstract" />
+					<property name="templateSuffix" value="Helper.vm" />
+					<property name="entity" value="false" />
+					<property name="typeSpecific" value="true" />
+					<property name="destFolder" value="targetDao" />
+					<property name="filePrefix" value="Abstract" />
+					<property name="fileSuffix" value="Helper.java" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
+</beans>

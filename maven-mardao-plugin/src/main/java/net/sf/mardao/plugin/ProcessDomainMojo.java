@@ -12,6 +12,7 @@ import java.util.TreeSet;
 import net.sf.mardao.domain.Entity;
 import net.sf.mardao.domain.Field;
 import net.sf.mardao.domain.Group;
+import net.sf.mardao.domain.MergeTemplate;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -62,11 +63,16 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 	private void mergeEntity(Entity en) {
 		vc.put("entity", en);
 		
+		for (MergeTemplate mt : mergeScheme.getTemplates()) {
+			if (mt.isEntity()) {
+				mergeTemplate(mt, en.getSimpleName());
+			}
+		}
 		// AbstractEntityDaoInterface in target:
-		mergeTemplate("AbstractDaoInterface.vm", targetDaoFolder, "Abstract" + en.getSimpleName() + "DaoInterface.java");
-		mergeTemplate("AbstractDao.vm", targetDaoFolder, "Abstract" + en.getSimpleName() + "Dao.java");
-		mergeTemplate("Dao.vm", srcDaoFolder, en.getSimpleName() + "Dao.java");
-		mergeTemplate("DaoBean.vm", srcDaoFolder, en.getSimpleName() + "DaoBean.java");
+//		mergeTemplate("AbstractDaoInterface.vm", targetDaoFolder, "Abstract" + en.getSimpleName() + "DaoInterface.java");
+//		mergeTemplate("AbstractDao.vm", targetDaoFolder, "Abstract" + en.getSimpleName() + "Dao.java");
+//		mergeTemplate("Dao.vm", srcDaoFolder, en.getSimpleName() + "Dao.java");
+//		mergeTemplate("DaoBean.vm", srcDaoFolder, en.getSimpleName() + "DaoBean.java");
 	}
 
 	private void mergePackages() {
@@ -89,7 +95,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 				mergeEntity(e);
 			}
 		}
-		mergeTemplate("spring-beans-xml.vm", resourceFolder, "spring-dao.xml");
+//		mergeTemplate("spring-beans-xml.vm", resourceFolder, "spring-dao.xml");
 	}
 	
 	/**

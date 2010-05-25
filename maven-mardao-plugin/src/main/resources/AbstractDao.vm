@@ -25,13 +25,12 @@ public abstract class Abstract${entity.simpleName}Dao
 	/** The list of attribute names */
 	public static final List<String> COLUMN_NAMES = Arrays.asList(COLUMN_NAMES_S);
 	
-	private final AbstractHelper<${entity.simpleName}, ${entity.pk.type}> genericDao;
+	protected AbstractHelper<${entity.simpleName}, ${entity.pk.type}> genericDao;
 	
-	// ----------------------- Constructor ---------------------------------
 	/**
-	 * Default constructor.
+	 * Setter for the AbstractHelper attribute
 	 */
-	Abstract${entity.simpleName}Dao(AbstractHelper<${entity.simpleName}, ${entity.pk.type}> genericDao) {
+	public void setHelper(AbstractHelper<${entity.simpleName}, ${entity.pk.type}> genericDao) {
 		this.genericDao = genericDao;
 	}
 
@@ -140,6 +139,29 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #end
 	
 	// ----------------------- implements GenericDao -------------------------
+	
+	public ${entity.simpleName} findByPrimaryKey(${entity.pk.type} id) {
+		return genericDao.findByPrimaryKey(id);
+	}
+	
+	public void persist(${entity.simpleName} entity) {
+		genericDao.persist(entity);
+	}
+	
+	public void update(${entity.simpleName} entity) {
+		genericDao.update(entity);
+	}
+	
+	public void delete(${entity.simpleName} entity) {
+		genericDao.delete(entity);
+	}
+	
+	public List<${entity.simpleName}> findAll() {
+		return genericDao.findAll();
+	}
+
+	
+	// ----------------------- implements AbstractEntityDaoInterface -------------------------
 	
 	protected final List<${entity.simpleName}> findBy(Map<String, Object> args, String orderBy,
 			boolean ascending) {

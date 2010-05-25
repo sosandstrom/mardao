@@ -31,15 +31,6 @@
 					<property name="destFolder" value="targetDao" />
 					<property name="fileSuffix" value="Helper.java" />
 				</bean>
-				<!-- spring-dao.xml bean context -->
-				<bean class="net.sf.mardao.domain.MergeTemplate">
-					<property name="templatePrefix" value="spring-dao-xml" />
-					<property name="templateSuffix" value=".vm" />
-					<property name="destFolder" value="resources" />
-					<property name="entity" value="false" />
-					<property name="filePrefix" value="spring-dao" />
-					<property name="fileSuffix" value=".xml" />
-				</bean>
 				<!-- AbstractEntityDaoInterface.java -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
 					<property name="templatePrefix" value="Abstract" />
@@ -59,6 +50,32 @@
 					<property name="filePrefix" value="Abstract" />
 					<property name="fileMiddle" value="Dao" />
 					<property name="fileSuffix" value=".java" />
+				</bean>
+				<!-- EntityDao.java (interface) -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templateMiddle" value="Dao" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="srcDao" />
+					<property name="fileMiddle" value="Dao" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+				<!-- EntityDaoBean.java (the Spring Bean injected into controllers) -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templateMiddle" value="DaoBean" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="srcDao" />
+					<property name="fileMiddle" value="DaoBean" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+				
+				<!-- spring-dao.xml bean context -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="spring-dao-xml" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="resources" />
+					<property name="entity" value="false" />
+					<property name="filePrefix" value="spring-dao" />
+					<property name="fileSuffix" value=".xml" />
 				</bean>
 			</list>
 		</constructor-arg>

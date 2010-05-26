@@ -74,6 +74,7 @@
 					<property name="templateSuffix" value=".vm" />
 					<property name="destFolder" value="resources" />
 					<property name="entity" value="false" />
+					<property name="listingEntities" value="true" />
 					<property name="filePrefix" value="spring-dao" />
 					<property name="fileSuffix" value=".xml" />
 				</bean>

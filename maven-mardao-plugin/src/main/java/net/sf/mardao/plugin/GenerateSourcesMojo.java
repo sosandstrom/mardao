@@ -16,7 +16,7 @@ public class GenerateSourcesMojo extends AbstractMardaoMojo {
 	
 	private void mergeGeneric() throws ResourceNotFoundException, ParseErrorException, Exception {
 		for (MergeTemplate mt : mergeScheme.getTemplates()) {
-			if (false == mt.isEntity()) {
+			if (false == mt.isEntity() && false == mt.isListingEntities()) {
 				mergeTemplate(mt, null);
 			}
 		}

@@ -96,6 +96,11 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 			}
 		}
 //		mergeTemplate("spring-beans-xml.vm", resourceFolder, "spring-dao.xml");
+		for (MergeTemplate mt : mergeScheme.getTemplates()) {
+			if (mt.isListingEntities()) {
+				mergeTemplate(mt, null);
+			}
+		}
 	}
 	
 	/**

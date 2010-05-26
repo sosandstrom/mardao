@@ -12,10 +12,16 @@
 	</bean>
 #end	
 
+<!-- $packages -->
+<!-- $packages.values() -->
 #foreach( $group in $packages.values() )
 	<!-- ============== DaoBeans for entities in package ${group.name} ============ -->
 #foreach( $entity in $group.entities.values() )	
-	<bean id="${helper.firstToLower($entity.simpleName)}Dao" class="${daoPackage}.${entity.simpleName}DaoBean" autowire="byType" />
+	<bean id="${helper.firstToLower($entity.simpleName)}Dao" class="${daoPackage}.${entity.simpleName}DaoBean">
+		<property name="helper">
+			<bean class="${daoPackage}.${entity.simpleName}${persistenceType}Helper" autowire="byName" />
+		</property>
+	</bean>
 #end
 	
 #end

@@ -5,5 +5,19 @@
 	
 	<!-- EntityManagerFactory is managed by the container. -->
 
+<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@51282707} -->
+<!-- [net.sf.mardao.domain.Group@51282707] -->
+	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.basic.domain ============ -->
+	<bean id="organizationDao" class="net.sf.mardao.test.basic.dao.OrganizationDaoBean">
+		<property name="helper">
+			<bean class="net.sf.mardao.test.basic.dao.OrganizationSpringHelper" autowire="byName" />
+		</property>
+	</bean>
+	<bean id="employeeDao" class="net.sf.mardao.test.basic.dao.EmployeeDaoBean">
+		<property name="helper">
+			<bean class="net.sf.mardao.test.basic.dao.EmployeeSpringHelper" autowire="byName" />
+		</property>
+	</bean>
+	
 
 </beans>

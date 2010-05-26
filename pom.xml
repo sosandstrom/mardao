@@ -13,6 +13,10 @@
 		<module>basic-plugin-test</module>
 		<module>basic-webapp</module>
 	</modules>
+	
+	<properties>
+		<spring.version>3.0.2.RELEASE</spring.version>
+	</properties>
 
 	<dependencyManagement>
 		<dependencies>

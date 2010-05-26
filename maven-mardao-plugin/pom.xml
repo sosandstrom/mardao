@@ -10,10 +10,6 @@
 	<packaging>maven-plugin</packaging>
 	<name>${groupId}::${artifactId}</name>
 
-	<properties>
-		<spring.version>3.0.2.RELEASE</spring.version>
-	</properties>
-
 	<build>
 		<plugins>
 			<plugin>

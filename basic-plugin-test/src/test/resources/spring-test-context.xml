@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+	<bean id="propertyURL" class="java.net.URI">
+		<constructor-arg index="0" type="java.lang.String" value="http" />
+		<constructor-arg index="1" type="java.lang.String" value="localhost" />
+		<constructor-arg index="2" type="java.lang.String" value="/env/mardao.properties" />
+		<constructor-arg index="3" type="java.lang.String" value="" />
+	</bean>
+	<bean id="propertyUrlResource" class="org.springframework.core.io.UrlResource">
+		<constructor-arg index="0" type="java.net.URI"><ref bean="propertyURL" /></constructor-arg>
+	</bean>
+	
+	<import resource="classpath:/spring-dao.xml"/>
+</beans>

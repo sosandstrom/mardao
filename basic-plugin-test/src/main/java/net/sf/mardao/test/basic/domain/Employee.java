@@ -13,7 +13,7 @@ public class Employee {
 	private String name;
 	
 	@ManyToOne
-	private Organization currentEmployer;
+	private Long currentEmployerId;
 
 	public void setName(String name) {
 		this.name = name;
@@ -31,11 +31,11 @@ public class Employee {
 		return id;
 	}
 
-	public void setCurrentEmployer(Organization currentEmployer) {
-		this.currentEmployer = currentEmployer;
+	public void setCurrentEmployerId(Long currentEmployerId) {
+		this.currentEmployerId = currentEmployerId;
 	}
 
-	public Organization getCurrentEmployer() {
-		return currentEmployer;
+	public Long getCurrentEmployerId() {
+		return currentEmployerId;
 	}
 }

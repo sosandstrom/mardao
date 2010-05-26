@@ -1,5 +1,13 @@
 package ${daoBasePackage};
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+
 import ${entity.className};
 
 /**
@@ -11,4 +19,46 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
       super(${entity.simpleName}.class);
    }
    
+	/** 
+	 * Used for DataSource injection
+	 * @param dataSource the DataSource to inject
+	 */
+	public void setDataSource(DataSource dataSource) {
+		LOGGER.info("setDataSource " + dataSource);
+		template = new SimpleJdbcTemplate(dataSource);
+	
+      // create the JDBC insert with specific columns and table name:
+		insert = new SimpleJdbcInsert(dataSource)
+			.withTableName(getTableName())
+			.usingColumns("${entity.pk.name}"#foreach( $field in $entity.fields )
+, "${field.name}"#end
+#foreach( $field in $entity.manyToOnes )
+, "${field.name}"#end);
+   }
+   
+   @Override
+   protected String getTableName() {
+   		return "${entity.simpleName}";
+   }
+   
+	/** Mapper for the ${entity.simpleName} row retrieval */
+	private static final ParameterizedRowMapper<${entity.simpleName}> MAPPER = 
+		new ParameterizedRowMapper<${entity.simpleName}>() {
+		public ${entity.simpleName} mapRow(ResultSet rs, int rowNum) throws SQLException {
+			final ${entity.simpleName} entity = new ${entity.simpleName}();
+#set( $field = $entity.pk )
+			entity.set${helper.firstToUpper($field.name)}(rs.get${helper.firstToUpper($field.simpleType)}("${field.name}"));
+#foreach( $field in $entity.fields )
+			entity.set${helper.firstToUpper($field.name)}(rs.get${helper.firstToUpper($field.simpleType)}("${field.name}"));
+#end			
+#foreach( $field in $entity.manyToOnes )
+			entity.set${helper.firstToUpper($field.name)}(rs.get${helper.firstToUpper($field.simpleType)}("${field.name}"));
+#end
+			return entity;			
+		}
+	};
+	protected final ParameterizedRowMapper<${entity.simpleName}> getRowMapper() {
+		return MAPPER;
+	}
+	
 }

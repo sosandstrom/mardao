@@ -1,12 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+	">
+	<bean id="daoProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"><ref bean="propertyUrlResource"/></property>
+	</bean>
+	
+
+	<tx:advice id="txAdvice">
+		<tx:attributes>
+			<tx:method name="create*" propagation="REQUIRED"/>
+			<tx:method name="delete*" propagation="REQUIRED"/>
+			<tx:method name="populate*" propagation="REQUIRED"/>
+			<tx:method name="update*" propagation="REQUIRED"/>
+			<tx:method name="*" propagation="SUPPORTS" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *..${uber.name}Dao.*(..))"/>
+	</aop:config>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
 	
 	<!-- EntityManagerFactory is managed by the container. -->
 
-<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@51282707} -->
-<!-- [net.sf.mardao.domain.Group@51282707] -->
+<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@689ba632} -->
+<!-- [net.sf.mardao.domain.Group@689ba632] -->
 	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.basic.domain ============ -->
 	<bean id="organizationDao" class="net.sf.mardao.test.basic.dao.OrganizationDaoBean">
 		<property name="helper">
@@ -20,4 +47,20 @@
 	</bean>
 	
 
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${dao.driver.classname}" />
+		<property name="url" value="${dao.connection.url}" />
+		<property name="username" value="${dao.connection.username}" />
+		<property name="password" value="${dao.connection.password}" />
+		<property name="validationQuery" value="${dao.connection.validationQuery}" />
+	</bean>
+	<bean id="daoIncrementerMYSQL" class="org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer">
+		<property name="dataSource" ref="dataSource" />
+		<property name="incrementerName" value="id_sequence" />
+		<property name="columnName" value="highest" />
+	</bean>
+	<bean id="daoIncrementerORACLE" class="org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer">
+		<property name="dataSource" ref="dataSource" />
+		<property name="incrementerName" value="id_sequence" />
+	</bean>
 </beans>

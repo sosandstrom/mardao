@@ -17,7 +17,7 @@ public class DaoTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		ApplicationContext springCtx = new GenericXmlApplicationContext("/spring-dao.xml");
+		ApplicationContext springCtx = new GenericXmlApplicationContext("/spring-test-context.xml");
 		employeeDao = (EmployeeDao) springCtx.getBean("employeeDao");
 		assertNotNull(employeeDao);
 		organizationDao = (OrganizationDao) springCtx.getBean("organizationDao");

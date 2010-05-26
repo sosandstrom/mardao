@@ -5,13 +5,52 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class AbstractSpringHelper<T, ID extends Serializable>  implements AbstractHelper<T, ID> {
+import org.apache.log4j.Logger;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
+
+public abstract class AbstractSpringHelper<T, ID extends Serializable>  implements AbstractHelper<T, ID> {
 
    protected final Class<T> persistentClass;
-   
+	/** the Spring SimpleJDBC template */
+	protected SimpleJdbcTemplate template;
+	
+	/** Spring inserter */
+	protected SimpleJdbcInsert insert;
+	
+	/** Used to generate unique ids */
+	protected DataFieldMaxValueIncrementer incrementer;
+	
+	/** Log4j Logger */
+	protected final Logger LOGGER = Logger.getLogger(getClass());
+
    public AbstractSpringHelper(Class<T> type) {
       this.persistentClass = type;
    }
+   
+   protected abstract String getTableName();
+   protected abstract RowMapper<T> getRowMapper();   
+   
+	/**
+	 * Used for test purposes and for creating tables on-deploy
+	 */
+	public JdbcOperations getJdbcOperations()
+	{
+		return template.getJdbcOperations();
+	}
+	
+	/**
+	 * Used for MaxValueIncrementer injection
+	 * @param maxValueIncrementer the DataFieldMaxValueIncrementer to inject
+	 */
+	public void setMaxValueIncrementer(DataFieldMaxValueIncrementer maxValueIncrementer)	
+	{
+		incrementer = maxValueIncrementer;
+	}
+	
    
    /**
     * Override to implement specific EntityManager factory functionality
@@ -68,15 +107,11 @@ public class AbstractSpringHelper<T, ID extends Serializable>  implements Abstra
 //      close();
    }
 
-   //@SuppressWarnings("unchecked")
    public List<T> findAll() {
-   		// TODO: implement
-      final List<T> returnValue = null;
-      
-      // for eager fetch then close
-      // returnValue.size();
-      // close();
-      return returnValue;
+		LOGGER.debug("findAll()");
+
+		final String sql = "SELECT * FROM " + getTableName();
+		return template.query(sql, getRowMapper());
    }
    
    // ------ AbstractHelper implementation -----------------------------

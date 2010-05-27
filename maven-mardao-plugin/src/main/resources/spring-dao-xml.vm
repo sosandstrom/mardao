@@ -24,7 +24,7 @@
 	</tx:advice>
 	
 	<aop:config>
-		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *..${uber.name}Dao.*(..))"/>
+		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *${daoPackage}.*DaoBean.*(..))"/>
 	</aop:config>
 	
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">

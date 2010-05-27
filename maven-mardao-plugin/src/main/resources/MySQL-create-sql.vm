@@ -1,0 +1,54 @@
+#foreach( $group in $packages.values() )
+- ----------- CREATE TABLE for entities in package ${group.name} -----------
+#foreach( $entity in $group.entities.values() )	
+CREATE TABLE `${entity.simpleName}` (
+	`${entity.pk.name}` int(10) unsigned NOT NULL,
+#foreach( $column in $entity.fields )
+	`${column.name}` #if( $column.type == $JAVA_BOOLEAN )
+bit(1) #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
+#elseif( $column.type == $JAVA_DATE )
+timestamp NOT NULL default CURRENT_TIMESTAMP,
+#elseif( $column.type == $JAVA_NUMBER )
+BIGINT #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
+#elseif( $column.type == $JAVA_STRING )
+varchar(${column.size}) #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
+#else
+${column.type},
+#end
+#end
+#foreach( $column in $entity.manyToOnes )
+#set( $javaType = $Helper.getForeignType($entities, $column.class1, $column.column) )
+	`${column.name}` #if( $javaType == $JAVA_BOOLEAN )
+bit(1) #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
+#elseif( $javaType == $JAVA_DATE )
+timestamp NOT NULL default CURRENT_TIMESTAMP,
+#elseif( $javaType == $JAVA_NUMBER )
+int(10) unsigned #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
+#elseif( $javaType == $JAVA_STRING )
+varchar(${Helper.getForeignSize($classes, $column.class1, $column.column)}) #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
+#else
+${javaType},
+#end
+#end
+	PRIMARY KEY (`${entity.pk.name}`)#if( 0 < $class.sizeOfManyToOnes() || 0 < $class.sizeOfUniqueArray() ),#end
+	
+#foreach( $unique in $entity.uniqueArray )
+	UNIQUE (#foreach( $column in $unique.memberArray )
+`${column.name}`#if( $velocityCount < $unique.sizeOfMemberArray() ),#end
+#end	
+)#if( 0 < $entity.sizeOfManyToOnes() || $velocityCount < $entity.sizeOfUniqueArray() ),#end
+	
+#end	
+#foreach( $column in $entity.manyToOnes )
+	CONSTRAINT `Fk${entity.simpleName}${column.name}` FOREIGN KEY (`${column.name}`) REFERENCES `${column.type}` (`${column.column}`)#if( $velocityCount < $entity.sizeOfManyToOnes() ),#end
+	
+#end
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+#end
+#end
+
+- ----------- CREATE TABLE for sequence and db version -----------
+create table id_sequence (highest int not null) type=MYISAM;
+insert into id_sequence values(0);
+create table db_version (currentVersion int not null) type=MYISAM;
+insert into db_version values(1);

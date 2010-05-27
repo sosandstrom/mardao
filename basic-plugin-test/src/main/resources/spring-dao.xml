@@ -23,7 +23,7 @@
 	</tx:advice>
 	
 	<aop:config>
-		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *..${uber.name}Dao.*(..))"/>
+		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *net.sf.mardao.test.basic.dao.*DaoBean.*(..))"/>
 	</aop:config>
 	
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
@@ -32,8 +32,8 @@
 	
 	<!-- EntityManagerFactory is managed by the container. -->
 
-<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@689ba632} -->
-<!-- [net.sf.mardao.domain.Group@689ba632] -->
+<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@237aaeec} -->
+<!-- [net.sf.mardao.domain.Group@237aaeec] -->
 	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.basic.domain ============ -->
 	<bean id="organizationDao" class="net.sf.mardao.test.basic.dao.OrganizationDaoBean">
 		<property name="helper">

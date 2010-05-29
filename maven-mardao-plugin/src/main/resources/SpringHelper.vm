@@ -9,7 +9,9 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
 import ${entity.className};
-
+#foreach( $field in $entity.manyToOnes )
+import ${field.entity.className};
+#end
 /**
  * Concrete class without generics, for Spring container instatiation.
  */
@@ -52,8 +54,13 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 			entity.set${helper.firstToUpper($field.name)}(rs.get${helper.firstToUpper($field.simpleType)}("${field.name}"));
 #end			
 #foreach( $field in $entity.manyToOnes )
-			entity.set${helper.firstToUpper($field.name)}(rs.get${helper.firstToUpper($field.simpleType)}("${field.name}"));
+
+			// many-to-one ${field.name}:
+			final ${field.entity.simpleName} ${field.name} = new ${field.entity.simpleName}();
+			${field.name}.set${helper.firstToUpper($field.entity.pk.name)}(rs.get${helper.firstToUpper($field.entity.pk.simpleType)}("${field.name}"));
+			entity.set${helper.firstToUpper($field.name)}(${field.name});
 #end
+
 			return entity;			
 		}
 	};

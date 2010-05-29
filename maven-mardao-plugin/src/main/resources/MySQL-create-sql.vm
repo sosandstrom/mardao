@@ -7,7 +7,7 @@
 CREATE TABLE `${entity.simpleName}` (
 	`${entity.pk.name}` $dbTypes.get($entity.pk.type) NOT NULL,
 #foreach( $column in $entity.fields )
-	`${column.name}` $dbTypes.get($column.type) DEFAULT NULL, 
+	`${column.name}` $dbTypes.get($column.type) $dbDefaults.get($column.type), 
 #end
 #foreach( $column in $entity.manyToOnes )
 	`${column.name}` $dbTypes.get($column.entity.pk.type) DEFAULT NULL,

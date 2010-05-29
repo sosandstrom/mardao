@@ -14,7 +14,7 @@
 	<url>http://mardao.sf.net</url>
 
 	<properties>
-		<spring.version>2.5.6</spring.version>
+		<spring.version>3.0.2.RELEASE</spring.version>
 	</properties>
 
 	<build>

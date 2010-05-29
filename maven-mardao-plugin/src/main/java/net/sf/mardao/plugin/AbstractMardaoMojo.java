@@ -159,12 +159,21 @@ public class AbstractMardaoMojo extends AbstractMojo {
 		vc.put("helper", this);
 		
 		Map<String,String> mySqlTypes = new HashMap<String,String>();
+		Map<String,String> mySqlDefaults = new HashMap<String,String>();
 		// for MySQL
 		mySqlTypes.put(Long.class.getName(), "INTEGER");
-		mySqlTypes.put(String.class.getName(), "VARCHAR");
+		mySqlTypes.put(String.class.getName(), "TEXT");
 		mySqlTypes.put("boolean", "BIT(1)");
+		mySqlTypes.put(java.util.Date.class.getName(), "TIMESTAMP");
+		
+		mySqlDefaults.put(Long.class.getName(), "DEFAULT NULL");
+		mySqlDefaults.put(String.class.getName(), "DEFAULT NULL");
+		mySqlDefaults.put("boolean", "DEFAULT NULL");
+		mySqlDefaults.put(java.util.Date.class.getName(), "NOT NULL DEFAULT CURRENT_TIMESTAMP");		
+		
 		// FIXME: other DB types
 		vc.put("dbTypes", mySqlTypes);
+		vc.put("dbDefaults", mySqlDefaults);
 		
 		Date current = new Date();
 		vc.put("currentDate", DATEFORMAT.format(current));

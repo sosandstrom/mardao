@@ -1,39 +1,18 @@
+-- Created by mardao DAO generator $currentDate
+-- 
+--
 #foreach( $group in $packages.values() )
-- ----------- CREATE TABLE for entities in package ${group.name} -----------
+-- ----------- CREATE TABLE for entities in package ${group.name} -----------
 #foreach( $entity in $group.entities.values() )	
 CREATE TABLE `${entity.simpleName}` (
-	`${entity.pk.name}` int(10) unsigned NOT NULL,
+	`${entity.pk.name}` $dbTypes.get($entity.pk.type) NOT NULL,
 #foreach( $column in $entity.fields )
-	`${column.name}` #if( $column.type == $JAVA_BOOLEAN )
-bit(1) #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
-#elseif( $column.type == $JAVA_DATE )
-timestamp NOT NULL default CURRENT_TIMESTAMP,
-#elseif( $column.type == $JAVA_NUMBER )
-BIGINT #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
-#elseif( $column.type == $JAVA_STRING )
-varchar(${column.size}) #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
-#else
-${column.type},
-#end
+	`${column.name}` $dbTypes.get($column.type) DEFAULT NULL, 
 #end
 #foreach( $column in $entity.manyToOnes )
-- ${column.entity}
-- ${column.entity.pk}
-- ${column.entity.pk.type}
-#set( $javaType = $column.entity.pk.type )
-	`${column.name}` #if( $javaType == $JAVA_BOOLEAN )
-bit(1) #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
-#elseif( $javaType == $JAVA_DATE )
-timestamp NOT NULL default CURRENT_TIMESTAMP,
-#elseif( $javaType == $JAVA_NUMBER )
-int(10) unsigned #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
-#elseif( $javaType == $JAVA_STRING )
-varchar(${Helper.getForeignSize($classes, $column.class1, $column.column)}) #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
-#else
-${javaType},
+	`${column.name}` $dbTypes.get($column.entity.pk.type) DEFAULT NULL,
 #end
-#end
-	PRIMARY KEY (`${entity.pk.name}`)#if( 0 < $class.sizeOfManyToOnes() || 0 < $class.sizeOfUniqueArray() ),#end
+	PRIMARY KEY (`${entity.pk.name}`)#if( 0 < $entity.manyToOnes.size() ),#end
 	
 #foreach( $unique in $entity.uniqueArray )
 	UNIQUE (#foreach( $column in $unique.memberArray )
@@ -50,7 +29,7 @@ ${javaType},
 #end
 #end
 
-- ----------- CREATE TABLE for sequence and db version -----------
+-- ----------- CREATE TABLE for sequence and db version -----------
 create table id_sequence (highest int not null) type=MYISAM;
 insert into id_sequence values(0);
 create table db_version (currentVersion int not null) type=MYISAM;

@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import net.sf.mardao.domain.MergeScheme;
@@ -156,6 +157,15 @@ public class AbstractMardaoMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		Velocity.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, this);
 		vc.put("helper", this);
+		
+		Map<String,String> mySqlTypes = new HashMap<String,String>();
+		// for MySQL
+		mySqlTypes.put(Long.class.getName(), "INTEGER");
+		mySqlTypes.put(String.class.getName(), "VARCHAR");
+		mySqlTypes.put("boolean", "BIT(1)");
+		// FIXME: other DB types
+		vc.put("dbTypes", mySqlTypes);
+		
 		Date current = new Date();
 		vc.put("currentDate", DATEFORMAT.format(current));
 		vc.put("persistenceUnitName", persistenceUnitName);

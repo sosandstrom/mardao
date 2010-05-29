@@ -2,8 +2,12 @@ package ${daoBasePackage};
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import javax.sql.DataSource;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
@@ -17,6 +21,23 @@ import ${field.entity.className};
  */
 public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${entity.simpleName}, ${entity.pk.type}> {
 
+	/** Table name for ${entity.simpleName} is "${entity.simpleName}" */
+	public static final String TABLE_NAME = "${entity.simpleName}";
+
+	/** Column name for primary key attribute is "${entity.pk.name}" */
+	public static final String COLUMN_NAME_${entity.pk.name.toUpperCase()} = "${entity.pk.name}";
+
+#foreach( $field in $entity.allFields )
+	/** Column name for attribute ${field.name} is "${field.name}" */
+	public static final String COLUMN_NAME_${field.name.toUpperCase()} = "${field.name}";
+#end
+
+	private static final String[] COLUMN_NAMES_S = {
+		#foreach( $field in $entity.allFields )COLUMN_NAME_${field.name.toUpperCase()}, #end};
+	/** The list of attribute names */
+	public static final List<String> COLUMN_NAMES = Arrays.asList(COLUMN_NAMES_S);
+
+	/** Default constructor */
    public ${entity.simpleName}SpringHelper() {
       super(${entity.simpleName}.class);
    }
@@ -40,7 +61,17 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
    
    @Override
    protected String getTableName() {
-   		return "${entity.simpleName}";
+   		return TABLE_NAME;
+   }
+   
+   @Override
+   protected String getPrimaryKeyColumnName() {
+   		return COLUMN_NAME_${entity.pk.name.toUpperCase()};
+   }
+   
+   @Override
+   protected List<String> getColumnNames() {
+        return COLUMN_NAMES;
    }
    
 	/** Mapper for the ${entity.simpleName} row retrieval */
@@ -68,4 +99,86 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 		return MAPPER;
 	}
 	
+   // ------ GenericDao implementation -----------------------------
+
+	/**
+	 * Inserts a ${entity.simpleName} instance. The primary key attribute of the instance is updated.
+	 *
+	 * @param entity the ${entity.simpleName} entity to insert
+	 */
+   @Override
+   public void persist(${entity.simpleName} entity) {
+		LOGGER.debug("insert(" + entity + ")");
+		
+		// get id from next in sequence:
+		final long id = incrementer.nextLongValue();
+		entity.set${helper.firstToUpper(${entity.pk.name})}(id);
+		
+		HashMap<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put(getPrimaryKeyColumnName(), id);
+		
+		// properties
+#foreach( $field in $entity.fields )
+		parameters.put(COLUMN_NAME_${field.name.toUpperCase()}, entity.get${helper.firstToUpper($field.name)}());
+#end
+
+		// foreign keys:
+#foreach( $field in $entity.manyToOnes )
+		parameters.put(COLUMN_NAME_${field.name.toUpperCase()}, toForeignKey(entity.get${helper.firstToUpper($field.name)}()));
+#end
+
+		insert.execute(parameters);
+   }
+
+	/** UPDATE SQL String for ${entity.simpleName} updates. */
+	protected static final String SQL_UPDATE = "UPDATE " + TABLE_NAME + " SET " + 
+    		// attributes first:
+#foreach( $field in $entity.fields )
+			COLUMN_NAME_${field.name.toUpperCase()} + " = ?#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end" + 
+#end
+
+			// then many-to-ones:
+#foreach( $field in $entity.manyToOnes )
+			COLUMN_NAME_${field.name.toUpperCase()} + " = ?#if( $velocityCount < $entity.manyToOnes.size() ), #end" + 
+#end
+
+			// finally, the primary key for WHERE clause:
+			" WHERE " + COLUMN_NAME_${entity.pk.name.toUpperCase()} + " = ?";
+
+	/**
+	 * Updates a ${entity.simpleName} instance. 
+	 * The primary key must not be changed.
+	 *
+	 * @param entity the instance to update
+	 */
+    public void update(final ${entity.simpleName} entity) {
+		LOGGER.debug("update(" + entity + ")");
+		
+		// attributes first:
+		final Object args[] = {
+#foreach( $field in $entity.fields )
+			entity.get${helper.firstToUpper($field.name)}(), 
+#end
+
+			// then many-to-ones:
+#foreach( $field in $entity.manyToOnes )
+			toForeignKey(entity.get${helper.firstToUpper($field.name)}()), 
+#end
+
+			// finally, the primary key for WHERE clause:
+			entity.get${helper.firstToUpper($entity.pk.name)}()};
+		template.update(SQL_UPDATE, args);
+	}
+	
+   public void delete(${entity.simpleName} entity) {
+		LOGGER.debug("delete(" + entity + ")");
+		
+		final String sql = "DELETE FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_${entity.pk.name.toUpperCase()} + " = ?";
+		int affected = template.update(sql, entity.get${helper.firstToUpper($field.name)}());
+		if (0 == affected)
+		{
+			throw new EmptyResultDataAccessException("No such " + getTableName() + " for id " + entity.get${helper.firstToUpper($field.name)}(), 1);
+		}
+   }
+
 }

@@ -32,17 +32,17 @@
 	
 	<!-- EntityManagerFactory is managed by the container. -->
 
-<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@237aaeec} -->
-<!-- [net.sf.mardao.domain.Group@237aaeec] -->
+<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@2792e317} -->
+<!-- [net.sf.mardao.domain.Group@2792e317] -->
 	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.basic.domain ============ -->
 	<bean id="organizationDao" class="net.sf.mardao.test.basic.dao.OrganizationDaoBean">
 		<property name="helper">
-			<bean class="net.sf.mardao.test.basic.dao.OrganizationSpringHelper" autowire="byName" init-method="checkTables" />
+			<bean class="net.sf.mardao.test.basic.dao.OrganizationSpringHelper" autowire="byType" init-method="checkTables" />
 		</property>
 	</bean>
 	<bean id="employeeDao" class="net.sf.mardao.test.basic.dao.EmployeeDaoBean">
 		<property name="helper">
-			<bean class="net.sf.mardao.test.basic.dao.EmployeeSpringHelper" autowire="byName" />
+			<bean class="net.sf.mardao.test.basic.dao.EmployeeSpringHelper" autowire="byType" init-method="checkTables" />
 		</property>
 	</bean>
 	
@@ -59,8 +59,10 @@
 		<property name="incrementerName" value="id_sequence" />
 		<property name="columnName" value="highest" />
 	</bean>
+	<!-- disable, as above is autowired by type into Helpers
 	<bean id="daoIncrementerORACLE" class="org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer">
 		<property name="dataSource" ref="dataSource" />
 		<property name="incrementerName" value="id_sequence" />
 	</bean>
+	-->
 </beans>

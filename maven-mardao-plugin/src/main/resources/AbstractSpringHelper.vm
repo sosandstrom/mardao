@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -36,6 +37,8 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
    }
    
    protected abstract String getTableName();
+   protected abstract String getPrimaryKeyColumnName();
+   protected abstract List<String> getColumnNames();
    protected abstract RowMapper<T> getRowMapper();   
    
 	/**
@@ -156,41 +159,38 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
       return persistentClass;
    }
    
+	/**
+	 * Used to replace 0-valued foreign keys
+	 * with a null value. Used in the
+	 * insert() and update() implementations.
+	 * @param id the long foreign key value
+	 * @return null if id is 0, id otherwise 
+	 */	
+	protected Long toForeignKey(long id)
+	{
+		return java.sql.Types.NULL == id ? null : id;
+	}
+
+	/**
+	 * Simply returns the specified key, used for overloading.
+	 * @param key the foreign key value
+	 * @return the specified key 
+	 */	
+	protected Object toForeignKey(Object key)
+	{
+		return key;
+	}
+
    // ------ GenericDao implementation -----------------------------
 
    public T findByPrimaryKey(ID id) {
-   		// TODO: implement
-      //final EntityManager em = getEntityManager();
-      final T returnValue = null; //em.find(persistentClass, id);
-      //close();
-      return returnValue;
-   }
-
-   public void persist(T entity) {
-   		// TODO: implement
-      //final EntityManager em = getEntityManager();
-      //final EntityTransaction tx = beginTransaction();
-      //em.persist(entity);
-      //commitTransaction(tx);
-      //close();
-   }
-
-   public void update(T entity) {
-   		// TODO: implement
-      //final EntityManager em = getEntityManager();
-      //final EntityTransaction tx = beginTransaction();
-      //em.merge(entity);
-      //commitTransaction(tx);
-      //close();
-   }
-
-   public void delete(T entity) {
-   		// TODO: implement
-//      final EntityManager em = getEntityManager();
-//      final EntityTransaction tx = beginTransaction();
-//      em.remove(entity);
-//      commitTransaction(tx);
-//      close();
+		T entity = null;
+		LOGGER.debug("find(" + id + ")");
+		final String sql = "SELECT * FROM " + getTableName() + " WHERE " + getPrimaryKeyColumnName() + " = ?";
+		try {
+			entity = template.queryForObject(sql, getRowMapper(), id);
+		} catch (EmptyResultDataAccessException e) {}
+		return entity;
    }
 
    public List<T> findAll() {
@@ -323,6 +323,14 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	    //ql.append(" ORDER BY t.");
 	    //ql.append(orderBy);
 	    //ql.append(ascending ? " ASC" : " DESC");
+
+		if (!getColumnNames().contains(orderBy))
+		{
+			throw new IllegalArgumentException("No such ORDER BY column " + orderBy);
+		}
+		if (!getColumnNames().containsAll(args.keySet())) {
+			throw new IllegalArgumentException("No such WHERE column " + args.keySet());
+		}
 	    
 		//final Query query =	em.createQuery(ql.toString());
 	    //for (Entry<String,Object> entry : args.entrySet()) {

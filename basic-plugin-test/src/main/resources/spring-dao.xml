@@ -37,7 +37,7 @@
 	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.basic.domain ============ -->
 	<bean id="organizationDao" class="net.sf.mardao.test.basic.dao.OrganizationDaoBean">
 		<property name="helper">
-			<bean class="net.sf.mardao.test.basic.dao.OrganizationSpringHelper" autowire="byName" />
+			<bean class="net.sf.mardao.test.basic.dao.OrganizationSpringHelper" autowire="byName" init-method="checkTables" />
 		</property>
 	</bean>
 	<bean id="employeeDao" class="net.sf.mardao.test.basic.dao.EmployeeDaoBean">

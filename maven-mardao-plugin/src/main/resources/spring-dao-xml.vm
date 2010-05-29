@@ -46,7 +46,7 @@
 #foreach( $entity in $group.entities.values() )	
 	<bean id="${helper.firstToLower($entity.simpleName)}Dao" class="${daoPackage}.${entity.simpleName}DaoBean">
 		<property name="helper">
-			<bean class="${daoPackage}.${entity.simpleName}${persistenceType}Helper" autowire="byName" />
+			<bean class="${daoPackage}.${entity.simpleName}${persistenceType}Helper" autowire="byType" init-method="checkTables" />
 		</property>
 	</bean>
 #end
@@ -65,8 +65,10 @@
 		<property name="incrementerName" value="id_sequence" />
 		<property name="columnName" value="highest" />
 	</bean>
+	<!-- disable, as above is autowired by type into Helpers
 	<bean id="daoIncrementerORACLE" class="org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer">
 		<property name="dataSource" ref="dataSource" />
 		<property name="incrementerName" value="id_sequence" />
 	</bean>
+	-->
 </beans>

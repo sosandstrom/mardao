@@ -1,5 +1,9 @@
 package ${daoBasePackage};
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +41,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	/**
 	 * Used for test purposes and for creating tables on-deploy
 	 */
-	public JdbcOperations getJdbcOperations()
+	protected JdbcOperations getJdbcOperations()
 	{
 		return template.getJdbcOperations();
 	}
@@ -49,6 +53,88 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	public void setMaxValueIncrementer(DataFieldMaxValueIncrementer maxValueIncrementer)	
 	{
 		incrementer = maxValueIncrementer;
+	}
+	
+	/**
+	 * Creates the database tables, if necessary
+	 */
+	protected void checkTables() {
+		try
+		{
+			// check for any entity:
+			findAll();
+		}
+		catch (org.springframework.jdbc.BadSqlGrammarException e)
+		{
+			InputStream in = getClass().getResourceAsStream("/MySQL-create.sql");
+			if (null != in)
+			{
+				LOGGER.info("Creating DB tables.");
+				try {
+					executeOperations(in);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					throw e;
+				}
+			}
+			else { 
+				throw e;
+			}
+		}
+	}
+	
+	/** Logs and executes from the specified InputStream */
+	protected void executeOperations(final InputStream in) throws IOException
+	{
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		StringBuffer sql = new StringBuffer();
+		String s = br.readLine().trim();
+		
+		while (null != s)
+		{
+			if (false == s.startsWith("--")) {
+				sql.append(s);
+				if (s.endsWith(";"))
+				{
+					sql.deleteCharAt(sql.length()-1);
+					try
+					{
+						executeOperations(sql.toString());
+					}
+					catch (org.springframework.jdbc.BadSqlGrammarException e2)
+					{
+						LOGGER.warn(e2.getMessage());
+					}
+					sql.setLength(0);
+				}
+			}
+			
+			s = br.readLine();
+		}
+	}
+	
+	/** Logs and executes the specified sql String */
+	protected void executeOperations(final String sql) throws org.springframework.jdbc.BadSqlGrammarException
+	{
+		final JdbcOperations ops = getJdbcOperations();
+		LOGGER.info(sql);
+		ops.execute(sql);
+	}
+	
+	/** Logs and queries the specified sql String */
+	protected int queryForInt(final String sql) throws org.springframework.jdbc.BadSqlGrammarException
+	{
+		final JdbcOperations ops = getJdbcOperations();
+		LOGGER.info(sql);
+		return ops.queryForInt(sql);
+	}
+	
+	/** Logs and updates the specified sql String */
+	protected void updateOperations(final String sql) throws org.springframework.jdbc.BadSqlGrammarException
+	{
+		final JdbcOperations ops = getJdbcOperations();
+		LOGGER.info(sql);
+		ops.update(sql);
 	}
 	
    

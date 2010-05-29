@@ -105,4 +105,9 @@ public class Entity {
 	public Map<String,Field> getMappedBy() {
 		return mappedBy;
 	}
+	
+	@Override
+	public String toString() {
+		return getClassName() + "<" + getSimpleName() + ">";
+	}
 }

@@ -10,6 +10,8 @@ public class Field implements Comparable<Field> {
 	private String name;
 	private String type;
 	private String mappedBy;
+	/** for many-to-ones */
+	private Entity entity;
 
 	public void setName(String name) {
 		this.name = name;
@@ -58,5 +60,15 @@ public class Field implements Comparable<Field> {
 
 	public String getMappedBy() {
 		return mappedBy;
+	}
+
+
+	public void setEntity(Entity entity) {
+		this.entity = entity;
+	}
+
+
+	public Entity getEntity() {
+		return entity;
 	}
 }

@@ -17,7 +17,10 @@ ${column.type},
 #end
 #end
 #foreach( $column in $entity.manyToOnes )
-#set( $javaType = $Helper.getForeignType($entities, $column.class1, $column.column) )
+- ${column.entity}
+- ${column.entity.pk}
+- ${column.entity.pk.type}
+#set( $javaType = $column.entity.pk.type )
 	`${column.name}` #if( $javaType == $JAVA_BOOLEAN )
 bit(1) #if( $column.notNull ) NOT NULL#else DEFAULT NULL#end,
 #elseif( $javaType == $JAVA_DATE )
@@ -40,7 +43,7 @@ ${javaType},
 	
 #end	
 #foreach( $column in $entity.manyToOnes )
-	CONSTRAINT `Fk${entity.simpleName}${column.name}` FOREIGN KEY (`${column.name}`) REFERENCES `${column.type}` (`${column.column}`)#if( $velocityCount < $entity.sizeOfManyToOnes() ),#end
+	CONSTRAINT `Fk${entity.simpleName}${helper.firstToUpper($column.name)}` FOREIGN KEY (`${column.name}`) REFERENCES `${column.entity.simpleName}` (`${column.entity.pk.name}`)#if( $velocityCount < $entity.sizeOfManyToOnes() ),#end
 	
 #end
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

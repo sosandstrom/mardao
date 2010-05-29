@@ -7,24 +7,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import net.sf.mardao.domain.Entity;
-import net.sf.mardao.domain.Field;
 import net.sf.mardao.domain.Group;
 import net.sf.mardao.domain.MergeTemplate;
+import net.sf.mardao.plugin.visitor.EntityClassVisitor;
+import net.sf.mardao.plugin.visitor.FirstPassClassVisitor;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
 
 /**
  * This is the Mojo that scans the domain classes and builds a graph. Then, it 
@@ -34,9 +30,9 @@ import org.objectweb.asm.Type;
  *
  */
 public class ProcessDomainMojo extends AbstractMardaoMojo {
-	private EntityClassVisitor classVisitor;
 	private final Map<String,Group> packages = new HashMap<String,Group>();
 	private final Map<String,Entity> entities = new HashMap<String,Entity>();
+	private final Map<File, Entity> entityFiles = new TreeMap<File, Entity>();
 
 	/**
 	 * Calls super.execute(), then process the configured classpaths
@@ -109,7 +105,6 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 	 * @throws Exception
 	 */
 	protected Map<String,Group> processClasspaths() throws Exception {
-		classVisitor = new EntityClassVisitor();
 		
 		// default classpath element
 		processClasspath(classpathElement);
@@ -117,6 +112,24 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 		// and any additional elements:
 		for (String s : additionalClasspathElements) {
 			processClasspath(s);
+		}
+		
+		// second pass ClassVisitor:
+		for (Entry<File, Entity> entry : entityFiles.entrySet()) {
+			File f = entry.getKey();
+			getLog().debug("--- file: " + f);
+			try {
+				final FileInputStream fis = new FileInputStream(f);
+				final ClassReader cr = new ClassReader(fis);
+				EntityClassVisitor fpcv = new EntityClassVisitor(
+						getLog(), entities, entry.getValue());
+				cr.accept(fpcv, 0);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
 		}
 		
 		mergePackages();
@@ -164,7 +177,9 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 				try {
 					final FileInputStream fis = new FileInputStream(f);
 					final ClassReader cr = new ClassReader(fis);
-					cr.accept(classVisitor, 0);
+					FirstPassClassVisitor fpcv = new FirstPassClassVisitor(
+							getLog(), f, packages, entities, entityFiles);
+					cr.accept(fpcv, 0);
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -173,252 +188,5 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 			}
 		}
 	}
-
-	class EntityClassVisitor implements ClassVisitor {
-		
-		
-		private Group group;
-		private Entity entity;
-		private String simpleName;
-		private String packageName;
-		private String className;
-		private EntityAnnotationVisitor annotationVisitor;
-
-		private EntityFieldVisitor fieldVisitor;
-
-		private Field field;
-		private String fieldSign;
-
-		public EntityClassVisitor() {
-			getLog().debug("EntityClassVisitor.<init>");
-			annotationVisitor = new EntityAnnotationVisitor(null);
-			fieldVisitor = new EntityFieldVisitor();
-		}
-
-		@Override
-		public void visit(int version, int access, String name, String signature,
-				String superName, String[] interfaces) {
-			className = name.replace('/', '.');
-			int index = className.lastIndexOf('.');
-			simpleName = className.substring(index+1);
-			packageName = className.substring(0, index);
-			entity = null;
-			group = null;
-		}
-		
-		static final String DESC_ENTITY = "javax/persistence/Entity";
-		static final String DESC_TABLE = "javax/persistence/Table";
-		@Override
-		public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-			final String internal = Type.getType(desc).getInternalName();
-			getLog().debug("@" + internal + " visible=" + visible);
-			if (DESC_ENTITY.equals(internal)) {
-				entity = new Entity();
-				entity.setClassName(className);
-				entity.setSimpleName(simpleName);
-				return null;
-			}
-			else if (null != entity && DESC_TABLE.equals(internal)) {
-				getLog().debug("   @" + entity);
-				return annotationVisitor;
-			}
-			return null;
-		}
-		
-		@Override
-		public void visitEnd() {
-			if (null != entity) {
-				getLog().info("@Entity " + packageName + "." + simpleName);
-				
-				Group group = packages.get(packageName);
-				if (null == group) {
-					group = new Group();
-					group.setName(packageName);
-					packages.put(packageName, group);
-				}
-				
-				group.getEntities().put(simpleName, entity);
-				entities.put(entity.getClassName(), entity);
-			}
-		}
-
-		public Group getGroup() {
-			return group;
-		}
-
-		@Override
-		public void visitAttribute(Attribute arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public FieldVisitor visitField(int access, String name, String desc,
-				String signature, Object value) {
-			if (null != entity && null != desc && null != Type.getType(desc)) {
-				field = new Field();
-				field.setName(name);
-				try {
-					field.setType(Type.getType(desc).getInternalName().replace('/', '.'));
-				}
-				catch (NullPointerException npe) {
-					getLog().info("        !!!!!!!! " + entity.getClassName() + " " + name + " desc " + desc + " " + Type.getType(desc));
-				}
-				entity.getFields().add(field);
-				this.fieldSign = signature;
-				getLog().info("        " + field.getType() + " " + name + "; <" + signature + ">");
-				return fieldVisitor;
-			}
-			else if (null != entity){
-				getLog().info("        !!!!!!!! " + name + " desc " + desc + " " + Type.getType(desc));
-			}
-			return null;
-		}
-
-		@Override
-		public void visitInnerClass(String arg0, String arg1, String arg2, int arg3) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public MethodVisitor visitMethod(int access, String name, String desc,
-				String signature, String[] exceptions) {
-//			getLog().debug("        visitMethod " + name);
-//			return methodVisitor;
-			return null;
-		}
-
-		@Override
-		public void visitOuterClass(String arg0, String arg1, String arg2) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void visitSource(String arg0, String arg1) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		class EntityAnnotationVisitor implements AnnotationVisitor {
-
-			private String arrayName;
-			private final TreeSet<String> uniqueConstraint;
-			private int order = 0;
-
-			public EntityAnnotationVisitor(TreeSet<String> uniqueConstraint2) {
-				this.uniqueConstraint = uniqueConstraint2;
-			}
-
-			@Override
-			public void visit(String name, Object value) {
-				getLog().info("   visit @" + name + " " + value + " (" + arrayName + ")");
-				if ("mappedBy".equals(name)) {
-					// for this side's resolution:
-					field.setMappedBy(value.toString());
-					
-					// and remote side's resolution:
-					entity.getMappedBy().put(value.toString(), field);
-					getLog().info("         visit " + entity.getSimpleName() + "." + value + "->" + field.getName());
-				}
-				else if (null != uniqueConstraint) {
-					uniqueConstraint.add(value.toString());
-				}
-			}
-
-			@Override
-			public AnnotationVisitor visitAnnotation(String name, String desc) {
-				getLog().debug("   @ visitAnnotation " + name + " " + desc);
-				if ("uniqueConstraints".equals(arrayName) && null == name && "Ljavax/persistence/UniqueConstraint;".equals(desc)) {
-					return new EntityAnnotationVisitor(new TreeSet<String>());
-				}
-				return null;
-			}
-
-			@Override
-			public AnnotationVisitor visitArray(String name) {
-				getLog().info("   @ visitArray " + name);
-				arrayName = name;
-				order++;
-				return this;
-			}
-
-			@Override
-			public void visitEnd() {
-				getLog().debug("   @ visitEnd(" + arrayName + "," + order + ")");
-				order--;
-				if (null != entity && null != uniqueConstraint && 0 == order) {
-					entity.getUniqueConstraints().add(uniqueConstraint);
-				}
-			}
-
-			@Override
-			public void visitEnum(String arg0, String arg1, String arg2) {
-				// TODO Auto-generated method stub
-				getLog().debug("   @ visitEnum()" + arg0);
-
-			}
-		}
-		
-		class EntityFieldVisitor implements FieldVisitor {
-
-			static final String DESC_ID = "javax_persistence_Id";
-			static final String DESC_MANY_TO_MANY = "javax_persistence_ManyToMany";
-			static final String DESC_MANY_TO_ONE = "javax_persistence_ManyToOne";
-			static final String DESC_ONE_TO_MANY = "javax_persistence_OneToMany";
-			static final String DESC_ONE_TO_ONE = "javax_persistence_OneToOne";
-
-			@Override
-			public AnnotationVisitor visitAnnotation(String name, boolean visible) {
-				final String internal = Type.getType(name).getInternalName().replace('/', '_');
-				getLog().info("             @" + internal);
-				
-				// primary key
-				if (DESC_ID.equals(internal)) {
-					entity.getFields().remove(field);
-					entity.setPk(field);
-				}
-				// many-to-one
-				else if (DESC_MANY_TO_ONE.equals(internal)) {
-					entity.getFields().remove(field);
-					entity.getManyToOnes().add(field);
-				}
-				// one-to-many; nothing to generate!
-				else if (DESC_ONE_TO_MANY.equals(internal)) {
-					entity.getFields().remove(field);
-				}
-				else if (DESC_MANY_TO_MANY.equals(internal)) {
-					entity.getFields().remove(field);
-					entity.getManyToManys().add(field);
-					// update field type to generic type T (List<T>)
-					if (null != fieldSign) {
-						int beginIndex = fieldSign.indexOf('<') + 1;
-						int endIndex = fieldSign.indexOf('>', beginIndex);
-						String desc = fieldSign.substring(beginIndex, endIndex);
-						String generic = Type.getType(desc).getInternalName().replace('/', '.');
-						field.setType(generic);
-					}
-					return annotationVisitor;
-				}
-				return null;
-			}
-
-			@Override
-			public void visitAttribute(Attribute attr) {
-				getLog().info("   visitFieldAttribute " + attr);
-				
-			}
-
-			@Override
-			public void visitEnd() {
-				// TODO Auto-generated method stub
-				
-			}
-			
-		}
-		
-	}
-	
 
 }

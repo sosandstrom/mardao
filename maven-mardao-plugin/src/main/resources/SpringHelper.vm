@@ -145,6 +145,7 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 		// get id from next in sequence:
 		final long id = incrementer.nextLongValue();
 		entity.set${helper.firstToUpper(${entity.pk.name})}(id);
+		nameValuePairs.put(getPrimaryKeyColumnName(), id);
 		
 		// properties
 #foreach( $field in $entity.fields )

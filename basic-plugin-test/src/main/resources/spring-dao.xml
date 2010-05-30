@@ -40,7 +40,7 @@
 			<bean class="net.sf.mardao.test.basic.dao.OrganizationSpringHelper" autowire="byType" init-method="checkTables" />
 		</property>
 	</bean>
-	<bean id="employeeDao" class="net.sf.mardao.test.basic.dao.EmployeeDaoBean">
+	<bean id="employeeDao" class="net.sf.mardao.test.basic.dao.EmployeeDaoBean" init-method="populate">
 		<property name="helper">
 			<bean class="net.sf.mardao.test.basic.dao.EmployeeSpringHelper" autowire="byType" init-method="checkTables" />
 		</property>

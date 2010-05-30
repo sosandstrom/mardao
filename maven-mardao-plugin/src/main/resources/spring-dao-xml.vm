@@ -17,7 +17,7 @@
 		<tx:attributes>
 			<tx:method name="create*" propagation="REQUIRED"/>
 			<tx:method name="delete*" propagation="REQUIRED"/>
-			<tx:method name="populate*" propagation="REQUIRED"/>
+			<tx:method name="persist*" propagation="REQUIRED"/>
 			<tx:method name="update*" propagation="REQUIRED"/>
 			<tx:method name="*" propagation="SUPPORTS" read-only="true"/>
 		</tx:attributes>

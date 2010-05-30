@@ -117,4 +117,19 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	}
 #end
 	
+	// ----------------------- populate / persist method -------------------------
+	
+	/**
+	 * Persists an entity unless it already exists
+	 */
+	public final ${entity.simpleName} persist(#foreach( $field in $entity.fields )
+${field.simpleType} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end
+#end
+#foreach( $field in $entity.manyToOnes )	 
+${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #end
+#end) {
+		// call protected, generic method:
+		// TODO: generate when unique columns are up-to-date!
+		return null;
+	}
 }

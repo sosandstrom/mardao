@@ -12,4 +12,7 @@
 	</bean>
 	
 	<import resource="classpath:/spring-dao.xml"/>
+	
+	<bean id="testController" class="net.sf.mardao.test.TestController" 
+		init-method="populate" autowire="constructor" />
 </beans>

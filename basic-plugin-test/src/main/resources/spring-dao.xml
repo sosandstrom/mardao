@@ -16,7 +16,7 @@
 		<tx:attributes>
 			<tx:method name="create*" propagation="REQUIRED"/>
 			<tx:method name="delete*" propagation="REQUIRED"/>
-			<tx:method name="populate*" propagation="REQUIRED"/>
+			<tx:method name="persist*" propagation="REQUIRED"/>
 			<tx:method name="update*" propagation="REQUIRED"/>
 			<tx:method name="*" propagation="SUPPORTS" read-only="true"/>
 		</tx:attributes>
@@ -32,15 +32,15 @@
 	
 	<!-- EntityManagerFactory is managed by the container. -->
 
-<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@2792e317} -->
-<!-- [net.sf.mardao.domain.Group@2792e317] -->
+<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@4283df14} -->
+<!-- [net.sf.mardao.domain.Group@4283df14] -->
 	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.basic.domain ============ -->
 	<bean id="organizationDao" class="net.sf.mardao.test.basic.dao.OrganizationDaoBean">
 		<property name="helper">
 			<bean class="net.sf.mardao.test.basic.dao.OrganizationSpringHelper" autowire="byType" init-method="checkTables" />
 		</property>
 	</bean>
-	<bean id="employeeDao" class="net.sf.mardao.test.basic.dao.EmployeeDaoBean" init-method="populate">
+	<bean id="employeeDao" class="net.sf.mardao.test.basic.dao.EmployeeDaoBean">
 		<property name="helper">
 			<bean class="net.sf.mardao.test.basic.dao.EmployeeSpringHelper" autowire="byType" init-method="checkTables" />
 		</property>

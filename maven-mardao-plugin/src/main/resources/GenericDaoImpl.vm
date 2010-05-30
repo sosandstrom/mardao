@@ -1,0 +1,58 @@
+package ${daoBasePackage};
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Abstract implementation of GenericDao interface methods.
+ *
+ * Generated on ${currentDate}.
+ * @author mardao DAO generator (${helper.class.name})
+ */
+public abstract class GenericDaoImpl<T, ID extends Serializable> 
+	implements GenericDao<T, ID> 
+{
+	/** The specific helper reference */
+	protected AbstractHelper<T, ID> genericDao;
+	
+	/**
+	 * Setter for the AbstractHelper attribute
+	 */
+	public void setHelper(AbstractHelper<T, ID> genericDao) {
+		this.genericDao = genericDao;
+	}
+
+	// ----------------------- generic implements -------------------------
+	
+	protected T populate(String uniqueFieldName, Object value, Map<String, Object> nameValuePairs) {
+		T entity = genericDao.findUniqueBy(uniqueFieldName, value);
+		if (null == entity) {
+			// FIXME: insert
+		}
+		return entity;
+	}
+	
+	// ----------------------- implements GenericDao -------------------------
+	
+	public T findByPrimaryKey(ID id) {
+		return genericDao.findByPrimaryKey(id);
+	}
+	
+	public void persist(T entity) {
+		genericDao.persist(entity);
+	}
+	
+	public void update(T entity) {
+		genericDao.update(entity);
+	}
+	
+	public void delete(T entity) {
+		genericDao.delete(entity);
+	}
+	
+	public List<T> findAll() {
+		return genericDao.findAll();
+	}
+	
+}

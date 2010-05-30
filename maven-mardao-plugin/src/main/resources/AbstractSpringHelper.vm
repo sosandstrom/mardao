@@ -210,20 +210,19 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	 */
 	// @SuppressWarnings("unchecked")
 	public final T findUniqueBy(String fieldName, Object param) {
-		// TODO: implement
-		//try {
-		//    final EntityManager em = getEntityManager();
-		//	final Query query =	em.createQuery("SELECT t FROM " + persistentClass.getName() + " t WHERE t." + fieldName + " = :param");
-		//	query.setParameter("param", param);
-		//	final T returnValue = (T) query.getSingleResult();
-		//	return returnValue;
-		//}
-		//catch (javax.persistence.NoResultException nre) {
-		//}
-		//finally {
-		//	close();
-		//}
-		return null;
+		if (!getColumnNames().contains(fieldName))
+		{
+			throw new IllegalArgumentException("No such UNIQUE BY column " + fieldName);
+		}
+	    
+		LOGGER.debug("findUniqueBy(" + fieldName + ")");
+		T entity = null;
+		final String sql = "SELECT * FROM " + getTableName() + " WHERE " + fieldName + " = ?";
+
+		try {
+			entity = template.queryForObject(sql.toString(), getRowMapper(), param);
+		} catch (EmptyResultDataAccessException e) {}
+		return entity;
 	}
 	
 	/**

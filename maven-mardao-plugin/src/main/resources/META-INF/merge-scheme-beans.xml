@@ -18,6 +18,12 @@
 					<property name="entity" value="false" />
 					<property name="filePrefix" value="GenericDao" />
 				</bean>
+				<!-- GenericDao implementation -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="GenericDaoImpl" />
+					<property name="entity" value="false" />
+					<property name="filePrefix" value="GenericDaoImpl" />
+				</bean>
 				<!-- AbstractHelper interface -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
 					<property name="templatePrefix" value="AbstractHelper" />

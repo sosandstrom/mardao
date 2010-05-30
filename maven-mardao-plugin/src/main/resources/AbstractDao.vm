@@ -10,19 +10,9 @@ import ${entity.className};
  * Generated on ${currentDate}.
  * @author mardao DAO generator (${helper.class.name})
  */
-public abstract class Abstract${entity.simpleName}Dao 
-	implements Abstract${entity.simpleName}DaoInterface, GenericDao<${entity.simpleName}, ${entity.pk.type}> 
+public abstract class Abstract${entity.simpleName}Dao extends GenericDaoImpl <${entity.simpleName}, ${entity.pk.type}>
+	implements Abstract${entity.simpleName}DaoInterface
 {
-	/** The specific helper reference */
-	protected AbstractHelper<${entity.simpleName}, ${entity.pk.type}> genericDao;
-	
-	/**
-	 * Setter for the AbstractHelper attribute
-	 */
-	public void setHelper(AbstractHelper<${entity.simpleName}, ${entity.pk.type}> genericDao) {
-		this.genericDao = genericDao;
-	}
-
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
 #if( $entity.isUnique($field.name) )
@@ -126,27 +116,5 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 		return genericDao.findBy(args);
 	}
 #end
-	
-	// ----------------------- implements GenericDao -------------------------
-	
-	public ${entity.simpleName} findByPrimaryKey(${entity.pk.type} id) {
-		return genericDao.findByPrimaryKey(id);
-	}
-	
-	public void persist(${entity.simpleName} entity) {
-		genericDao.persist(entity);
-	}
-	
-	public void update(${entity.simpleName} entity) {
-		genericDao.update(entity);
-	}
-	
-	public void delete(${entity.simpleName} entity) {
-		genericDao.delete(entity);
-	}
-	
-	public List<${entity.simpleName}> findAll() {
-		return genericDao.findAll();
-	}
 	
 }

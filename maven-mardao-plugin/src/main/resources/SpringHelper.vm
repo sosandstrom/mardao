@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
 
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -53,10 +54,10 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
       // create the JDBC insert with specific columns and table name:
 		insert = new SimpleJdbcInsert(dataSource)
 			.withTableName(getTableName())
-			.usingColumns("${entity.pk.name}"#foreach( $field in $entity.fields )
-, "${field.name}"#end
+			.usingColumns(COLUMN_NAME_${entity.pk.name.toUpperCase()}#foreach( $field in $entity.fields )
+, COLUMN_NAME_${field.name.toUpperCase()}#end
 #foreach( $field in $entity.manyToOnes )
-, "${field.name}"#end);
+, COLUMN_NAME_${field.name.toUpperCase()}#end);
    }
    
    @Override
@@ -124,11 +125,47 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 
 		// foreign keys:
 #foreach( $field in $entity.manyToOnes )
-		parameters.put(COLUMN_NAME_${field.name.toUpperCase()}, toForeignKey(entity.get${helper.firstToUpper($field.name)}()));
+		final ${field.type} ${field.name} = entity.get${helper.firstToUpper($field.name)}();
+		if (null != ${field.name}) {
+			parameters.put(COLUMN_NAME_${field.name.toUpperCase()}, toForeignKey(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}()));
+		}
 #end
 
 		insert.execute(parameters);
    }
+   
+	public ${entity.simpleName} persist(Map<String,Object> nameValuePairs) {
+		if (!getColumnNames().containsAll(nameValuePairs.keySet()))
+		{
+			throw new IllegalArgumentException("No such column for persist.");
+		}
+		LOGGER.debug("insert(" + nameValuePairs + ")");
+		final ${entity.simpleName} entity = new ${entity.simpleName}();
+		
+		// get id from next in sequence:
+		final long id = incrementer.nextLongValue();
+		entity.set${helper.firstToUpper(${entity.pk.name})}(id);
+		
+		// properties
+#foreach( $field in $entity.fields )
+		entity.set${helper.firstToUpper($field.name)}((${field.type}) nameValuePairs.get(COLUMN_NAME_${field.name.toUpperCase()}));
+#end
+
+		// foreign keys:
+#foreach( $field in $entity.manyToOnes )
+		Object ${field.name}Value = nameValuePairs.get(COLUMN_NAME_${field.name.toUpperCase()});
+		// replace entity with its primary key
+		if (${field.name}Value instanceof ${field.type}) {
+			final ${field.type} ${field.name} = (${field.type}) ${field.name}Value;
+			${field.name}Value = ${field.name}.get${helper.firstToUpper($field.entity.pk.name)}();
+		}
+		entity.set${helper.firstToUpper($field.name)}((${field.type}) ${field.name}Value);
+#end
+
+		insert.execute(nameValuePairs);
+		return entity;
+	}
+   
 
 	/** UPDATE SQL String for ${entity.simpleName} updates. */
 	protected static final String SQL_UPDATE = "UPDATE " + TABLE_NAME + " SET " + 

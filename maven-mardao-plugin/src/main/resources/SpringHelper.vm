@@ -155,12 +155,12 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 		// foreign keys:
 #foreach( $field in $entity.manyToOnes )
 		Object ${field.name}Value = nameValuePairs.get(COLUMN_NAME_${field.name.toUpperCase()});
-		// replace entity with its primary key
+		// replace entity with its primary key (in Map)
 		if (${field.name}Value instanceof ${field.type}) {
+			entity.set${helper.firstToUpper($field.name)}((${field.type}) ${field.name}Value);
 			final ${field.type} ${field.name} = (${field.type}) ${field.name}Value;
-			${field.name}Value = ${field.name}.get${helper.firstToUpper($field.entity.pk.name)}();
+			nameValuePairs.put(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name}.get${helper.firstToUpper($field.entity.pk.name)}());
 		}
-		entity.set${helper.firstToUpper($field.name)}((${field.type}) ${field.name}Value);
 #end
 
 		insert.execute(nameValuePairs);

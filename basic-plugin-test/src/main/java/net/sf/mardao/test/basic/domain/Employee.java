@@ -7,13 +7,15 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(uniqueConstraints=@UniqueConstraint(columnNames="name"))
+@Table(uniqueConstraints={@UniqueConstraint(columnNames="name"),
+		@UniqueConstraint(columnNames={"signum","currentEmployer"})})
 public class Employee {
 	
 	@Id
 	private Long id;
 
 	private String name;
+	private String signum;
 	
 	@ManyToOne
 	private Organization currentEmployer;
@@ -40,6 +42,14 @@ public class Employee {
 
 	public Organization getCurrentEmployer() {
 		return currentEmployer;
+	}
+
+	public void setSignum(String signum) {
+		this.signum = signum;
+	}
+
+	public String getSignum() {
+		return signum;
 	}
 
 }

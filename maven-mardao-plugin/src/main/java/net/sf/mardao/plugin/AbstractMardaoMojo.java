@@ -162,7 +162,8 @@ public class AbstractMardaoMojo extends AbstractMojo {
 		Map<String,String> mySqlDefaults = new HashMap<String,String>();
 		// for MySQL
 		mySqlTypes.put(Long.class.getName(), "INTEGER");
-		mySqlTypes.put(String.class.getName(), "TEXT");
+		// MySQL max key length is 767:
+		mySqlTypes.put(String.class.getName(), "VARCHAR(255)"); 
 		mySqlTypes.put("boolean", "BIT(1)");
 		mySqlTypes.put(java.util.Date.class.getName(), "TIMESTAMP");
 		

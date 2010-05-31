@@ -231,7 +231,6 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	 * @param param the specified generic attribute
 	 * @return a List of entities with the specified attribute
 	 */
-	//@SuppressWarnings("unchecked")
 	public final List<T> findBy(String fieldName, Object param) {
 		if (!getColumnNames().contains(fieldName))
 		{
@@ -252,18 +251,9 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	 * @param key the specified foreign key
 	 * @return a List of entities with the specified foreign key
 	 */
-	//@SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	public final List<T> findByKey(String fieldName, Class foreignClass, Object key) {
-		// TODO: implement
-	    //final EntityManager em = getEntityManager();
-		//final Object lazy = em.getReference(foreignClass, key);
-		final List<T> returnValue = null; // findBy(fieldName, lazy);
-		
-		// Do this so we can eager load the list and close the EM: 
-		//returnValue.size();
-		
-		//close();
-		return returnValue;
+		return findBy(fieldName, key);
 	}
    
 	/**
@@ -271,28 +261,28 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	 * @param args the specified attribute name-value map
 	 * @return the unique entity for the specified attributes
 	 */
-	//@SuppressWarnings("unchecked")
 	public final T findBy(Map<String,Object> args) {
-		// TODO: implement
-	    //final EntityManager em = getEntityManager();
-	    //final StringBuffer ql = new StringBuffer("SELECT t FROM ");
-	    //ql.append(persistentClass.getName());
-	    //ql.append(" t");
-	    //boolean isFirst = true;
-	    //for (Entry<String,Object> entry : args.entrySet()) {
-	    //	ql.append(isFirst ? " WHERE t." : " AND t.");
-	    //	isFirst = false;
-	    //	ql.append(entry.getKey());
-	    //	ql.append(" = :pP");
-	    //	ql.append(entry.getKey());
-	    //}
-		//final Query query =	em.createQuery(ql.toString());
-	    //for (Entry<String,Object> entry : args.entrySet()) {
-	    //	query.setParameter("pP" + entry.getKey(), entry.getValue());
-	    //}
-		final T returnValue = null; //(T) query.getSingleResult();
-		//close();
-		return returnValue;
+		if (!getColumnNames().containsAll(args.keySet()))
+		{
+			throw new IllegalArgumentException("No such FIND BY column " + args);
+		}
+	    
+		LOGGER.debug("findBy(" + args + ")");
+		T entity = null;
+		final StringBuffer sql = new StringBuffer("SELECT * FROM ");
+		sql.append(getTableName());
+		boolean isFirst = true;
+		for (Entry<String,Object> entry : args.entrySet()) {
+			sql.append(isFirst ? " WHERE " : " AND ");
+			isFirst = false;
+			sql.append(entry.getKey());
+			sql.append(" = ?");
+		}
+
+		try {
+			entity = template.queryForObject(sql.toString(), getRowMapper(), args);
+		} catch (EmptyResultDataAccessException e) {}
+		return entity;
 	}
 
 	/**
@@ -302,26 +292,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	 * @param ascending true if ascending
 	 * @return the unique entity for the specified attributes
 	 */
-	//@SuppressWarnings("unchecked")
 	public List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending) {
-		// TODO: implement
-	    //final EntityManager em = getEntityManager();
-	    //final StringBuffer ql = new StringBuffer("SELECT t FROM ");
-	    //ql.append(persistentClass.getName());
-	    //ql.append(" t");
-	    //boolean isFirst = true;
-	    //for (Entry<String,Object> entry : args.entrySet()) {
-	    //	ql.append(isFirst ? " WHERE t." : " AND t.");
-	    //	isFirst = false;
-	    //	ql.append(entry.getKey());
-	    //	ql.append(" = :pP");
-	    //	ql.append(entry.getKey());
-	    //}
-	    
-	    //ql.append(" ORDER BY t.");
-	    //ql.append(orderBy);
-	    //ql.append(ascending ? " ASC" : " DESC");
-
 		if (!getColumnNames().contains(orderBy))
 		{
 			throw new IllegalArgumentException("No such ORDER BY column " + orderBy);
@@ -329,17 +300,23 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 		if (!getColumnNames().containsAll(args.keySet())) {
 			throw new IllegalArgumentException("No such WHERE column " + args.keySet());
 		}
-	    
-		//final Query query =	em.createQuery(ql.toString());
-	    //for (Entry<String,Object> entry : args.entrySet()) {
-	    //	query.setParameter("pP" + entry.getKey(), entry.getValue());
-	    //}
-		final List<T> returnValue = null; //query.getResultList();
 		
-		// Do this so we can eager load the list and close the EM: 
-		//returnValue.size();
+		final StringBuffer sql = new StringBuffer("SELECT * FROM ");
+		sql.append(getTableName());
+		boolean isFirst = true;
+		for (Entry<String,Object> entry : args.entrySet()) {
+			sql.append(isFirst ? " WHERE " : " AND ");
+			isFirst = false;
+			sql.append(entry.getKey());
+			sql.append(" = ?");
+		}
+
+		sql.append(" ORDER BY ");
+		sql.append(orderBy);
+		sql.append(ascending ? " ASC" : " DESC");
+
+		final List<T> returnValue = template.query(sql.toString(), getRowMapper(), args);
 		
-		//close();
 		return returnValue;
 	}
 	

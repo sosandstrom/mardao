@@ -12,17 +12,15 @@ CREATE TABLE `${entity.simpleName}` (
 #foreach( $column in $entity.manyToOnes )
 	`${column.name}` $dbTypes.get($column.entity.pk.type) DEFAULT NULL,
 #end
-	PRIMARY KEY (`${entity.pk.name}`)#if( 0 < $entity.manyToOnes.size() ),#end
+	PRIMARY KEY (`${entity.pk.name}`)#if( 0 < $entity.uniqueConstraints.size() || 0 < $entity.manyToOnes.size() ),#end
 	
-#foreach( $unique in $entity.uniqueArray )
-	UNIQUE (#foreach( $column in $unique.memberArray )
-`${column.name}`#if( $velocityCount < $unique.sizeOfMemberArray() ),#end
-#end	
-)#if( 0 < $entity.sizeOfManyToOnes() || $velocityCount < $entity.sizeOfUniqueArray() ),#end
-	
-#end	
+#foreach( $columnSet in $entity.uniqueConstraints )
+	UNIQUE (#foreach( $column in $columnSet )`${column}`#if( $velocityCount < $columnSet.size() ),#end
+#end)#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.uniqueConstraints.size() ),#end
+
+#end
 #foreach( $column in $entity.manyToOnes )
-	CONSTRAINT `Fk${entity.simpleName}${helper.firstToUpper($column.name)}` FOREIGN KEY (`${column.name}`) REFERENCES `${column.entity.simpleName}` (`${column.entity.pk.name}`)#if( $velocityCount < $entity.sizeOfManyToOnes() ),#end
+	CONSTRAINT `Fk${entity.simpleName}${helper.firstToUpper($column.name)}` FOREIGN KEY (`${column.name}`) REFERENCES `${column.entity.simpleName}` (`${column.entity.pk.name}`)#if( $velocityCount < $entity.manyToOnes.size() ),#end
 	
 #end
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

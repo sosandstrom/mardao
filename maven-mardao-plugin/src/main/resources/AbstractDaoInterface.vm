@@ -75,13 +75,6 @@ public interface Abstract${entity.simpleName}DaoInterface extends GenericDao<${e
 #end	
 
 	// ----------------------- uniqueFields finders -------------------------
-#foreach( $columnSet in $entity.uniqueConstraints )
-	// -- columnSet {
-#foreach( $column in $columnSet )
-	// -- -- ${column}
-#end
-	// --}
-#end
 	
 #foreach( $uniqueFields in $entity.uniqueFieldsSets )
 	/**

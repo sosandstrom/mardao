@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 /**
  * The domain object for Entities in the class graph.
@@ -68,7 +69,7 @@ public class Entity {
 		}
 		return false;
 	}
-
+	
 	public Map<String,Field> getAllFields() {
 		final Map<String,Field> returnValue = new TreeMap<String,Field>();
 		for (Field f : getFields()) {
@@ -95,6 +96,19 @@ public class Entity {
 				returnValue.add(fieldsSet);
 			}
 		}
+		return returnValue;
+	}
+	
+	public Field getFirstUniqueField() {
+		Field returnValue = null;
+		
+		for (Entry<String,Field> entry : getAllFields().entrySet()) {
+			if (isUnique(entry.getKey())) {
+				returnValue = entry.getValue();
+				break;
+			}
+		}
+		
 		return returnValue;
 	}
 

@@ -30,7 +30,14 @@ public class DaoTest extends TestCase {
 
 	public void testFindAll() {
 		List<Employee> employees = employeeDao.findAll();
-		assertNotNull(employees);
-		
+		assertNotNull("findAll", employees);
+		assertFalse("findAll", employees.isEmpty());
+	}
+	
+	public void testFindByPrimaryKey() {
+		Employee ola = employeeDao.findByName("Ola");
+		assertNotNull("findByPrimaryKey", ola);
+		Employee actual = employeeDao.findByPrimaryKey(ola.getId());
+		assertEquals("findByPrimaryKey", ola.getName(), actual.getName());
 	}
 }

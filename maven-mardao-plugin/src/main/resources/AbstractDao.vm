@@ -1,6 +1,8 @@
 package ${daoPackage};
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ${entity.className};
 
@@ -119,6 +121,8 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	
 	// ----------------------- populate / persist method -------------------------
 	
+#if( $entity.firstUniqueField )
+#set( $uniqueField = $entity.firstUniqueField )
 	/**
 	 * Persists an entity unless it already exists
 	 */
@@ -128,8 +132,28 @@ ${field.simpleType} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocity
 #foreach( $field in $entity.manyToOnes )	 
 ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #end
 #end) {
+		// create Map with other attributes:
+		final Map<String, Object> nameValuePairs = new HashMap<String, Object>();
+#foreach( $field in $entity.fields )
+#if( $field != $uniqueField )
+		nameValuePairs.put("${field.name}", ${field.name});
+#else
+		// skipping the unique field ${field.name} from the Map
+#end
+#end
+		
+		// many-to-ones:		
+#foreach( $field in $entity.manyToOnes )
+#if( $field != $uniqueField )
+		nameValuePairs.put("${field.name}", ${field.name});
+#else
+		// skipping the unique field ${field.name} from the Map
+#end
+#end		
+		
 		// call protected, generic method:
-		// TODO: generate when unique columns are up-to-date!
-		return null;
+		return populate("${uniqueField.name}", ${uniqueField.name}, nameValuePairs);
 	}
+
+#end
 }

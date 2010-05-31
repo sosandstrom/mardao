@@ -17,6 +17,5 @@ public class TestController {
 	public void populate() {
 		Organization wadpam = organizationDao.persist("Wadpam AB");
 		Employee ola = employeeDao.persist("Ola", wadpam);
-		
 	}
 }

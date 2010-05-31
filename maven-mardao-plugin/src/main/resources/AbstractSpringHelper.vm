@@ -233,17 +233,16 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	 */
 	//@SuppressWarnings("unchecked")
 	public final List<T> findBy(String fieldName, Object param) {
-		// TODO: implement
-	    //final EntityManager em = getEntityManager();
-		//final Query query =	em.createQuery("SELECT t FROM " + persistentClass.getName() + " t WHERE t." + fieldName + " = :param");
-		//query.setParameter("param", param);
-		final List<T> returnValue = null; // query.getResultList();
-		
-		// Do this so we can eager load the list and close the EM: 
-		//returnValue.size();
-		
-		//close();
-		return returnValue;
+		if (!getColumnNames().contains(fieldName))
+		{
+			throw new IllegalArgumentException("No such WHERE column " + fieldName);
+		}
+	    
+		LOGGER.debug("findUniqueBy(" + fieldName + ")");
+		final String sql = "SELECT * FROM " + getTableName() + " WHERE " + fieldName + " = ?";
+
+		final List<T> list = template.query(sql.toString(), getRowMapper(), param);
+		return list;
 	}
 	
 	/**

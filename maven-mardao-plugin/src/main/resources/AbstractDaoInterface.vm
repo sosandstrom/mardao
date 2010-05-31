@@ -75,6 +75,14 @@ public interface Abstract${entity.simpleName}DaoInterface extends GenericDao<${e
 #end	
 
 	// ----------------------- uniqueFields finders -------------------------
+#foreach( $columnSet in $entity.uniqueConstraints )
+	// -- columnSet {
+#foreach( $column in $columnSet )
+	// -- -- ${column}
+#end
+	// --}
+#end
+	
 #foreach( $uniqueFields in $entity.uniqueFieldsSets )
 	/**
 	 * find-by method for unique fields
@@ -92,6 +100,8 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	
 	// ----------------------- populate / persist method -------------------------
 	
+#if( $entity.firstUniqueField )
+#set( $uniqueField = $entity.firstUniqueField )
 	/**
 	 * Persists an entity unless it already exists
 	 */
@@ -101,4 +111,6 @@ ${field.simpleType} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocity
 #foreach( $field in $entity.manyToOnes )	 
 ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #end
 #end);
+
+#end
 }

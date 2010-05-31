@@ -2,8 +2,11 @@ package net.sf.mardao.test.basic.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
+@Table(uniqueConstraints=@UniqueConstraint(columnNames="name"))
 public class Organization {
 	
 	@Id

@@ -25,7 +25,7 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 
 
 /**
- * The abstract Mojo for the mardao generator. 
+ * The abstract Mojo for the mardao generator, which declares all configuration parameters.
  * First pass is parsing the domain classes and build a graph,
  * second pass is generating DAO classes while traversing the graph. 
  * @author f94os

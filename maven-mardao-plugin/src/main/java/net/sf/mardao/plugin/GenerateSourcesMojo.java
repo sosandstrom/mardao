@@ -8,6 +8,8 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
 /**
+ * This Mojo merges the generic (non-entity) templates into their sources, 
+ * to be ready for the maven <code>compile</code> phase.
  * @goal generate-sources
  * @author f94os
  *

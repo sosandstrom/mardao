@@ -23,8 +23,8 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.objectweb.asm.ClassReader;
 
 /**
- * This is the Mojo that scans the domain classes and builds a graph. Then, it 
- * traverses the graph and generates DAO source files.
+ * This is the Mojo that scans the domain classes and builds a graph; then, it 
+ * traverses the graph and generates DAO source files by merging templates.
  * @goal process-classes
  * @author f94os
  *

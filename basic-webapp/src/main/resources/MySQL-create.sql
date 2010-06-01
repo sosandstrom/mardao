@@ -1,15 +1,15 @@
--- Created by mardao DAO generator 2010-05-29T12:42:52.775+0700
+-- Created by mardao DAO generator 2010-06-01T20:14:17.262+0700
 -- 
 --
 -- ----------- CREATE TABLE for entities in package net.sf.mardao.test.webapp.domain -----------
 CREATE TABLE `Organization` (
 	`id` INTEGER NOT NULL,
-	`name` TEXT DEFAULT NULL, 
+	`name` VARCHAR(255) DEFAULT NULL, 
 	PRIMARY KEY (`id`)	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 CREATE TABLE `Employee` (
 	`id` INTEGER NOT NULL,
-	`name` TEXT DEFAULT NULL, 
+	`name` VARCHAR(255) DEFAULT NULL, 
 	`currentEmployer` INTEGER DEFAULT NULL,
 	PRIMARY KEY (`id`),	
 	CONSTRAINT `FkEmployeeCurrentEmployer` FOREIGN KEY (`currentEmployer`) REFERENCES `Organization` (`id`)	

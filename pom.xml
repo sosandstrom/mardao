@@ -12,7 +12,7 @@
 	<modules>
 		<module>maven-mardao-plugin</module>
 		<module>basic-plugin-test</module>
-		<!--  <module>basic-webapp</module>  -->
+		<module>basic-webapp</module>
 	</modules>
 
 	<properties>

@@ -69,7 +69,7 @@
 	<distributionManagement>
 		<site>
 			<id>sourceforge.net</id>
-			<url>scp://shell.sourceforge.net/home/groups/m/ma/mardao/htdocs</url>
+			<url>scp://web.sourceforge.net/home/groups/m/ma/mardao/htdocs</url>
 		</site>
 	</distributionManagement>
 
@@ -81,6 +81,7 @@
 
 	<reporting>
 		<plugins>
+			<!-- 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
@@ -99,9 +100,11 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+			 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
+				<version>2.3</version>
 				<inherited>false</inherited>
 				<reportSets>
 					<reportSet>

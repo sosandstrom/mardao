@@ -1,5 +1,6 @@
 package net.sf.mardao.test.basic.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -7,8 +8,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(uniqueConstraints={@UniqueConstraint(columnNames="name"),
-		@UniqueConstraint(columnNames={"signum","currentEmployer"})})
+@Table(name="tblEmployee", uniqueConstraints={@UniqueConstraint(columnNames="name"),
+		@UniqueConstraint(columnNames={"signum","currentEmployerID"})})
 public class Employee {
 	
 	@Id
@@ -18,7 +19,12 @@ public class Employee {
 	private String signum;
 	
 	@ManyToOne
+	@Column(name="currentEmployerID")
 	private Organization currentEmployer;
+	
+	@ManyToOne
+	@Column(name="currentUnitID")
+	private OrganizationUnit currentUnit;
 
 	public void setName(String name) {
 		this.name = name;
@@ -50,6 +56,14 @@ public class Employee {
 
 	public String getSignum() {
 		return signum;
+	}
+
+	public void setCurrentUnit(OrganizationUnit currentUnit) {
+		this.currentUnit = currentUnit;
+	}
+
+	public OrganizationUnit getCurrentUnit() {
+		return currentUnit;
 	}
 
 }

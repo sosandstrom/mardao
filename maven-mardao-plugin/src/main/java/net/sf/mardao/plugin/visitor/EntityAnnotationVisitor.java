@@ -10,6 +10,7 @@ import org.objectweb.asm.AnnotationVisitor;
 
 public class EntityAnnotationVisitor implements AnnotationVisitor {
 
+	private final String annotation;
 	private final Entity entity;
 	private final Field field;
 	private final Log LOG;
@@ -17,8 +18,9 @@ public class EntityAnnotationVisitor implements AnnotationVisitor {
 	private final TreeSet<String> uniqueConstraint;
 	private int order = 0;
 
-	public EntityAnnotationVisitor(Log log, Entity entity, Field field, TreeSet<String> uniqueConstraint2) {
+	public EntityAnnotationVisitor(Log log, String annotation, Entity entity, Field field, TreeSet<String> uniqueConstraint2) {
 		this.LOG = log;
+		this.annotation = annotation;
 		this.entity = entity;
 		this.field = field;
 		this.uniqueConstraint = uniqueConstraint2;
@@ -35,6 +37,14 @@ public class EntityAnnotationVisitor implements AnnotationVisitor {
 			entity.getMappedBy().put(value.toString(), field);
 			LOG.info("         visit " + entity.getSimpleName() + "." + value + "->" + field.getName());
 		}
+		else if ("name".equals(name)) {
+			if (EntityClassVisitor.DESC_TABLE.equals(annotation)) {
+				entity.setTableName(value.toString());
+			}
+			else if (EntityFieldVisitor.DESC_COLUMN.equals(annotation)) {
+				field.setColumnName(value.toString());
+			} 
+		}
 		else if (null != uniqueConstraint) {
 			uniqueConstraint.add(value.toString());
 		}
@@ -44,7 +54,7 @@ public class EntityAnnotationVisitor implements AnnotationVisitor {
 	public AnnotationVisitor visitAnnotation(String name, String desc) {
 		LOG.debug("   @ visitAnnotation " + name + " " + desc);
 		if ("uniqueConstraints".equals(arrayName) && null == name && "Ljavax/persistence/UniqueConstraint;".equals(desc)) {
-			return new EntityAnnotationVisitor(LOG, entity, field, new TreeSet<String>());
+			return new EntityAnnotationVisitor(LOG, annotation, entity, field, new TreeSet<String>());
 		}
 		return null;
 	}

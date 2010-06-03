@@ -1,5 +1,5 @@
 README for the mardao Architect's Java DAO generator
-Version: 1.0
+Version: 1.1
 License: http://www.gnu.org/licenses/lgpl.html
 
 Mardao is a maven plugin, which you configure in your project's pom.xml.
@@ -183,3 +183,11 @@ pom.xml example:
 		</dependency>
 	</dependencies>
 </project>
+--------------------------------------------------------------------------------
+New features in 1.1:
+
+
+================================================================================
+Release History
+
+Version: 1.0 Initial release.

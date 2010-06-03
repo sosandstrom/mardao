@@ -22,15 +22,15 @@ import ${field.entity.className};
  */
 public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${entity.simpleName}, ${entity.pk.type}> {
 
-	/** Table name for ${entity.simpleName} is "${entity.simpleName}" */
-	public static final String TABLE_NAME = "${entity.simpleName}";
+	/** Table name for ${entity.simpleName} is "${entity.tableName}" */
+	public static final String TABLE_NAME = "${entity.tableName}";
 
-	/** Column name for primary key attribute is "${entity.pk.name}" */
-	public static final String COLUMN_NAME_${entity.pk.name.toUpperCase()} = "${entity.pk.name}";
+	/** Column name for primary key attribute is "${entity.pk.columnName}" */
+	public static final String COLUMN_NAME_${entity.pk.name.toUpperCase()} = "${entity.pk.columnName}";
 
 #foreach( $field in $entity.allFields )
-	/** Column name for attribute ${field.name} is "${field.name}" */
-	public static final String COLUMN_NAME_${field.name.toUpperCase()} = "${field.name}";
+	/** Column name for attribute ${field.name} is "${field.columnName}" */
+	public static final String COLUMN_NAME_${field.name.toUpperCase()} = "${field.columnName}";
 #end
 
 	private static final String[] COLUMN_NAMES_S = {

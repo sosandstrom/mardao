@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 public class Entity {
 	private String className;
 	private String simpleName;
+	private String tableName;
 	private Field pk;
 	private final Set<Field> fields = new TreeSet<Field>();
 	private final Set<Field> manyToOnes = new TreeSet<Field>();
@@ -91,7 +92,12 @@ public class Entity {
 			if (1 < uniqueConstraint.size()) {
 				Set<Field> fieldsSet = new TreeSet<Field>();
 				for (String fieldName : uniqueConstraint) {
-					fieldsSet.add(allFields.get(fieldName));
+					for (Field column : allFields.values()) {
+						if (fieldName.equals(column.getColumnName())) {
+							fieldsSet.add(column);
+							break;
+						}
+					}
 				}
 				returnValue.add(fieldsSet);
 			}
@@ -123,5 +129,20 @@ public class Entity {
 	@Override
 	public String toString() {
 		return getClassName() + "<" + getSimpleName() + ">";
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+
+	/** If there is no <code>@@Table(name)</code> annotation, just return the simpleName 
+	 * 
+	 * @return
+	 */
+	public String getTableName() {
+		if (null == tableName) {
+			return simpleName;
+		}
+		return tableName;
 	}
 }

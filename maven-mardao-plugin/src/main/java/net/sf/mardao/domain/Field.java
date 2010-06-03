@@ -7,6 +7,7 @@ package net.sf.mardao.domain;
  *
  */
 public class Field implements Comparable<Field> {
+	private String columnName;
 	private String name;
 	private String type;
 	private String mappedBy;
@@ -70,5 +71,18 @@ public class Field implements Comparable<Field> {
 
 	public Entity getEntity() {
 		return entity;
+	}
+
+
+	public void setColumnName(String columnName) {
+		this.columnName = columnName;
+	}
+
+
+	public String getColumnName() {
+		if (null == columnName) {
+			return name;
+		}
+		return columnName;
 	}
 }

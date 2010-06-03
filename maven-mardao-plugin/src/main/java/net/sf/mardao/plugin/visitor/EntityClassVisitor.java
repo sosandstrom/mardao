@@ -57,7 +57,7 @@ public class EntityClassVisitor extends EmptyClassVisitor {
 		LOG.debug("@" + internal + " visible=" + visible);
 		if (DESC_TABLE.equals(internal)) {
 			LOG.debug("   @" + entity);
-			return new EntityAnnotationVisitor(LOG, entity, null, null);
+			return new EntityAnnotationVisitor(LOG, internal, entity, null, null);
 		}
 		return null;
 	}

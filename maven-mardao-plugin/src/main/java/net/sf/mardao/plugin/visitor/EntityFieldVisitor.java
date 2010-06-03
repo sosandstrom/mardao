@@ -13,6 +13,7 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Type;
 
 public class EntityFieldVisitor implements FieldVisitor {
+	static final String DESC_COLUMN = "javax_persistence_Column";
 	static final String DESC_ID = "javax_persistence_Id";
 	static final String DESC_MANY_TO_MANY = "javax_persistence_ManyToMany";
 	static final String DESC_MANY_TO_ONE = "javax_persistence_ManyToOne";
@@ -38,8 +39,12 @@ public class EntityFieldVisitor implements FieldVisitor {
 		final String internal = Type.getType(name).getInternalName().replace('/', '_');
 		LOG.info("             @" + internal);
 		
+		// column
+		if (DESC_COLUMN.equals(internal)) {
+			return new EntityAnnotationVisitor(LOG, internal, entity, field, null);
+		}
 		// primary key
-		if (DESC_ID.equals(internal)) {
+		else if (DESC_ID.equals(internal)) {
 			entity.getFields().remove(field);
 			entity.setPk(field);
 		}
@@ -66,7 +71,7 @@ public class EntityFieldVisitor implements FieldVisitor {
 				field.setType(generic);
 				field.setEntity(entities.get(generic));
 			}
-			return new EntityAnnotationVisitor(LOG, entity, field, null);
+			return new EntityAnnotationVisitor(LOG, internal, entity, field, null);
 		}
 		return null;
 	}

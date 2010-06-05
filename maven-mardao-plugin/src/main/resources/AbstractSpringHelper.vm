@@ -61,7 +61,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	/**
 	 * Creates the database tables, if necessary
 	 */
-	protected void checkTables() {
+	public void checkTables() {
 		try
 		{
 			// check for any entity:
@@ -69,12 +69,20 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 		}
 		catch (org.springframework.jdbc.BadSqlGrammarException e)
 		{
-			InputStream in = getClass().getResourceAsStream("/MySQL-create.sql");
+			LOGGER.info("CREATE TABLE for " + persistentClass.getSimpleName());
+			InputStream in = getClass().getResourceAsStream("/MySQL/CREATE-" + 
+				persistentClass.getSimpleName() + ".sql");
 			if (null != in)
 			{
-				LOGGER.info("Creating DB tables.");
 				try {
 					executeOperations(in);
+					
+					// create incrementer and version tables?
+					checkTable("id_sequence", "create table id_sequence (highest int not null) type=MYISAM;", 
+						"insert into id_sequence values(0);");
+					checkTable("db_version", "create table db_version (currentVersion int not null) type=MYISAM;",
+						"insert into db_version values(1);");
+
 				} catch (IOException e1) {
 					e1.printStackTrace();
 					throw e;
@@ -83,6 +91,20 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 			else { 
 				throw e;
 			}
+		}
+	}
+	
+	private void checkTable(String tableName, String create, String insert) throws org.springframework.jdbc.BadSqlGrammarException {
+		try
+		{
+			// check for table:
+			executeOperations("SELECT 1 FROM " + tableName);
+		}
+		catch (org.springframework.jdbc.BadSqlGrammarException e)
+		{
+			LOGGER.info("CREATE TABLE for " + tableName);
+			executeOperations(create);
+			executeOperations(insert);
 		}
 	}
 	
@@ -336,7 +358,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 		// TODO: implement
 	    //final EntityManager em = getEntityManager();
 		//final Query keyQuery =	em.createQuery("SELECT t." + fieldName + 
-		//	" FROM " + persistentClass.getName() + "_" + foreignSimpleClass +  
+		//	" FROM " + getTableName() + "_" + foreignSimpleClass +  
 		//		" t WHERE t." + foreignFieldName + " = :param");
 		//keyQuery.setParameter("param", foreignId);
 		//final List<ID> keyList = keyQuery.getResultList();

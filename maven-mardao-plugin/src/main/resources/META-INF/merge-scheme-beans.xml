@@ -84,7 +84,7 @@
 					<property name="filePrefix" value="spring-dao" />
 					<property name="fileSuffix" value=".xml" />
 				</bean>
-				<!-- MySQL-create.sql script -->
+				<!-- MySQL-create.sql script 
 				<bean class="net.sf.mardao.domain.MergeTemplate">
 					<property name="templatePrefix" value="MySQL-create-sql" />
 					<property name="templateSuffix" value=".vm" />
@@ -92,6 +92,14 @@
 					<property name="entity" value="false" />
 					<property name="listingEntities" value="true" />
 					<property name="filePrefix" value="MySQL-create" />
+					<property name="fileSuffix" value=".sql" />
+				</bean>
+				-->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="MySQL-CREATE" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="resources" />
+					<property name="filePrefix" value="MySQL/CREATE-" />
 					<property name="fileSuffix" value=".sql" />
 				</bean>
 			</list>

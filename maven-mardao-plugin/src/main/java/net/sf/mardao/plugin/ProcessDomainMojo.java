@@ -5,12 +5,15 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import net.sf.mardao.domain.Entity;
+import net.sf.mardao.domain.Field;
 import net.sf.mardao.domain.Group;
 import net.sf.mardao.domain.MergeTemplate;
 import net.sf.mardao.plugin.visitor.EntityClassVisitor;
@@ -56,6 +59,40 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 		return name.substring(0, 1).toUpperCase() + name.substring(1);
 	}
 	
+	public static List<Entity> getEntitiesResolved(Map<String, Entity> entities) {
+		List<Entity> resolved = new ArrayList<Entity>();
+		List<Entity> remaining = new ArrayList<Entity>(entities.values());
+		for (Entity e : entities.values()) {
+			resolveEntity(resolved, e, remaining);
+		}
+		
+		return resolved;
+	}
+	
+	private static void resolveEntity(List<Entity> resolved, Entity e, List<Entity> remaining) {
+		System.out.println("resolveEntity " + e.getSimpleName() + " " + remaining.contains(e));
+		// only process if remaining
+		if (remaining.contains(e)) {
+		
+			// remove this entity from remaining to avoid circular recursion:
+			remaining.remove(e);
+			
+			for (Field f : e.getFields()) {
+				if (null != f.getEntity()) {
+					resolveEntity(resolved, f.getEntity(), remaining);
+				}
+			}
+			for (Field f : e.getManyToOnes()) {
+				if (null != f.getEntity() ) {
+					resolveEntity(resolved, f.getEntity(), remaining);
+				}
+			}
+			
+			System.out.println("   add resolved entity " + e.getSimpleName());
+			resolved.add(e);
+		}
+	}
+
 	private void mergeEntity(Entity en) {
 		vc.put("entity", en);
 		
@@ -64,11 +101,6 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 				mergeTemplate(mt, en.getSimpleName());
 			}
 		}
-		// AbstractEntityDaoInterface in target:
-//		mergeTemplate("AbstractDaoInterface.vm", targetDaoFolder, "Abstract" + en.getSimpleName() + "DaoInterface.java");
-//		mergeTemplate("AbstractDao.vm", targetDaoFolder, "Abstract" + en.getSimpleName() + "Dao.java");
-//		mergeTemplate("Dao.vm", srcDaoFolder, en.getSimpleName() + "Dao.java");
-//		mergeTemplate("DaoBean.vm", srcDaoFolder, en.getSimpleName() + "DaoBean.java");
 	}
 
 	private void mergePackages() {
@@ -87,11 +119,12 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 			
 			vc.put("domainPackage", p);
 			vc.put("daoPackage", p.getDaoPackageName());
-			for (Entity e : p.getEntities().values()) {
+			for (Entity e : getEntitiesResolved(p.getEntities())) {
 				mergeEntity(e);
 			}
 		}
-//		mergeTemplate("spring-beans-xml.vm", resourceFolder, "spring-dao.xml");
+
+		//	merge non-entity-specific templates
 		for (MergeTemplate mt : mergeScheme.getTemplates()) {
 			if (mt.isListingEntities()) {
 				mergeTemplate(mt, null);

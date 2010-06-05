@@ -32,12 +32,17 @@
 	
 	<!-- EntityManagerFactory is managed by the container. -->
 
-<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@4283df14} -->
-<!-- [net.sf.mardao.domain.Group@4283df14] -->
+<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@21495bb8} -->
+<!-- [net.sf.mardao.domain.Group@21495bb8] -->
 	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.basic.domain ============ -->
 	<bean id="organizationDao" class="net.sf.mardao.test.basic.dao.OrganizationDaoBean">
 		<property name="helper">
 			<bean class="net.sf.mardao.test.basic.dao.OrganizationSpringHelper" autowire="byType" init-method="checkTables" />
+		</property>
+	</bean>
+	<bean id="organizationUnitDao" class="net.sf.mardao.test.basic.dao.OrganizationUnitDaoBean">
+		<property name="helper">
+			<bean class="net.sf.mardao.test.basic.dao.OrganizationUnitSpringHelper" autowire="byType" init-method="checkTables" />
 		</property>
 	</bean>
 	<bean id="employeeDao" class="net.sf.mardao.test.basic.dao.EmployeeDaoBean">

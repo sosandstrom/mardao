@@ -39,20 +39,20 @@
 	</bean>
 #end	
 
-<!-- $packages -->
-<!-- $packages.values() -->
 #foreach( $group in $packages.values() )
 	<!-- ============== DaoBeans for entities in package ${group.name} ============ -->
-#foreach( $entity in $group.entities.values() )	
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
 	<bean id="${helper.firstToLower($entity.simpleName)}Dao" class="${daoPackage}.${entity.simpleName}DaoBean">
 		<property name="helper">
 			<bean class="${daoPackage}.${entity.simpleName}${persistenceType}Helper" autowire="byType" init-method="checkTables" />
 		</property>
 	</bean>
+	
 #end
 	
 #end
 
+	<!-- ============== DataSource and Incrementors ============ -->
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="${dao.driver.classname}" />
 		<property name="url" value="${dao.connection.url}" />

@@ -22,17 +22,6 @@ public class GenerateSourcesMojo extends AbstractMardaoMojo {
 				mergeTemplate(mt, null);
 			}
 		}
-		
-//		// GenericDao in target dao folder
-//		mergeTemplate("GenericDao.vm", targetDaoFolder, "GenericDao.java");
-//		
-//		// GenericDaoJpa implementation in src dao folder
-//		mergeTemplate("GenericDao" + persistenceType + ".vm", srcDaoFolder, "GenericDao" + persistenceType + ".java");
-//		
-//		// SingletonEntityManagerFactory in src dao folder
-//		if (false == containerManagedEntityManager) {
-//			mergeTemplate("SingletonEntityManagerFactory.vm", srcDaoFolder, "SingletonEntityManagerFactory.java");
-//		}
 	}
 
 	public void execute() throws MojoExecutionException, MojoFailureException {

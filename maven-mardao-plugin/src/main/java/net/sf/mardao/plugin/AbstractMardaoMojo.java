@@ -246,6 +246,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
 		
 		// lookup destination folder, and merge the template:
 		File folder = destFolders.get(mt.getDestFolder());
+		
 		mergeTemplate(templateName.toString(), folder, fileName.toString());
 	}
 
@@ -257,6 +258,13 @@ public class AbstractMardaoMojo extends AbstractMojo {
 	 */
 	private void mergeTemplate(String templateFilename, File folder, String javaFilename) {
 		final File javaFile = new File(folder, javaFilename);
+		
+		// create destination folder?
+		File destinationFolder = javaFile.getParentFile();
+		if (false == destinationFolder.exists()) {
+			destinationFolder.mkdirs();
+		}
+		
 		// up-to-date?
 		if (false == javaFile.exists())
 		{

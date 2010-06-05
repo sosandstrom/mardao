@@ -1,9 +1,6 @@
 -- Created by mardao DAO generator $currentDate
--- 
+-- CREATE script for TABLE ${entity.tableName} corresponding to Entity ${entity.simpleName} 
 --
-#foreach( $group in $packages.values() )
--- ----------- CREATE TABLE for entities in package ${group.name} -----------
-#foreach( $entity in $helper.getEntitiesResolved($group.entities) )	
 CREATE TABLE `${entity.tableName}` (
 	`${entity.pk.columnName}` $dbTypes.get($entity.pk.type) NOT NULL,
 #foreach( $column in $entity.fields )
@@ -24,11 +21,3 @@ CREATE TABLE `${entity.tableName}` (
 	
 #end
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-#end
-#end
-
--- ----------- CREATE TABLE for sequence and db version -----------
-create table id_sequence (highest int not null) type=MYISAM;
-insert into id_sequence values(0);
-create table db_version (currentVersion int not null) type=MYISAM;
-insert into db_version values(1);

@@ -26,17 +26,15 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 	public static final String TABLE_NAME = "${entity.tableName}";
 
 	/** Column name for primary key attribute is "${entity.pk.columnName}" */
-	public static final String COLUMN_NAME_${entity.pk.name.toUpperCase()} = "${entity.pk.columnName}";
+	protected static final String COLUMN_NAME_${entity.pk.name.toUpperCase()} = Abstract${entity.simpleName}DaoInterface.COLUMN_NAME_${entity.pk.name.toUpperCase()};
 
 #foreach( $field in $entity.allFields )
 	/** Column name for attribute ${field.name} is "${field.columnName}" */
-	public static final String COLUMN_NAME_${field.name.toUpperCase()} = "${field.columnName}";
+	protected static final String COLUMN_NAME_${field.name.toUpperCase()} = Abstract${entity.simpleName}DaoInterface.COLUMN_NAME_${field.name.toUpperCase()};
 #end
 
-	private static final String[] COLUMN_NAMES_S = {
-		#foreach( $field in $entity.allFields )COLUMN_NAME_${field.name.toUpperCase()}, #end};
 	/** The list of attribute names */
-	public static final List<String> COLUMN_NAMES = Arrays.asList(COLUMN_NAMES_S);
+	protected static final List<String> COLUMN_NAMES = Abstract${entity.simpleName}DaoInterface.COLUMN_NAMES;
 
 	/** Default constructor */
    public ${entity.simpleName}SpringHelper() {
@@ -81,15 +79,15 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 		public ${entity.simpleName} mapRow(ResultSet rs, int rowNum) throws SQLException {
 			final ${entity.simpleName} entity = new ${entity.simpleName}();
 #set( $field = $entity.pk )
-			entity.set${helper.firstToUpper($field.name)}(rs.get${helper.firstToUpper($field.simpleType)}("${field.name}"));
+			entity.set${helper.firstToUpper($field.name)}(rs.get${helper.firstToUpper($field.simpleType)}(COLUMN_NAME_${field.name.toUpperCase()}));
 #foreach( $field in $entity.fields )
-			entity.set${helper.firstToUpper($field.name)}(rs.get${helper.firstToUpper($field.simpleType)}("${field.name}"));
+			entity.set${helper.firstToUpper($field.name)}(rs.get${helper.firstToUpper($field.simpleType)}(COLUMN_NAME_${field.name.toUpperCase()}));
 #end			
 #foreach( $field in $entity.manyToOnes )
 
 			// many-to-one ${field.name}:
 			final ${field.entity.simpleName} ${field.name} = new ${field.entity.simpleName}();
-			${field.name}.set${helper.firstToUpper($field.entity.pk.name)}(rs.get${helper.firstToUpper($field.entity.pk.simpleType)}("${field.name}"));
+			${field.name}.set${helper.firstToUpper($field.entity.pk.name)}(rs.get${helper.firstToUpper($field.entity.pk.simpleType)}(COLUMN_NAME_${field.name.toUpperCase()}));
 			entity.set${helper.firstToUpper($field.name)}(${field.name});
 #end
 

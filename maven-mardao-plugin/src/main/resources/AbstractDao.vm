@@ -24,7 +24,7 @@ public abstract class Abstract${entity.simpleName}Dao extends GenericDaoImpl <${
 	 * @return the unique ${entity.simpleName} for the specified attribute
 	 */
 	public final ${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		return genericDao.findUniqueBy("${field.name}", ${field.name});
+		return genericDao.findUniqueBy(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
 	}
 #else
 	/**
@@ -33,7 +33,7 @@ public abstract class Abstract${entity.simpleName}Dao extends GenericDaoImpl <${
 	 * @return a List of ${entity.simpleName}s with the specified attribute
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		return genericDao.findBy("${field.name}", ${field.name});
+		return genericDao.findBy(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
 	}
 #end	
 	 
@@ -48,7 +48,7 @@ public abstract class Abstract${entity.simpleName}Dao extends GenericDaoImpl <${
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		return genericDao.findBy("${field.name}", ${field.name});
+		return genericDao.findBy(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
 	}
 	
 #if( $foreign )  
@@ -58,7 +58,7 @@ public abstract class Abstract${entity.simpleName}Dao extends GenericDaoImpl <${
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
-		return genericDao.findByKey("${field.name}", ${field.type}.class, ${foreign.pk.name});
+		return genericDao.findByKey(COLUMN_NAME_${field.name.toUpperCase()}, ${field.type}.class, ${foreign.pk.name});
 	}	
 #end	
 	
@@ -83,6 +83,7 @@ public abstract class Abstract${entity.simpleName}Dao extends GenericDaoImpl <${
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+		// FIXME: implement properly
 		return findByManyToMany("${entity.pk.name}", // primaryKeyName
 #if( $field.mappedBy )		 
 			"${field.mappedBy}_${entity.pk.name}", // this side's column in the join table (mappedBy="${field.mappedBy}")
@@ -113,7 +114,7 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #end) {
 		final java.util.Map<String,Object> args = new java.util.HashMap<String,Object>($uniqueFields.size());
 #foreach( $field in $uniqueFields )
-		args.put("${field.name}", ${field.name});
+		args.put(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
 #end
 		return genericDao.findBy(args);
 	}
@@ -136,7 +137,7 @@ ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #e
 		final Map<String, Object> nameValuePairs = new HashMap<String, Object>();
 #foreach( $field in $entity.fields )
 #if( $field != $uniqueField )
-		nameValuePairs.put("${field.name}", ${field.name});
+		nameValuePairs.put(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
 #else
 		// skipping the unique field ${field.name} from the Map
 #end
@@ -145,14 +146,14 @@ ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #e
 		// many-to-ones:		
 #foreach( $field in $entity.manyToOnes )
 #if( $field != $uniqueField )
-		nameValuePairs.put("${field.name}", ${field.name});
+		nameValuePairs.put(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
 #else
 		// skipping the unique field ${field.name} from the Map
 #end
 #end		
 		
 		// call protected, generic method:
-		return populate("${uniqueField.name}", ${uniqueField.name}, nameValuePairs);
+		return populate(COLUMN_NAME_${uniqueField.name.toUpperCase()}, ${uniqueField.name}, nameValuePairs);
 	}
 
 #end

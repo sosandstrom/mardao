@@ -1,5 +1,6 @@
 package ${daoPackage};
 
+import java.util.Arrays;
 import java.util.List;
 
 import ${entity.className};
@@ -11,6 +12,22 @@ import ${entity.className};
  * @author mardao DAO generator (${helper.class.name})
  */
 public interface Abstract${entity.simpleName}DaoInterface extends GenericDao<${entity.simpleName}, ${entity.pk.type}> {
+
+	/** Column name for primary key attribute is "${entity.pk.columnName}" */
+	static final String COLUMN_NAME_${entity.pk.name.toUpperCase()} = "${entity.pk.columnName}";
+
+#set( $allFields = $entity.allFields )
+#foreach( $field in $allFields )
+	/** Column name for attribute ${field.name} is "${field.columnName}" */
+	static final String COLUMN_NAME_${field.name.toUpperCase()} = "${field.columnName}";
+#end
+
+	/** The list of attribute names */
+	static final List<String> COLUMN_NAMES = Arrays.asList(
+		#foreach( $field in $allFields )
+COLUMN_NAME_${field.name.toUpperCase()}#if( $velocityCount < $allFields.size() ), #end
+#end);
+
 
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )

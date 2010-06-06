@@ -15,7 +15,7 @@ pom.xml example:
 	<parent>
 		<groupId>net.sf.mardao</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.1</version>
 	</parent>
 	<artifactId>basic-plugin-test</artifactId>
 	<packaging>jar</packaging>
@@ -184,8 +184,18 @@ pom.xml example:
 	</dependencies>
 </project>
 --------------------------------------------------------------------------------
-New features in 1.1:
+Release 1.1 Overview:
+Support @Table and @Column.
+Generate per-table CREATE scripts
+Use Column names instead of Entity attribute names
+More JUnit tests
 
+New features in 1.1:
+3010142  	 @Column(name="currentEmployerID")
+3010141 	 @Table(name="tblEmployee")
+
+Fixed bugs in 1.1:
+3011930  	 Use column names in AbstractDao, not attribute names 
 
 ================================================================================
 Release History

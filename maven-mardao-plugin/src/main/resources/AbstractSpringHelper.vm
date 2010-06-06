@@ -237,9 +237,9 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 			throw new IllegalArgumentException("No such UNIQUE BY column " + fieldName);
 		}
 	    
-		LOGGER.debug("findUniqueBy(" + fieldName + ")");
 		T entity = null;
 		final String sql = "SELECT * FROM " + getTableName() + " WHERE " + fieldName + " = ?";
+		LOGGER.debug("findUniqueBy(" + fieldName + "): " + sql + ", " + param);
 
 		try {
 			entity = template.queryForObject(sql.toString(), getRowMapper(), param);
@@ -259,8 +259,8 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 			throw new IllegalArgumentException("No such WHERE column " + fieldName);
 		}
 	    
-		LOGGER.debug("findUniqueBy(" + fieldName + ")");
 		final String sql = "SELECT * FROM " + getTableName() + " WHERE " + fieldName + " = ?";
+		LOGGER.debug("findBy(" + fieldName + "): " + sql + ", " + param);
 
 		final List<T> list = template.query(sql.toString(), getRowMapper(), param);
 		return list;

@@ -86,9 +86,12 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 #foreach( $field in $entity.manyToOnes )
 
 			// many-to-one ${field.name}:
-			final ${field.entity.simpleName} ${field.name} = new ${field.entity.simpleName}();
-			${field.name}.set${helper.firstToUpper($field.entity.pk.name)}(rs.get${helper.firstToUpper($field.entity.pk.simpleType)}(COLUMN_NAME_${field.name.toUpperCase()}));
-			entity.set${helper.firstToUpper($field.name)}(${field.name});
+			final ${field.entity.pk.simpleType} ${field.name}${helper.firstToUpper($field.entity.pk.name)} = rs.get${helper.firstToUpper($field.entity.pk.simpleType)}(COLUMN_NAME_${field.name.toUpperCase()});
+			if (null != ${field.name}${helper.firstToUpper($field.entity.pk.name)}) {
+    			final ${field.entity.simpleName} ${field.name} = new ${field.entity.simpleName}();
+    			${field.name}.set${helper.firstToUpper($field.entity.pk.name)}(${field.name}${helper.firstToUpper($field.entity.pk.name)});
+				entity.set${helper.firstToUpper($field.name)}(${field.name});
+			}
 #end
 
 			return entity;			

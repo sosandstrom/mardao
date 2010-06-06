@@ -18,9 +18,9 @@ public class TestController {
 		this.organizationUnitDao = organizationUnitDao;
 	}
 	
-	public void populate() {
-		Organization wadpam = organizationDao.persist("Wadpam AB");
-		OrganizationUnit management = organizationUnitDao.persist("Management", wadpam, null);
-		Employee ola = employeeDao.persist("Ola", "f94os", wadpam, management);
-	}
+//	public void populate() {
+//		Organization wadpam = organizationDao.persist("Wadpam AB");
+//		OrganizationUnit management = organizationUnitDao.persist("Management", wadpam, null);
+//		Employee ola = employeeDao.persist("Ola", "f94os", wadpam, management);
+//	}
 }

@@ -11,6 +11,16 @@
 	<version>1.2-SNAPSHOT</version>
 	<name>${groupId}::${artifactId}</name>
 	<url>http://mardao.sourceforge.net</url>
+	<description>Mardao is the Architect's Java DAO generator for use with Maven</description>
+
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License</name>
+			<url>http://www.gnu.org/licenses/lgpl.html</url>
+			<distribution>repo</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
+	</licenses>
 
 	<build>
 		<plugins>

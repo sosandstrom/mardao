@@ -100,19 +100,16 @@
 	</build>
 
 	<dependencies>
-		<!-- 
 		<dependency>
 			<groupId>commons-dbcp</groupId>
 			<artifactId>commons-dbcp</artifactId>
 			<version>1.2.2</version>
 		</dependency>
-		-->
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.9</version>
 		</dependency>
-		<!-- 
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
@@ -125,7 +122,6 @@
 			<version>3.0.2.RELEASE</version>
 			<scope>compile</scope>
 		</dependency>
-		 -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
@@ -144,13 +140,11 @@
 			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- 
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.10</version>
 			<scope>test</scope>
 		</dependency>
-		 -->
 	</dependencies>
 </project>

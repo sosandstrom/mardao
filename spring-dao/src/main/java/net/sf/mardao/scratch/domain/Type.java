@@ -2,8 +2,11 @@ package net.sf.mardao.scratch.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
+@Table(name="tblType",uniqueConstraints={@UniqueConstraint(columnNames={"name"})})
 public class Type {
 	
 	@Id

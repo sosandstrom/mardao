@@ -108,7 +108,9 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 	 *
 	 * @param entity the ${entity.simpleName} entity to insert
 	 */
+#if( "1.5" != $sourceVersion )
    @Override
+#end
    public void persist(${entity.simpleName} entity) {
 		LOGGER.debug("insert(" + entity + ")");
 		

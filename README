@@ -184,6 +184,17 @@ pom.xml example:
 	</dependencies>
 </project>
 --------------------------------------------------------------------------------
+Release 1.2 Overview:
+Only one bugfix for Eclipse IDE
+
+New features in 1.2:
+
+Fixed bugs in 1.2:
+3017379  	 Generated source does not compile in java 1.5 (Eclipse IDE only?)
+
+================================================================================
+Release History
+
 Release 1.1 Overview:
 Support @Table and @Column.
 Generate per-table CREATE scripts
@@ -197,7 +208,5 @@ New features in 1.1:
 Fixed bugs in 1.1:
 3011930  	 Use column names in AbstractDao, not attribute names 
 
-================================================================================
-Release History
-
+--------------------------------------------------------------------------------
 Version: 1.0 Initial release.

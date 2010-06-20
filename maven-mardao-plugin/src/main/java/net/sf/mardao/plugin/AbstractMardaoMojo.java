@@ -106,6 +106,11 @@ public class AbstractMardaoMojo extends AbstractMojo {
 	 */
 	protected String persistenceType;
 	
+	/**
+	 * @parameter expression="${generate.sourceVersion}" default-value="${maven.compiler.source}"
+	 */
+	protected String sourceVersion;
+	
 	public static final java.text.DateFormat DATEFORMAT = new java.text.SimpleDateFormat(
 		"yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	
@@ -157,6 +162,11 @@ public class AbstractMardaoMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		Velocity.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, this);
 		vc.put("helper", this);
+		
+		if (null != sourceVersion) {
+			getLog().info("sourceVersion=" + sourceVersion);
+			vc.put("sourceVersion", sourceVersion);
+		}
 		
 		Map<String,String> mySqlTypes = new HashMap<String,String>();
 		Map<String,String> mySqlDefaults = new HashMap<String,String>();

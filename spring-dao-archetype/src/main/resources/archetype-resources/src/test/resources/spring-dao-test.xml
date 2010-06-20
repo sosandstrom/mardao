@@ -1,0 +1,73 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+	">
+	<tx:advice id="txAdvice">
+		<tx:attributes>
+			<tx:method name="create*" propagation="REQUIRED"/>
+			<tx:method name="delete*" propagation="REQUIRED"/>
+			<tx:method name="persist*" propagation="REQUIRED"/>
+			<tx:method name="update*" propagation="REQUIRED"/>
+			<tx:method name="*" propagation="SUPPORTS" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *${package}.dao.*DaoBean.*(..))"/>
+	</aop:config>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- EntityManagerFactory is managed by the container. -->
+
+	<!-- ============== DaoBeans for entities in package ${package}.domain ============ -->
+	<bean id="manufacturerDao" class="${package}.dao.ManufacturerDaoBean">
+		<property name="helper">
+			<bean class="${package}.dao.ManufacturerSpringHelper" autowire="byType" init-method="checkTables" />
+		</property>
+	</bean>
+	
+	<bean id="typeDao" class="${package}.dao.TypeDaoBean">
+		<property name="helper">
+			<bean class="${package}.dao.TypeSpringHelper" autowire="byType" init-method="checkTables" />
+		</property>
+	</bean>
+	
+	<bean id="modelDao" class="${package}.dao.ModelDaoBean">
+		<property name="helper">
+			<bean class="${package}.dao.ModelSpringHelper" autowire="byType" init-method="checkTables" />
+		</property>
+	</bean>
+	
+	
+
+	<!-- ============== DataSource and Incrementors ============ -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost/mardao_scratch_test" />
+		<property name="username" value="scratchuser" />
+		<property name="password" value="scratchpass" />
+		<property name="validationQuery" value="select 1 from mysql.user" />
+	</bean>
+	<bean id="daoIncrementerMYSQL" class="org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer">
+		<property name="dataSource" ref="dataSource" />
+		<property name="incrementerName" value="id_sequence" />
+		<property name="columnName" value="highest" />
+	</bean>
+	<!-- disable, as above is autowired by type into Helpers
+	<bean id="daoIncrementerORACLE" class="org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer">
+		<property name="dataSource" ref="dataSource" />
+		<property name="incrementerName" value="id_sequence" />
+	</bean>
+	-->
+</beans>

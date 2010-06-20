@@ -16,8 +16,8 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.5</source>
+					<target>1.5</target>
 				</configuration>
 				<executions>
 					<!-- extra compile step of domain classes before generator processing -->
@@ -89,6 +89,9 @@
 					-->
 					<!-- default is true: 
 					<containerManagedEntityManager>false</containerManagedEntityManager> -->
+					
+					<!-- default is null -->
+					<sourceVersion>1.5</sourceVersion>
 				</configuration>
 			</plugin>
 			<plugin>

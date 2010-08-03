@@ -298,7 +298,8 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 			sql.append(isFirst ? " WHERE " : " AND ");
 			isFirst = false;
 			sql.append(entry.getKey());
-			sql.append(" = ?");
+			sql.append(" = :");
+			sql.append(entry.getKey());
 		}
 
 		try {
@@ -315,7 +316,8 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	 * @return the unique entity for the specified attributes
 	 */
 	public List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending) {
-		if (!getColumnNames().contains(orderBy))
+		LOGGER.debug("findBy(" + args + ")");
+		if (null != orderBy && !getColumnNames().contains(orderBy))
 		{
 			throw new IllegalArgumentException("No such ORDER BY column " + orderBy);
 		}
@@ -330,13 +332,16 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 			sql.append(isFirst ? " WHERE " : " AND ");
 			isFirst = false;
 			sql.append(entry.getKey());
-			sql.append(" = ?");
+			sql.append(" = :");
+			sql.append(entry.getKey());
 		}
 
-		sql.append(" ORDER BY ");
-		sql.append(orderBy);
-		sql.append(ascending ? " ASC" : " DESC");
-
+		if (null != orderBy) {
+			sql.append(" ORDER BY ");
+			sql.append(orderBy);
+			sql.append(ascending ? " ASC" : " DESC");
+		}
+		
 		final List<T> returnValue = template.query(sql.toString(), getRowMapper(), args);
 		
 		return returnValue;

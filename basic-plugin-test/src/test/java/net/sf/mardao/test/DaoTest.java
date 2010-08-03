@@ -107,4 +107,11 @@ public class DaoTest extends TestCase {
 		assertEquals("Orgs", b.getCurrentEmployer().getId(), s.getCurrentEmployer().getId());
 		assertNotSame("Names", b.getName(), s.getName());
 	}
+	
+	public void testFindBy() {
+		Employee actual = employeeDao.findBy(boss.getName(), boss.getSignum(), 
+				boss.getCurrentUnit(), boss.getCurrentEmployer());
+		assertNotNull(actual);
+		assertEquals(boss.getId(), actual.getId());
+	}
 }

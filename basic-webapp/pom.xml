@@ -4,12 +4,12 @@
 	<parent>
 		<groupId>net.sf.mardao</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.3-SNAPSHOT</version>
+		<version>1.3</version>
 	</parent>
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>basic-webapp</artifactId>
 	<packaging>war</packaging>
-	<version>1.3-SNAPSHOT</version>
+	<version>1.3</version>
 	<name>${groupId}::${artifactId}</name>
 	<url>http://mardao.sf.net</url>
 
@@ -61,7 +61,7 @@
 			<plugin>
 				<groupId>net.sf.mardao</groupId>
 				<artifactId>maven-mardao-plugin</artifactId>
-				<version>1.3-SNAPSHOT</version>
+				<version>1.3</version>
 				<executions>
 					<execution>
 						<id>generate-generics</id>

@@ -1,5 +1,5 @@
 README for the mardao Architect's Java DAO generator
-Version: 1.1
+Version: 1.3
 License: http://www.gnu.org/licenses/lgpl.html
 
 Mardao is a maven plugin, which you configure in your project's pom.xml.
@@ -54,7 +54,7 @@ pom.xml example:
 			<plugin>
 				<groupId>net.sf.mardao</groupId>
 				<artifactId>maven-mardao-plugin</artifactId>
-				<version>1.0-SNAPSHOT</version>
+				<version>1.3</version>
 				<executions>
 					<execution>
 						<id>generate-generics</id>
@@ -184,6 +184,17 @@ pom.xml example:
 	</dependencies>
 </project>
 --------------------------------------------------------------------------------
+Release 1.3 Overview:
+Only one bugfix, for findBy(Map args) methods
+
+New features in 1.3:
+
+Fixed bugs in 1.3:
+3038659  	 findBy(Map args) does not find entities
+
+================================================================================
+Release History
+
 Release 1.2 Overview:
 Only one bugfix for Eclipse IDE
 
@@ -192,9 +203,7 @@ New features in 1.2:
 Fixed bugs in 1.2:
 3017379  	 Generated source does not compile in java 1.5 (Eclipse IDE only?)
 
-================================================================================
-Release History
-
+--------------------------------------------------------------------------------
 Release 1.1 Overview:
 Support @Table and @Column.
 Generate per-table CREATE scripts

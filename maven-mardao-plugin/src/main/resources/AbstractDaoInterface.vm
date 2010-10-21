@@ -24,6 +24,7 @@ public interface Abstract${entity.simpleName}DaoInterface extends GenericDao<${e
 
 	/** The list of attribute names */
 	static final List<String> COLUMN_NAMES = Arrays.asList(
+		COLUMN_NAME_${entity.pk.name.toUpperCase()},
 		#foreach( $field in $allFields )
 COLUMN_NAME_${field.name.toUpperCase()}#if( $velocityCount < $allFields.size() ), #end
 #end);

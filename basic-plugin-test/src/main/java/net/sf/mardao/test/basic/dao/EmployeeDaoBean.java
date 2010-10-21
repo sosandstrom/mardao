@@ -19,8 +19,8 @@ public class EmployeeDaoBean
 	public Employee findBy(String name, String signum, OrganizationUnit unit, Organization org) {
 		HashMap<String,Object> args = new HashMap<String,Object>();
 		
-		args.put(COLUMN_NAME_CURRENTEMPLOYER, org.getId());
-		args.put(COLUMN_NAME_CURRENTUNIT, unit.getKey());
+		args.put(COLUMN_NAME_CURRENTEMPLOYER, org);
+		args.put(COLUMN_NAME_CURRENTUNIT, unit);
 		args.put(COLUMN_NAME_NAME, name);
 		args.put(COLUMN_NAME_SIGNUM, signum);
 		

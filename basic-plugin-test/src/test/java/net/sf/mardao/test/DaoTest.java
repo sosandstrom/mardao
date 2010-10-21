@@ -114,4 +114,11 @@ public class DaoTest extends TestCase {
 		assertNotNull(actual);
 		assertEquals(boss.getId(), actual.getId());
 	}
+	
+	public void testUpdateEmployee() {
+		empl.setCurrentUnit(RnD);
+		employeeDao.update(empl);
+		Employee actual = employeeDao.findByPrimaryKey(empl.getId());
+		assertEquals(RnD.getKey(), actual.getCurrentUnit().getKey());
+	}
 }

@@ -4,7 +4,7 @@
 CREATE TABLE `${entity.tableName}` (
 	`${entity.pk.columnName}` $dbTypes.get($entity.pk.type) NOT NULL,
 #foreach( $column in $entity.fields )
-	`${column.columnName}` $dbTypes.get($column.type) $dbDefaults.get($column.type), 
+	`${column.columnName}` $dbTypes.get($column.type) #if("createdDate" == $column.columnName) $dbDefaults.get($column.type) #else DEFAULT 0 #end, 
 #end
 #foreach( $column in $entity.manyToOnes )
 	`${column.columnName}` $dbTypes.get($column.entity.pk.type) DEFAULT NULL,

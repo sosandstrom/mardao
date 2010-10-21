@@ -1,0 +1,23 @@
+package ${daoBasePackage};
+
+public class Expression {
+	  private final String column;
+	  private final String operation;
+	  private final Object operand;
+	  
+	  public Expression(String column, String operation, Object operand) {
+	  	this.column = column;
+	  	this.operation = operation;
+	  	this.operand = operand;
+	  }
+	  
+	  public String getColumn() {
+	  	return column;
+	  }
+	  public String getOperation() {
+	  	return operation;
+	  }
+	  public Object getOperand() {
+	  	return operand;
+	  }
+}

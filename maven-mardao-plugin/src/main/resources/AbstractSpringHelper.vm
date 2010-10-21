@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -206,13 +207,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
    // ------ GenericDao implementation -----------------------------
 
    public T findByPrimaryKey(ID id) {
-		T entity = null;
-		LOGGER.debug("find(" + id + ")");
-		final String sql = "SELECT * FROM " + getTableName() + " WHERE " + getPrimaryKeyColumnName() + " = ?";
-		try {
-			entity = template.queryForObject(sql, getRowMapper(), id);
-		} catch (EmptyResultDataAccessException e) {}
-		return entity;
+   		return findUniqueBy(getPrimaryKeyColumnName(), id);
    }
 
    public List<T> findAll() {
@@ -239,7 +234,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	    
 		T entity = null;
 		final String sql = "SELECT * FROM " + getTableName() + " WHERE " + fieldName + " = ?";
-		LOGGER.debug("findUniqueBy(" + fieldName + "): " + sql + ", " + param);
+		LOGGER.debug("find" + persistentClass.getSimpleName() + "By_" + fieldName + "(): " + param);
 
 		try {
 			entity = template.queryForObject(sql.toString(), getRowMapper(), param);
@@ -283,7 +278,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	 * @param args the specified attribute name-value map
 	 * @return the unique entity for the specified attributes
 	 */
-	public final T findBy(Map<String,Object> args) {
+	public T findBy(Map<String,Object> args) {
 		if (!getColumnNames().containsAll(args.keySet()))
 		{
 			throw new IllegalArgumentException("No such FIND BY column " + args);
@@ -340,6 +335,61 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 			sql.append(" ORDER BY ");
 			sql.append(orderBy);
 			sql.append(ascending ? " ASC" : " DESC");
+		}
+		
+		final List<T> returnValue = template.query(sql.toString(), getRowMapper(), args);
+		
+		return returnValue;
+	}
+	
+    /**
+     * find-by method for unique attributes
+     * @param orderBy the attribute to order by
+     * @param ascending true if ascending
+	 * @param limit set to -1 for no LIMIT clause
+     * @param expressions the specified column-operation-operand expressions
+     * @return the matching entities for the specified attributes
+     */
+    public List<T> findBy(String orderBy, boolean ascending, int limit, Expression... expressions) {
+		LOGGER.debug("find" + persistentClass.getSimpleName() + "sBy(" + expressions + ")");
+		if (null != orderBy && !getColumnNames().contains(orderBy))
+		{
+			throw new IllegalArgumentException("No such ORDER BY column " + orderBy);
+		}
+		
+		// build SQL
+		final StringBuffer sql = new StringBuffer("SELECT * FROM ");
+		sql.append(getTableName());
+		
+		// and arguments map
+		boolean isFirst = true;
+		int i = 0;
+		final Map<String,Object> args = new HashMap<String,Object>();
+		for (Expression ex : expressions) {
+			//  check that column exists
+			if (!getColumnNames().contains(ex.getColumn())) {
+				throw new IllegalArgumentException("No such WHERE column " + ex.getColumn());
+			}
+		
+			sql.append(isFirst ? " WHERE " : " AND ");
+			isFirst = false;
+			sql.append(ex.getColumn());
+			sql.append(ex.getOperation());
+			sql.append(" :operand");
+			sql.append(i);
+			args.put("operand"+i, ex.getOperand());
+			i++;
+		}
+
+		if (null != orderBy) {
+			sql.append(" ORDER BY ");
+			sql.append(orderBy);
+			sql.append(ascending ? " ASC" : " DESC");
+		}
+		
+		if (0 < limit) {
+			sql.append(" LIMIT ");
+			sql.append(limit);
 		}
 		
 		final List<T> returnValue = template.query(sql.toString(), getRowMapper(), args);

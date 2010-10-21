@@ -24,6 +24,12 @@
 					<property name="entity" value="false" />
 					<property name="filePrefix" value="GenericDaoImpl" />
 				</bean>
+				<!-- Expression class -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="Expression" />
+					<property name="entity" value="false" />
+					<property name="filePrefix" value="Expression" />
+				</bean>
 				<!-- AbstractHelper interface -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
 					<property name="templatePrefix" value="AbstractHelper" />
@@ -84,24 +90,6 @@
 					<property name="filePrefix" value="spring-dao" />
 					<property name="fileSuffix" value=".xml" />
 				</bean>
-				<!-- MySQL-create.sql script 
-				<bean class="net.sf.mardao.domain.MergeTemplate">
-					<property name="templatePrefix" value="MySQL-create-sql" />
-					<property name="templateSuffix" value=".vm" />
-					<property name="destFolder" value="resources" />
-					<property name="entity" value="false" />
-					<property name="listingEntities" value="true" />
-					<property name="filePrefix" value="MySQL-create" />
-					<property name="fileSuffix" value=".sql" />
-				</bean>
-				-->
-				<bean class="net.sf.mardao.domain.MergeTemplate">
-					<property name="templatePrefix" value="MySQL-CREATE" />
-					<property name="templateSuffix" value=".vm" />
-					<property name="destFolder" value="resources" />
-					<property name="filePrefix" value="MySQL/CREATE-" />
-					<property name="fileSuffix" value=".sql" />
-				</bean>
 			</list>
 		</constructor-arg>
 	</bean>
@@ -123,6 +111,13 @@
 					<property name="destFolder" value="targetDao" />
 					<property name="filePrefix" value="Abstract" />
 					<property name="fileSuffix" value="Helper.java" />
+				</bean>
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="MySQL-CREATE" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="resources" />
+					<property name="filePrefix" value="MySQL/CREATE-" />
+					<property name="fileSuffix" value=".sql" />
 				</bean>
 			</list>
 		</property>

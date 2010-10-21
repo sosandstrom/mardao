@@ -12,7 +12,7 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-public abstract class GenericDaoJPA<T, ID extends Serializable> implements GenericDao<T, ID> {
+public abstract class JPAHelper<T, ID extends Serializable> implements GenericDao<T, ID> {
 
    protected final Class<T> persistentClass;
    

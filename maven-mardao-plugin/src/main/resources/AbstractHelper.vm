@@ -44,9 +44,19 @@ public interface AbstractHelper<T, ID extends Serializable> extends GenericDao<T
 	 * @param args the specified attribute name-value map
 	 * @param orderBy the attribute to order by
 	 * @param ascending true if ascending
-	 * @return the unique entity for the specified attributes
+	 * @return the matching entities for the specified attributes
 	 */
 	List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending);
+
+    /**
+     * find-by method for unique attributes
+     * @param orderBy the attribute to order by
+     * @param ascending true if ascending
+	 * @param limit set to -1 for no LIMIT clause
+     * @param expressions the specified column-operation-operand expressions
+     * @return the matching entities for the specified attributes
+     */
+    List<T> findBy(String orderBy, boolean ascending, int limit, Expression... args);
 
 	/**
 	 * find-by method for many-to-many fields

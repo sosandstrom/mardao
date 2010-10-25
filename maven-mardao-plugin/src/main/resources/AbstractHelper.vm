@@ -72,5 +72,10 @@ public interface AbstractHelper<T, ID extends Serializable> extends GenericDao<T
 			String foreignSimpleClass, String foreignFieldName, Object foreignId);
 			
 	/** For persisting entities specified by Map nameValuePairs */
-	T persist(Map<String,Object> nameValuePairs);	
+	T persist(Map<String,Object> nameValuePairs);
+	
+	/**
+	 * For updating many rows in one go
+	 */
+	int update(Map<String, Object> values, Expression... expressions);	
 }

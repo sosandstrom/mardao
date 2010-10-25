@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -351,7 +352,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
      * @return the matching entities for the specified attributes
      */
     public List<T> findBy(String orderBy, boolean ascending, int limit, Expression... expressions) {
-		LOGGER.debug("find" + persistentClass.getSimpleName() + "sBy(" + expressions + ")");
+		LOGGER.debug("find" + persistentClass.getSimpleName() + "sBy(" + Arrays.toString(expressions) + ")");
 		if (null != orderBy && !getColumnNames().contains(orderBy))
 		{
 			throw new IllegalArgumentException("No such ORDER BY column " + orderBy);
@@ -430,4 +431,49 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 		return returnValue;
 	}
 		
+	/**
+	 * Updates many rows in one go
+	 * @param values new values for specified columns
+     * @param expressions the specified column-operation-operand expressions
+	 * @return number of modified rows
+	 */	
+	public int update(Map<String, Object> values, Expression... expressions) {
+		final Map<String,Object> args = new HashMap<String,Object>();
+		final StringBuffer sql = new StringBuffer("UPDATE ");
+		sql.append(getTableName());
+		sql.append(" SET ");
+		
+		int i = 0;
+		for (Entry<String, Object> entry : values.entrySet()) {
+			sql.append(entry.getKey());
+			sql.append(" = :");
+			sql.append(entry.getKey());
+			if (i+1 < values.size()) {
+				sql.append(", ");
+			}
+		}
+		args.putAll(values);
+	
+		// and arguments map
+		boolean isFirst = true;
+		i = 0;
+		for (Expression ex : expressions) {
+			//  check that column exists
+			if (!getColumnNames().contains(ex.getColumn())) {
+				throw new IllegalArgumentException("No such WHERE column " + ex.getColumn());
+			}
+		
+			sql.append(isFirst ? " WHERE " : " AND ");
+			isFirst = false;
+			sql.append(ex.getColumn());
+			sql.append(ex.getOperation());
+			sql.append(" :operand");
+			sql.append(i);
+			args.put("operand"+i, ex.getOperand());
+			i++;
+		}
+		
+		LOGGER.debug("update" + persistentClass.getSimpleName() + "(" + args + ")");
+		return template.update(sql.toString(), args);
+	}		
 }

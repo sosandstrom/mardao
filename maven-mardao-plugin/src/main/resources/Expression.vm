@@ -11,6 +11,10 @@ public class Expression {
 	  	this.operand = operand;
 	  }
 	  
+	  public String toString() {
+	  	return column + operation + operand;
+	  }
+	  
 	  public String getColumn() {
 	  	return column;
 	  }

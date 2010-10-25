@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>parent</artifactId>
@@ -73,6 +74,12 @@
 	</build>
 
 	<distributionManagement>
+		<!-- use the following if you ARE using a snapshot version. -->
+		<snapshotRepository>
+			<id>ppSnapshots</id>
+			<name>Snapshots Repository</name>
+			<url>http://192.168.1.97:8180/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
 		<site>
 			<id>sourceforge.net</id>
 			<url>scp://web.sourceforge.net/home/groups/m/ma/mardao/htdocs</url>

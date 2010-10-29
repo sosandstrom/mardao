@@ -7,10 +7,7 @@
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
 	">
-	<bean id="daoProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location"><ref bean="propertyUrlResource"/></property>
-	</bean>
-	
+
 #if( $containerManagedEntityManager )
 
 	<tx:advice id="txAdvice">
@@ -26,31 +23,28 @@
 	<aop:config>
 		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *${daoPackage}.*DaoBean.*(..))"/>
 	</aop:config>
-	
+
+#if( $persistenceType == "JPA" )
+   <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+      <property name="entityManagerFactory" ref="entityManagerFactory" />
+   </bean>
+#else
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
-	
+#end
+
 	<!-- EntityManagerFactory is managed by the container. -->
 #else	
 	<!-- EntityManagerFactory should be created only once! -->
 	<bean id="entityManagerFactory" class="${daoPackage}.SingletonEntityManagerFactory" destroy-method="close">
 		<constructor-arg value="${persistenceUnitName}" />
 	</bean>
-#end	
 
-#foreach( $group in $packages.values() )
-	<!-- ============== DaoBeans for entities in package ${group.name} ============ -->
-#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
-	<bean id="${helper.firstToLower($entity.simpleName)}Dao" class="${daoPackage}.${entity.simpleName}DaoBean">
-		<property name="helper">
-			<bean class="${daoPackage}.${entity.simpleName}${persistenceType}Helper" autowire="byType" init-method="checkTables" />
-		</property>
+
+	<bean id="daoProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"><ref bean="propertyUrlResource"/></property>
 	</bean>
-	
-#end
-	
-#end
 
 	<!-- ============== DataSource and Incrementors ============ -->
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
@@ -71,4 +65,27 @@
 		<property name="incrementerName" value="id_sequence" />
 	</bean>
 	-->
+#end	
+
+#foreach( $group in $packages.values() )
+	<!-- ============== DaoBeans for entities in package ${group.name} ============ -->
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+	<bean id="${helper.firstToLower($entity.simpleName)}Dao" class="${daoPackage}.${entity.simpleName}DaoBean">
+		<property name="helper">
+#if( $persistenceType == "JPA" )
+         <bean class="${daoPackage}.${persistenceType}Helper" autowire="byName">
+            <constructor-arg>
+               <value>${entity.className}</value>
+            </constructor-arg>
+         </bean>
+#else
+         <bean class="${daoPackage}.${entity.simpleName}${persistenceType}Helper" autowire="byType" init-method="checkTables" />
+#end
+      </property>
+   </bean>
+	
+#end
+	
+#end
+
 </beans>

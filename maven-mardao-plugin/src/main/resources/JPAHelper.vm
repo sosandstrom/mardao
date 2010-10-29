@@ -12,7 +12,7 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-public abstract class JPAHelper<T, ID extends Serializable> implements GenericDao<T, ID> {
+public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, ID> {
 
    protected final Class<T> persistentClass;
    
@@ -21,7 +21,11 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
    
    private EntityManagerFactory entityManagerFactory;
 
-   public GenericDaoJPA(Class<T> type) {
+   public JPAHelper(String type) throws ClassNotFoundException {
+      this.persistentClass = (Class<T>) Class.forName(type);
+   }
+
+   public JPAHelper(Class<T> type) {
       this.persistentClass = type;
    }
    
@@ -103,6 +107,7 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
       return persistentClass;
    }
 
+   @Override
    public T findByPrimaryKey(ID id) {
       final EntityManager em = getEntityManager();
       final T returnValue = em.find(persistentClass, id);
@@ -110,6 +115,7 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
       return returnValue;
    }
 
+   @Override
    public void persist(T entity) {
       System.out.println("Persisting " + persistentClass.getSimpleName());
       final EntityManager em = getEntityManager();
@@ -119,6 +125,7 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
       close();
    }
 
+   @Override
    public void update(T entity) {
 	   System.out.println("Merging " + persistentClass.getSimpleName());
       final EntityManager em = getEntityManager();
@@ -128,6 +135,7 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
       close();
    }
 
+   @Override
    public void delete(T entity) {
       final EntityManager em = getEntityManager();
       final EntityTransaction tx = beginTransaction();
@@ -155,7 +163,7 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
 	 * @return the unique entity for the specified attribute
 	 */
 	@SuppressWarnings("unchecked")
-	protected final T findUniqueBy(String fieldName, Object param) {
+	public final T findUniqueBy(String fieldName, Object param) {
 		try {
 		    final EntityManager em = getEntityManager();
 			final Query query =	em.createQuery("SELECT t FROM " + persistentClass.getName() + " t WHERE t." + fieldName + " = :param");
@@ -178,7 +186,7 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
 	 * @return a List of entities with the specified attribute
 	 */
 	@SuppressWarnings("unchecked")
-	protected final List<T> findBy(String fieldName, Object param) {
+	public final List<T> findBy(String fieldName, Object param) {
 	    final EntityManager em = getEntityManager();
 		final Query query =	em.createQuery("SELECT t FROM " + persistentClass.getName() + " t WHERE t." + fieldName + " = :param");
 		query.setParameter("param", param);
@@ -199,7 +207,7 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
 	 * @return a List of entities with the specified foreign key
 	 */
 	@SuppressWarnings("unchecked")
-	protected final List<T> findByKey(String fieldName, Class foreignClass, Object key) {
+	public final List<T> findByKey(String fieldName, Class foreignClass, Object key) {
 	    final EntityManager em = getEntityManager();
 		final Object lazy = em.getReference(foreignClass, key);
 		final List<T> returnValue = findBy(fieldName, lazy);
@@ -217,7 +225,7 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
 	 * @return the unique entity for the specified attributes
 	 */
 	@SuppressWarnings("unchecked")
-	protected final T findBy(Map<String,Object> args) {
+	public final T findBy(Map<String,Object> args) {
 	    final EntityManager em = getEntityManager();
 	    final StringBuffer ql = new StringBuffer("SELECT t FROM ");
 	    ql.append(persistentClass.getName());
@@ -247,7 +255,7 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
 	 * @return the unique entity for the specified attributes
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending) {
+	public List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending) {
 	    final EntityManager em = getEntityManager();
 	    final StringBuffer ql = new StringBuffer("SELECT t FROM ");
 	    ql.append(persistentClass.getName());
@@ -288,7 +296,7 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
 	 * @return a List of entities belonging to the many-to-many relation
 	 */
 	@SuppressWarnings("unchecked")
-	protected final List<T> findByManyToMany(String primaryKeyName, 
+	public final List<T> findByManyToMany(String primaryKeyName,
 			String fieldName, 
 			String foreignSimpleClass, String foreignFieldName, Object foreignId) {
 	    final EntityManager em = getEntityManager();
@@ -309,5 +317,19 @@ public abstract class JPAHelper<T, ID extends Serializable> implements GenericDa
 		close();
 		return returnValue;
 	}
-		
+
+   @Override
+   public List<T> findBy(String orderBy, boolean ascending, int limit, Expression... args) {
+      throw new UnsupportedOperationException("Not supported for JPA.");
+   }
+
+   @Override
+   public T persist(Map<String, Object> nameValuePairs) {
+      throw new UnsupportedOperationException("Not supported for JPA.");
+   }
+
+   @Override
+   public int update(Map<String, Object> values, Expression... expressions) {
+      throw new UnsupportedOperationException("Not supported for JPA.");
+   }
 }

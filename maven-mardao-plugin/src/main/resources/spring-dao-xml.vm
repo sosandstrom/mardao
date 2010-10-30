@@ -21,7 +21,7 @@
 	</tx:advice>
 	
 	<aop:config>
-		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *${daoPackage}.*DaoBean.*(..))"/>
+		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *${daoPackage}.JPAHelper.*(..))"/>
 	</aop:config>
 
 #if( $persistenceType == "JPA" )

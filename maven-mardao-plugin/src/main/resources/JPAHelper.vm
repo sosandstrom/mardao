@@ -87,7 +87,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 #if( $containerManagedTransactionManager )
       return null;
 #else
-      final EntityTransaction tx = em.getTransaction();
+      final EntityTransaction tx = entityManager.getTransaction();
       tx.begin();
       return tx;
 #end

@@ -74,7 +74,11 @@ public abstract class Abstract${entity.simpleName}Dao extends GenericDaoImpl <${
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+#if( $persistenceType == "JPA" )
+      return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
+#else
 		return genericDao.findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
+#end
 	}
 	
 	/**
@@ -83,6 +87,14 @@ public abstract class Abstract${entity.simpleName}Dao extends GenericDaoImpl <${
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+#if( $persistenceType == "JPA" )
+
+      return genericDao.findByManyToMany("${entity.pk.name}",
+                                         "${field.name}_${foreign.pk.name}",
+                                         "${field.simpleType}",
+                                         "${field.mappedBy}_${entity.pk.name}",
+                                         ${foreign.pk.name});
+#else
 		// FIXME: implement properly
 		return findByManyToMany("${entity.pk.name}", // primaryKeyName
 #if( $field.mappedBy )		 
@@ -94,10 +106,11 @@ public abstract class Abstract${entity.simpleName}Dao extends GenericDaoImpl <${
 			"${field.simpleType}", // related entity class simple name
 			"${field.name}_${foreign.pk.name}", // the related side's column in the join table
 			${foreign.pk.name}); 			 
+#end
 	}
 #end	
 	
-#end	
+#end
 
 	// ----------------------- uniqueFields finders -------------------------
 #foreach( $uniqueFields in $entity.uniqueFieldsSets )

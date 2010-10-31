@@ -46,7 +46,7 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 	 * @param dataSource the DataSource to inject
 	 */
 	public void setDataSource(DataSource dataSource) {
-		LOGGER.info("setDataSource " + dataSource);
+		LOGGER.info("setDataSource " + ((org.apache.commons.dbcp.BasicDataSource) dataSource).getUrl() + ' ' + getTableName());
 		template = new SimpleJdbcTemplate(dataSource);
 	
       // create the JDBC insert with specific columns and table name:
@@ -58,18 +58,15 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 , COLUMN_NAME_${field.name.toUpperCase()}#end);
    }
    
-   @Override
-   protected String getTableName() {
+   public String getTableName() {
    		return TABLE_NAME;
    }
    
-   @Override
-   protected String getPrimaryKeyColumnName() {
+   public String getPrimaryKeyColumnName() {
    		return COLUMN_NAME_${entity.pk.name.toUpperCase()};
    }
    
-   @Override
-   protected List<String> getColumnNames() {
+   public List<String> getColumnNames() {
         return COLUMN_NAMES;
    }
    

@@ -34,14 +34,6 @@
 	</bean>
 #end
 
-	<!-- EntityManagerFactory is managed by the container. -->
-#else	
-	<!-- EntityManagerFactory should be created only once! -->
-	<bean id="entityManagerFactory" class="${daoPackage}.SingletonEntityManagerFactory" destroy-method="close">
-		<constructor-arg value="${persistenceUnitName}" />
-	</bean>
-
-
 	<bean id="daoProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="location"><ref bean="propertyUrlResource"/></property>
 	</bean>
@@ -65,12 +57,20 @@
 		<property name="incrementerName" value="id_sequence" />
 	</bean>
 	-->
+	<!-- EntityManagerFactory is managed by the container. -->
+#else	
+	<!-- EntityManagerFactory should be created only once! -->
+	<bean id="entityManagerFactory" class="${daoPackage}.SingletonEntityManagerFactory" destroy-method="close">
+		<constructor-arg value="${persistenceUnitName}" />
+	</bean>
+
+
 #end	
 
 #foreach( $group in $packages.values() )
 	<!-- ============== DaoBeans for entities in package ${group.name} ============ -->
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
-	<bean id="${helper.firstToLower($entity.simpleName)}Dao" class="${daoPackage}.${entity.simpleName}DaoBean">
+	<bean id="${helper.firstToLower($entity.simpleName)}Dao" class="${daoPackage}.${entity.simpleName}DaoBean" autowire="constructor">
 		<property name="helper">
 #if( $persistenceType == "JPA" )
          <bean class="${daoPackage}.${persistenceType}Helper" autowire="byName">

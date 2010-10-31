@@ -115,6 +115,11 @@ public class DaoTest extends TestCase {
 		assertEquals(boss.getId(), actual.getId());
 	}
 	
+	public void testFindByOrgName() {
+		List<Employee> actual = employeeDao.findByOrganization(acme.getName());
+		assertEquals(2, actual.size());
+	}
+	
 	public void testUpdateEmployee() {
 		empl.setCurrentUnit(RnD);
 		employeeDao.update(empl);

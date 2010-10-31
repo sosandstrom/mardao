@@ -7,10 +7,7 @@
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
 	">
-	<bean id="daoProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location"><ref bean="propertyUrlResource"/></property>
-	</bean>
-	
+
 
 	<tx:advice id="txAdvice">
 		<tx:attributes>
@@ -23,35 +20,18 @@
 	</tx:advice>
 	
 	<aop:config>
-		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *net.sf.mardao.test.basic.dao.*DaoBean.*(..))"/>
+		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *net.sf.mardao.test.basic.dao.JPAHelper.*(..))"/>
 	</aop:config>
-	
+
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
-	
-	<!-- EntityManagerFactory is managed by the container. -->
 
-<!-- {net.sf.mardao.test.basic.domain=net.sf.mardao.domain.Group@21495bb8} -->
-<!-- [net.sf.mardao.domain.Group@21495bb8] -->
-	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.basic.domain ============ -->
-	<bean id="organizationDao" class="net.sf.mardao.test.basic.dao.OrganizationDaoBean">
-		<property name="helper">
-			<bean class="net.sf.mardao.test.basic.dao.OrganizationSpringHelper" autowire="byType" init-method="checkTables" />
-		</property>
+	<bean id="daoProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"><ref bean="propertyUrlResource"/></property>
 	</bean>
-	<bean id="organizationUnitDao" class="net.sf.mardao.test.basic.dao.OrganizationUnitDaoBean">
-		<property name="helper">
-			<bean class="net.sf.mardao.test.basic.dao.OrganizationUnitSpringHelper" autowire="byType" init-method="checkTables" />
-		</property>
-	</bean>
-	<bean id="employeeDao" class="net.sf.mardao.test.basic.dao.EmployeeDaoBean">
-		<property name="helper">
-			<bean class="net.sf.mardao.test.basic.dao.EmployeeSpringHelper" autowire="byType" init-method="checkTables" />
-		</property>
-	</bean>
-	
 
+	<!-- ============== DataSource and Incrementors ============ -->
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="${dao.driver.classname}" />
 		<property name="url" value="${dao.connection.url}" />
@@ -70,4 +50,27 @@
 		<property name="incrementerName" value="id_sequence" />
 	</bean>
 	-->
+	<!-- EntityManagerFactory is managed by the container. -->
+
+	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.basic.domain ============ -->
+	<bean id="organizationDao" class="net.sf.mardao.test.basic.dao.OrganizationDaoBean" autowire="constructor">
+		<property name="helper">
+         <bean class="net.sf.mardao.test.basic.dao.OrganizationSpringHelper" autowire="byType" init-method="checkTables" />
+      </property>
+   </bean>
+	
+	<bean id="organizationUnitDao" class="net.sf.mardao.test.basic.dao.OrganizationUnitDaoBean" autowire="constructor">
+		<property name="helper">
+         <bean class="net.sf.mardao.test.basic.dao.OrganizationUnitSpringHelper" autowire="byType" init-method="checkTables" />
+      </property>
+   </bean>
+	
+	<bean id="employeeDao" class="net.sf.mardao.test.basic.dao.EmployeeDaoBean" autowire="constructor">
+		<property name="helper">
+         <bean class="net.sf.mardao.test.basic.dao.EmployeeSpringHelper" autowire="byType" init-method="checkTables" />
+      </property>
+   </bean>
+	
+	
+
 </beans>

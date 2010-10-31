@@ -1,5 +1,7 @@
 package net.sf.mardao.test.basic.dao;
 
+import java.util.List;
+
 import net.sf.mardao.test.basic.domain.Employee;
 import net.sf.mardao.test.basic.domain.Organization;
 import net.sf.mardao.test.basic.domain.OrganizationUnit;
@@ -9,7 +11,7 @@ import net.sf.mardao.test.basic.domain.OrganizationUnit;
  */
 public interface EmployeeDao extends AbstractEmployeeDaoInterface {
 
-	// TODO: declare your Business Methods here
 	Employee findBy(String name, String signum, OrganizationUnit unit, Organization org);
 	
+	List<Employee> findByOrganization(String orgName);
 }

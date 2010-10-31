@@ -38,9 +38,6 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
       this.persistentClass = type;
    }
    
-   protected abstract String getTableName();
-   protected abstract String getPrimaryKeyColumnName();
-   protected abstract List<String> getColumnNames();
    protected abstract RowMapper<T> getRowMapper();   
    
 	/**
@@ -67,7 +64,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 		try
 		{
 			// check for any entity:
-			findAll();
+			findUniqueBy(getPrimaryKeyColumnName(), "1");
 		}
 		catch (org.springframework.jdbc.BadSqlGrammarException e)
 		{
@@ -376,9 +373,9 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 			isFirst = false;
 			sql.append(ex.getColumn());
 			sql.append(ex.getOperation());
-			sql.append(" :operand");
-			sql.append(i);
-			args.put("operand"+i, ex.getOperand());
+			String key = "operand" + i;
+			sql.append(ex.getToken(key));
+			args.put(key, ex.getOperand());
 			i++;
 		}
 
@@ -467,9 +464,9 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 			isFirst = false;
 			sql.append(ex.getColumn());
 			sql.append(ex.getOperation());
-			sql.append(" :operand");
-			sql.append(i);
-			args.put("operand"+i, ex.getOperand());
+			String key = "operand" + i;
+			sql.append(ex.getToken(key));
+			args.put(key, ex.getOperand());
 			i++;
 		}
 		

@@ -9,8 +9,8 @@ import org.objectweb.asm.MethodVisitor;
 public class EmptyClassVisitor implements ClassVisitor {
 
 	@Override
-	public void visit(int arg0, int arg1, String arg2, String arg3,
-			String arg4, String[] arg5) {
+	public void visit(int version, int access, String name, String signature,
+			String superName, String[] interfaces) {
 		// TODO Auto-generated method stub
 
 	}

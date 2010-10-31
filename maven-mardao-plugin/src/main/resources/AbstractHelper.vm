@@ -77,5 +77,10 @@ public interface AbstractHelper<T, ID extends Serializable> extends GenericDao<T
 	/**
 	 * For updating many rows in one go
 	 */
-	int update(Map<String, Object> values, Expression... expressions);	
+	int update(Map<String, Object> values, Expression... expressions);
+	
+	// for Helper exposure to GenericDao:
+	String getTableName();
+	String getPrimaryKeyColumnName();
+	List<String> getColumnNames();
 }

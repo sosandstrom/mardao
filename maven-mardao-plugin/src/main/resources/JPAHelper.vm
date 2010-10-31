@@ -145,6 +145,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
    }
 
    @SuppressWarnings("unchecked")
+   @Override
    public List<T> findAll() {
 	      System.out.println("findAll " + persistentClass.getSimpleName());
       final EntityManager em = getEntityManager();
@@ -163,6 +164,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return the unique entity for the specified attribute
 	 */
 	@SuppressWarnings("unchecked")
+   @Override
 	public final T findUniqueBy(String fieldName, Object param) {
 		try {
 		    final EntityManager em = getEntityManager();
@@ -186,6 +188,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return a List of entities with the specified attribute
 	 */
 	@SuppressWarnings("unchecked")
+   @Override
 	public final List<T> findBy(String fieldName, Object param) {
 	    final EntityManager em = getEntityManager();
 		final Query query =	em.createQuery("SELECT t FROM " + persistentClass.getName() + " t WHERE t." + fieldName + " = :param");
@@ -207,6 +210,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return a List of entities with the specified foreign key
 	 */
 	@SuppressWarnings("unchecked")
+   @Override
 	public final List<T> findByKey(String fieldName, Class foreignClass, Object key) {
 	    final EntityManager em = getEntityManager();
 		final Object lazy = em.getReference(foreignClass, key);
@@ -225,6 +229,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return the unique entity for the specified attributes
 	 */
 	@SuppressWarnings("unchecked")
+   @Override
 	public final T findBy(Map<String,Object> args) {
 	    final EntityManager em = getEntityManager();
 	    final StringBuffer ql = new StringBuffer("SELECT t FROM ");
@@ -255,6 +260,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return the unique entity for the specified attributes
 	 */
 	@SuppressWarnings("unchecked")
+   @Override
 	public List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending) {
 	    final EntityManager em = getEntityManager();
 	    final StringBuffer ql = new StringBuffer("SELECT t FROM ");
@@ -296,6 +302,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return a List of entities belonging to the many-to-many relation
 	 */
 	@SuppressWarnings("unchecked")
+   @Override
 	public final List<T> findByManyToMany(String primaryKeyName,
 			String fieldName, 
 			String foreignSimpleClass, String foreignFieldName, Object foreignId) {
@@ -331,5 +338,20 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
    @Override
    public int update(Map<String, Object> values, Expression... expressions) {
       throw new UnsupportedOperationException("Not supported for JPA.");
+   }
+
+   @Override
+   public String getTableName() {
+      throw new UnsupportedOperationException("Not supported yet.");
+   }
+
+   @Override
+   public List<String> getColumnNames() {
+      throw new UnsupportedOperationException("Not supported yet.");
+   }
+
+   @Override
+   public String getPrimaryKeyColumnName() {
+      throw new UnsupportedOperationException("Not supported yet.");
    }
 }

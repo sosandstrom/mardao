@@ -9,7 +9,15 @@
 	">
 
 #if( $containerManagedEntityManager )
+	<!-- EntityManagerFactory is managed by the container. -->
+#else
+	<!-- EntityManagerFactory should be created only once! -->
+	<bean id="entityManagerFactory" class="${daoPackage}.SingletonEntityManagerFactory" destroy-method="close">
+		<constructor-arg value="${persistenceUnitName}" />
+	</bean>
+#end
 
+#if($containerManagedTransactionManager)
 	<tx:advice id="txAdvice">
 		<tx:attributes>
 			<tx:method name="create*" propagation="REQUIRED"/>
@@ -19,7 +27,7 @@
 			<tx:method name="*" propagation="SUPPORTS" read-only="true"/>
 		</tx:attributes>
 	</tx:advice>
-	
+
 	<aop:config>
 		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *${daoPackage}.JPAHelper.*(..))"/>
 	</aop:config>
@@ -34,6 +42,11 @@
 	</bean>
 #end
 
+#else
+<!-- Bean managed transactions -->
+#end
+
+#if( $persistenceType != "JPA" )
 	<bean id="daoProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="location"><ref bean="propertyUrlResource"/></property>
 	</bean>
@@ -57,15 +70,7 @@
 		<property name="incrementerName" value="id_sequence" />
 	</bean>
 	-->
-	<!-- EntityManagerFactory is managed by the container. -->
-#else	
-	<!-- EntityManagerFactory should be created only once! -->
-	<bean id="entityManagerFactory" class="${daoPackage}.SingletonEntityManagerFactory" destroy-method="close">
-		<constructor-arg value="${persistenceUnitName}" />
-	</bean>
-
-
-#end	
+#end
 
 #foreach( $group in $packages.values() )
 	<!-- ============== DaoBeans for entities in package ${group.name} ============ -->

@@ -121,6 +121,9 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
       final EntityManager em = getEntityManager();
       final EntityTransaction tx = beginTransaction();
       em.persist(entity);
+      em.flush();
+      em.refresh(entity);
+
       commitTransaction(tx);
       close();
    }
@@ -139,7 +142,10 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
    public void delete(T entity) {
       final EntityManager em = getEntityManager();
       final EntityTransaction tx = beginTransaction();
+      em.merge(entity);
+      em.flush();
       em.remove(entity);
+      em.flush();
       commitTransaction(tx);
       close();
    }

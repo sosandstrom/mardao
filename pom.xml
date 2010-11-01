@@ -11,8 +11,6 @@
 
 	<modules>
 		<module>maven-mardao-plugin</module>
-		<module>basic-plugin-test</module>
-		<module>jpa-plugin-test</module>
 		<module>basic-webapp</module>
 	</modules>
 
@@ -74,6 +72,19 @@
 		</plugins>
 	</build>
 
+   <profiles>
+      <profile>
+         <!-- Profile for building and packaging for the android platform-->
+         <id>test</id>
+         <modules>
+		<module>basic-plugin-test</module>
+		<module>jpa-plugin-test</module>
+         </modules>
+         <activation>
+            <activeByDefault>true</activeByDefault>
+         </activation>
+      </profile>
+   </profiles>
 	<distributionManagement>
 		<!-- use the following if you ARE using a snapshot version. -->
 		<snapshotRepository>

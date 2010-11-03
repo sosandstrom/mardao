@@ -110,7 +110,8 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #end
 	
 	// ----------------------- populate / persist method -------------------------
-	
+
+#if( $persistenceType != "JPA" )
 #if( $entity.firstUniqueField )
 #set( $uniqueField = $entity.firstUniqueField )
 	/**
@@ -123,5 +124,6 @@ ${field.simpleType} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocity
 ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #end
 #end);
 
+#end
 #end
 }

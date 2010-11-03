@@ -134,7 +134,8 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #end
 	
 	// ----------------------- populate / persist method -------------------------
-	
+
+#if( $persistenceType != "JPA" )
 #if( $entity.firstUniqueField )
 #set( $uniqueField = $entity.firstUniqueField )
 	/**
@@ -155,7 +156,7 @@ ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #e
 		// skipping the unique field ${field.name} from the Map
 #end
 #end
-		
+
 		// many-to-ones:		
 #foreach( $field in $entity.manyToOnes )
 #if( $field != $uniqueField )
@@ -168,6 +169,6 @@ ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #e
 		// call protected, generic method:
 		return populate(COLUMN_NAME_${uniqueField.name.toUpperCase()}, ${uniqueField.name}, nameValuePairs);
 	}
-
+#end
 #end
 }

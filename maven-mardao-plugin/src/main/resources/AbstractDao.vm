@@ -39,6 +39,31 @@ public abstract class Abstract${entity.simpleName}Dao extends GenericDaoImpl <${
 	 
 #end	
 		  
+	// ----------------------- one-to-one finders -------------------------
+#foreach( $field in $entity.oneToOnes )
+#set( $foreign = $entities.get($field.type))
+	/**
+	 * find-by method for one-to-one field ${field.name}
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return the ${entity.simpleName} belonging to the one-to-one relation
+	 */
+	public final ${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}());
+	}
+	
+#if( $foreign )  
+	/**
+	 * find-by method for one-to-one field ${field.name}
+	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @return the ${entity.simpleName} belonging to the one-to-one relation
+	 */
+	public final ${entity.simpleName} findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+		return genericDao.findUniqueBy(COLUMN_NAME_${field.name.toUpperCase()}, ${foreign.pk.name});
+	}	
+#end	
+	
+#end	
+
 	// ----------------------- many-to-one finders -------------------------
 #foreach( $field in $entity.manyToOnes )
 #set( $foreign = $entities.get($field.type))
@@ -139,10 +164,14 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #if( $entity.firstUniqueField )
 #set( $uniqueField = $entity.firstUniqueField )
 	/**
-	 * Persists an entity unless it already exists
+	 * Persists an entity unless it already exists.
+	 * Based on unique field ${uniqueField.name}
 	 */
 	public final ${entity.simpleName} persist(#foreach( $field in $entity.fields )
-${field.simpleType} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end
+${field.simpleType} ${field.name}#if( 0 < $entity.OneToOnes.size() || 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end
+#end
+#foreach( $field in $entity.oneToOnes )	 
+${field.type} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.manyToOnes.size() ), #end
 #end
 #foreach( $field in $entity.manyToOnes )	 
 ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #end
@@ -157,6 +186,15 @@ ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #e
 #end
 #end
 
+		// one-to-ones:		
+#foreach( $field in $entity.oneToOnes )
+#if( $field != $uniqueField )
+		nameValuePairs.put(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
+#else
+		// skipping the unique field ${field.name} from the Map
+#end
+#end		
+		
 		// many-to-ones:		
 #foreach( $field in $entity.manyToOnes )
 #if( $field != $uniqueField )
@@ -166,8 +204,14 @@ ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #e
 #end
 #end		
 		
+#if( $entity.oneToOnes.contains($uniqueField) ) 		
+		// unique value is foreign Entity
+		$uniqueField.entity.pk.type uniqueId = ${uniqueField.name}.get${helper.firstToUpper($uniqueField.entity.pk.name)}();
+		return populate(COLUMN_NAME_${uniqueField.name.toUpperCase()}, uniqueId, nameValuePairs);
+#else		
 		// call protected, generic method:
 		return populate(COLUMN_NAME_${uniqueField.name.toUpperCase()}, ${uniqueField.name}, nameValuePairs);
+#end
 	}
 #end
 #end

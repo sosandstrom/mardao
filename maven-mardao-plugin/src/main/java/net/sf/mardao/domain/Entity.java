@@ -14,16 +14,18 @@ import java.util.Map.Entry;
  * @author f94os
  *
  */
-public class Entity {
+public class Entity implements Comparable<Entity> {
 	private String className;
 	private String simpleName;
 	private String tableName;
 	private Field pk;
 	private final Set<Field> fields = new TreeSet<Field>();
+	private final Set<Field> oneToOnes = new TreeSet<Field>();
 	private final Set<Field> manyToOnes = new TreeSet<Field>();
 	private final Set<Field> manyToManys = new TreeSet<Field>();
 	private final List<Set<String>> uniqueConstraints = new ArrayList<Set<String>>();
 	private final Map<String,Field> mappedBy = new HashMap<String,Field>();
+	private final Set<Entity> dependsOn = new TreeSet<Entity>();
 
 	public void setClassName(String className) {
 		this.className = className;
@@ -62,6 +64,11 @@ public class Entity {
 	}
 
 	public boolean isUnique(String fieldName) {
+		for (Field f : getOneToOnes()) {
+			if (f.getName().equals(fieldName)) {
+				return true;
+			}
+		}
 		for (Set<String> uniqueConstraint : uniqueConstraints) {
 			if (1 == uniqueConstraint.size()
 					&& uniqueConstraint.contains(fieldName)) {
@@ -74,6 +81,9 @@ public class Entity {
 	public Map<String,Field> getAllFields() {
 		final Map<String,Field> returnValue = new TreeMap<String,Field>();
 		for (Field f : getFields()) {
+			returnValue.put(f.getName(), f);
+		}
+		for (Field f : getOneToOnes()) {
 			returnValue.put(f.getName(), f);
 		}
 		for (Field f : getManyToOnes()) {
@@ -144,5 +154,18 @@ public class Entity {
 			return simpleName;
 		}
 		return tableName;
+	}
+
+	public Set<Field> getOneToOnes() {
+		return oneToOnes;
+	}
+
+	public Set<Entity> getDependsOn() {
+		return dependsOn;
+	}
+
+	@Override
+	public int compareTo(Entity other) {
+		return this.className.compareTo(other.className);
 	}
 }

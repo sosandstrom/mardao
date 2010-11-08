@@ -6,18 +6,21 @@ CREATE TABLE `${entity.tableName}` (
 #foreach( $column in $entity.fields )
 	`${column.columnName}` $dbTypes.get($column.type) #if("createdDate" == $column.columnName) $dbDefaults.get($column.type) #else DEFAULT 0 #end, 
 #end
+#foreach( $column in $entity.oneToOnes )
+	`${column.columnName}` $dbTypes.get($column.entity.pk.type) NOT NULL,
+#end
 #foreach( $column in $entity.manyToOnes )
 	`${column.columnName}` $dbTypes.get($column.entity.pk.type) DEFAULT NULL,
 #end
-	PRIMARY KEY (`${entity.pk.columnName}`)#if( 0 < $entity.uniqueConstraints.size() || 0 < $entity.manyToOnes.size() ),#end
-	
 #foreach( $columnSet in $entity.uniqueConstraints )
 	UNIQUE (#foreach( $column in $columnSet )`${column}`#if( $velocityCount < $columnSet.size() ),#end
-#end)#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.uniqueConstraints.size() ),#end
-
+#end),
+#end
+#foreach( $column in $entity.oneToOnes )
+	CONSTRAINT `Fk${entity.simpleName}${helper.firstToUpper($column.name)}` FOREIGN KEY (`${column.columnName}`) REFERENCES `${column.entity.tableName}` (`${column.entity.pk.columnName}`),
 #end
 #foreach( $column in $entity.manyToOnes )
-	CONSTRAINT `Fk${entity.simpleName}${helper.firstToUpper($column.name)}` FOREIGN KEY (`${column.columnName}`) REFERENCES `${column.entity.tableName}` (`${column.entity.pk.columnName}`)#if( $velocityCount < $entity.manyToOnes.size() ),#end
-	
+	CONSTRAINT `Fk${entity.simpleName}${helper.firstToUpper($column.name)}` FOREIGN KEY (`${column.columnName}`) REFERENCES `${column.entity.tableName}` (`${column.entity.pk.columnName}`),
 #end
+	PRIMARY KEY (`${entity.pk.columnName}`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

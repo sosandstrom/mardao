@@ -6,9 +6,11 @@ import junit.framework.TestCase;
 import net.sf.mardao.test.basic.dao.EmployeeDao;
 import net.sf.mardao.test.basic.dao.OrganizationDao;
 import net.sf.mardao.test.basic.dao.OrganizationUnitDao;
+import net.sf.mardao.test.basic.dao.StatusDao;
 import net.sf.mardao.test.basic.domain.Employee;
 import net.sf.mardao.test.basic.domain.Organization;
 import net.sf.mardao.test.basic.domain.OrganizationUnit;
+import net.sf.mardao.test.basic.domain.Status;
 
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -21,10 +23,12 @@ public class DaoTest extends TestCase {
 	EmployeeDao employeeDao;
 	OrganizationDao organizationDao;
 	OrganizationUnitDao orgUnitDao;
+	StatusDao statusDao;
 	
 	Employee boss, empl;
 	Organization acme;
 	OrganizationUnit RnD, swDev;
+	Status idle;
 	
 	long orgSize, unitSize, emplSize;
 
@@ -38,6 +42,7 @@ public class DaoTest extends TestCase {
 		assertNotNull(organizationDao);
 		orgUnitDao = (OrganizationUnitDao) springCtx.getBean("organizationUnitDao");
 		assertNotNull(orgUnitDao);
+		statusDao = (StatusDao) springCtx.getBean("statusDao");
 		
 		// populate for tests:
 		orgSize = organizationDao.findAll().size();
@@ -51,6 +56,8 @@ public class DaoTest extends TestCase {
 		boss = employeeDao.persist("the Boss", "boss", acme, RnD);
 		empl = employeeDao.persist("Mr Employee", "empl", acme, swDev);
 		
+		idle = statusDao.persist("Idle", boss);
+		
 		LOG.info("--- setUp() " + getName() + " ---");
 	}
 
@@ -58,6 +65,8 @@ public class DaoTest extends TestCase {
 		LOG.info("--- tearDown() " + getName() + " ---");
 		
 		// delete test entities
+		statusDao.delete(idle);
+		
 		employeeDao.delete(empl);
 		employeeDao.delete(boss);
 		
@@ -125,5 +134,25 @@ public class DaoTest extends TestCase {
 		employeeDao.update(empl);
 		Employee actual = employeeDao.findByPrimaryKey(empl.getId());
 		assertEquals(RnD.getKey(), actual.getCurrentUnit().getKey());
+	}
+	
+	public void testFindStatusByEmployee() {
+		Status actual = statusDao.findByEmployee(boss);
+		assertEquals(idle.getId(), actual.getId());
+		
+		actual = statusDao.findByEmployee(empl);
+		assertNull(actual);
+	}
+	
+	public void testUpdateStatus() {
+		Status status = statusDao.findByEmployee(boss);
+		status.setText("Busy");
+		status.setEmployee(empl);
+		statusDao.update(status);
+		
+		Status actual = statusDao.findByEmployee(empl);
+		assertEquals("Busy", actual.getText());
+		
+		assertNull(statusDao.findByEmployee(boss));
 	}
 }

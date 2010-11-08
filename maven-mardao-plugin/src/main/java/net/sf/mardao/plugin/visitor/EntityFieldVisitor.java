@@ -48,6 +48,13 @@ public class EntityFieldVisitor implements FieldVisitor {
 			entity.getFields().remove(field);
 			entity.setPk(field);
 		}
+		// one-to-one
+		else if (DESC_ONE_TO_ONE.equals(internal)) {
+			entity.getFields().remove(field);
+			entity.getOneToOnes().add(field);
+			field.setEntity(entities.get(field.getType()));
+			LOG.info("                remote=" + field.getEntity());
+		}
 		// many-to-one
 		else if (DESC_MANY_TO_ONE.equals(internal)) {
 			entity.getFields().remove(field);

@@ -50,6 +50,27 @@ COLUMN_NAME_${field.name.toUpperCase()}#if( $velocityCount < $allFields.size() )
 	 
 #end	
 		  
+	// ----------------------- one-to-one finders -------------------------
+#foreach( $field in $entity.oneToOnes )
+#set( $foreign = $entities.get($field.type))
+	/**
+	 * find-by method for one-to-one field ${field.name}
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return the ${entity.simpleName} belonging to the one-to-one relation
+	 */
+	${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+	
+#if( $foreign )  
+	/**
+	 * find-by method for one-to-one field ${field.name}
+	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @return the ${entity.simpleName} belonging to the one-to-one relation
+	 */
+	${entity.simpleName} findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
+#end	
+	
+#end	
+
 	// ----------------------- many-to-one finders -------------------------
 #foreach( $field in $entity.manyToOnes )
 #set( $foreign = $entities.get($field.type)) 
@@ -118,7 +139,10 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	 * Persists an entity unless it already exists
 	 */
 	 ${entity.simpleName} persist(#foreach( $field in $entity.fields )
-${field.simpleType} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end
+${field.simpleType} ${field.name}#if( 0 < $entity.oneToOnes.size() || 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end
+#end
+#foreach( $field in $entity.oneToOnes )	 
+${field.type} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.manyToOnes.size() ), #end
 #end
 #foreach( $field in $entity.manyToOnes )	 
 ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #end

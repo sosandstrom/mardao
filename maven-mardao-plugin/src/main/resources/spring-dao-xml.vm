@@ -84,10 +84,14 @@
             </constructor-arg>
          </bean>
 #else
-         <bean class="${daoPackage}.${entity.simpleName}${persistenceType}Helper" autowire="byType" init-method="checkTables" />
+			<ref local="${helper.firstToLower($entity.simpleName)}Helper"/>
 #end
       </property>
    </bean>
+#if( $persistenceType != "JPA" )
+	<bean id="${helper.firstToLower($entity.simpleName)}Helper" class="${daoPackage}.${entity.simpleName}${persistenceType}Helper" 
+     	autowire="byType" init-method="checkTables" depends-on="#foreach( $dependency in $entity.dependsOn )${helper.firstToLower($dependency.simpleName)}Helper #end" />
+#end
 	
 #end
 	

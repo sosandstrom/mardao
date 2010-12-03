@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+	">
+
+	<!-- EntityManagerFactory should be created only once! -->
+	<bean id="entityManagerFactory" class="net.sf.mardao.test.gae.dao.SingletonEntityManagerFactory" destroy-method="close">
+		<constructor-arg value="transactions-optional" />
+	</bean>
+
+	<tx:advice id="txAdvice">
+		<tx:attributes>
+			<tx:method name="create*" propagation="REQUIRED"/>
+			<tx:method name="delete*" propagation="REQUIRED"/>
+			<tx:method name="persist*" propagation="REQUIRED"/>
+			<tx:method name="update*" propagation="REQUIRED"/>
+			<tx:method name="*" propagation="SUPPORTS" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config>
+		<aop:advisor advice-ref="txAdvice" pointcut="execution(* *net.sf.mardao.test.gae.dao.JPAHelper.*(..))"/>
+	</aop:config>
+
+   <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+      <property name="entityManagerFactory" ref="entityManagerFactory" />
+   </bean>
+
+
+
+	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.gae.domain ============ -->
+	<bean id="messageDao" class="net.sf.mardao.test.gae.dao.MessageDaoBean" autowire="constructor">
+		<property name="helper">
+         <bean class="net.sf.mardao.test.gae.dao.JPAHelper" autowire="byName">
+            <constructor-arg>
+               <value>net.sf.mardao.test.gae.domain.Message</value>
+            </constructor-arg>
+         </bean>
+      </property>
+   </bean>
+	
+	
+
+</beans>

@@ -85,6 +85,11 @@
       <constructor-arg name="parent" ref="mergeSchemeRoot" />
       <property name="templates">
          <list>
+            <bean class="net.sf.mardao.domain.MergeTemplate">
+               <property name="templatePrefix" value="SingletonEntityManagerFactory" />
+               <property name="entity" value="false" />
+               <property name="filePrefix" value="SingletonEntityManagerFactory" />
+            </bean>
 				<!-- GenericDao implementation -->
             <bean class="net.sf.mardao.domain.MergeTemplate">
                <property name="templatePrefix" value="GenericDaoImpl" />

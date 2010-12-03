@@ -6,6 +6,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.springframework.dao.NonTransientDataAccessResourceException;
+
 public final class SingletonEntityManagerFactory implements EntityManagerFactory {
 	
 	static EntityManagerFactory _instance = null;
@@ -13,6 +15,9 @@ public final class SingletonEntityManagerFactory implements EntityManagerFactory
 	public SingletonEntityManagerFactory(String persistenceUnitName) {
 		if (null == _instance) {
 			_instance = Persistence.createEntityManagerFactory(persistenceUnitName);
+			if (null == _instance) {
+				throw new NonTransientDataAccessResourceException("No such persistence unit " + persistenceUnitName);
+			}
 		}
 	}
 

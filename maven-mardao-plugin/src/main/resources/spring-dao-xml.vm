@@ -12,9 +12,15 @@
 	<!-- EntityManagerFactory is managed by the container. -->
 #else
 	<!-- EntityManagerFactory should be created only once! -->
+#if( $persistenceType == "JPA" )
 	<bean id="entityManagerFactory" class="${daoPackage}.SingletonEntityManagerFactory" destroy-method="close">
 		<constructor-arg value="${persistenceUnitName}" />
 	</bean>
+#else
+	<bean id="entityManagerFactory" class="javax.persistence.Persistence" factory-method="createEntityManagerFactory" destroy-method="close">
+		<constructor-arg value="transactions-optional" />
+	</bean>
+#end
 #end
 
 #if($containerManagedTransactionManager)
@@ -46,7 +52,7 @@
 <!-- Bean managed transactions -->
 #end
 
-#if( $persistenceType != "JPA" )
+#if( $persistenceType == "Spring" )
 	<bean id="daoProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="location"><ref bean="propertyUrlResource"/></property>
 	</bean>
@@ -64,12 +70,6 @@
 		<property name="incrementerName" value="id_sequence" />
 		<property name="columnName" value="highest" />
 	</bean>
-	<!-- disable, as above is autowired by type into Helpers
-	<bean id="daoIncrementerORACLE" class="org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer">
-		<property name="dataSource" ref="dataSource" />
-		<property name="incrementerName" value="id_sequence" />
-	</bean>
-	-->
 #end
 
 #foreach( $group in $packages.values() )
@@ -77,7 +77,7 @@
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
 	<bean id="${helper.firstToLower($entity.simpleName)}Dao" class="${daoPackage}.${entity.simpleName}DaoBean" autowire="constructor">
 		<property name="helper">
-#if( $persistenceType == "JPA" )
+#if( $persistenceType != "Spring" )
          <bean class="${daoPackage}.${persistenceType}Helper" autowire="byName">
             <constructor-arg>
                <value>${entity.className}</value>
@@ -88,7 +88,7 @@
 #end
       </property>
    </bean>
-#if( $persistenceType != "JPA" )
+#if( $persistenceType == "Spring" )
 	<bean id="${helper.firstToLower($entity.simpleName)}Helper" class="${daoPackage}.${entity.simpleName}${persistenceType}Helper" 
      	autowire="byType" init-method="checkTables" depends-on="#foreach( $dependency in $entity.dependsOn )${helper.firstToLower($dependency.simpleName)}Helper #end" />
 #end

@@ -232,7 +232,7 @@
 				<configuration>
 					<!-- Templates are retreived from plugin jar by default: <templateFolder>C:/workspaces/Misc/eclipse/Scanner/src/main/resources</templateFolder> -->
 					<basePackage>net.sf.mardao.test.gae</basePackage>
-					<persistenceType>JPA</persistenceType>
+					<persistenceType>GAE</persistenceType>
 					<!-- Scan here for entity classes: <classpathElement>target/entity-classes</classpathElement> -->
 					<!-- <additionalClasspathElements> <param>c:/develop</param> <param>h:/</param> 
 						</additionalClasspathElements> -->
@@ -241,6 +241,7 @@
 					<!-- default is transactions-optional: <persistenceUnitName>JpaPU2</persistenceUnitName> -->
 					<!-- default is true: -->
 					<containerManagedEntityManager>false</containerManagedEntityManager>
+					<containerManagedTransactionManager>false</containerManagedTransactionManager>
 
 					<!-- default is null -->
 					<!-- <sourceVersion>1.5</sourceVersion> -->

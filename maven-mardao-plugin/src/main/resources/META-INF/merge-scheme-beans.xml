@@ -85,11 +85,6 @@
       <constructor-arg name="parent" ref="mergeSchemeRoot" />
       <property name="templates">
          <list>
-            <bean class="net.sf.mardao.domain.MergeTemplate">
-               <property name="templatePrefix" value="SingletonEntityManagerFactory" />
-               <property name="entity" value="false" />
-               <property name="filePrefix" value="SingletonEntityManagerFactory" />
-            </bean>
 				<!-- GenericDao implementation -->
             <bean class="net.sf.mardao.domain.MergeTemplate">
                <property name="templatePrefix" value="GenericDaoImpl" />
@@ -103,6 +98,21 @@
                <property name="entity" value="false" />
                <property name="destFolder" value="targetDao" />
                <property name="fileSuffix" value="Helper.java" />
+            </bean>
+
+         </list>
+      </property>
+   </bean>
+	
+   <bean id="mergeSchemeGAE" class="net.sf.mardao.domain.MergeScheme">
+      <constructor-arg name="parent" ref="mergeSchemeJPA" />
+      <property name="templates">
+         <list>
+            			<!-- GAEHelper extends JPAHelper -->
+            <bean class="net.sf.mardao.domain.MergeTemplate">
+               <property name="templatePrefix" value="JPAHelper" />
+               <property name="entity" value="false" />
+               <property name="filePrefix" value="JPAHelper" />
             </bean>
 
          </list>

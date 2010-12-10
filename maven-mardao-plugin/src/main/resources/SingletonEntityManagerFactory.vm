@@ -1,4 +1,4 @@
-package ${daoBasePackage};
+package com.goldengekko.air.persistence.dao;
 
 import java.util.Map;
 
@@ -9,33 +9,39 @@ import javax.persistence.Persistence;
 import org.springframework.dao.NonTransientDataAccessResourceException;
 
 public final class SingletonEntityManagerFactory implements EntityManagerFactory {
-	
-	static EntityManagerFactory _instance = null;
-	
-	public SingletonEntityManagerFactory(String persistenceUnitName) {
-		if (null == _instance) {
-			_instance = Persistence.createEntityManagerFactory(persistenceUnitName);
-			if (null == _instance) {
-				throw new NonTransientDataAccessResourceException("No such persistence unit " + persistenceUnitName);
-			}
-		}
-	}
 
-	public void close() {
-		_instance.close();
-	}
+    private EntityManagerFactory _instance = null;
+    private final String         persistenceUnitName;
 
-	public EntityManager createEntityManager() {
-		return _instance.createEntityManager();
-	}
+    public SingletonEntityManagerFactory(String persistenceUnitName) {
+        this.persistenceUnitName = persistenceUnitName;
+    }
 
-	@SuppressWarnings("unchecked")
-	public EntityManager createEntityManager(Map map) {
-		return _instance.createEntityManager(map);
-	}
+    protected EntityManagerFactory getFactory() {
+        if (null == _instance) {
+            _instance = Persistence.createEntityManagerFactory(persistenceUnitName);
+            if (null == _instance) {
+                throw new NonTransientDataAccessResourceException("No such persistence unit " + persistenceUnitName);
+            }
+        }
+        return _instance;
+    }
 
-	public boolean isOpen() {
-		return _instance.isOpen();
-	}
+    public void close() {
+        getFactory().close();
+        _instance = null;
+    }
+
+    public EntityManager createEntityManager() {
+        return getFactory().createEntityManager();
+    }
+
+    public EntityManager createEntityManager(Map map) {
+        return getFactory().createEntityManager(map);
+    }
+
+    public boolean isOpen() {
+        return null != _instance && _instance.isOpen();
+    }
 
 }

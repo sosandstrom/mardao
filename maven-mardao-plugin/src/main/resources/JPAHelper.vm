@@ -117,7 +117,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 
    @Override
    public void persist(T entity) {
-      System.out.println("Persisting " + persistentClass.getSimpleName());
+      //System.out.println("Persisting " + persistentClass.getSimpleName());
       final EntityManager em = getEntityManager();
       final EntityTransaction tx = beginTransaction();
       em.persist(entity);
@@ -130,7 +130,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 
    @Override
    public void update(T entity) {
-	   System.out.println("Merging " + persistentClass.getSimpleName());
+	  //System.out.println("Merging " + persistentClass.getSimpleName());
       final EntityManager em = getEntityManager();
       final EntityTransaction tx = beginTransaction();
       em.merge(entity);
@@ -153,7 +153,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
    @SuppressWarnings("unchecked")
    @Override
    public List<T> findAll() {
-	      System.out.println("findAll " + persistentClass.getSimpleName());
+	  //System.out.println("findAll " + persistentClass.getSimpleName());
       final EntityManager em = getEntityManager();
       final List<T> returnValue = em.createQuery("SELECT t FROM " + persistentClass.getName() + " t").getResultList();
       
@@ -253,9 +253,16 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	    for (Entry<String,Object> entry : args.entrySet()) {
 	    	query.setParameter("pP" + entry.getKey(), entry.getValue());
 	    }
-		final T returnValue = (T) query.getSingleResult();
-		close();
-		return returnValue;
+	    try {
+			final T returnValue = (T) query.getSingleResult();
+			return returnValue;
+		}
+		catch (javax.persistence.NoResultException nre) {
+		}
+		finally {
+			close();
+		}
+		return null;
 	}
 
 	/**

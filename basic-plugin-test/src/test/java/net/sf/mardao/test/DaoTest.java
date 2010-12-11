@@ -12,13 +12,15 @@ import net.sf.mardao.test.basic.domain.Organization;
 import net.sf.mardao.test.basic.domain.OrganizationUnit;
 import net.sf.mardao.test.basic.domain.Status;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
 public class DaoTest extends TestCase {
 	
-	static final Logger LOG = Logger.getLogger(DaoTest.class);
+	static final Logger LOG = LoggerFactory.getLogger(DaoTest.class);
 	
 	EmployeeDao employeeDao;
 	OrganizationDao organizationDao;

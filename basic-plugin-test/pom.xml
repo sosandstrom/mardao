@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.sf.mardao</groupId>
@@ -37,10 +38,8 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--
-				two phases: to generate generics (in generate-sources), then
-				generate daos (in process-sources)
-			-->
+			<!-- two phases: to generate generics (in generate-sources), then generate 
+				daos (in process-sources) -->
 			<plugin>
 				<groupId>net.sf.mardao</groupId>
 				<artifactId>maven-mardao-plugin</artifactId>
@@ -62,34 +61,16 @@
 					</execution>
 				</executions>
 				<configuration>
-					<!--
-						Templates are retreived from plugin jar by default:
-						<templateFolder>C:/workspaces/Misc/eclipse/Scanner/src/main/resources</templateFolder>
-					-->
+					<!-- Templates are retreived from plugin jar by default: <templateFolder>C:/workspaces/Misc/eclipse/Scanner/src/main/resources</templateFolder> -->
 					<basePackage>net.sf.mardao.test.basic</basePackage>
-					<!--
-						Scan here for entity classes:
-						<classpathElement>target/entity-classes</classpathElement>
-					-->
-					<!--
-						<additionalClasspathElements> <param>c:/develop</param>
-						<param>h:/</param> </additionalClasspathElements>
-					-->
-					<!--
-						Override default ${basePackage}.domain
-						<domanBasePackage></domanBasePackage>
-					-->
-					<!--
-						Override default ${basePackage}.dao
-						<daoBasePackage></daoBasePackage>
-					-->
-					<!--
-						default is transactions-optional:
-						<persistenceUnitName>JpaPU2</persistenceUnitName>
-					-->
-					<!-- default is true: 
-					<containerManagedEntityManager>false</containerManagedEntityManager> -->
-					
+					<!-- Scan here for entity classes: <classpathElement>target/entity-classes</classpathElement> -->
+					<!-- <additionalClasspathElements> <param>c:/develop</param> <param>h:/</param> 
+						</additionalClasspathElements> -->
+					<!-- Override default ${basePackage}.domain <domanBasePackage></domanBasePackage> -->
+					<!-- Override default ${basePackage}.dao <daoBasePackage></daoBasePackage> -->
+					<!-- default is transactions-optional: <persistenceUnitName>JpaPU2</persistenceUnitName> -->
+					<!-- default is true: <containerManagedEntityManager>false</containerManagedEntityManager> -->
+
 					<!-- default is null -->
 					<sourceVersion>1.5</sourceVersion>
 				</configuration>
@@ -137,8 +118,15 @@
 			<version>1.2.2</version>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.6.1</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.aspectj</groupId>
@@ -163,7 +151,7 @@
 			<artifactId>geronimo-jpa_3.0_spec</artifactId>
 			<version>1.1.1</version>
 		</dependency>
-		<!--  Test scope dependencies: -->
+		<!-- Test scope dependencies: -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

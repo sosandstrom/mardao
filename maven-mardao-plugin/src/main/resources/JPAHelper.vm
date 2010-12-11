@@ -12,9 +12,13 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, ID> {
 
    protected final Class<T> persistentClass;
+   protected final Logger LOG = LoggerFactory.getLogger(getClass());
    
    @PersistenceContext
    private EntityManager entityManager;
@@ -155,7 +159,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
    public List<T> findAll() {
 	  //System.out.println("findAll " + persistentClass.getSimpleName());
       final EntityManager em = getEntityManager();
-      final List<T> returnValue = em.createQuery("SELECT t FROM " + persistentClass.getName() + " t").getResultList();
+      final List<T> returnValue = em.createQuery("SELECT t FROM " + getTableName() + " t").getResultList();
       
       // for eager fetch then close
       returnValue.size();
@@ -174,7 +178,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	public final T findUniqueBy(String fieldName, Object param) {
 		try {
 		    final EntityManager em = getEntityManager();
-			final Query query =	em.createQuery("SELECT t FROM " + persistentClass.getName() + " t WHERE t." + fieldName + " = :param");
+			final Query query =	em.createQuery("SELECT t FROM " + getTableName() + " t WHERE t." + fieldName + " = :param");
 			query.setParameter("param", param);
 			final T returnValue = (T) query.getSingleResult();
 			return returnValue;
@@ -197,7 +201,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
    @Override
 	public final List<T> findBy(String fieldName, Object param) {
 	    final EntityManager em = getEntityManager();
-		final Query query =	em.createQuery("SELECT t FROM " + persistentClass.getName() + " t WHERE t." + fieldName + " = :param");
+		final Query query =	em.createQuery("SELECT t FROM " + getTableName() + " t WHERE t." + fieldName + " = :param");
 		query.setParameter("param", param);
 		final List<T> returnValue = query.getResultList();
 		
@@ -239,7 +243,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	public final T findBy(Map<String,Object> args) {
 	    final EntityManager em = getEntityManager();
 	    final StringBuffer ql = new StringBuffer("SELECT t FROM ");
-	    ql.append(persistentClass.getName());
+	    ql.append(getTableName());
 	    ql.append(" t");
 	    boolean isFirst = true;
 	    for (Entry<String,Object> entry : args.entrySet()) {
@@ -277,7 +281,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	public List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending) {
 	    final EntityManager em = getEntityManager();
 	    final StringBuffer ql = new StringBuffer("SELECT t FROM ");
-	    ql.append(persistentClass.getName());
+	    ql.append(getTableName());
 	    ql.append(" t");
 	    boolean isFirst = true;
 	    for (Entry<String,Object> entry : args.entrySet()) {
@@ -321,12 +325,12 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 			String foreignSimpleClass, String foreignFieldName, Object foreignId) {
 	    final EntityManager em = getEntityManager();
 		final Query keyQuery =	em.createQuery("SELECT t." + fieldName + 
-			" FROM " + persistentClass.getName() + "_" + foreignSimpleClass +  
+			" FROM " + getTableName() + "_" + foreignSimpleClass +  
 				" t WHERE t." + foreignFieldName + " = :param");
 		keyQuery.setParameter("param", foreignId);
 		final List<ID> keyList = keyQuery.getResultList();
 		
-		final Query query = em.createQuery("SELECT t FROM " + persistentClass.getName() + 
+		final Query query = em.createQuery("SELECT t FROM " + getTableName() + 
 			" t WHERE t." + primaryKeyName + " IN :param");
 		query.setParameter("param", keyList);
 		final List<T> returnValue = query.getResultList();
@@ -355,7 +359,8 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 
    @Override
    public String getTableName() {
-      throw new UnsupportedOperationException("Not supported yet.");
+	   // FIXME: support @Table name annotation
+      return persistentClass.getSimpleName();
    }
 
    @Override

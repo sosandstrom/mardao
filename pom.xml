@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>parent</artifactId>
@@ -10,7 +11,9 @@
 
 	<modules>
 		<module>maven-mardao-plugin</module>
-		<module>basic-webapp</module>
+		<module>basic-plugin-test</module>
+		<module>jpa-plugin-test</module>
+		<module>gae-plugin-test</module>
 	</modules>
 
 	<properties>
@@ -46,19 +49,19 @@
 		</plugins>
 	</build>
 
-   <profiles>
-      <profile>
-         <!-- Profile for building and packaging for the android platform-->
-         <id>test</id>
-         <modules>
-		<module>basic-plugin-test</module>
-		<module>jpa-plugin-test</module>
-         </modules>
-         <activation>
-            <activeByDefault>true</activeByDefault>
-         </activation>
-      </profile>
-   </profiles>
+	<profiles>
+		<profile>
+			<!-- Profile for building and packaging for the android platform -->
+			<id>test</id>
+			<modules>
+				<module>basic-plugin-test</module>
+				<module>jpa-plugin-test</module>
+			</modules>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+	</profiles>
 	<distributionManagement>
 		<!-- use the following if you ARE using a snapshot version. -->
 		<snapshotRepository>

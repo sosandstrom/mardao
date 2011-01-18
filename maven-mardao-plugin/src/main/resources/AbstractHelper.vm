@@ -48,6 +48,17 @@ public interface AbstractHelper<T, ID extends Serializable> extends GenericDao<T
 	 */
 	List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending);
 
+	/**
+	 * find-by method for unique attributes
+	 * @param args the specified attribute name-value map
+	 * @param orderBy the attribute to order by
+	 * @param ascending true if ascending
+	 * @param limit causes the query to stop returning results after the first count entities
+	 * @param offset skip that many results to find the first result to return
+	 * @return the matching entities for the specified attributes
+	 */
+	List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending, int limit, int offset);
+
     /**
      * find-by method for unique attributes
      * @param orderBy the attribute to order by
@@ -71,6 +82,9 @@ public interface AbstractHelper<T, ID extends Serializable> extends GenericDao<T
 			String fieldName, 
 			String foreignSimpleClass, String foreignFieldName, Object foreignId);
 			
+	/** For deleting all entities in one go */
+	int deleteAll();
+	
 	/** For persisting entities specified by Map nameValuePairs */
 	T persist(Map<String,Object> nameValuePairs);
 	

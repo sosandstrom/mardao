@@ -31,7 +31,7 @@ public class Expression {
 	  }
 	  
 	  public static class IN extends Expression {
-	  	public IN(String column, String operand) {
+	  	public IN(String column, Object operand) {
 	  		super(column, " IN ", operand);
 	  	}
 	  	public String getToken(String key) {

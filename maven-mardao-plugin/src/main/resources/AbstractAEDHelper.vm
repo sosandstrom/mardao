@@ -1,0 +1,114 @@
+package ${daoBasePackage};
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.appengine.api.datastore.Entity;
+
+public abstract class AbstractAEDHelper<T, ID extends Serializable> implements AbstractHelper<T, ID> {
+
+	/** Using slf4j logging */
+	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
+	public T findByPrimaryKey(ID id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	protected void persist(Entity entity) {
+		
+	}
+
+	public void update(T entity) {
+		persist(entity);
+	}
+
+	public void delete(T entity) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public List<T> findAll() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public T findUniqueBy(String fieldName, Object param) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<T> findBy(String fieldName, Object param) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<T> findByKey(String fieldName, Class foreignClass, Object key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public T findBy(Map<String, Object> args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<T> findBy(Map<String, Object> args, String orderBy,
+			boolean ascending) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<T> findBy(Map<String, Object> args, String orderBy,
+			boolean ascending, int limit, int offset) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<T> findBy(String orderBy, boolean ascending, int limit,
+			Expression... args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<T> findByManyToMany(String primaryKeyName, String fieldName,
+			String foreignSimpleClass, String foreignFieldName, Object foreignId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public int deleteAll() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public T persist(Map<String, Object> nameValuePairs) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public int update(Map<String, Object> values, Expression... expressions) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public String getTableName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getPrimaryKeyColumnName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<String> getColumnNames() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

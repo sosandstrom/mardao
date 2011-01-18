@@ -219,6 +219,16 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
    
    // ------ AbstractHelper implementation -----------------------------
 
+	/** For deleting all entities in one go */
+	public int deleteAll() {
+		LOGGER.debug("deleteAll() " + getTableName());
+		
+		final String sql = "DELETE FROM " + getTableName();
+		int affected = template.update(sql);
+		
+		return affected;
+	}
+
 	/**
 	 * find-by method for generic unique attribute field 
 	 * @param fieldName the generic unique attribute's field name
@@ -311,6 +321,17 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	 * @return the unique entity for the specified attributes
 	 */
 	public List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending) {
+		return findBy(args, orderBy, ascending, -1, 0);
+	}
+	
+	/**
+	 * find-by method for unique attributes
+	 * @param args the specified attribute name-value map
+	 * @param orderBy the attribute to order by
+	 * @param ascending true if ascending
+	 * @return the unique entity for the specified attributes
+	 */
+	public List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending, int limit, int offset) {
 		LOGGER.debug("findBy(" + args + ")");
 		if (null != orderBy && !getColumnNames().contains(orderBy))
 		{
@@ -337,6 +358,22 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 			sql.append(ascending ? " ASC" : " DESC");
 		}
 		
+	    // [LIMIT [<offset>,]<count>]
+	    // [OFFSET <offset>]
+	    if (0 < limit) {
+	    	if (0 < offset) {
+	    		sql.append(offset);
+	    		sql.append(',');
+	    	}
+	    	
+	    	sql.append(" LIMIT ");
+	    	sql.append(limit);
+	    }
+	    else if (0 < offset) {
+	    	sql.append(" OFFSET ");
+	    	sql.append(offset); 
+	    }
+	    
 		final List<T> returnValue = template.query(sql.toString(), getRowMapper(), args);
 		
 		return returnValue;

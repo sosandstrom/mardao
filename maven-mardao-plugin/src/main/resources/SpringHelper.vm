@@ -238,7 +238,7 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
    
 
 	/** UPDATE SQL String for ${entity.simpleName} updates. */
-	protected static final String SQL_UPDATE = "UPDATE " + TABLE_NAME + " SET " + 
+	protected final String SQL_UPDATE = "UPDATE " + getTableName() + " SET " + 
     		// attributes first:
 #foreach( $field in $entity.fields )
 			COLUMN_NAME_${field.name.toUpperCase()} + " = ?#if( 0 < $entity.oneToOnes.size() || 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end" + 
@@ -302,7 +302,7 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
    public void delete(${entity.simpleName} entity) {
 		LOGGER.debug("delete(" + entity + ")");
 		
-		final String sql = "DELETE FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_${entity.pk.name.toUpperCase()} + " = ?";
+		final String sql = "DELETE FROM " + getTableName() + " WHERE " + COLUMN_NAME_${entity.pk.name.toUpperCase()} + " = ?";
 		int affected = template.update(sql, entity.get${helper.firstToUpper($field.name)}());
 		if (0 == affected)
 		{

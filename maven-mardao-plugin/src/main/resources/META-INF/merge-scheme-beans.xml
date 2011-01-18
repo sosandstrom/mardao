@@ -157,4 +157,35 @@
       </property>
    </bean>
 	
+   <bean id="mergeSchemeAED" class="net.sf.mardao.domain.MergeScheme">
+      <constructor-arg name="parent" ref="mergeSchemeRoot" />
+      <property name="templates">
+         <list>
+				<!-- GenericDao implementation -->
+            <bean class="net.sf.mardao.domain.MergeTemplate">
+               <property name="templatePrefix" value="GenericDaoImpl" />
+               <property name="entity" value="false" />
+               <property name="filePrefix" value="GenericDaoImpl" />
+            </bean>
+				<!-- AbstractTypeHelper -->
+            <bean class="net.sf.mardao.domain.MergeTemplate">
+               <property name="templatePrefix" value="Abstract" />
+               <property name="templateSuffix" value="Helper.vm" />
+               <property name="entity" value="false" />
+               <property name="typeSpecific" value="true" />
+               <property name="destFolder" value="targetDao" />
+               <property name="filePrefix" value="Abstract" />
+               <property name="fileSuffix" value="Helper.java" />
+            </bean>
+			<!-- TypeHelper -->
+            <bean class="net.sf.mardao.domain.MergeTemplate">
+               <property name="templateSuffix" value="Helper.vm" />
+               <property name="typeSpecific" value="true" />
+               <property name="destFolder" value="targetDao" />
+               <property name="fileSuffix" value="Helper.java" />
+            </bean>
+         </list>
+      </property>
+   </bean>
+	
 </beans>

@@ -1,0 +1,82 @@
+package ${daoBasePackage};
+
+import java.util.List;
+
+import ${entity.className};
+#foreach( $field in $entity.oneToOnes )
+import ${field.entity.className};
+#end
+#foreach( $field in $entity.manyToOnes )
+import ${field.entity.className};
+#end
+
+/**
+ * Concrete class without generics, for Spring container instatiation.
+ */
+public class ${entity.simpleName}AEDHelper extends AbstractAEDHelper<${entity.simpleName}, ${entity.pk.type}> {
+
+	/** Table name for ${entity.simpleName} is "${entity.tableName}" */
+	public static final String TABLE_NAME = "${entity.tableName}";
+
+	/** Column name for primary key attribute is "${entity.pk.columnName}" */
+	protected static final String COLUMN_NAME_${entity.pk.name.toUpperCase()} = Abstract${entity.simpleName}DaoInterface.COLUMN_NAME_${entity.pk.name.toUpperCase()};
+
+#foreach( $field in $entity.allFields )
+	/** Column name for attribute ${field.name} is "${field.columnName}" */
+	protected static final String COLUMN_NAME_${field.name.toUpperCase()} = Abstract${entity.simpleName}DaoInterface.COLUMN_NAME_${field.name.toUpperCase()};
+#end
+
+	/** The list of attribute names */
+	protected static final List<String> COLUMN_NAMES = Abstract${entity.simpleName}DaoInterface.COLUMN_NAMES;
+
+	/** Default constructor */
+   public ${entity.simpleName}AEDHelper() {
+      super(); // ${entity.simpleName}.class);
+   }
+   
+   public String getTableName() {
+   		return TABLE_NAME;
+   }
+   
+   public String getPrimaryKeyColumnName() {
+   		return COLUMN_NAME_${entity.pk.name.toUpperCase()};
+   }
+   
+   public List<String> getColumnNames() {
+        return COLUMN_NAMES;
+   }
+   
+	
+   // ------ AbstractSpringHelper overrides -----------------------------
+   
+
+   // ------ GenericDao implementation -----------------------------
+
+	/**
+	 * Inserts a ${entity.simpleName} instance. The primary key attribute of the instance is updated.
+	 *
+	 * @param entity the ${entity.simpleName} entity to insert
+	 */
+#if( $sourceVersion != "1.5" )
+   @Override
+#end
+   public void persist(${entity.simpleName} entity) {
+		LOGGER.debug("persisting {}", entity);
+		
+   }
+   
+	/**
+	 * Updates a ${entity.simpleName} instance. 
+	 * The primary key must not be changed.
+	 *
+	 * @param entity the instance to update
+	 */
+    public void update(final ${entity.simpleName} entity) {
+		LOGGER.debug("update(" + entity + ")");
+	}
+	
+   public void delete(${entity.simpleName} entity) {
+		LOGGER.debug("delete(" + entity + ")");
+   }
+
+}

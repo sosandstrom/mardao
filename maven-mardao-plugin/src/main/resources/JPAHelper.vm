@@ -1,6 +1,8 @@
 package ${daoBasePackage};
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -111,7 +113,9 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
       return persistentClass;
    }
 
+#if( "1.5" != $sourceVersion )
    @Override
+#end
    public T findByPrimaryKey(ID id) {
       final EntityManager em = getEntityManager();
       final T returnValue = em.find(persistentClass, id);
@@ -119,20 +123,32 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
       return returnValue;
    }
 
+#if( "1.5" != $sourceVersion )
    @Override
+#end
    public void persist(T entity) {
       //System.out.println("Persisting " + persistentClass.getSimpleName());
       final EntityManager em = getEntityManager();
-      final EntityTransaction tx = beginTransaction();
-      em.persist(entity);
-      em.flush();
-      em.refresh(entity);
-
-      commitTransaction(tx);
-      close();
+      try {
+	      final EntityTransaction tx = beginTransaction();
+	      em.persist(entity);
+	      em.flush();
+	      em.refresh(entity);
+	
+	      commitTransaction(tx);
+	  }
+	  catch (RuntimeException e) {
+	      e.printStackTrace();
+	      throw e;
+	  }
+	  finally {
+          close();
+      }
    }
 
+#if( "1.5" != $sourceVersion )
    @Override
+#end
    public void update(T entity) {
 	  //System.out.println("Merging " + persistentClass.getSimpleName());
       final EntityManager em = getEntityManager();
@@ -142,7 +158,9 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
       close();
    }
 
+#if( "1.5" != $sourceVersion )
    @Override
+#end
    public void delete(T entity) {
       final EntityManager em = getEntityManager();
       final EntityTransaction tx = beginTransaction();
@@ -154,8 +172,22 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
       close();
    }
 
-   @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
+#if( "1.5" != $sourceVersion )
    @Override
+#end
+    public int deleteAll() {
+        final EntityManager em = getEntityManager();
+        final String jql = "DELETE FROM " + getTableName();
+        final int returnValue = em.createQuery(jql).executeUpdate();
+        close();
+        return returnValue;
+    }
+
+   @SuppressWarnings("unchecked")
+#if( "1.5" != $sourceVersion )
+   @Override
+#end
    public List<T> findAll() {
 	  //System.out.println("findAll " + persistentClass.getSimpleName());
       final EntityManager em = getEntityManager();
@@ -174,7 +206,9 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return the unique entity for the specified attribute
 	 */
 	@SuppressWarnings("unchecked")
+#if( "1.5" != $sourceVersion )
    @Override
+#end
 	public final T findUniqueBy(String fieldName, Object param) {
 		try {
 		    final EntityManager em = getEntityManager();
@@ -198,7 +232,9 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return a List of entities with the specified attribute
 	 */
 	@SuppressWarnings("unchecked")
+#if( "1.5" != $sourceVersion )
    @Override
+#end
 	public final List<T> findBy(String fieldName, Object param) {
 	    final EntityManager em = getEntityManager();
 		final Query query =	em.createQuery("SELECT t FROM " + getTableName() + " t WHERE t." + fieldName + " = :param");
@@ -220,7 +256,9 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return a List of entities with the specified foreign key
 	 */
 	@SuppressWarnings("unchecked")
+#if( "1.5" != $sourceVersion )
    @Override
+#end
 	public final List<T> findByKey(String fieldName, Class foreignClass, Object key) {
 	    final EntityManager em = getEntityManager();
 		final Object lazy = em.getReference(foreignClass, key);
@@ -239,7 +277,9 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return the unique entity for the specified attributes
 	 */
 	@SuppressWarnings("unchecked")
+#if( "1.5" != $sourceVersion )
    @Override
+#end
 	public final T findBy(Map<String,Object> args) {
 	    final EntityManager em = getEntityManager();
 	    final StringBuffer ql = new StringBuffer("SELECT t FROM ");
@@ -277,8 +317,25 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return the unique entity for the specified attributes
 	 */
 	@SuppressWarnings("unchecked")
+#if( "1.5" != $sourceVersion )
    @Override
+#end
 	public List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending) {
+		return findBy(args, orderBy, ascending, -1, 0);
+	}
+	
+	/**
+	 * find-by method for unique attributes
+	 * @param args the specified attribute name-value map
+	 * @param orderBy the attribute to order by
+	 * @param ascending true if ascending
+	 * @return the unique entity for the specified attributes
+	 */
+	@SuppressWarnings("unchecked")
+#if( "1.5" != $sourceVersion )
+   @Override
+#end
+	public List<T> findBy(Map<String,Object> args, String orderBy, boolean ascending, int limit, int offset) {
 	    final EntityManager em = getEntityManager();
 	    final StringBuffer ql = new StringBuffer("SELECT t FROM ");
 	    ql.append(getTableName());
@@ -295,6 +352,22 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	    ql.append(" ORDER BY t.");
 	    ql.append(orderBy);
 	    ql.append(ascending ? " ASC" : " DESC");
+	    
+	    // [LIMIT [<offset>,]<count>]
+	    // [OFFSET <offset>]
+	    if (0 < limit) {
+	    	if (0 < offset) {
+	    		ql.append(offset);
+	    		ql.append(',');
+	    	}
+	    	
+	    	ql.append(" LIMIT ");
+	    	ql.append(limit);
+	    }
+	    else if (0 < offset) {
+	    	ql.append(" OFFSET ");
+	    	ql.append(offset); 
+	    }
 	    
 		final Query query =	em.createQuery(ql.toString());
 	    for (Entry<String,Object> entry : args.entrySet()) {
@@ -319,7 +392,9 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	 * @return a List of entities belonging to the many-to-many relation
 	 */
 	@SuppressWarnings("unchecked")
+#if( "1.5" != $sourceVersion )
    @Override
+#end
 	public final List<T> findByManyToMany(String primaryKeyName,
 			String fieldName, 
 			String foreignSimpleClass, String foreignFieldName, Object foreignId) {
@@ -342,33 +417,154 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 		return returnValue;
 	}
 
+#if( "1.5" != $sourceVersion )
    @Override
-   public List<T> findBy(String orderBy, boolean ascending, int limit, Expression... args) {
-      throw new UnsupportedOperationException("Not supported for JPA.");
+#end
+   public List<T> findBy(String orderBy, boolean ascending, int limit, Expression... expressions) {
+		LOG.debug("find" + persistentClass.getSimpleName() + "sBy(" + Arrays.toString(expressions) + ")");
+		
+		// build SQL
+		final StringBuffer sql = new StringBuffer("SELECT t FROM ");
+		sql.append(getTableName());
+		sql.append(" t");
+		
+		// and arguments map
+		boolean isFirst = true;
+		int i = 0;
+		final Map<String,Object> args = new HashMap<String,Object>();
+		for (Expression ex : expressions) {
+			sql.append(isFirst ? " WHERE t." : " AND t.");
+			isFirst = false;
+			sql.append(ex.getColumn());
+			sql.append(' ');
+			sql.append(ex.getOperation());
+			sql.append(' ');
+			String key = "operand" + i;
+			sql.append(ex.getToken(key));
+			args.put(key, ex.getOperand());
+			i++;
+		}
+
+		if (null != orderBy) {
+			sql.append(" ORDER BY t.");
+			sql.append(orderBy);
+			sql.append(ascending ? " ASC" : " DESC");
+		}
+		
+		if (0 < limit) {
+			sql.append(" LIMIT ");
+			sql.append(limit);
+		}
+		
+	    final EntityManager em = getEntityManager();
+	    LOG.debug(sql.toString());
+	    final Query query = em.createQuery(sql.toString());
+	    
+	    for (Entry<String, Object> entry : args.entrySet()) {
+	    	query.setParameter(entry.getKey(), entry.getValue());
+	    }
+	    
+		final List<T> returnValue = query.getResultList();
+		
+		// Do this so we can eager load the list and close the EM: 
+		returnValue.size();
+		
+		close();
+		return returnValue;
    }
 
+#if( "1.5" != $sourceVersion )
    @Override
+#end
    public T persist(Map<String, Object> nameValuePairs) {
       throw new UnsupportedOperationException("Not supported for JPA.");
    }
 
+	/**
+	 * Updates many rows in one go
+	 * @param values new values for specified columns
+     * @param expressions the specified column-operation-operand expressions
+	 * @return number of modified rows
+	 */	
+#if( "1.5" != $sourceVersion )
    @Override
-   public int update(Map<String, Object> values, Expression... expressions) {
-      throw new UnsupportedOperationException("Not supported for JPA.");
-   }
+#end
+	public int update(Map<String, Object> values, Expression... expressions) {
+		final Map<String,Object> args = new HashMap<String,Object>();
+		final StringBuffer sql = new StringBuffer("UPDATE ");
+		sql.append(getTableName());
+		sql.append(" SET ");
+		
+		int i = 0;
+		for (Entry<String, Object> entry : values.entrySet()) {
+			sql.append(entry.getKey());
+			sql.append(" = :");
+			sql.append(entry.getKey());
+			if (i+1 < values.size()) {
+				sql.append(", ");
+			}
+		}
+		args.putAll(values);
+	
+		// and arguments map
+		boolean isFirst = true;
+		i = 0;
+		for (Expression ex : expressions) {
+			//  check that column exists
+			if (!getColumnNames().contains(ex.getColumn())) {
+				throw new IllegalArgumentException("No such WHERE column " + ex.getColumn());
+			}
+		
+			sql.append(isFirst ? " WHERE " : " AND ");
+			isFirst = false;
+			sql.append(ex.getColumn());
+			sql.append(' ');
+			sql.append(ex.getOperation());
+			sql.append(' ');
+			String key = "operand" + i;
+			sql.append(ex.getToken(key));
+			args.put(key, ex.getOperand());
+			i++;
+		}
+		
+	    final EntityManager em = getEntityManager();
+	    try {
+			final EntityTransaction tx = beginTransaction();
+			final String jql = sql.toString();
+			LOG.debug(jql + ", " + args);
+		    final Query query = em.createQuery(jql);
+		    
+		    for (Entry<String, Object> entry : args.entrySet()) {
+		    	query.setParameter(entry.getKey(), entry.getValue());
+		    }
+		    
+			int returnValue = query.executeUpdate();
+			commitTransaction(tx);
+			return returnValue;
+		}
+		finally {
+			close();
+		}
+	}		
 
+#if( "1.5" != $sourceVersion )
    @Override
+#end
    public String getTableName() {
 	   // FIXME: support @Table name annotation
       return persistentClass.getSimpleName();
    }
 
+#if( "1.5" != $sourceVersion )
    @Override
+#end
    public List<String> getColumnNames() {
       throw new UnsupportedOperationException("Not supported yet.");
    }
 
+#if( "1.5" != $sourceVersion )
    @Override
+#end
    public String getPrimaryKeyColumnName() {
       throw new UnsupportedOperationException("Not supported yet.");
    }

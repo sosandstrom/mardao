@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+	">
+
+	<!-- EntityManagerFactory should be created only once! -->
+	<bean id="entityManagerFactory" class="javax.persistence.Persistence" factory-method="createEntityManagerFactory" destroy-method="close">
+		<constructor-arg value="transactions-optional" />
+	</bean>
+
+<!-- Bean managed transactions -->
+
+
+	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.aed.domain ============ -->
+	<bean id="bookDao" class="net.sf.mardao.test.aed.dao.BookDaoBean" autowire="constructor">
+		<property name="helper">
+			<ref local="bookHelper"/>
+		</property>
+	</bean>
+	<bean id="bookHelper" class="net.sf.mardao.test.aed.dao.BookAEDHelper" 
+     	autowire="byType" depends-on="" />
+	
+
+</beans>

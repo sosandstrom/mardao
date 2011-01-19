@@ -9,8 +9,11 @@
 	<import resource="classpath:spring-dao.xml" />
 
 	<bean id="uberDao" class="net.sf.mardao.test.aed.dao.UberDaoBean" 
-		init-method="init" destroy-method="destroy">
+		init-method="setup" destroy-method="test">
 		<property name="bookDao" ref="bookDao" />
+		<property name="chapterDao" ref="chapterDao" />
+		<property name="pageDao" ref="pageDao" />
+		<property name="footnoteDao" ref="footnoteDao" />
 	</bean>
 
 

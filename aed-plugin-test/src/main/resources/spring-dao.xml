@@ -24,6 +24,27 @@
 	</bean>
 	<bean id="bookHelper" class="net.sf.mardao.test.aed.dao.BookAEDHelper" 
      	autowire="byType" depends-on="" />
+	<bean id="chapterDao" class="net.sf.mardao.test.aed.dao.ChapterDaoBean" autowire="constructor">
+		<property name="helper">
+			<ref local="chapterHelper"/>
+		</property>
+	</bean>
+	<bean id="chapterHelper" class="net.sf.mardao.test.aed.dao.ChapterAEDHelper" 
+     	autowire="byType" depends-on="" />
+	<bean id="pageDao" class="net.sf.mardao.test.aed.dao.PageDaoBean" autowire="constructor">
+		<property name="helper">
+			<ref local="pageHelper"/>
+		</property>
+	</bean>
+	<bean id="pageHelper" class="net.sf.mardao.test.aed.dao.PageAEDHelper" 
+     	autowire="byType" depends-on="" />
+	<bean id="footnoteDao" class="net.sf.mardao.test.aed.dao.FootnoteDaoBean" autowire="constructor">
+		<property name="helper">
+			<ref local="footnoteHelper"/>
+		</property>
+	</bean>
+	<bean id="footnoteHelper" class="net.sf.mardao.test.aed.dao.FootnoteAEDHelper" 
+     	autowire="byType" depends-on="" />
 	
 
 </beans>

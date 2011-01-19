@@ -3,21 +3,24 @@ package net.sf.mardao.test.aed.domain;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-import com.google.appengine.api.datastore.Key;
-
 @Entity
-public class Book {
+public class Book extends AbstractPrimaryKeyEntity {
 	@Id
-	Key key;
+	private String ISBN;
 	
-	String title;
+	private String title;
 
-	public Key getKey() {
-		return key;
+	@Override
+	public Object getPrimaryKey() {
+		return ISBN;
 	}
 
-	public void setKey(Key key) {
-		this.key = key;
+	public String getISBN() {
+		return ISBN;
+	}
+
+	public void setISBN(String name) {
+		this.ISBN = name;
 	}
 
 	public String getTitle() {

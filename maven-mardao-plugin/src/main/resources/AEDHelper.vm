@@ -2,6 +2,8 @@ package ${daoBasePackage};
 
 import java.util.List;
 
+import com.google.appengine.api.datastore.Entity;
+
 import ${entity.className};
 #foreach( $field in $entity.oneToOnes )
 import ${field.entity.className};
@@ -60,9 +62,44 @@ public class ${entity.simpleName}AEDHelper extends AbstractAEDHelper<${entity.si
 #if( $sourceVersion != "1.5" )
    @Override
 #end
-   public void persist(${entity.simpleName} entity) {
-		LOGGER.debug("persisting {}", entity);
+   public void persist(${entity.simpleName} domain) {
+		LOGGER.debug("persisting {} with Id of type ${entity.pk.type}", domain);
 		
+#if( ${entity.pk.type} == "java.lang.String" )
+		final Entity entity = new Entity(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
+#else
+		final Entity entity = new Entity(getTableName());
+#if( ${entity.pk.type} != "com.google.appengine.api.datastore.Key" )		
+		entity.setProperty(COLUMN_NAME_${entity.pk.name.toUpperCase()}, domain.get${helper.firstToUpper(${entity.pk.name})}());
+#end
+#end
+		// properties
+#foreach( $field in $entity.fields )
+		entity.setProperty(COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
+#end
+
+		// one-to-one keys:
+#foreach( $field in $entity.oneToOnes )
+		final ${field.type} ${field.name} = domain.get${helper.firstToUpper($field.name)}();
+		if (null != ${field.name}) {
+			entity.setProperty(COLUMN_NAME_${field.name.toUpperCase()}, toForeignKey(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}()));
+		}
+#end
+
+		// many-to-one keys:
+#foreach( $field in $entity.manyToOnes )
+		final ${field.type} ${field.name} = domain.get${helper.firstToUpper($field.name)}();
+		if (null != ${field.name}) {
+			entity.setProperty(COLUMN_NAME_${field.name.toUpperCase()}, toForeignKey(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}()));
+		}
+#end
+
+#if( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )
+		// update domain object with generated Key
+		domain.set${helper.firstToUpper($entity.pk.name)}(persist(entity));		
+#else
+		persist(entity);
+#end		
    }
    
 	/**

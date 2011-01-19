@@ -12,6 +12,20 @@
    <bean id="rootTemplates" class="java.util.ArrayList">
       <constructor-arg>
          <list>
+				<!-- PrimaryKeyEntity interface -->
+            <bean class="net.sf.mardao.domain.MergeTemplate">
+               <property name="templatePrefix" value="PrimaryKeyEntity" />
+               <property name="entity" value="false" />
+               <property name="destFolder" value="srcDomain" />
+               <property name="filePrefix" value="PrimaryKeyEntity" />
+            </bean>
+				<!-- PrimaryKeyEntity interface -->
+            <bean class="net.sf.mardao.domain.MergeTemplate">
+               <property name="templatePrefix" value="AbstractPrimaryKeyEntity" />
+               <property name="entity" value="false" />
+               <property name="destFolder" value="srcDomain" />
+               <property name="filePrefix" value="AbstractPrimaryKeyEntity" />
+            </bean>
 				<!-- GenericDao interface -->
             <bean class="net.sf.mardao.domain.MergeTemplate">
                <property name="templatePrefix" value="GenericDao" />

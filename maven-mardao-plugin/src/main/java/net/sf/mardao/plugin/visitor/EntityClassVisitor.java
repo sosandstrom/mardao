@@ -15,6 +15,10 @@ import org.objectweb.asm.Type;
 
 public class EntityClassVisitor extends EmptyClassVisitor {
 	
+	public static final int ACCESS_FINAL = 0x10;
+	public static final int ACCESS_STATIC = 0x08;
+	public static final int ACCESS_PRIVATE = 0x02;
+	
 //	private Group group;
 	private final Entity entity;
 	private final Log LOG;
@@ -69,21 +73,21 @@ public class EntityClassVisitor extends EmptyClassVisitor {
 	@Override
 	public FieldVisitor visitField(int access, String name, String desc,
 			String signature, Object value) {
-		if (null != entity && null != desc && null != Type.getType(desc)) {
+		if (0 == (access & ACCESS_STATIC) && null != entity && null != desc && null != Type.getType(desc)) {
 			field = new Field();
 			field.setName(name);
 			try {
 				field.setType(Type.getType(desc).getInternalName().replace('/', '.'));
 			}
 			catch (NullPointerException npe) {
-				LOG.info("        !!!!!!!! " + entity.getClassName() + " " + name + " desc " + desc + " " + Type.getType(desc));
+				LOG.warn("        !!!!!!!! " + entity.getClassName() + " " + name + " desc " + desc + " " + Type.getType(desc));
 			}
 			entity.getFields().add(field);
 			LOG.info("        " + field.getType() + " " + name + "; <" + signature + ">");
 			return new EntityFieldVisitor(LOG, entities, entity, field, signature);
 		}
 		else if (null != entity){
-			LOG.info("        !!!!!!!! " + name + " desc " + desc + " " + Type.getType(desc));
+			LOG.info("        !!!!!!!! SKIP " + name + " desc " + desc + " " + Type.getType(desc));
 		}
 		return null;
 	}

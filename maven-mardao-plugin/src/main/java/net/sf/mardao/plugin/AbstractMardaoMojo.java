@@ -122,6 +122,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
 	protected File targetDaoFolder;
 
 	protected File srcDaoFolder;
+	protected File srcDomainFolder;
 	
 	protected MergeScheme mergeScheme;
 
@@ -148,10 +149,15 @@ public class AbstractMardaoMojo extends AbstractMojo {
 		if (false == srcDaoFolder.exists()) {
 			srcDaoFolder.mkdirs();
 		}
+		srcDomainFolder = new File(sourceFolder, domainBasePackage.replace('.', '/'));
+		if (false == srcDomainFolder.exists()) {
+			srcDomainFolder.mkdirs();
+		}
 
 		// create destFolders
 		destFolders = new HashMap<String, File>();
 		destFolders.put("srcDao", srcDaoFolder);
+		destFolders.put("srcDomain", srcDomainFolder);
 		destFolders.put("targetDao", targetDaoFolder);
 		destFolders.put("resources", resourceFolder);
 	}

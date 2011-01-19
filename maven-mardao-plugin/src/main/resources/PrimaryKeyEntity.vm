@@ -1,0 +1,5 @@
+package ${domainBasePackage};
+
+public interface PrimaryKeyEntity {
+    Object getPrimaryKey();
+}

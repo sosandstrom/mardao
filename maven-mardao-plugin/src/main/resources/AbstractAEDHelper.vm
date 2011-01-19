@@ -7,7 +7,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 
 public abstract class AbstractAEDHelper<T, ID extends Serializable> implements AbstractHelper<T, ID> {
 
@@ -19,8 +22,10 @@ public abstract class AbstractAEDHelper<T, ID extends Serializable> implements A
 		return null;
 	}
 	
-	protected void persist(Entity entity) {
+	protected Key persist(Entity entity) {
+		final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		
+		return datastore.put(entity);
 	}
 
 	public void update(T entity) {

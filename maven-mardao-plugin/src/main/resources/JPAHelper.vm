@@ -22,8 +22,14 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
    protected final Class<T> persistentClass;
    protected final Logger LOG = LoggerFactory.getLogger(getClass());
    
+#if( $containerManagedEntityManager )
+	/** Container-managed EntityManager */
    @PersistenceContext
    private EntityManager entityManager;
+#else   
+	/** Application-managed EntityManager */
+   private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
+#end   
    
    private EntityManagerFactory entityManagerFactory;
 
@@ -51,25 +57,30 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
     * @see close
     */
    protected EntityManager getEntityManager() {
-   
 #if( $containerManagedEntityManager )
       // As the EntityManager is managed by the Container,
       // we should do nothing here but returning the injected
       // entityManager.
       // This setting is controlled by generator plugin configuration <containerManagedEntityManager>.
-#else   
+      return entityManager;   
+#else
+      // one entity manager per thread:
+      EntityManager em = entityManager.get();
+         
       // discard closed?
-      if (null != entityManager && !entityManager.isOpen()) {
-      	entityManager = null;
+      if (null != em && !em.isOpen()) {
+      	em = null;
+      	entityManager.remove();
       }
       
       // create new?
-      if (entityManager == null) {
-         entityManager = getEntityManagerFactory().createEntityManager();
+      if (em == null) {
+         em = getEntityManagerFactory().createEntityManager();
+         entityManager.set(em);
       }
-#end      
       
-      return entityManager;
+      return em;
+#end      
    }
    
    /**
@@ -82,18 +93,21 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
       // we should do nothing here.
       // This setting is controlled by generator plugin configuration <containerManagedEntityManager>.
 #else
+      final EntityManager em = entityManager.get();   
       // close?
-      if (null != entityManager && entityManager.isOpen()) {
-      	entityManager.close();
+      if (null != em && em.isOpen()) {
+      	em.close();
+      	entityManager.remove();
       }
 #end      
 	}   
 
    protected EntityTransaction beginTransaction() {
 #if( $containerManagedTransactionManager )
+      // container-managed TransactionManager
       return null;
 #else
-      final EntityTransaction tx = entityManager.getTransaction();
+      final EntityTransaction tx = getEntityManager().getTransaction();
       tx.begin();
       return tx;
 #end
@@ -101,7 +115,7 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 
    protected void commitTransaction(EntityTransaction tx) {
 #if( $containerManagedTransactionManager )
-      // Do nothing
+      // container-managed TransactionManager
 #else
       if (null != tx && tx.isActive()) {
          tx.commit();
@@ -349,9 +363,11 @@ public class JPAHelper<T, ID extends Serializable> implements AbstractHelper<T, 
 	    	ql.append(entry.getKey());
 	    }
 	    
-	    ql.append(" ORDER BY t.");
-	    ql.append(orderBy);
-	    ql.append(ascending ? " ASC" : " DESC");
+	    if (null != orderBy) {
+		    ql.append(" ORDER BY t.");
+		    ql.append(orderBy);
+		    ql.append(ascending ? " ASC" : " DESC");
+		}
 	    
 	    // [LIMIT [<offset>,]<count>]
 	    // [OFFSET <offset>]

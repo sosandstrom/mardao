@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 public class Expression {
 	  private final String column;
-	  private final String operation;
+	  private final Object operation;
 	  private final Object operand;
 	  
-	  public Expression(String column, String operation, Object operand) {
+	  public Expression(String column, Object operation, Object operand) {
 	  	this.column = column;
 	  	this.operation = operation;
 	  	this.operand = operand;
@@ -20,7 +20,7 @@ public class Expression {
 	  public String getColumn() {
 	  	return column;
 	  }
-	  public String getOperation() {
+	  public Object getOperation() {
 	  	return operation;
 	  }
 	  public Object getOperand() {

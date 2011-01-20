@@ -15,4 +15,8 @@ public abstract class AbstractPrimaryKeyEntity implements PrimaryKeyEntity {
         }
         return null;
     }
+    
+    public String toString() {
+    	return getClass().getSimpleName() + ',' + getPrimaryKey();
+    }
 }

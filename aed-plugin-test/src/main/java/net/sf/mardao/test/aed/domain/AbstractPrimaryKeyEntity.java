@@ -1,7 +1,6 @@
 package net.sf.mardao.test.aed.domain;
 
 public abstract class AbstractPrimaryKeyEntity implements PrimaryKeyEntity {
-
     public String getKeyString() {
     	final Object pk = getPrimaryKey();
     	if ("com.google.appengine.api.datastore.Key".equals(pk.getClass().getName())) {
@@ -16,5 +15,8 @@ public abstract class AbstractPrimaryKeyEntity implements PrimaryKeyEntity {
         }
         return null;
     }
-
+    
+    public String toString() {
+    	return getClass().getSimpleName() + ',' + getPrimaryKey();
+    }
 }

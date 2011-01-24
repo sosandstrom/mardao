@@ -224,7 +224,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 			})) {
 				if (f.isDirectory()) {
 					processPackage(root, f);
-				} else {
+				} else if (f.getParentFile().getAbsolutePath().replace('/', '.').endsWith(basePackage + '.' + domainPackageName)) {
 					getLog().debug("--- file: " + f);
 					try {
 						final FileInputStream fis = new FileInputStream(f);

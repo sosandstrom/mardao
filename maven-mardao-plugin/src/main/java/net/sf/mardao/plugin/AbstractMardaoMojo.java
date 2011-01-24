@@ -261,7 +261,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
 			fileName.append(entityName);
 		}
 		fileName.append(mt.getFileMiddle());
-		if (mt.isTypeSpecific()) {
+		if (mt.isTypeSpecific() && mt.isTypeAppend()) {
 			fileName.append(persistenceType);
 		}
 		fileName.append(mt.getFileSuffix());

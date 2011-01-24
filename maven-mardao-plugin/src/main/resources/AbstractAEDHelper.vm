@@ -43,6 +43,31 @@ public abstract class AbstractAEDHelper<T, ID extends Serializable> implements A
 	 */
 	protected abstract T convert(Entity entity);
 	
+	protected List<T> asIterable(PreparedQuery pq, int limit, int offset) {
+		final List<T> returnValue = new ArrayList<T>();
+		
+		FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
+		
+		if (0 < limit) {
+			fetchOptions.limit(limit);
+		}
+		
+		if (0 < offset) {
+			fetchOptions.offset(offset);
+		}
+		
+		T domain;
+		for (Entity entity : pq.asIterable(fetchOptions)) {
+			domain = convert(entity);
+			returnValue.add(domain);
+//			LOGGER.debug("  entity {} -> domain {}", entity, domain);
+		}
+		return returnValue;
+	}
+	
+   protected abstract Key createKey(T entity);
+	
+	
 	/**
 	 * @param ascending 
 	 * @param orderBy 
@@ -93,8 +118,9 @@ public abstract class AbstractAEDHelper<T, ID extends Serializable> implements A
 	}
 
 	public void delete(T entity) {
-		// TODO Auto-generated method stub
-		
+		final Key key = createKey(entity);
+		final DatastoreService datastore = getDatastoreService();
+		datastore.delete(key);
 	}
 
 	public List<T> findAll() {
@@ -108,8 +134,8 @@ public abstract class AbstractAEDHelper<T, ID extends Serializable> implements A
 	}
 
 	public List<T> findBy(String fieldName, Object param) {
-		// TODO Auto-generated method stub
-		return null;
+		LOGGER.debug("{} = {}", fieldName, param);
+		return findBy(null, false, -1, 0, new Expression(fieldName, Query.FilterOperator.EQUAL, param));
 	}
 
 	public List<T> findByKey(String fieldName, Class foreignClass, Object key) {
@@ -136,26 +162,8 @@ public abstract class AbstractAEDHelper<T, ID extends Serializable> implements A
 
 	public List<T> findBy(String orderBy,
 			boolean ascending, int limit, int offset, Expression... filters) {
-		final List<T> returnValue = new ArrayList<T>();
 		PreparedQuery pq = prepare(orderBy, ascending, filters);
-		
-		FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
-		
-		if (0 < limit) {
-			fetchOptions.limit(limit);
-		}
-		
-		if (0 < offset) {
-			fetchOptions.offset(offset);
-		}
-		
-		T domain;
-		for (Entity entity : pq.asIterable(fetchOptions)) {
-			domain = convert(entity);
-			returnValue.add(domain);
-			LOGGER.debug("  entity {} -> domain {}", entity, domain);
-		}
-		return returnValue;
+		return asIterable(pq, limit, offset);
 	}
 	
 	public List<T> findBy(String orderBy, boolean ascending, int limit,

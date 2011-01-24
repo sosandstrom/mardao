@@ -10,6 +10,7 @@ public class MergeTemplate {
 	private String fileSuffix = ".java";
 	private boolean entity = true;
 	private boolean typeSpecific = false;
+	private boolean typeAppend = true;
 	private boolean listingEntities = false;
 	
 	public void setListingEntities(boolean listingEntities) {
@@ -71,6 +72,12 @@ public class MergeTemplate {
 	}
 	public boolean isListingEntities() {
 		return listingEntities;
+	}
+	public void setTypeAppend(boolean typeAppend) {
+		this.typeAppend = typeAppend;
+	}
+	public boolean isTypeAppend() {
+		return typeAppend;
 	}
 	
 	

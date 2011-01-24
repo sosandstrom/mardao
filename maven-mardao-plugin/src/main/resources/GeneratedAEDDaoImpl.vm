@@ -1,0 +1,335 @@
+package ${daoBasePackage};
+
+import java.util.List;
+
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+
+import net.sf.mardao.api.dao.AEDDaoImpl;
+
+import ${entity.className};
+#foreach( $field in $entity.oneToOnes )
+import ${field.entity.className};
+#end
+#foreach( $field in $entity.manyToOnes )
+import ${field.entity.className};
+#end
+
+/**
+ * Concrete class without generics, for Spring container instatiation.
+ */
+public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.simpleName}, ${entity.pk.type}> 
+	implements Generated${entity.simpleName}Dao {
+
+	/** Table name for ${entity.simpleName} is "${entity.tableName}" */
+	public static final String TABLE_NAME = "${entity.tableName}";
+
+	/** Column name for primary key attribute is "${entity.pk.columnName}" */
+	protected static final String COLUMN_NAME_${entity.pk.name.toUpperCase()} = Generated${entity.simpleName}Dao.COLUMN_NAME_${entity.pk.name.toUpperCase()};
+
+#foreach( $field in $entity.allFields )
+	/** Column name for attribute ${field.name} is "${field.columnName}" */
+	protected static final String COLUMN_NAME_${field.name.toUpperCase()} = Generated${entity.simpleName}Dao.COLUMN_NAME_${field.name.toUpperCase()};
+#end
+
+	/** The list of attribute names */
+	protected static final List<String> COLUMN_NAMES = Generated${entity.simpleName}Dao.COLUMN_NAMES;
+
+	/** Default constructor */
+   public Generated${entity.simpleName}DaoImpl() {
+      super(${entity.simpleName}.class);
+   }
+   
+   public String getTableName() {
+   		return TABLE_NAME;
+   }
+   
+   public String getPrimaryKeyColumnName() {
+   		return COLUMN_NAME_${entity.pk.name.toUpperCase()};
+   }
+   
+   public List<String> getColumnNames() {
+        return COLUMN_NAMES;
+   }
+   
+	
+   // ------ AbstractAEDHelper overrides -----------------------------
+   
+   protected ${entity.simpleName} convert(Entity entity) {
+        // do null-check here only :-)
+        if (null == entity)  {
+        	return null;
+        }
+        
+        final ${entity.simpleName} domain = new ${entity.simpleName}();
+#if( ${entity.pk.type} == "java.lang.String" )
+        domain.set${helper.firstToUpper(${entity.pk.name})}(entity.getKey().getName());
+#elseif( ${entity.pk.type} == "java.lang.Long" )
+        domain.set${helper.firstToUpper(${entity.pk.name})}(Long.valueOf(entity.getKey().getName()));
+#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+        domain.set${helper.firstToUpper(${entity.pk.name})}(entity.getKey());
+#else
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
+#end
+		// properties
+#foreach( $field in $entity.fields )
+		domain.set${helper.firstToUpper($field.name)}(($field.type) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()}));
+#end
+
+		// one-to-one keys:
+#foreach( $field in $entity.oneToOnes )
+		domain.set${helper.firstToUpper($field.name)}(($field.type) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()}));
+#end
+
+		// many-to-one keys:
+#foreach( $field in $entity.manyToOnes )
+		domain.set${helper.firstToUpper($field.name)}(($field.type) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()}));
+#end
+
+		return domain;
+   }
+   
+   protected Key createKey(${entity.pk.type} ${entity.pk.name}) {
+#if( ${entity.pk.type} == "java.lang.String" )
+		return KeyFactory.createKey(getTableName(), ${entity.pk.name});
+#elseif( ${entity.pk.type} == "java.lang.Long" )
+		return KeyFactory.createKey(getTableName(), ${entity.pk.name}.toString());
+#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+		return ${entity.pk.name};
+#else
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
+#end
+   }
+
+   protected Key createKey(${entity.simpleName} domain) {
+#if( ${entity.pk.type} == "java.lang.String" )
+		return KeyFactory.createKey(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
+#elseif( ${entity.pk.type} == "java.lang.Long" )
+		return KeyFactory.createKey(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}().toString());
+#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+		return domain.get${helper.firstToUpper(${entity.pk.name})}();
+#else
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
+#end
+   }
+
+   // ------ GenericDao implementation -----------------------------
+   
+   public ${entity.simpleName} findByPrimaryKey(${entity.pk.type} ${entity.pk.name}) {
+		final Key datastoreKey = createKey(${entity.pk.name});
+#if( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+		throw new UnsupportedOperationException("Did not expect this implementation to be invoked.");
+#else
+		return findByPrimaryKey(datastoreKey);
+#end
+   }
+
+	/**
+	 * Inserts a ${entity.simpleName} instance. The primary key attribute of the instance is updated.
+	 *
+	 * @param entity the ${entity.simpleName} entity to insert
+	 */
+#if( $sourceVersion != "1.5" )
+   @Override
+#end
+   public void persist(${entity.simpleName} domain) {
+		LOGGER.debug("persisting {} with Id of type ${entity.pk.type}", domain);
+		
+#if( ${entity.pk.type} == "java.lang.String" )
+		final Entity entity = new Entity(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
+#elseif( ${entity.pk.type} == "java.lang.Long" )
+		final Entity entity = new Entity(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}().toString());
+#else
+		final Entity entity = new Entity(getTableName());
+#if( ${entity.pk.type} != "com.google.appengine.api.datastore.Key" )		
+		entity.setProperty(COLUMN_NAME_${entity.pk.name.toUpperCase()}, domain.get${helper.firstToUpper(${entity.pk.name})}());
+#end
+#end
+		// properties
+#foreach( $field in $entity.fields )
+		entity.setProperty(COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
+#end
+
+		// one-to-one keys:
+#foreach( $field in $entity.oneToOnes )
+		final ${field.type} ${field.name} = domain.get${helper.firstToUpper($field.name)}();
+		if (null != ${field.name}) {
+			entity.setProperty(COLUMN_NAME_${field.name.toUpperCase()}, toForeignKey(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}()));
+		}
+#end
+
+		// many-to-one keys:
+#foreach( $field in $entity.manyToOnes )
+		final ${field.type} ${field.name} = domain.get${helper.firstToUpper($field.name)}();
+		if (null != ${field.name}) {
+			entity.setProperty(COLUMN_NAME_${field.name.toUpperCase()}, toForeignKey(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}()));
+		}
+#end
+
+#if( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )
+		// update domain object with generated Key
+		domain.set${helper.firstToUpper($entity.pk.name)}(persist(entity));		
+#else
+		persist(entity);
+#end		
+   }
+   
+	/**
+	 * Updates a ${entity.simpleName} instance. 
+	 * The primary key must not be changed.
+	 *
+	 * @param entity the instance to update
+	 */
+    public void update(final ${entity.simpleName} entity) {
+		LOGGER.debug("update(" + entity + ")");
+	}
+	
+   public void delete(${entity.simpleName} entity) {
+		LOGGER.debug("delete(" + entity + ")");
+   }
+
+	// ----------------------- field finders -------------------------------
+#foreach( $field in $entity.fields )
+#if( $entity.isUnique($field.name) )
+	/**
+	 * find-by method for unique attribute field ${field.name}
+	 * @param ${field.name} the unique attribute
+	 * @return the unique ${entity.simpleName} for the specified attribute
+	 */
+	public final ${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		return findUniqueBy(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
+	}
+#else
+	/**
+	 * find-by method for attribute field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return a List of ${entity.simpleName}s with the specified attribute
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		return findBy(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
+	}
+#end	
+	 
+#end	
+		  
+	// ----------------------- one-to-one finders -------------------------
+#foreach( $field in $entity.oneToOnes )
+#set( $foreign = $entities.get($field.type))
+	/**
+	 * find-by method for one-to-one field ${field.name}
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return the ${entity.simpleName} belonging to the one-to-one relation
+	 */
+	public final ${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}());
+	}
+	
+#if( $foreign )  
+	/**
+	 * find-by method for one-to-one field ${field.name}
+	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @return the ${entity.simpleName} belonging to the one-to-one relation
+	 */
+	public final ${entity.simpleName} findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+		return findUniqueBy(COLUMN_NAME_${field.name.toUpperCase()}, ${foreign.pk.name});
+	}	
+#end	
+	
+#end	
+
+	// ----------------------- many-to-one finders -------------------------
+#foreach( $field in $entity.manyToOnes )
+#set( $foreign = $entities.get($field.type))
+	/**
+	 * find-by method for many-to-one field ${field.name}
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}());
+	}
+	
+#if( $foreign )  
+	/**
+	 * find-by method for many-to-one field ${field.name}
+	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+		return findByKey(COLUMN_NAME_${field.name.toUpperCase()}, ${field.type}.class, ${foreign.pk.name});
+	}	
+#end	
+	
+#end	
+
+	// ----------------------- many-to-many finders -------------------------
+#foreach( $field in $entity.manyToManys )
+#if( $entities.get($field.type) )  
+#set( $foreign = $entities.get($field.type))
+	/**
+	 * find-by method for many-to-many field ${field.name}
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+#if( $persistenceType == "JPA" )
+      return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
+#else
+		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
+#end
+	}
+	
+	/**
+	 * find-by method for many-to-many field ${field.name}
+	 * @param ${foreign.pk.type} the related ${field.type} entity's primary key
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+#if( $persistenceType == "JPA" )
+
+      return findByManyToMany("${entity.pk.name}",
+                                         "${field.name}_${foreign.pk.name}",
+                                         "${field.simpleType}",
+                                         "${field.mappedBy}_${entity.pk.name}",
+                                         ${foreign.pk.name});
+#else
+		// FIXME: implement properly
+		return findByManyToMany("${entity.pk.name}", // primaryKeyName
+#if( $field.mappedBy )		 
+			"${field.mappedBy}_${entity.pk.name}", // this side's column in the join table (mappedBy="${field.mappedBy}")
+#else
+#set( $relatedField = $foreign.mappedBy.get($field.name) )
+			"${helper.firstToLower($relatedField.name)}_${entity.pk.name}", // this side's column in the join table  
+#end
+			"${field.simpleType}", // related entity class simple name
+			"${field.name}_${foreign.pk.name}", // the related side's column in the join table
+			${foreign.pk.name}); 			 
+#end
+	}
+#end	
+	
+#end
+
+	// ----------------------- uniqueFields finders -------------------------
+#foreach( $uniqueFields in $entity.uniqueFieldsSets )
+	/**
+	 * find-by method for unique attributes
+#foreach( $field in $uniqueFields )	 
+	 * @param ${field.name} the specified ${field.name}
+#end	 
+	 * @return the unique ${entity.simpleName} for the specified fields
+	 */
+	public final ${entity.simpleName} findBy#foreach( $field in $uniqueFields )
+${helper.firstToUpper($field.name)}#end(#foreach( $field in $uniqueFields )
+${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
+#end) {
+		final java.util.Map<String,Object> args = new java.util.HashMap<String,Object>($uniqueFields.size());
+#foreach( $field in $uniqueFields )
+		args.put(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
+#end
+		return findBy(args);
+	}
+#end
+	
+}

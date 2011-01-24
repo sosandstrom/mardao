@@ -86,20 +86,39 @@ public class ${entity.simpleName}AEDHelper extends AbstractAEDHelper<${entity.si
 
 		return domain;
    }
+   
+   protected Key createKey(${entity.pk.type} ${entity.pk.name}) {
+#if( ${entity.pk.type} == "java.lang.String" )
+		return KeyFactory.createKey(getTableName(), ${entity.pk.name});
+#elseif( ${entity.pk.type} == "java.lang.Long" )
+		return KeyFactory.createKey(getTableName(), ${entity.pk.name}.toString());
+#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+		return ${entity.pk.name};
+#else
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
+#end
+   }
+
+   protected Key createKey(${entity.simpleName} domain) {
+#if( ${entity.pk.type} == "java.lang.String" )
+		return KeyFactory.createKey(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
+#elseif( ${entity.pk.type} == "java.lang.Long" )
+		return KeyFactory.createKey(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}().toString());
+#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+		return ${entity.pk.name};
+#else
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
+#end
+   }
 
    // ------ GenericDao implementation -----------------------------
    
    public ${entity.simpleName} findByPrimaryKey(${entity.pk.type} ${entity.pk.name}) {
-#if( ${entity.pk.type} == "java.lang.String" )
-		final Key datastoreKey = KeyFactory.createKey(getTableName(), ${entity.pk.name});
-		return findByPrimaryKey(datastoreKey);
-#elseif( ${entity.pk.type} == "java.lang.Long" )
-		final Key datastoreKey = KeyFactory.createKey(getTableName(), ${entity.pk.name}.toString());
-		return findByPrimaryKey(datastoreKey);
-#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+		final Key datastoreKey = createKey(${entity.pk.name});
+#if( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
 		throw new UnsupportedOperationException("Did not expect this implementation to be invoked.");
 #else
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
+		return findByPrimaryKey(datastoreKey);
 #end
    }
 

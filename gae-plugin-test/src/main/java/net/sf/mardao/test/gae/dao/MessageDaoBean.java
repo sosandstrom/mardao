@@ -8,6 +8,9 @@ public class MessageDaoBean
 		implements MessageDao 
 {
 
-	// TODO: implement your Business Methods here
+	@Override
+	public void deleteAll() {
+		genericDao.deleteAll();
+	}
 
 }

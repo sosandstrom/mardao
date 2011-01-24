@@ -14,4 +14,10 @@ public class MessageControllerTest extends TestCase {
 		assertEquals(200, con.getResponseCode());
 	}
 
+	public void testMessageComment() throws IOException {
+//		URL url = new URL("http://localhost:8282/message/test");
+//		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+//		assertEquals(200, con.getResponseCode());
+	}
+
 }

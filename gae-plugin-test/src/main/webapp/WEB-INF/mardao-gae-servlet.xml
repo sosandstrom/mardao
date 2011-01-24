@@ -10,6 +10,7 @@
 
 	<bean id="messageController" class="net.sf.mardao.test.gae.web.MessageController">
 		<property name="messageDao" ref="messageDao" />
+		<property name="commentDao" ref="commentDao" />
 	</bean>
 
 

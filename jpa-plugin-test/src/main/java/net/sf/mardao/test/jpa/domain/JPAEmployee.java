@@ -23,6 +23,10 @@ public class JPAEmployee {
 	
 	@ManyToOne
 	private JPAOrganizationUnit currentUnit;
+	
+	public String toString() {
+		return '{' + name + ',' + signum + '}';
+	}
 
 	public void setName(String name) {
 		this.name = name;

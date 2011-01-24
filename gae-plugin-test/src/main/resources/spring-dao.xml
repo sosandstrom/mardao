@@ -27,6 +27,16 @@
       </property>
    </bean>
 	
+	<bean id="commentDao" class="net.sf.mardao.test.gae.dao.CommentDaoBean" autowire="constructor">
+		<property name="helper">
+         <bean class="net.sf.mardao.test.gae.dao.GAEHelper" autowire="byName">
+            <constructor-arg>
+               <value>net.sf.mardao.test.gae.domain.Comment</value>
+            </constructor-arg>
+         </bean>
+      </property>
+   </bean>
+	
 	
 
 </beans>

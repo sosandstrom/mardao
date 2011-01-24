@@ -5,6 +5,6 @@ package net.sf.mardao.test.gae.dao;
  */
 public interface MessageDao extends AbstractMessageDaoInterface {
 
-	// TODO: declare your Business Methods here
-	
+	void deleteAll();
+
 }

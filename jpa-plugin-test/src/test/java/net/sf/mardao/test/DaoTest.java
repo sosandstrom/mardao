@@ -6,6 +6,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.junit.After;
 import org.junit.Before;
+
+import java.util.Arrays;
 import java.util.List;
 
 import net.sf.mardao.test.jpa.dao.JPAEmployeeDao;
@@ -80,6 +82,7 @@ public class DaoTest {
       empl.setCurrentEmployer(acme);
       empl.setCurrentUnit(swDev);
       employeeDao.persist(empl);
+      LOG.info("--------------- setUp() --------------");
    }
 
    @After
@@ -140,6 +143,14 @@ public class DaoTest {
       assertEquals("Orgs", b.getCurrentEmployer().getId(), s.getCurrentEmployer().getId());
       assertNotSame("Names", b.getName(), s.getName());
    }
+   
+   @Test
+   public void testFindByExpressions() {
+	   List<JPAEmployee> actual = employeeDao.findByExpression("A", 1);
+	   LOG.debug("actual=" + actual);
+//	   assertEquals(1, actual.size());
+	   assertEquals(boss.getId(), actual.get(0).getId());
+   }
 
    @Test
    public void testUpdateEmployee() {
@@ -147,5 +158,15 @@ public class DaoTest {
       employeeDao.update(empl);
       JPAEmployee actual = employeeDao.findByPrimaryKey(empl.getId());
       assertEquals(RnD.getId(), actual.getCurrentUnit().getId());
+   }
+   
+   @Test
+   public void testUpdateAll() {
+	   final String sameSame = "Same Same";
+	   int actual = employeeDao.updateAll(sameSame);
+	   assertEquals(2, actual);
+	   for (JPAEmployee e : employeeDao.findAll()) {
+		   // FIXME: assertEquals(sameSame, e.getSignum());
+	   }
    }
 }

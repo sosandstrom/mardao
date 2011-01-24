@@ -1,10 +1,9 @@
 package net.sf.mardao.test.aed.domain;
 
-import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-import com.google.appengine.api.datastore.Key;
+import net.sf.mardao.api.Parent;
 
 @Entity
 public class Chapter extends AbstractPrimaryKeyEntity {
@@ -14,8 +13,7 @@ public class Chapter extends AbstractPrimaryKeyEntity {
 	private String name;
 	
 	/** References the book's ISBN */
-	// @ManyToOne
-	@Basic
+	@Parent(kind="Book")
 	private String book;
 
 	@Override

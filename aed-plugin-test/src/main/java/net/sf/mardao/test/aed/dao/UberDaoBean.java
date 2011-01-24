@@ -54,6 +54,11 @@ public class UberDaoBean {
 		footnoteDao.findAll();
 		
 		Book book = bookDao.findByPrimaryKey(ISBN);
+		
+		List<Chapter> chapters = chapterDao.findByBook(ISBN);
+		if (chapters.isEmpty()) {
+			LOG.error("Expected chapters in book {}", ISBN);
+		}
 	}
 
 	public void destroy() {

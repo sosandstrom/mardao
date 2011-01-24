@@ -9,9 +9,11 @@
 	<url>http://mardao.sourceforge.net</url>
 
 	<modules>
-		<module>mardao-api</module>
 		<module>maven-mardao-plugin</module>
+		<!-- 
+		<module>mardao-api</module>
 		<module>aed-plugin-test</module>
+		 -->
 		<module>basic-plugin-test</module>
 		<module>jpa-plugin-test</module>
 		<module>gae-plugin-test</module>

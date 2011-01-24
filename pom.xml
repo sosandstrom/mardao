@@ -4,7 +4,7 @@
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.7-SNAPSHOT</version>
+	<version>1.7</version>
 	<name>${groupId}:${artifactId}</name>
 	<url>http://mardao.sourceforge.net</url>
 
@@ -79,9 +79,9 @@
 	</distributionManagement>
 
 	<scm>
-		<connection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/trunk</connection>
-		<developerConnection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/trunk/</developerConnection>
-		<url>http://mardao.svn.sourceforge.net/viewvc/mardao/trunk</url>
+		<connection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/tags/parent-1.7</connection>
+		<developerConnection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/tags/parent-1.7</developerConnection>
+		<url>http://mardao.svn.sourceforge.net/viewvc/mardao/tags/parent-1.7</url>
 	</scm>
 
 	<reporting>

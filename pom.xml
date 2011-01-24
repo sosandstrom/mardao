@@ -5,11 +5,13 @@
 	<artifactId>parent</artifactId>
 	<packaging>pom</packaging>
 	<version>1.7-SNAPSHOT</version>
-	<name>${groupId}::${artifactId}</name>
+	<name>${groupId}:${artifactId}</name>
 	<url>http://mardao.sourceforge.net</url>
 
 	<modules>
+		<module>mardao-api</module>
 		<module>maven-mardao-plugin</module>
+		<module>aed-plugin-test</module>
 		<module>basic-plugin-test</module>
 		<module>jpa-plugin-test</module>
 		<module>gae-plugin-test</module>

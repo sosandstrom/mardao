@@ -3,12 +3,12 @@
 	<parent>
 		<groupId>net.sf.mardao</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.7</version>
+		<version>1.7-SNAPSHOT</version>
 	</parent>
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>basic-plugin-test</artifactId>
 	<packaging>jar</packaging>
-	<version>1.7</version>
+	<version>1.7-SNAPSHOT</version>
 	<name>${groupId}::${artifactId}</name>
 
 	<build>
@@ -42,7 +42,7 @@
 			<plugin>
 				<groupId>net.sf.mardao</groupId>
 				<artifactId>maven-mardao-plugin</artifactId>
-				<version>1.7</version>
+				<version>1.7-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>generate-generics</id>

@@ -25,17 +25,6 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 	/** Table name for ${entity.simpleName} is "${entity.tableName}" */
 	public static final String TABLE_NAME = "${entity.tableName}";
 
-	/** Column name for primary key attribute is "${entity.pk.columnName}" */
-	protected static final String COLUMN_NAME_${entity.pk.name.toUpperCase()} = Generated${entity.simpleName}Dao.COLUMN_NAME_${entity.pk.name.toUpperCase()};
-
-#foreach( $field in $entity.allFields )
-	/** Column name for attribute ${field.name} is "${field.columnName}" */
-	protected static final String COLUMN_NAME_${field.name.toUpperCase()} = Generated${entity.simpleName}Dao.COLUMN_NAME_${field.name.toUpperCase()};
-#end
-
-	/** The list of attribute names */
-	protected static final List<String> COLUMN_NAMES = Generated${entity.simpleName}Dao.COLUMN_NAMES;
-
 	/** Default constructor */
    public Generated${entity.simpleName}DaoImpl() {
       super(${entity.simpleName}.class);
@@ -66,7 +55,7 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 #if( ${entity.pk.type} == "java.lang.String" )
         domain.set${helper.firstToUpper(${entity.pk.name})}(entity.getKey().getName());
 #elseif( ${entity.pk.type} == "java.lang.Long" )
-        domain.set${helper.firstToUpper(${entity.pk.name})}(Long.valueOf(entity.getKey().getName()));
+        domain.set${helper.firstToUpper(${entity.pk.name})}(entity.getKey().getId());
 #elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
         domain.set${helper.firstToUpper(${entity.pk.name})}(entity.getKey());
 #else
@@ -90,62 +79,16 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 		return domain;
    }
    
-   protected Key createKey(${entity.pk.type} ${entity.pk.name}) {
-#if( ${entity.pk.type} == "java.lang.String" )
-		return KeyFactory.createKey(getTableName(), ${entity.pk.name});
-#elseif( ${entity.pk.type} == "java.lang.Long" )
-		return KeyFactory.createKey(getTableName(), ${entity.pk.name}.toString());
-#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
-		return ${entity.pk.name};
-#else
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#end
-   }
+   protected Entity convert(${entity.simpleName} domain) {
+   		final Key key = createKey(domain);
+		Entity entity;
+		if (null != key) {
+			entity = new Entity(key);
+		}
+		else {
+			entity = new Entity(getTableName());
+		}
 
-   protected Key createKey(${entity.simpleName} domain) {
-#if( ${entity.pk.type} == "java.lang.String" )
-		return KeyFactory.createKey(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
-#elseif( ${entity.pk.type} == "java.lang.Long" )
-		return KeyFactory.createKey(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}().toString());
-#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
-		return domain.get${helper.firstToUpper(${entity.pk.name})}();
-#else
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#end
-   }
-
-   // ------ GenericDao implementation -----------------------------
-   
-   public ${entity.simpleName} findByPrimaryKey(${entity.pk.type} ${entity.pk.name}) {
-		final Key datastoreKey = createKey(${entity.pk.name});
-#if( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
-		throw new UnsupportedOperationException("Did not expect this implementation to be invoked.");
-#else
-		return findByPrimaryKey(datastoreKey);
-#end
-   }
-
-	/**
-	 * Inserts a ${entity.simpleName} instance. The primary key attribute of the instance is updated.
-	 *
-	 * @param entity the ${entity.simpleName} entity to insert
-	 */
-#if( $sourceVersion != "1.5" )
-   @Override
-#end
-   public void persist(${entity.simpleName} domain) {
-		LOGGER.debug("persisting {} with Id of type ${entity.pk.type}", domain);
-		
-#if( ${entity.pk.type} == "java.lang.String" )
-		final Entity entity = new Entity(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
-#elseif( ${entity.pk.type} == "java.lang.Long" )
-		final Entity entity = new Entity(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}().toString());
-#else
-		final Entity entity = new Entity(getTableName());
-#if( ${entity.pk.type} != "com.google.appengine.api.datastore.Key" )		
-		entity.setProperty(COLUMN_NAME_${entity.pk.name.toUpperCase()}, domain.get${helper.firstToUpper(${entity.pk.name})}());
-#end
-#end
 		// properties
 #foreach( $field in $entity.fields )
 		entity.setProperty(COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
@@ -167,28 +110,78 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 		}
 #end
 
-#if( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )
-		// update domain object with generated Key
-		domain.set${helper.firstToUpper($entity.pk.name)}(persist(entity));		
+	return entity;
+   }
+
+   protected Key createKey(${entity.pk.type} ${entity.pk.name}) {
+#if( ${entity.pk.type} == "java.lang.String" )
+		return KeyFactory.createKey(getTableName(), ${entity.pk.name});
+#elseif( ${entity.pk.type} == "java.lang.Long" )
+		return KeyFactory.createKey(getTableName(), ${entity.pk.name});
+#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+		return ${entity.pk.name};
 #else
-		persist(entity);
-#end		
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
+#end
+   }
+
+   protected Key createKey(${entity.simpleName} domain) {
+#if( ${entity.pk.type} == "java.lang.String" )
+		if (null != domain.get${helper.firstToUpper(${entity.pk.name})}()) {
+			return KeyFactory.createKey(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
+		}
+		return null;
+#elseif( ${entity.pk.type} == "java.lang.Long" )
+		if (null != domain.get${helper.firstToUpper(${entity.pk.name})}()) {
+			return KeyFactory.createKey(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
+		}
+		return null;
+#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+		if (null != domain.get${helper.firstToUpper(${entity.pk.name})}()) {
+			return domain.get${helper.firstToUpper(${entity.pk.name})}();
+		}
+		return null;
+#else
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
+#end
+   }
+
+   // ------ GenericDao implementation -----------------------------
+   
+   public ${entity.simpleName} findByPrimaryKey(${entity.pk.type} ${entity.pk.name}) {
+		final Key datastoreKey = createKey(${entity.pk.name});
+#if( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+		throw new UnsupportedOperationException("Did not expect this implementation to be invoked.");
+#else
+		return findByPrimaryKey(datastoreKey);
+#end
    }
    
 	/**
-	 * Updates a ${entity.simpleName} instance. 
-	 * The primary key must not be changed.
+	 * Inserts a ${entity.simpleName} instance. The primary key attribute of the instance is updated.
 	 *
-	 * @param entity the instance to update
+	 * @param entity the ${entity.simpleName} entity to insert
 	 */
-    public void update(final ${entity.simpleName} entity) {
-		LOGGER.debug("update(" + entity + ")");
-	}
-	
-   public void delete(${entity.simpleName} entity) {
-		LOGGER.debug("delete(" + entity + ")");
+#if( $sourceVersion != "1.5" )
+   @Override
+#end
+   public void persist(${entity.simpleName} domain) {
+		LOGGER.debug("persisting {} with Id of type ${entity.pk.type}", domain);
+		
+		final Entity entity = convert(domain);
+		final Key key = persist(entity);
+		// update domain object with (generated) Key
+#if( ${entity.pk.type} == "java.lang.String" )
+		domain.set${helper.firstToUpper($entity.pk.name)}(key.getName());		
+#elseif( ${entity.pk.type} == "java.lang.Long" )
+		domain.set${helper.firstToUpper($entity.pk.name)}(key.getId());		
+#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )
+		domain.set${helper.firstToUpper($entity.pk.name)}(key);		
+#else
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
+#end		
    }
-
+   
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
 #if( $entity.isUnique($field.name) )

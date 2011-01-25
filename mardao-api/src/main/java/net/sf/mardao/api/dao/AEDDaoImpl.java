@@ -75,6 +75,12 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
 		return returnValue;
 	}
 	
+	protected T asSingleEntity(PreparedQuery pq) {
+		final Entity entity = pq.asSingleEntity();
+		final T domain = convert(entity);
+		return domain;
+	}
+	
 	
 	/**
 	 * @param ascending 
@@ -108,7 +114,7 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
 	 * @param filters 
 	 *
 	 */
-	protected PreparedQuery prepare(String orderBy, boolean ascending, Expression[] filters) {
+	protected PreparedQuery prepare(String orderBy, boolean ascending, Expression... filters) {
 		final DatastoreService datastore = getDatastoreService();
 		
 		Query q = new Query(getTableName());
@@ -146,13 +152,13 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
 		
 		return datastore.put(entity);
 	}
-
-	public void update(T entity) {
-		persist(entity);
+	
+	public void update(T domain) {
+		persist(domain);
 	}
 
-	public void delete(T entity) {
-		final Key key = createKey(entity);
+	public void delete(T domain) {
+		final Key key = createKey(domain);
 		final DatastoreService datastore = getDatastoreService();
 		datastore.delete(key);
 	}
@@ -163,8 +169,8 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
 	}
 
 	public T findUniqueBy(String fieldName, Object param) {
-		// TODO Auto-generated method stub
-		return null;
+		PreparedQuery pq = prepare(null, false, new Expression(fieldName, Query.FilterOperator.EQUAL, param));
+		return asSingleEntity(pq);
 	}
 
 	public List<T> findBy(String fieldName, Object param) {
@@ -178,14 +184,13 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
 	}
 
 	public T findBy(Map<String, Object> args) {
-		// TODO Auto-generated method stub
-		return null;
+		PreparedQuery pq = prepare(args, null, false);
+		return asSingleEntity(pq);
 	}
 
 	public List<T> findBy(Map<String, Object> args, String orderBy,
 			boolean ascending) {
-		// TODO Auto-generated method stub
-		return null;
+		return findBy(args, orderBy, ascending, -1, 0);
 	}
 
 	public List<T> findBy(Map<String, Object> filters, String orderBy,

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface Dao<T, ID extends Serializable> {
+	void delete(T entity);
 	
 	int deleteAll();
 
@@ -13,4 +14,5 @@ public interface Dao<T, ID extends Serializable> {
 
 	void persist(T entity);
 
+	void update(T entity);
 }

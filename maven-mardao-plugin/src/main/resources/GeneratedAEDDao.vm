@@ -48,6 +48,13 @@ COLUMN_NAME_${field.name.toUpperCase()}#if( $velocityCount < $allFields.size() )
 	 * @return a List of ${entity.simpleName}s with the specified attribute
 	 */
 	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+	
+	/**
+	 * find-primary-key-by method for attribute field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return a List of keys to the ${entity.simpleName}s with the specified attribute
+	 */
+	List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
 #end	
 	 
 #end	

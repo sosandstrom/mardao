@@ -6,6 +6,8 @@ import java.util.List;
 public interface Dao<T, ID extends Serializable> {
 	void delete(T entity);
 	
+	void delete(List<ID> primaryKeys);
+	
 	int deleteAll();
 
 	List<T> findAll();

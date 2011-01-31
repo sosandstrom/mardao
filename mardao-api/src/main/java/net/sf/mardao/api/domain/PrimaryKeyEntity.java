@@ -1,5 +1,7 @@
 package net.sf.mardao.api.domain;
 
-public interface PrimaryKeyEntity {
+import java.io.Serializable;
+
+public interface PrimaryKeyEntity extends Serializable {
     Object getPrimaryKey();
 }

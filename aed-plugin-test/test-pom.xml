@@ -17,6 +17,7 @@
 	
 	<modules>
 		<module>../maven-mardao-plugin</module>
+		<module>../mardao-api</module>
 		<module>.</module>
 	</modules>
 </project>

@@ -7,6 +7,7 @@ import java.util.Map;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
 
 import net.sf.mardao.api.dao.AEDDaoImpl;
 
@@ -125,7 +126,11 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
    }
    
    protected Entity convert(${entity.simpleName} domain) {
+#if( $entity.parent )
+        final Entity entity = createEntity((Key) domain.getParentKey(), domain.get${helper.firstToUpper($entity.pk.name)}());
+#else
         final Entity entity = createEntity(domain.get${helper.firstToUpper($entity.pk.name)}());
+#end
 
 		// properties
 #foreach( $field in $entity.fields )
@@ -146,10 +151,14 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
    }
 
    protected Key createKey(${entity.pk.type} ${entity.pk.name}) {
+      return createKey(null, ${entity.pk.name});
+   }
+   
+   protected Key createKey(Key parentKey, ${entity.pk.type} ${entity.pk.name}) {
 #if( ${entity.pk.type} == "java.lang.String" )
-		return KeyFactory.createKey(getTableName(), ${entity.pk.name});
+		return KeyFactory.createKey(parentKey, getTableName(), ${entity.pk.name});
 #elseif( ${entity.pk.type} == "java.lang.Long" )
-		return KeyFactory.createKey(getTableName(), ${entity.pk.name});
+		return KeyFactory.createKey(parentKey, getTableName(), ${entity.pk.name});
 #elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
 		return ${entity.pk.name};
 #else
@@ -236,6 +245,20 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #end		
    }
+   
+#if( $entity.parent )
+#set( $field = $entity.parent )
+	// ----------------------- parent finder -------------------------------
+	/**
+	 * find-by method for parent field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return a List of ${entity.simpleName}s with the specified parent
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		final PreparedQuery query = prepare(false, ${field.name}, null, false);
+		return asIterable(query, -1, 0);
+	}
+#end   
    
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
@@ -390,6 +413,68 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #end
 
 	// ----------------------- populate / persist method -------------------------
+
+	/**
+	 * Persist an entity given all attributes
+	 */
+	public ${entity.simpleName} persist(#if( $entity.parent )
+${entity.parent.type} ${entity.parent.name},  	
+#end		${entity.pk.type} ${entity.pk.name}#foreach( $field in $entity.fields )
+, 
+		${field.type} ${field.name}#end
+#foreach( $field in $entity.oneToOnes )	 
+, 
+		${field.type} ${field.name}#end
+#foreach( $field in $entity.manyToOnes )	 
+, 
+		${field.type} ${field.name}#end) {
+		${entity.simpleName} domain = null;
+		// if primaryKey specified, use it
+		if (null != ${entity.pk.name}) {
+			domain = findByPrimaryKey(#if( $entity.parent )
+${entity.parent.name}, #end${entity.pk.name});
+		}
+		
+#if( 0 < $entity.uniqueFieldsSets.size() )
+#set( $uniqueFields = $entity.uniqueFieldsSets.get(0) )
+		// use find-by unique column set
+		if (null == domain) {
+			final java.util.Map<String,Object> args = new java.util.HashMap<String,Object>($uniqueFields.size());
+#foreach( $field in $uniqueFields )
+			args.put(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
+#end
+			domain = findBy(args);
+		}
+#end		
+		// create new?
+		if (null == domain) {
+			domain = new ${entity.simpleName}();
+#if( $entity.parent )
+			// set parent
+			domain.set${helper.firstToUpper($entity.parent.name)}(${entity.parent.name});
+#end			
+			// generate Id?
+			if (null != ${entity.pk.name}) {
+				domain.set${helper.firstToUpper($entity.pk.name)}(${entity.pk.name});
+			}
+			// fields
+#foreach( $field in $entity.fields )
+			domain.set${helper.firstToUpper($field.name)}(${field.name});
+#end
+			// one-to-ones
+#foreach( $field in $entity.oneToOnes )	 
+			domain.set${helper.firstToUpper($field.name)}(${field.name});
+#end
+			// many-to-ones
+#foreach( $field in $entity.manyToOnes )	 
+			domain.set${helper.firstToUpper($field.name)}(${field.name});
+#end
+			
+			persist(domain);
+		}
+		return domain;
+	}
+
 
 #if( $persistenceType != "JPA" )
 #if( $entity.firstUniqueField )

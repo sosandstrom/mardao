@@ -32,6 +32,17 @@ COLUMN_NAME_${field.name.toUpperCase()}#if( $velocityCount < $allFields.size() )
 #end);
 
 
+#if( $entity.parent )
+#set( $field = $entity.parent )
+	// ----------------------- parent finder -------------------------------
+	/**
+	 * find-by method for parent field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return a List of ${entity.simpleName}s with the specified parent
+	 */
+	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+#end   
+   
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
 #if( $entity.isUnique($field.name) )
@@ -140,6 +151,21 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #end
 	
 	// ----------------------- populate / persist method -------------------------
+
+	/**
+	 * Persist an entity given all attributes
+	 */
+	${entity.simpleName} persist(#if( $entity.parent )
+${entity.parent.type} ${entity.parent.name},  	
+#end		${entity.pk.type} ${entity.pk.name}#foreach( $field in $entity.fields )
+, 
+		${field.type} ${field.name}#end
+#foreach( $field in $entity.oneToOnes )	 
+, 
+		${field.type} ${field.name}#end
+#foreach( $field in $entity.manyToOnes )	 
+, 
+		${field.type} ${field.name}#end);	
 
 #if( $persistenceType != "JPA" )
 #if( $entity.firstUniqueField )

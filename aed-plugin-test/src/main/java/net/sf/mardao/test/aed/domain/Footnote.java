@@ -1,50 +1,52 @@
 package net.sf.mardao.test.aed.domain;
 
-import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+
+import net.sf.mardao.api.Parent;
+import net.sf.mardao.api.domain.AEDPrimaryKeyEntity;
 
 import com.google.appengine.api.datastore.Key;
 
 @Entity
-public class Footnote extends AbstractPrimaryKeyEntity {
-	@Id
-	private Key key;
-	
-	private String name;
-	
-	/** References the page key*/
-	// @ManyToOne
-	@Basic
-	private Key page;
+public class Footnote extends AEDPrimaryKeyEntity {
+    private static final long serialVersionUID = 1L;
 
-	@Override
-	public Object getPrimaryKey() {
-		return key;
-	}
+    @Id
+    private Key               key;
 
-	public String getName() {
-		return name;
-	}
+    private String            name;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Parent(kind = "Page")
+    private Key               page;
 
-	public Key getKey() {
-		return key;
-	}
+    @Override
+    public Object getSimpleKey() {
+        return key;
+    }
 
-	public void setKey(Key key) {
-		this.key = key;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public Key getPage() {
-		return page;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setPage(Key page) {
-		this.page = page;
-	}
+    public Key getKey() {
+        return key;
+    }
+
+    public void setKey(Key key) {
+        this.key = key;
+    }
+
+    public Key getPage() {
+        return page;
+    }
+
+    public void setPage(Key page) {
+        this.page = page;
+    }
 
 }

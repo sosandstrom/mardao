@@ -4,60 +4,63 @@ import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import net.sf.mardao.api.Parent;
+import net.sf.mardao.api.domain.AEDPrimaryKeyEntity;
+
 import com.google.appengine.api.datastore.Key;
 
 @Entity
-public class Page extends AbstractPrimaryKeyEntity {
-	@Id
-	private Key key;
-	
-	private String body;
-	
-	/** References the book's ISBN */
-	// @ManyToOne
-	@Basic
-	private String book;
+public class Page extends AEDPrimaryKeyEntity {
+    @Id
+    private Long              pageNumber;
 
-	/** References the book's Chapter key */
-	// @ManyToOne
-	@Basic
-	private Long chapter;
+    private String            body;
 
-	@Override
-	public Object getPrimaryKey() {
-		return key;
-	}
+    /** References the book's ISBN */
+    // @ManyToOne
+    @Basic
+    private String            book;
 
-	public Key getKey() {
-		return key;
-	}
+    @Parent(kind = "Chapter")
+    private Key               chapter;
 
-	public void setKey(Key key) {
-		this.key = key;
-	}
+    private static final long serialVersionUID = 5589616677376850910L;
 
-	public String getBody() {
-		return body;
-	}
+    @Override
+    public Object getSimpleKey() {
+        return pageNumber;
+    }
 
-	public void setBody(String body) {
-		this.body = body;
-	}
+    public String getBody() {
+        return body;
+    }
 
-	public String getBook() {
-		return book;
-	}
+    public void setBody(String body) {
+        this.body = body;
+    }
 
-	public void setBook(String book) {
-		this.book = book;
-	}
+    public String getBook() {
+        return book;
+    }
 
-	public void setChapter(Long chapter) {
-		this.chapter = chapter;
-	}
+    public void setBook(String book) {
+        this.book = book;
+    }
 
-	public Long getChapter() {
-		return chapter;
-	}
+    public void setChapter(Key chapter) {
+        this.chapter = chapter;
+    }
+
+    public Key getChapter() {
+        return chapter;
+    }
+
+    public Long getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(Long pageNumber) {
+        this.pageNumber = pageNumber;
+    }
 
 }

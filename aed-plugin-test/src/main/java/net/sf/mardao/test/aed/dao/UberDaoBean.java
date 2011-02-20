@@ -10,92 +10,93 @@ import net.sf.mardao.test.aed.domain.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.datastore.Key;
+
 public class UberDaoBean {
-	static final Logger LOG = LoggerFactory.getLogger(UberDaoBean.class);
-	
-	static final String ISBN = "ISBN-123-4569677-01"; 
-	
-	private BookDao bookDao;
-	private ChapterDao chapterDao;
-	private PageDao pageDao;
-	private FootnoteDao footnoteDao;
-	
-	public void setup() {
-		Book book = new Book();
-		book.setISBN(ISBN);
-		book.setTitle("Good morning midnight");
-		bookDao.persist(book);
-		
-		Chapter chapter = new Chapter();
-		chapter.setId(42L);
-		chapter.setBook(book.getISBN());
-		chapter.setName("Prologue");
-		chapterDao.persist(chapter);
-		
-		Page page1 = new Page();
-		page1.setBody("Lorem ipsum dolor ...");
-		page1.setBook(book.getISBN());
-		page1.setChapter(chapter.getId());
-		pageDao.persist(page1);
-		LOG.info("persisted " + page1);
-		
-		Footnote footnote = new Footnote();
-		footnote.setName("Be aware that...");
-		footnote.setPage(page1.getKey());
-		footnoteDao.persist(footnote);
-		
-		test();
-	}
+    static final Logger LOG  = LoggerFactory.getLogger(UberDaoBean.class);
 
-	public void test() {
-		List<Book> books = bookDao.findAll();
-		chapterDao.findAll();
-		pageDao.findAll();
-		footnoteDao.findAll();
-		
-		Book book = bookDao.findByPrimaryKey(ISBN);
-		
-		List<Chapter> chapters = chapterDao.findByBook(ISBN);
-		if (chapters.isEmpty()) {
-			LOG.error("Expected chapters in book {}", ISBN);
-		}
-	}
+    static final String ISBN = "ISBN-123-4569677-01";
 
-	public void destroy() {
-		bookDao.deleteAll();
-	}
+    private BookDao     bookDao;
+    private ChapterDao  chapterDao;
+    private PageDao     pageDao;
+    private FootnoteDao footnoteDao;
 
-	public ChapterDao getChapterDao() {
-		return chapterDao;
-	}
+    public void setup() {
+        Book book = new Book();
+        book.setISBN(ISBN);
+        book.setTitle("Good morning midnight");
+        bookDao.persist(book);
 
-	public void setChapterDao(ChapterDao chapterDao) {
-		this.chapterDao = chapterDao;
-	}
+        Chapter chapter = new Chapter();
+        chapter.setId(42L);
+        chapter.setBook((Key) book.getPrimaryKey());
+        chapter.setName("Prologue");
+        chapterDao.persist(chapter);
 
-	public PageDao getPageDao() {
-		return pageDao;
-	}
+        Page page1 = new Page();
+        page1.setBody("Lorem ipsum dolor ...");
+        page1.setBook(book.getISBN());
+        page1.setChapter((Key) chapter.getPrimaryKey());
+        pageDao.persist(page1);
+        LOG.info("persisted " + page1);
 
-	public void setPageDao(PageDao pageDao) {
-		this.pageDao = pageDao;
-	}
+        Footnote footnote = new Footnote();
+        footnote.setName("Be aware that...");
+        footnote.setPage((Key) page1.getPrimaryKey());
+        footnoteDao.persist(footnote);
 
-	public void setBookDao(BookDao bookDao) {
-		this.bookDao = bookDao;
-	}
+        test();
+    }
 
-	public BookDao getBookDao() {
-		return bookDao;
-	}
+    public void test() {
+        List<Book> books = bookDao.findAll();
+        chapterDao.findAll();
+        pageDao.findAll();
+        footnoteDao.findAll();
 
-	public FootnoteDao getFootnoteDao() {
-		return footnoteDao;
-	}
+        Book book = bookDao.findByPrimaryKey(ISBN);
 
-	public void setFootnoteDao(FootnoteDao footnoteDao) {
-		this.footnoteDao = footnoteDao;
-	}
-	
-	
+        List<Chapter> chapters = chapterDao.findByBook((Key) book.getPrimaryKey());
+        if (chapters.isEmpty()) {
+            LOG.error("Expected chapters in book {}", ISBN);
+        }
+    }
+
+    public void destroy() {
+        bookDao.deleteAll();
+    }
+
+    public ChapterDao getChapterDao() {
+        return chapterDao;
+    }
+
+    public void setChapterDao(ChapterDao chapterDao) {
+        this.chapterDao = chapterDao;
+    }
+
+    public PageDao getPageDao() {
+        return pageDao;
+    }
+
+    public void setPageDao(PageDao pageDao) {
+        this.pageDao = pageDao;
+    }
+
+    public void setBookDao(BookDao bookDao) {
+        this.bookDao = bookDao;
+    }
+
+    public BookDao getBookDao() {
+        return bookDao;
+    }
+
+    public FootnoteDao getFootnoteDao() {
+        return footnoteDao;
+    }
+
+    public void setFootnoteDao(FootnoteDao footnoteDao) {
+        this.footnoteDao = footnoteDao;
+    }
+
 }

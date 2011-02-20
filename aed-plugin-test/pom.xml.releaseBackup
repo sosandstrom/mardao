@@ -4,13 +4,13 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>net.sf.mardao</groupId>
-		<version>1.7-SNAPSHOT</version>
+		<version>1.8-SNAPSHOT</version>
 	</parent>
 
 	<!-- The Basics -->
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>aed-plugin-test</artifactId>
-	<version>1.7-SNAPSHOT</version>
+	<version>1.8-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -193,7 +193,7 @@
 			<plugin>
 				<groupId>net.sf.mardao</groupId>
 				<artifactId>maven-mardao-plugin</artifactId>
-				<version>1.7-SNAPSHOT</version>
+				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>generate-generics</id>

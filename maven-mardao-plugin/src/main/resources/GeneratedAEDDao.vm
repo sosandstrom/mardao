@@ -156,7 +156,7 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	 * Persist an entity given all attributes
 	 */
 	${entity.simpleName} persist(#if( $entity.parent )
-${entity.parent.type} ${entity.parent.name},  	
+Object ${entity.parent.name},  	
 #end		${entity.pk.type} ${entity.pk.name}#foreach( $field in $entity.fields )
 , 
 		${field.type} ${field.name}#end

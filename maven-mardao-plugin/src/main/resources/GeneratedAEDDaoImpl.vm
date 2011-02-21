@@ -64,6 +64,10 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 #else
 		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #end
+#if( $entity.parent )
+		// parent
+		domain.set${helper.firstToUpper(${entity.parent.name})}(entity.getParent());
+#end
 		// properties
 #foreach( $field in $entity.fields )
 #if( $field.type == "java.lang.String" )
@@ -418,7 +422,7 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	 * Persist an entity given all attributes
 	 */
 	public ${entity.simpleName} persist(#if( $entity.parent )
-${entity.parent.type} ${entity.parent.name},  	
+Object ${entity.parent.name},  	
 #end		${entity.pk.type} ${entity.pk.name}#foreach( $field in $entity.fields )
 , 
 		${field.type} ${field.name}#end
@@ -451,7 +455,7 @@ ${entity.parent.name}, #end${entity.pk.name});
 			domain = new ${entity.simpleName}();
 #if( $entity.parent )
 			// set parent
-			domain.set${helper.firstToUpper($entity.parent.name)}(${entity.parent.name});
+			domain.set${helper.firstToUpper($entity.parent.name)}((${entity.parent.type}) ${entity.parent.name});
 #end			
 			// generate Id?
 			if (null != ${entity.pk.name}) {

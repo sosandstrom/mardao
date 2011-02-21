@@ -291,9 +291,9 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
         return findByPrimaryKey(null, primaryKey);
     }
 
-    public T findByPrimaryKey(Key parentKey, ID primaryKey) {
+    public T findByPrimaryKey(Object parentKey, ID primaryKey) {
         T domain = null;
-        final Key key = createKey(parentKey, primaryKey);
+        final Key key = createKey((Key) parentKey, primaryKey);
         final DatastoreService datastore = getDatastoreService();
         try {
             final Entity entity = datastore.get(key);

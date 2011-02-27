@@ -252,15 +252,25 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
    
 #if( $entity.parent )
 #set( $field = $entity.parent )
-	// ----------------------- parent finder -------------------------------
+	// ----------------------- parent finders -------------------------------
 	/**
 	 * find-by method for parent field ${field.name}
 	 * @param ${field.name} the specified attribute
 	 * @return a List of ${entity.simpleName}s with the specified parent
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		final PreparedQuery query = prepare(false, ${field.name}, null, false);
+		final PreparedQuery query = prepare(false, ${field.name}, null, null, false);
 		return asIterable(query, -1, 0);
+	}
+
+	/**
+	 * find-by method for parent field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return a List of ${entity.simpleName}s with the specified parent
+	 */
+	public final List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		final PreparedQuery query = prepare(true, ${field.name}, null, null, false);
+		return asKeys(query, -1, 0);
 	}
 #end   
    

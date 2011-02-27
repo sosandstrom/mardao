@@ -26,10 +26,8 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 
 	/** The list of attribute names */
 	static final List<String> COLUMN_NAMES = Arrays.asList(
-		COLUMN_NAME_${entity.pk.name.toUpperCase()},
-		#foreach( $field in $allFields )
-COLUMN_NAME_${field.name.toUpperCase()}#if( $velocityCount < $allFields.size() ), #end
-#end);
+		COLUMN_NAME_${entity.pk.name.toUpperCase()}#foreach( $field in $allFields ), 
+		COLUMN_NAME_${field.name.toUpperCase()}#end);
 
 
 #if( $entity.parent )
@@ -41,8 +39,9 @@ COLUMN_NAME_${field.name.toUpperCase()}#if( $velocityCount < $allFields.size() )
 	 * @return a List of ${entity.simpleName}s with the specified parent
 	 */
 	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
-#end   
    
+	List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+#end   
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
 #if( $entity.isUnique($field.name) )

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -220,7 +221,7 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
      * 
      */
     protected PreparedQuery prepare(boolean keysOnly, String orderBy, boolean ascending, Expression... filters) {
-        return prepare(keysOnly, null, orderBy, ascending, filters);
+        return prepare(keysOnly, null, null, orderBy, ascending, filters);
     }
 
     /**
@@ -232,7 +233,8 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
      * @param filters
      * @return
      */
-    protected PreparedQuery prepare(boolean keysOnly, Key parentKey, String orderBy, boolean ascending, Expression... filters) {
+    protected PreparedQuery prepare(boolean keysOnly, Key parentKey, Key simpleKey, String orderBy, boolean ascending,
+            Expression... filters) {
         LOGGER.debug("findUnique {} with filters {}", getTableName(), filters);
         final DatastoreService datastore = getDatastoreService();
 
@@ -241,6 +243,11 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
         // keys only?
         if (keysOnly) {
             q.setKeysOnly();
+        }
+
+        // filter on keyName:
+        if (null != simpleKey) {
+            q.addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.EQUAL, simpleKey);
         }
 
         // filter query:
@@ -278,17 +285,12 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
         return prepare(true, orderBy, ascending, filters);
     }
 
-    // protected Key createKey(ID primaryKey) {
-    // if (primaryKey instanceof Key) {
-    // return (Key) primaryKey;
-    // }
-    // else if (primaryKey instanceof String) {
-    // return
-    // }
-    // }
-
     public T findByPrimaryKey(ID primaryKey) {
         return findByPrimaryKey(null, primaryKey);
+    }
+
+    public Map<ID, T> findByPrimaryKeys(Iterable<ID> primaryKeys) {
+        return findByPrimaryKeys(null, primaryKeys);
     }
 
     public T findByPrimaryKey(Object parentKey, ID primaryKey) {
@@ -304,6 +306,31 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
         LOGGER.debug("{} -> {}", key.toString(), domain);
 
         return domain;
+    }
+
+    public Map<ID, T> findByPrimaryKeys(Object parentKey, Iterable<ID> primaryKeys) {
+        final Map<ID, T> returnValue = new TreeMap<ID, T>();
+        final List<Key> keys = new ArrayList<Key>();
+        Key key;
+        for(ID id : primaryKeys) {
+            key = createKey((Key) parentKey, id);
+            keys.add(key);
+        }
+        final DatastoreService datastore = getDatastoreService();
+        final Map<Key, Entity> entities = datastore.get(keys);
+        T domain;
+        ID id;
+        for(Entry<Key, Entity> entry : entities.entrySet()) {
+            id = convert(entry.getKey());
+            domain = convert(entry.getValue());
+            returnValue.put(id, domain);
+        }
+        return returnValue;
+    }
+
+    public List<ID> findAllKeys() {
+        PreparedQuery pq = prepare(true, Entity.KEY_RESERVED_PROPERTY, true);
+        return asKeys(pq, -1, 0);
     }
 
     protected Key persist(Entity entity) {

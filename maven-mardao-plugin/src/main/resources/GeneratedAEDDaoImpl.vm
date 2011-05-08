@@ -157,8 +157,11 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
    protected Key createKey(${entity.pk.type} ${entity.pk.name}) {
       return createKey(null, ${entity.pk.name});
    }
-   
-   protected Key createKey(Key parentKey, ${entity.pk.type} ${entity.pk.name}) {
+
+   /**
+    * Only implemented on AED
+	*/
+   public final Key createKey(Key parentKey, ${entity.pk.type} ${entity.pk.name}) {
 #if( ${entity.pk.type} == "java.lang.String" )
 		return KeyFactory.createKey(parentKey, getTableName(), ${entity.pk.name});
 #elseif( ${entity.pk.type} == "java.lang.Long" )
@@ -170,11 +173,11 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 #end
    }
 
-   protected List<Key> createKeys(List<${entity.pk.type}> ${entity.pk.name}s) {
+   protected List<Key> createKeys(Key parentKey, List<${entity.pk.type}> ${entity.pk.name}s) {
 #if( ${entity.pk.type} == "java.lang.String" || ${entity.pk.type} == "java.lang.Long" )
 		final List<Key> returnValue = new ArrayList<Key>();
 		for (${entity.pk.type} ${entity.pk.name} : ${entity.pk.name}s) {
-			returnValue.add(createKey(${entity.pk.name}));
+			returnValue.add(createKey(parentKey, ${entity.pk.name}));
 		}
 		return returnValue;
 #elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
@@ -204,6 +207,7 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #end
    }
+   
    
    protected void populate(Entity entity, Map<String, Object> nameValuePairs) {
 		// properties
@@ -250,8 +254,28 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 #end		
    }
    
+   public void delete(List<${entity.simpleName}> domains) {
+	   final List<Key> keys = new ArrayList<Key>(domains.size());
+	   for (${entity.simpleName} domain : domains) {
+	       keys.add(createKey(domain));
+	   }
+	   deleteByCore(keys);
+   }
+   
 #if( $entity.parent )
 #set( $field = $entity.parent )
+#if( ${entity.pk.type} != "com.google.appengine.api.datastore.Key" )
+	public void delete(Object parentKey, List<${entity.pk.type}> childKeys) {
+       final List<Key> keys = createKeys((Key) parentKey, childKeys);
+	   deleteByCore(keys);
+    }
+	
+	public void delete(Object parentKey, ${entity.pk.type} childKey) {
+       final Key key = createKey((Key) parentKey, childKey);
+	   delete(key);
+    }
+#end
+
 	// ----------------------- parent finders -------------------------------
 	/**
 	 * find-by method for parent field ${field.name}
@@ -272,6 +296,16 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 		final PreparedQuery query = prepare(true, ${field.name}, null, null, false);
 		return asKeys(query, -1, 0);
 	}
+#else
+#if( ${entity.pk.type} != "com.google.appengine.api.datastore.Key" )
+    // ----------------------- delete -------------------------------
+	public void delete(${entity.pk.simpleType} primaryKey) {
+        delete(createKey(primaryKey));
+	}
+	
+#end
+   
+	
 #end   
    
 	// ----------------------- field finders -------------------------------

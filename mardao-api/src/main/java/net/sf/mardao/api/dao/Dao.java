@@ -7,7 +7,7 @@ import java.util.Map;
 public interface Dao<T, ID extends Serializable> {
     void delete(T entity);
 
-    void delete(List<ID> primaryKeys);
+    void delete(List<T> entities);
 
     int deleteAll();
 

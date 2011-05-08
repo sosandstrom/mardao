@@ -3,6 +3,8 @@ package ${daoPackage};
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.appengine.api.datastore.Key;
+
 import net.sf.mardao.api.dao.Dao;
 
 import ${entity.className};
@@ -29,9 +31,32 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 		COLUMN_NAME_${entity.pk.name.toUpperCase()}#foreach( $field in $allFields ), 
 		COLUMN_NAME_${field.name.toUpperCase()}#end);
 
+   /**
+    * Only implemented on AED
+	*/
+	Key createKey(Key parentKey, ${entity.pk.type} ${entity.pk.name});
+	
 
+    // ----------------------- canonical deletes -------------------------------
+   /**
+    * Only implemented on AED
+	*/
+	void delete(Key primaryKey);
+
+   /**
+    * Only implemented on AED
+	*/
+    void deleteByCore(List<Key> primaryKeys);
+		
 #if( $entity.parent )
 #set( $field = $entity.parent )
+#if( ${entity.pk.type} != "com.google.appengine.api.datastore.Key" )
+	void delete(Object parentKey, List<${entity.pk.type}> childKeys);
+	
+	void delete(Object parentKey, ${entity.pk.type} childKey);
+	
+#end
+
 	// ----------------------- parent finder -------------------------------
 	/**
 	 * find-by method for parent field ${field.name}
@@ -41,6 +66,14 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
    
 	List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+#else
+#if( ${entity.pk.type} != "com.google.appengine.api.datastore.Key" )
+	void deleteByKeys(List<${entity.pk.type}> primaryKeys);
+	
+	void delete(${entity.pk.type} primaryKey);
+	
+#end
+	
 #end   
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
@@ -66,7 +99,7 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	 */
 	List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
 #end	
-	 
+
 #end	
 		  
 	// ----------------------- one-to-one finders -------------------------

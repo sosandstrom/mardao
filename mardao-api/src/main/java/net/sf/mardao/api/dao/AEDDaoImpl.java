@@ -69,9 +69,13 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
 
     protected abstract Key createKey(ID primaryKey);
 
-    protected abstract Key createKey(Key parentKey, ID primaryKey);
+    public abstract Key createKey(Key parentKey, ID primaryKey);
 
-    protected abstract List<Key> createKeys(List<ID> primaryKeys);
+    protected abstract List<Key> createKeys(Key parentKey, List<ID> primaryKeys);
+
+    protected List<Key> createKeys(List<ID> primaryKeys) {
+        return createKeys(null, primaryKeys);
+    }
 
     protected abstract String getTableName();
 
@@ -166,6 +170,27 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
         for(Entity entity : pq.asIterable(fetchOptions)) {
             key = convert(entity.getKey());
             returnValue.add(key);
+        }
+
+        return returnValue;
+    }
+
+    protected List<Key> asCoreKeys(PreparedQuery pq, int limit, int offset) {
+        final List<Key> returnValue = new ArrayList<Key>();
+
+        FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
+
+        if (0 < limit) {
+            fetchOptions.limit(limit);
+        }
+
+        if (0 < offset) {
+            fetchOptions.offset(offset);
+        }
+
+        ID key;
+        for(Entity entity : pq.asIterable(fetchOptions)) {
+            returnValue.add(entity.getKey());
         }
 
         return returnValue;
@@ -345,15 +370,27 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
 
     public void delete(T domain) {
         final Key key = createKey(domain);
-        final DatastoreService datastore = getDatastoreService();
-        datastore.delete(key);
+        delete(key);
     }
 
-    public void delete(List<ID> primaryKeys) {
-        final List<Key> keys = createKeys(primaryKeys);
+    public void delete(Key primaryKey) {
         final DatastoreService datastore = getDatastoreService();
-        datastore.delete(keys);
+        datastore.delete(primaryKey);
     }
+
+    public void deleteByCore(List<Key> primaryKeys) {
+        final DatastoreService datastore = getDatastoreService();
+        datastore.delete(primaryKeys);
+    }
+
+    public void deleteByKeys(List<ID> primaryKeys) {
+        deleteByCore(createKeys(primaryKeys));
+    }
+
+    // public void delete(List<ID> primaryKeys) {
+    // delete(null, primaryKeys);
+    // }
+    //
 
     public List<T> findAll() {
         LOGGER.debug(persistentClass.getSimpleName());
@@ -427,8 +464,9 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
     }
 
     public int deleteAll() {
-        final List<ID> keys = findKeysBy(null, false, -1, 0);
-        delete(keys);
+        PreparedQuery pq = prepareKeys(null, false);
+        List<Key> keys = asCoreKeys(pq, -1, 0);
+        deleteByCore(keys);
         return keys.size();
     }
 

@@ -190,12 +190,12 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
    protected Key createKey(${entity.simpleName} domain) {
 #if( ${entity.pk.type} == "java.lang.String" )
 		if (null != domain.get${helper.firstToUpper(${entity.pk.name})}()) {
-			return KeyFactory.createKey(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
+			return KeyFactory.createKey((Key) domain.getParentKey(), getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
 		}
 		return null;
 #elseif( ${entity.pk.type} == "java.lang.Long" )
 		if (null != domain.get${helper.firstToUpper(${entity.pk.name})}()) {
-			return KeyFactory.createKey(getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
+			return KeyFactory.createKey((Key) domain.getParentKey(), getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
 		}
 		return null;
 #elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		

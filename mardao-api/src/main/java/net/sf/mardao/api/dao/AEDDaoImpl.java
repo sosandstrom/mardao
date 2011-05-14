@@ -379,6 +379,7 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
     }
 
     public void deleteByCore(List<Key> primaryKeys) {
+        LOGGER.debug("deleteByCore({}, {})", persistentClass.getSimpleName(), primaryKeys);
         final DatastoreService datastore = getDatastoreService();
         datastore.delete(primaryKeys);
     }

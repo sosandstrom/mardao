@@ -1,0 +1,20 @@
+package ${controllerPackage};
+
+import ${daoPackage}.${entity.simpleName}Dao;
+#foreach( $p in $parents )
+import ${daoPackage}.${p.simpleName}Dao;
+#end	
+
+/**
+ * Concrete Controller related to entity ${entity.simpleName}.
+ */
+//@Controller
+//@RequestMapping(value = "#foreach( $p in $ancestors )/${p.simpleName}/{${p.simpleName.toLowerCase()}}#end/${entity.simpleName}")
+public class ${entity.simpleName}Controller extends Generated${entity.simpleName}Controller 
+##	extends Generated${entity.simpleName}DaoImpl
+##		implements ${entity.simpleName}Dao 
+{
+
+	// Write your non-generated business logic here
+
+}

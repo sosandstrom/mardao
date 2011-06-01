@@ -1,0 +1,77 @@
+package ${controllerPackage};
+
+import java.util.List;
+
+import ${entity.className};
+
+import ${daoPackage}.${entity.simpleName}Dao;
+#foreach( $p in $parents )
+import ${daoPackage}.${p.simpleName}Dao;
+#end	
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.google.appengine.api.datastore.Key;
+
+/**
+ * Implementation of Controller related to entity ${entity.simpleName}.
+ */
+@Controller
+@RequestMapping(value = "#foreach( $p in $ancestors )/${p.simpleName}/{${p.simpleName.toLowerCase()}}#end/${entity.simpleName}")
+public abstract class Generated${entity.simpleName}Controller 
+##	extends Generated${entity.simpleName}DaoImpl
+##		implements ${entity.simpleName}Dao 
+{
+#if( $entity.parent )
+	/** parent dao */
+	protected ${entity.parent.entity.simpleName}Dao parentDao;
+	
+#end	
+#foreach( $p in $ancestors )
+	/** DAO for parent${velocityCount} ${p.simpleName} */
+	protected ${p.simpleName}Dao parent${velocityCount}Dao;
+#end	
+	/** dao for this entity */
+	protected ${entity.simpleName}Dao dao;
+	
+	
+//    @ModelAttribute(ProjectHandlerInterceptor.KEY_PROJNAME)
+//    public Object populateProjName(HttpServletRequest request) {
+//        return request.getAttribute(ProjectHandlerInterceptor.KEY_PROJNAME);
+//    }
+	
+	
+#if( $entity.parent )
+    @RequestMapping(method = RequestMethod.GET)
+    public String getList(Model model#foreach( $p in $ancestors ), 
+	@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
+		Object parentKey = null;
+#foreach( $p in $ancestors )
+		// ${p.simpleName}
+        final Object parent${velocityCount}Key = parent${velocityCount}Dao.createKey(parentKey, ${p.simpleName.toLowerCase()});
+	    parentKey = parent${velocityCount}Key;
+#end
+        final List<${entity.simpleName}> list = dao.findBy${entity.parent.entity.simpleName}(parentKey);
+        model.addAttribute("list", list);
+        return "list";
+    }
+	
+	public final void setParentDao(${entity.parent.entity.simpleName}Dao parentDao) {
+		this.parentDao = parentDao;
+	}
+	
+#foreach( $p in $ancestors )
+    public final void setParent${velocityCount}Dao(${p.simpleName}Dao parentDao) {
+	    this.parent${velocityCount}Dao = parentDao;
+	}
+	
+#end
+#end	
+	public final void setDao(${entity.simpleName}Dao dao) {
+		this.dao = dao;
+	}
+}

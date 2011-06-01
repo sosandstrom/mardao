@@ -230,4 +230,38 @@
 			</list>
 		</property>
 	</bean>
+
+	<bean id="mergeSchemeWEB" class="net.sf.mardao.domain.MergeScheme">
+		<constructor-arg name="parent" ref="mergeSchemeRoot" />
+		<property name="templates">
+			<list>
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="Generated" />
+					<property name="templateMiddle" value="Controller" />
+					<property name="typeAppend" value="false" />
+					<property name="destFolder" value="targetController" />
+					<property name="filePrefix" value="Generated" />
+					<property name="fileSuffix" value="Controller.java" />
+				</bean>
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templateMiddle" value="Controller" />
+					<property name="typeAppend" value="false" />
+					<!-- <property name="destFolder" value="srcController" /> -->
+					<property name="destFolder" value="targetController" />
+					<property name="fileSuffix" value="Controller.java" />
+				</bean>
+				<!-- spring-web.xml bean context -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="spring-web" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="resources" />
+					<property name="entity" value="false" />
+					<property name="listingEntities" value="true" />
+					<property name="filePrefix" value="spring-web" />
+					<property name="fileSuffix" value=".xml" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
 </beans>

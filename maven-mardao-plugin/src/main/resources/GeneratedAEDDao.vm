@@ -35,6 +35,8 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
     * Only implemented on AED
 	*/
 	Key createKey(Key parentKey, ${entity.pk.type} ${entity.pk.name});
+
+    Object createKey(Object parentKey, ${entity.pk.type} ${entity.pk.name});	
 	
 
     // ----------------------- canonical deletes -------------------------------
@@ -64,6 +66,8 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	 * @return a List of ${entity.simpleName}s with the specified parent
 	 */
 	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+		
+    List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(Object ${field.name});		
    
 	List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
 #else

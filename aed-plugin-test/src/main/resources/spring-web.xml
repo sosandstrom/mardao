@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+	">
+
+	<!-- ============== Controller Beans for entities in package net.sf.mardao.test.aed.domain ============ -->
+	
+	<bean id="bookController" class="net.sf.mardao.test.aed.web.BookController">
+	    <!-- dao for this entity -->
+	    <property name="dao" ref="bookDao" />
+	</bean>
+	
+	<bean id="chapterController" class="net.sf.mardao.test.aed.web.ChapterController">
+		<!-- DAO for parent -->
+	    <property name="parentDao" ref="bookDao" />
+		<!-- DAO for parent1 Book -->
+	    <property name="parent1Dao" ref="bookDao" />
+	    <!-- dao for this entity -->
+	    <property name="dao" ref="chapterDao" />
+	</bean>
+	
+	<bean id="pageController" class="net.sf.mardao.test.aed.web.PageController">
+		<!-- DAO for parent -->
+	    <property name="parentDao" ref="chapterDao" />
+		<!-- DAO for parent1 Book -->
+	    <property name="parent1Dao" ref="bookDao" />
+		<!-- DAO for parent2 Chapter -->
+	    <property name="parent2Dao" ref="chapterDao" />
+	    <!-- dao for this entity -->
+	    <property name="dao" ref="pageDao" />
+	</bean>
+	
+	<bean id="footnoteController" class="net.sf.mardao.test.aed.web.FootnoteController">
+		<!-- DAO for parent -->
+	    <property name="parentDao" ref="pageDao" />
+		<!-- DAO for parent1 Book -->
+	    <property name="parent1Dao" ref="bookDao" />
+		<!-- DAO for parent2 Chapter -->
+	    <property name="parent2Dao" ref="chapterDao" />
+		<!-- DAO for parent3 Page -->
+	    <property name="parent3Dao" ref="pageDao" />
+	    <!-- dao for this entity -->
+	    <property name="dao" ref="footnoteDao" />
+	</bean>
+	
+
+</beans>

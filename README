@@ -1,5 +1,5 @@
 README for the mardao Architect's Java DAO generator
-Version: 1.4
+Version: 1.9
 License: http://www.gnu.org/licenses/lgpl.html
 
 Mardao is a maven plugin, which you configure in your project's pom.xml.
@@ -12,11 +12,6 @@ pom.xml example:
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>net.sf.mardao</groupId>
-		<artifactId>parent</artifactId>
-		<version>1.1</version>
-	</parent>
 	<artifactId>basic-plugin-test</artifactId>
 	<packaging>jar</packaging>
 	<name>${groupId}::${artifactId}</name>
@@ -54,7 +49,7 @@ pom.xml example:
 			<plugin>
 				<groupId>net.sf.mardao</groupId>
 				<artifactId>maven-mardao-plugin</artifactId>
-				<version>1.3</version>
+				<version>1.9</version>
 				<executions>
 					<execution>
 						<id>generate-generics</id>
@@ -148,6 +143,11 @@ pom.xml example:
 			<artifactId>log4j</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.sf.mardao</groupId>
+			<artifactId>mardao-api</artifactId>
+			<version>1.9</version>
+		</dependency>
+		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
 			<version>1.6.2</version>
@@ -185,6 +185,18 @@ pom.xml example:
 </project>
 ================================================================================
 Release History
+
+Release 1.9 Overview:
+Good support for AppEngine low-level API, and parent keys.
+You set
+<persistenceType>AED</persistenceType>
+to generate for AppEngine low-level.
+
+New features:
+
+Fixed bugs:
+
+--------------------------------------------------------------------------------
 Release 1.4 Overview:
 One important Date bugfix, and support for Expression queries
 

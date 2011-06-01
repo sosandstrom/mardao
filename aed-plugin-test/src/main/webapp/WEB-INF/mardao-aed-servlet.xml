@@ -8,6 +8,8 @@
 
 	<import resource="classpath:spring-dao.xml" />
 
+	<import resource="classpath:spring-web.xml" />
+
 	<bean id="uberDao" class="net.sf.mardao.test.aed.dao.UberDaoBean" 
 		init-method="setup" destroy-method="destroy">
 		<property name="bookDao" ref="bookDao" />

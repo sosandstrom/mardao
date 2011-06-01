@@ -9,7 +9,7 @@
 
 	<!-- The Basics -->
 	<groupId>net.sf.mardao</groupId>
-	<artifactId>aed-plugin-test-dev</artifactId>
+	<artifactId>web-plugin-test-dev</artifactId>
 	<version>1.10-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
@@ -18,6 +18,6 @@
 	<modules>
 		<module>../maven-mardao-plugin</module>
 		<module>../mardao-api</module>
-		<module>.</module>
+		<module>./web-pom.xml</module>
 	</modules>
 </project>

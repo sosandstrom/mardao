@@ -4,17 +4,17 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>net.sf.mardao</groupId>
-		<version>1.9-SNAPSHOT</version>
+		<version>1.10-SNAPSHOT</version>
 	</parent>
 
 	<!-- The Basics -->
 	<groupId>net.sf.mardao</groupId>
-	<artifactId>aed-plugin-test</artifactId>
-	<version>1.9-SNAPSHOT</version>
+	<artifactId>web-plugin-test</artifactId>
+	<version>1.10-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
-	<description>Basic test of mardao for Google AppEngine</description>
+	<description>Basic test of mardao Web add-on</description>
 
 	<pluginRepositories>
 		<pluginRepository>
@@ -102,35 +102,6 @@
 			<version>1.1.1</version>
 			 <scope>runtime</scope>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>com.google.appengine.orm</groupId>
-			<artifactId>datanucleus-appengine</artifactId>
-			<version>1.0.7</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.appengine.orm</groupId>
-			<artifactId>datanucleus-core</artifactId>
-			<version>1.1.5</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.appengine.orm</groupId>
-			<artifactId>datanucleus-jpa</artifactId>
-			<version>1.1.5</version>
-			<scope>runtime</scope>
-		</dependency>
-		 -->
-
-		<!-- 
-		<dependency>
-			<groupId>javax.transaction</groupId>
-			<artifactId>jta</artifactId>
-			<version>1.1</version>
-		</dependency>
-		 -->
-
 
 		<!-- Make use of JSP tags. Remove, if you don't use JSPs -->
 		<dependency>
@@ -208,6 +179,19 @@
 						<goals>
 							<goal>process-classes</goal>
 						</goals>
+					</execution>
+					<execution>
+						<id>generate-web</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>process-classes</goal>
+						</goals>
+						<configuration>
+							<!-- 
+							<basePackage>net.sf.mardao.test.aed</basePackage>
+							 -->
+							<persistenceType>WEB</persistenceType>
+						</configuration>
 					</execution>
 				</executions>
 				<configuration>

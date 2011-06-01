@@ -41,7 +41,7 @@ public class EntityFieldVisitor implements FieldVisitor {
 
         // column
         if (DESC_COLUMN.equals(internal)) {
-            return new EntityAnnotationVisitor(LOG, internal, entity, field, null);
+            return new EntityAnnotationVisitor(LOG, internal, entity, field, null, entities);
         }
         // primary key
         else if (DESC_ID.equals(internal)) {
@@ -52,6 +52,7 @@ public class EntityFieldVisitor implements FieldVisitor {
         else if (DESC_PARENT.equals(internal)) {
             entity.getFields().remove(field);
             entity.setParent(field);
+            return new EntityAnnotationVisitor(LOG, internal, entity, field, null, entities);
         }
         // one-to-one
         else if (DESC_ONE_TO_ONE.equals(internal)) {
@@ -83,7 +84,7 @@ public class EntityFieldVisitor implements FieldVisitor {
                 field.setType(generic);
                 field.setEntity(entities.get(generic));
             }
-            return new EntityAnnotationVisitor(LOG, internal, entity, field, null);
+            return new EntityAnnotationVisitor(LOG, internal, entity, field, null, entities);
         }
         return null;
     }

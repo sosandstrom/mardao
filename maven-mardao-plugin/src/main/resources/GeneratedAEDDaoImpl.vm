@@ -172,6 +172,9 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #end
    }
+   public final Object createKey(Object parentKey, ${entity.pk.type} ${entity.pk.name}) {
+	   return createKey((Key) parentKey, ${entity.pk.name});
+   }
 
    protected List<Key> createKeys(Key parentKey, List<${entity.pk.type}> ${entity.pk.name}s) {
 #if( ${entity.pk.type} == "java.lang.String" || ${entity.pk.type} == "java.lang.Long" )
@@ -287,6 +290,10 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 		return asIterable(query, -1, 0);
 	}
 
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(Object ${field.name}) {
+		return findBy${helper.firstToUpper($field.name)}((${field.type}) ${field.name});
+	}
+	
 	/**
 	 * find-by method for parent field ${field.name}
 	 * @param ${field.name} the specified attribute

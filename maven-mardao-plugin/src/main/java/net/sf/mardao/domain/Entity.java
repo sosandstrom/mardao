@@ -28,6 +28,8 @@ public class Entity implements Comparable<Entity> {
     private final List<Set<String>>  uniqueConstraints = new ArrayList<Set<String>>();
     private final Map<String, Field> mappedBy          = new HashMap<String, Field>();
     private final Set<Entity>        dependsOn         = new TreeSet<Entity>();
+    private List<Entity>             ancestors         = new ArrayList<Entity>();
+    private List<Entity>             parents           = new ArrayList<Entity>();
 
     public void setClassName(String className) {
         this.className = className;
@@ -177,5 +179,21 @@ public class Entity implements Comparable<Entity> {
 
     public Field getParent() {
         return parent;
+    }
+
+    public void setAncestors(List<Entity> ancestors) {
+        this.ancestors = ancestors;
+    }
+
+    public List<Entity> getAncestors() {
+        return ancestors;
+    }
+
+    public void setParents(List<Entity> parents) {
+        this.parents = parents;
+    }
+
+    public List<Entity> getParents() {
+        return parents;
     }
 }

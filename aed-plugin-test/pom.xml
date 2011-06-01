@@ -209,6 +209,19 @@
 							<goal>process-classes</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>generate-web</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>process-classes</goal>
+						</goals>
+						<configuration>
+							<!-- 
+							<basePackage>net.sf.mardao.test.aed</basePackage>
+							 -->
+							<persistenceType>WEB</persistenceType>
+						</configuration>
+					</execution>
 				</executions>
 				<configuration>
 					<!-- Templates are retreived from plugin jar by default: <templateFolder>C:/workspaces/Misc/eclipse/Scanner/src/main/resources</templateFolder> -->

@@ -25,6 +25,11 @@ public class Footnote extends AEDPrimaryKeyEntity {
         return key;
     }
 
+    @Override
+    public Object getParentKey() {
+        return page;
+    }
+
     public String getName() {
         return name;
     }

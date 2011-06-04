@@ -11,41 +11,28 @@
 	<!-- ============== Controller Beans for entities in package net.sf.mardao.test.aed.domain ============ -->
 	
 	<bean id="bookController" class="net.sf.mardao.test.aed.web.BookController">
-	    <!-- dao for this entity -->
 	    <property name="dao" ref="bookDao" />
 	</bean>
 	
 	<bean id="chapterController" class="net.sf.mardao.test.aed.web.ChapterController">
-		<!-- DAO for parent -->
-	    <property name="parentDao" ref="bookDao" />
-		<!-- DAO for parent1 Book -->
-	    <property name="parent1Dao" ref="bookDao" />
-	    <!-- dao for this entity -->
 	    <property name="dao" ref="chapterDao" />
+	    <property name="parentDao" ref="bookDao" />
+	    <property name="parentBookDao" ref="bookDao" />
 	</bean>
 	
 	<bean id="pageController" class="net.sf.mardao.test.aed.web.PageController">
-		<!-- DAO for parent -->
-	    <property name="parentDao" ref="chapterDao" />
-		<!-- DAO for parent1 Book -->
-	    <property name="parent1Dao" ref="bookDao" />
-		<!-- DAO for parent2 Chapter -->
-	    <property name="parent2Dao" ref="chapterDao" />
-	    <!-- dao for this entity -->
 	    <property name="dao" ref="pageDao" />
+	    <property name="parentDao" ref="chapterDao" />
+	    <property name="parentBookDao" ref="bookDao" />
+	    <property name="parentChapterDao" ref="chapterDao" />
 	</bean>
 	
 	<bean id="footnoteController" class="net.sf.mardao.test.aed.web.FootnoteController">
-		<!-- DAO for parent -->
-	    <property name="parentDao" ref="pageDao" />
-		<!-- DAO for parent1 Book -->
-	    <property name="parent1Dao" ref="bookDao" />
-		<!-- DAO for parent2 Chapter -->
-	    <property name="parent2Dao" ref="chapterDao" />
-		<!-- DAO for parent3 Page -->
-	    <property name="parent3Dao" ref="pageDao" />
-	    <!-- dao for this entity -->
 	    <property name="dao" ref="footnoteDao" />
+	    <property name="parentDao" ref="pageDao" />
+	    <property name="parentBookDao" ref="bookDao" />
+	    <property name="parentChapterDao" ref="chapterDao" />
+	    <property name="parentPageDao" ref="pageDao" />
 	</bean>
 	
 

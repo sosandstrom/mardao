@@ -3,6 +3,9 @@ package ${controllerPackage};
 import java.util.List;
 
 import ${entity.className};
+#foreach( $p in $parents )
+import ${p.className};
+#end	
 
 import ${daoPackage}.${entity.simpleName}Dao;
 #foreach( $p in $parents )
@@ -15,10 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
 /**
  * Implementation of Controller related to entity ${entity.simpleName}.
  */
@@ -37,7 +40,7 @@ public abstract class Generated${entity.simpleName}Controller
 #end	
 #foreach( $p in $ancestors )
 	/** DAO for parent${velocityCount} ${p.simpleName} */
-	protected ${p.simpleName}Dao parent${velocityCount}Dao;
+	protected ${p.simpleName}Dao parent${p.simpleName}Dao;
 #end	
 	/** dao for this entity */
 	protected ${entity.simpleName}Dao dao;
@@ -48,22 +51,29 @@ public abstract class Generated${entity.simpleName}Controller
 //        return request.getAttribute(ProjectHandlerInterceptor.KEY_PROJNAME);
 //    }
 	
-	
 #if( $entity.parent )
+## ---------------------- This is an Entity with at least one parent ------------------------------------
 	protected List<${entity.simpleName}> getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
-		#end@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
+		#end${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
 		Object parentKey = null;
 #foreach( $p in $ancestors )
 		// ${p.simpleName}
-        final Object parent${velocityCount}Key = parent${velocityCount}Dao.createKey(parentKey, ${p.simpleName.toLowerCase()});
-	    parentKey = parent${velocityCount}Key;
+        final Object parent${p.simpleName}Key = parent${p.simpleName}Dao.createKey(parentKey, ${p.simpleName.toLowerCase()});
+	    parentKey = parent${p.simpleName}Key;
 #end
+	    // list
         return dao.findBy${entity.parent.entity.simpleName}(parentKey);
 	}
 	
-    @RequestMapping(value = "index.html", method = RequestMethod.GET)
+// ------------------- HTML interface -----------------------------------	
+
+	/**
+	 * Queries for all ${entity.simpleName} Entities and responds with HTML
+	 * This method is for entities with parent(s)
+	 */
+	@RequestMapping(value = "index.html", method = RequestMethod.GET)
     public String getList(Model model#foreach( $p in $ancestors ), 
-	@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
+		@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
 		LOG.debug("list by parent");
 		final List<${entity.simpleName}> list = getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 			#end${p.simpleName.toLowerCase()}#end);
@@ -71,19 +81,55 @@ public abstract class Generated${entity.simpleName}Controller
         return "list";
     }
 	
+// ------------------- JSON interface -----------------------------------	
+	
+	/**
+	 * Queries for all ${entity.simpleName} Entities and responds with JSON
+	 * This method is for entities with parent(s)
+	 */
+    @RequestMapping(method = RequestMethod.GET, headers="accept=application/json")
+    public ResponseEntity<${entity.simpleName}[]> getListAcceptJson(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+		#end@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
+		LOG.debug("list All Accept");
+		final List<${entity.simpleName}> list = getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+			#end${p.simpleName.toLowerCase()}#end);
+		return listJson(list);
+	}
+	
+	/**
+	 * Queries for all ${entity.simpleName} Entities and responds with JSON.
+	 * This method is for entities with parent(s)
+	 */
+    @RequestMapping(value = "/index.json", method = RequestMethod.GET)
+    public ResponseEntity<${entity.simpleName}[]> getListJson(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+		#end@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
+		LOG.debug("list All index.json");
+		final List<${entity.simpleName}> list = getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+			#end${p.simpleName.toLowerCase()}#end);
+		return listJson(list);
+	}
+	
+// ------------------- Parent setters -----------------------------------	
 	public final void setParentDao(${entity.parent.entity.simpleName}Dao parentDao) {
 		this.parentDao = parentDao;
 	}
 	
 #foreach( $p in $ancestors )
-    public final void setParent${velocityCount}Dao(${p.simpleName}Dao parentDao) {
-	    this.parent${velocityCount}Dao = parentDao;
+    public final void setParent${p.simpleName}Dao(${p.simpleName}Dao parentDao) {
+	    this.parent${p.simpleName}Dao = parentDao;
 	}
 	
 #end
 
 #else
-    @RequestMapping(value = "/index.html", method = RequestMethod.GET)
+## ---------------------- This is a Root Entity without a parent ------------------------------------
+// ------------------- HTML interface -----------------------------------	
+
+	/**
+	 * Queries for all ${entity.simpleName} Entities and responds with HTML.
+	 * This method is for root entities (without a parent)
+	 */
+	@RequestMapping(value = "/index.html", method = RequestMethod.GET)
     public String getListHtml(Model model) {
 		LOG.debug("list All HTML");
         final List<${entity.simpleName}> list = dao.findAll();
@@ -91,29 +137,53 @@ public abstract class Generated${entity.simpleName}Controller
         return "list";
     }
 	
-    @RequestMapping(value = "/list.json", method = RequestMethod.GET, headers="accept=application/json")
-    public ResponseEntity<${entity.simpleName}[]> getListAcceptJson(Model model) {
-		LOG.debug("list All Accept");
-		return innerListJson(model);
-	}
-	
-    @RequestMapping(value = "/index.json", method = RequestMethod.GET)
-    public ResponseEntity<${entity.simpleName}[]> getListJson(Model model) {
-		LOG.debug("list All index.json");
-		return innerListJson(model);
-	}
-	
-    protected ResponseEntity<${entity.simpleName}[]> innerListJson(Model model) {
-		LOG.debug("inner list json");
-        final List<${entity.simpleName}> list = dao.findAll();
-        final Book[] body = list.toArray(new ${entity.simpleName}[list.size()]);
-        ResponseEntity<${entity.simpleName}[]> returnValue = new ResponseEntity<${entity.simpleName}[]>(body, HttpStatus.OK);
-        return returnValue;
-    }
-	
+// ------------------- JSON interface -----------------------------------	
 
+	/**
+	 * Queries for all ${entity.simpleName} Entities and responds with JSON.
+	 * This method is for root entities (without a parent)
+	 */
+    @RequestMapping(value = "/list.json", method = RequestMethod.GET, headers="accept=application/json")
+    public ResponseEntity<${entity.simpleName}[]> getListAcceptJson() {
+		LOG.debug("list All Accept");
+        final List<${entity.simpleName}> list = dao.findAll();
+		return listJson(list);
+	}
+	
+	/**
+	 * Queries for all ${entity.simpleName} Entities and responds with JSON.
+	 * This method is for root entities (without a parent)
+	 */
+    @RequestMapping(value = "/index.json", method = RequestMethod.GET)
+    public ResponseEntity<${entity.simpleName}[]> getListJson() {
+		LOG.debug("list All index.json");
+        final List<${entity.simpleName}> list = dao.findAll();
+		return listJson(list);
+	}
+	
+	/**
+	 * Queries for the ${entity.simpleName} Entity (by primary key) and responds with JSON.
+	 * This method is for root entities (without a parent)
+	 */
+    @RequestMapping(value = "/{${entity.pk.name}}/index.json", method = RequestMethod.GET)
+    public ResponseEntity<${entity.simpleName}> getItemJson(@PathVariable(value = "${entity.pk.name}") ${entity.pk.type} ${entity.pk.name}) {
+		LOG.debug("get item {}", ${entity.pk.name});
+        final ${entity.simpleName} body = dao.findByPrimaryKey(${entity.pk.name});
+		if (null != body) {
+			return new ResponseEntity<${entity.simpleName}>(body, HttpStatus.OK);
+		}
+		return new ResponseEntity<${entity.simpleName}>((MultiValueMap<java.lang.String,java.lang.String>) null, HttpStatus.NOT_FOUND);
+	}
+	
 #end	
 
+	protected final ResponseEntity<${entity.simpleName}[]>  listJson(List<${entity.simpleName}> list) {
+        final ${entity.simpleName}[] body = list.toArray(new ${entity.simpleName}[list.size()]);
+        ResponseEntity<${entity.simpleName}[]> returnValue = new ResponseEntity<${entity.simpleName}[]>(body, HttpStatus.OK);
+        return returnValue;
+	}
+
+// ------------------- DAO setter for this Entity -----------------------------------	
 	public final void setDao(${entity.simpleName}Dao dao) {
 		this.dao = dao;
 	}

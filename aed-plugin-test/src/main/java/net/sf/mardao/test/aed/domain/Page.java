@@ -31,6 +31,11 @@ public class Page extends AEDPrimaryKeyEntity {
         return pageNumber;
     }
 
+    @Override
+    public Object getParentKey() {
+        return chapter;
+    }
+
     public String getBody() {
         return body;
     }

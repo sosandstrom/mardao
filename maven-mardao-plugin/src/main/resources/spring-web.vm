@@ -13,16 +13,13 @@
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )
 	
 	<bean id="${helper.firstToLower($entity.simpleName)}Controller" class="${controllerPackage}.${entity.simpleName}Controller">
+	    <property name="dao" ref="${helper.firstToLower($entity.simpleName)}Dao" />
 #if( $entity.parent )
-		<!-- DAO for parent -->
 	    <property name="parentDao" ref="${helper.firstToLower($entity.parent.entity.simpleName)}Dao" />
 #end	
 #foreach( $p in $entity.ancestors )
-		<!-- DAO for parent${velocityCount} ${p.simpleName} -->
-	    <property name="parent${velocityCount}Dao" ref="${helper.firstToLower($p.simpleName)}Dao" />
+	    <property name="parent${p.simpleName}Dao" ref="${helper.firstToLower($p.simpleName)}Dao" />
 #end	
-	    <!-- dao for this entity -->
-	    <property name="dao" ref="${helper.firstToLower($entity.simpleName)}Dao" />
 	</bean>
 #end
 	

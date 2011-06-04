@@ -9,13 +9,15 @@ import ${daoPackage}.${entity.simpleName}Dao;
 import ${daoPackage}.${p.simpleName}Dao;
 #end	
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import com.google.appengine.api.datastore.Key;
 
 /**
  * Implementation of Controller related to entity ${entity.simpleName}.
@@ -26,6 +28,8 @@ public abstract class Generated${entity.simpleName}Controller
 ##	extends Generated${entity.simpleName}DaoImpl
 ##		implements ${entity.simpleName}Dao 
 {
+    protected static final Logger LOG = LoggerFactory.getLogger(Generated${entity.simpleName}Controller.class);
+
 #if( $entity.parent )
 	/** parent dao */
 	protected ${entity.parent.entity.simpleName}Dao parentDao;
@@ -46,16 +50,23 @@ public abstract class Generated${entity.simpleName}Controller
 	
 	
 #if( $entity.parent )
-    @RequestMapping(method = RequestMethod.GET)
-    public String getList(Model model#foreach( $p in $ancestors ), 
-	@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
+	protected List<${entity.simpleName}> getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+		#end@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
 		Object parentKey = null;
 #foreach( $p in $ancestors )
 		// ${p.simpleName}
         final Object parent${velocityCount}Key = parent${velocityCount}Dao.createKey(parentKey, ${p.simpleName.toLowerCase()});
 	    parentKey = parent${velocityCount}Key;
 #end
-        final List<${entity.simpleName}> list = dao.findBy${entity.parent.entity.simpleName}(parentKey);
+        return dao.findBy${entity.parent.entity.simpleName}(parentKey);
+	}
+	
+    @RequestMapping(value = "index.html", method = RequestMethod.GET)
+    public String getList(Model model#foreach( $p in $ancestors ), 
+	@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
+		LOG.debug("list by parent");
+		final List<${entity.simpleName}> list = getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+			#end${p.simpleName.toLowerCase()}#end);
         model.addAttribute("list", list);
         return "list";
     }
@@ -70,7 +81,39 @@ public abstract class Generated${entity.simpleName}Controller
 	}
 	
 #end
+
+#else
+    @RequestMapping(value = "/index.html", method = RequestMethod.GET)
+    public String getListHtml(Model model) {
+		LOG.debug("list All HTML");
+        final List<${entity.simpleName}> list = dao.findAll();
+        model.addAttribute("list", list);
+        return "list";
+    }
+	
+    @RequestMapping(value = "/list.json", method = RequestMethod.GET, headers="accept=application/json")
+    public ResponseEntity<${entity.simpleName}[]> getListAcceptJson(Model model) {
+		LOG.debug("list All Accept");
+		return innerListJson(model);
+	}
+	
+    @RequestMapping(value = "/index.json", method = RequestMethod.GET)
+    public ResponseEntity<${entity.simpleName}[]> getListJson(Model model) {
+		LOG.debug("list All index.json");
+		return innerListJson(model);
+	}
+	
+    protected ResponseEntity<${entity.simpleName}[]> innerListJson(Model model) {
+		LOG.debug("inner list json");
+        final List<${entity.simpleName}> list = dao.findAll();
+        final Book[] body = list.toArray(new ${entity.simpleName}[list.size()]);
+        ResponseEntity<${entity.simpleName}[]> returnValue = new ResponseEntity<${entity.simpleName}[]>(body, HttpStatus.OK);
+        return returnValue;
+    }
+	
+
 #end	
+
 	public final void setDao(${entity.simpleName}Dao dao) {
 		this.dao = dao;
 	}

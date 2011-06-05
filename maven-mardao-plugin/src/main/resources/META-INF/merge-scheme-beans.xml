@@ -236,7 +236,7 @@
 		<property name="templates">
 			<list>
 				<bean class="net.sf.mardao.domain.MergeTemplate">
-					<property name="templatePrefix" value="Generated" />
+					<property name="templatePrefix" value="WEB/Generated" />
 					<property name="templateMiddle" value="Controller" />
 					<property name="typeAppend" value="false" />
 					<property name="destFolder" value="targetController" />
@@ -244,6 +244,7 @@
 					<property name="fileSuffix" value="Controller.java" />
 				</bean>
 				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="WEB/" />
 					<property name="templateMiddle" value="Controller" />
 					<property name="typeAppend" value="false" />
 					<!-- <property name="destFolder" value="srcController" /> -->
@@ -252,7 +253,7 @@
 				</bean>
 				<!-- spring-web.xml bean context -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
-					<property name="templatePrefix" value="spring-web" />
+					<property name="templatePrefix" value="WEB/spring-web" />
 					<property name="templateSuffix" value=".vm" />
 					<property name="destFolder" value="resources" />
 					<property name="entity" value="false" />

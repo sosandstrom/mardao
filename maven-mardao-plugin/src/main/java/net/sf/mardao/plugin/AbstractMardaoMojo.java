@@ -266,7 +266,12 @@ public class AbstractMardaoMojo extends AbstractMojo {
         // Abstract Employee Dao Spring .java
 
         // compose template name:
-        StringBuffer templateName = new StringBuffer(mt.getTemplatePrefix());
+        StringBuffer templateName = new StringBuffer();
+        if (mt.isTypeSpecific()) {
+            templateName.append(persistenceType);
+            templateName.append('/');
+        }
+        templateName.append(mt.getTemplatePrefix());
         // no entityName in template filename!
         templateName.append(mt.getTemplateMiddle());
         if (mt.isTypeSpecific()) {

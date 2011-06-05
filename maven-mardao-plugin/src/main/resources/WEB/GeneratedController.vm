@@ -53,7 +53,7 @@ public abstract class Generated${entity.simpleName}Controller
 	
 #if( $entity.parent )
 ## ---------------------- This is an Entity with at least one parent ------------------------------------
-	protected List<${entity.simpleName}> getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+	protected final Object buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 		#end${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
 		Object parentKey = null;
 #foreach( $p in $ancestors )
@@ -61,7 +61,13 @@ public abstract class Generated${entity.simpleName}Controller
         final Object parent${p.simpleName}Key = parent${p.simpleName}Dao.createKey(parentKey, ${p.simpleName.toLowerCase()});
 	    parentKey = parent${p.simpleName}Key;
 #end
-	    // list
+	    return parentKey;
+	}
+
+	protected List<${entity.simpleName}> getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+		#end${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
+		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+			#end${p.simpleName.toLowerCase()}#end);
         return dao.findBy${entity.parent.entity.simpleName}(parentKey);
 	}
 	
@@ -107,6 +113,21 @@ public abstract class Generated${entity.simpleName}Controller
 		final List<${entity.simpleName}> list = getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 			#end${p.simpleName.toLowerCase()}#end);
 		return listJson(list);
+	}
+	
+	/**
+	 * Queries for the ${entity.simpleName} Entity (by primary key) and responds with JSON.
+	 * This method is for entities with parent(s)
+	 */
+    @RequestMapping(value = "/{${entity.pk.name}}/index.json", method = RequestMethod.GET)
+    public ResponseEntity<${entity.simpleName}> getItemJson(#foreach( $p in $ancestors )@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()},
+		#end
+		@PathVariable(value = "${entity.pk.name}") ${entity.pk.type} ${entity.pk.name}) {
+		LOG.debug("get child item {}", ${entity.pk.name});
+		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+			#end${p.simpleName.toLowerCase()}#end);
+        final ${entity.simpleName} body = dao.findByPrimaryKey(parentKey, ${entity.pk.name});
+		return respond(body);
 	}
 	
 // ------------------- Parent setters -----------------------------------	
@@ -167,21 +188,30 @@ public abstract class Generated${entity.simpleName}Controller
 	 */
     @RequestMapping(value = "/{${entity.pk.name}}/index.json", method = RequestMethod.GET)
     public ResponseEntity<${entity.simpleName}> getItemJson(@PathVariable(value = "${entity.pk.name}") ${entity.pk.type} ${entity.pk.name}) {
-		LOG.debug("get item {}", ${entity.pk.name});
+		LOG.debug("get root item {}", ${entity.pk.name});
         final ${entity.simpleName} body = dao.findByPrimaryKey(${entity.pk.name});
-		if (null != body) {
-			return new ResponseEntity<${entity.simpleName}>(body, HttpStatus.OK);
-		}
-		return new ResponseEntity<${entity.simpleName}>((MultiValueMap<java.lang.String,java.lang.String>) null, HttpStatus.NOT_FOUND);
+		return respond(body);
 	}
 	
 #end	
 
 	protected final ResponseEntity<${entity.simpleName}[]>  listJson(List<${entity.simpleName}> list) {
         final ${entity.simpleName}[] body = list.toArray(new ${entity.simpleName}[list.size()]);
-        ResponseEntity<${entity.simpleName}[]> returnValue = new ResponseEntity<${entity.simpleName}[]>(body, HttpStatus.OK);
-        return returnValue;
+		return respond(body);
 	}
+	
+	protected static final <B extends Object> ResponseEntity<B> respond(B body, HttpStatus okStatus, HttpStatus nullStatus) {
+		if (null != body) {
+			return new ResponseEntity<B>(body, okStatus);
+		}
+		return new ResponseEntity<B>((MultiValueMap<java.lang.String,java.lang.String>) null, nullStatus);
+	}
+	
+	protected static final <B extends Object> ResponseEntity<B> respond(B body) {
+		return respond(body, HttpStatus.OK, HttpStatus.NOT_FOUND);
+	}
+	
+	
 
 // ------------------- DAO setter for this Entity -----------------------------------	
 	public final void setDao(${entity.simpleName}Dao dao) {

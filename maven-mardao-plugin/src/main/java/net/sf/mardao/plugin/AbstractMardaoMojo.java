@@ -51,6 +51,13 @@ public class AbstractMardaoMojo extends AbstractMojo {
     protected File                           targetFolder;
 
     /**
+     * The target folder
+     * 
+     * @parameter expression="${generate.targetResourcesFolder}" default-value="${basedir}/target/generated-resources/web"
+     */
+    protected File                           targetResourcesFolder;
+
+    /**
      * The source folder
      * 
      * @parameter expression="${generate.sourceFolder}" default-value="${basedir}/src/main/java"
@@ -125,6 +132,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
 
     protected File                           targetDaoFolder;
     protected File                           targetControllerFolder;
+    protected File                           targetJspFolder;
 
     protected File                           srcDaoFolder;
     protected File                           srcDomainFolder;
@@ -155,6 +163,10 @@ public class AbstractMardaoMojo extends AbstractMojo {
         if (false == targetControllerFolder.exists()) {
             targetControllerFolder.mkdirs();
         }
+        targetJspFolder = new File(targetResourcesFolder, "WEB-INF/jsp");
+        if (false == targetJspFolder.exists()) {
+            targetJspFolder.mkdirs();
+        }
         srcDaoFolder = new File(sourceFolder, daoBasePackage.replace('.', '/'));
         if (false == srcDaoFolder.exists()) {
             srcDaoFolder.mkdirs();
@@ -175,6 +187,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
         destFolders.put("srcController", srcControllerFolder);
         destFolders.put("targetDao", targetDaoFolder);
         destFolders.put("targetController", targetControllerFolder);
+        destFolders.put("targetJsp", targetJspFolder);
         destFolders.put("resources", resourceFolder);
     }
 
@@ -184,6 +197,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         Velocity.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, this);
         vc.put("helper", this);
+        vc.put("ESC", "$");
 
         if (null != sourceVersion) {
             getLog().info("sourceVersion=" + sourceVersion);

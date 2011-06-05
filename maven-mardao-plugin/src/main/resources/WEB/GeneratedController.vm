@@ -84,7 +84,7 @@ public abstract class Generated${entity.simpleName}Controller
 		final List<${entity.simpleName}> list = getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 			#end${p.simpleName.toLowerCase()}#end);
         model.addAttribute("list", list);
-        return "list";
+        return "list${entity.simpleName}";
     }
 	
 // ------------------- JSON interface -----------------------------------	
@@ -155,7 +155,7 @@ public abstract class Generated${entity.simpleName}Controller
 		LOG.debug("list All HTML");
         final List<${entity.simpleName}> list = dao.findAll();
         model.addAttribute("list", list);
-        return "list";
+        return "list${entity.simpleName}";
     }
 	
 // ------------------- JSON interface -----------------------------------	

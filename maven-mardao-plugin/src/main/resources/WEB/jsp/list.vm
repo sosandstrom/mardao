@@ -6,20 +6,20 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>Insert title here</title>
+<title>${entity.simpleName} List</title>
 </head>
 <body>
-	<h1>List heading 1</h1>
+	<h1>${entity.simpleName} list</h1>
 	<table>
 		<thead>
 			<tr>
-				<th>Item</th>
+				<th>${entity.pk.name}</th>
 			</tr>
 		</thead>
 		<tbody>
-			<c:forEach items="${list}" var="item">
+			<c:forEach items="${ESC}{list}" var="item">
 			<tr>
-				<th><c:out value="${item}" /></th>
+				<th><c:out value="${ESC}{item.${entity.pk.name}}" /></th>
 			</tr>
 			</c:forEach>
 		</tbody>

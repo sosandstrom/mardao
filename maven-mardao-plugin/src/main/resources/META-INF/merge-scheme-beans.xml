@@ -152,7 +152,7 @@
 			<list>
 				<!-- GAEHelper extends JPAHelper -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
-					<property name="templatePrefix" value="JPAHelper" />
+					<property name="templatePrefix" value="JPA/JPAHelper" />
 					<property name="entity" value="false" />
 					<property name="filePrefix" value="JPAHelper" />
 				</bean>
@@ -250,6 +250,14 @@
 					<!-- <property name="destFolder" value="srcController" /> -->
 					<property name="destFolder" value="targetController" />
 					<property name="fileSuffix" value="Controller.java" />
+				</bean>
+				<!-- list JSP per entity: -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="WEB/jsp/list" />
+					<property name="typeAppend" value="false" />
+					<property name="destFolder" value="targetJsp" />
+					<property name="filePrefix" value="list" />
+					<property name="fileSuffix" value=".jsp" />
 				</bean>
 				<!-- spring-web.xml bean context -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">

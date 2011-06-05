@@ -99,29 +99,52 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 
             System.out.println("   add resolved entity " + e.getSimpleName());
             resolved.add(e);
+
+            // create ancestor and parents lists
+            System.out.println("+ resolving parents for " + e.getSimpleName());
+            final List<Entity> ancestors = new ArrayList<Entity>();
+            final List<Entity> parents = new ArrayList<Entity>();
+            Field f = e.getParent();
+            Entity p;
+            boolean direct = true;
+            while (null != f) {
+                p = f.getEntity();
+                if (direct) {
+                    direct = false;
+                    p.getChildren().add(e);
+                }
+                System.out.println(" - parent is " + p.getSimpleName());
+                parents.add(p);
+                ancestors.add(0, p);
+                f = p.getParent();
+            }
+            e.setAncestors(ancestors);
+            e.setParents(parents);
+
         }
     }
 
     private void mergeEntity(Entity en) {
         vc.put("entity", en);
 
-        // create ancestor and parents lists
-        System.out.println("+ resolving parents for " + en.getSimpleName());
-        final List<Entity> ancestors = new ArrayList<Entity>();
-        final List<Entity> parents = new ArrayList<Entity>();
-        Field f = en.getParent();
-        Entity p;
-        while (null != f) {
-            p = f.getEntity();
-            System.out.println(" - parent is " + p.getSimpleName());
-            parents.add(p);
-            ancestors.add(0, p);
-            f = p.getParent();
-        }
-        en.setAncestors(ancestors);
-        en.setParents(parents);
-        vc.put("ancestors", ancestors);
-        vc.put("parents", parents);
+        // // create ancestor and parents lists
+        // System.out.println("+ resolving parents for " + en.getSimpleName());
+        // final List<Entity> ancestors = new ArrayList<Entity>();
+        // final List<Entity> parents = new ArrayList<Entity>();
+        // Field f = en.getParent();
+        // Entity p;
+        // while (null != f) {
+        // p = f.getEntity();
+        // System.out.println(" - parent is " + p.getSimpleName());
+        // parents.add(p);
+        // ancestors.add(0, p);
+        // f = p.getParent();
+        // }
+        // en.setAncestors(ancestors);
+        // en.setParents(parents);
+        vc.put("ancestors", en.getAncestors());
+        vc.put("parents", en.getParents());
+        vc.put("children", en.getChildren());
 
         for(MergeTemplate mt : mergeScheme.getTemplates()) {
             if (mt.isEntity()) {

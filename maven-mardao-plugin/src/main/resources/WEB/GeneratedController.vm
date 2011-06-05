@@ -68,7 +68,7 @@ public abstract class Generated${entity.simpleName}Controller
 		#end${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
 		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 			#end${p.simpleName.toLowerCase()}#end);
-        return dao.findBy${entity.parent.entity.simpleName}(parentKey);
+        return dao.findBy${helper.firstToUpper($entity.parent.name)}(parentKey);
 	}
 	
 // ------------------- HTML interface -----------------------------------	
@@ -85,6 +85,22 @@ public abstract class Generated${entity.simpleName}Controller
 			#end${p.simpleName.toLowerCase()}#end);
         model.addAttribute("list", list);
         return "list${entity.simpleName}";
+    }
+	
+	/**
+	 * Queries for the ${entity.simpleName} Entity (by primary key) and responds with HTML.
+	 * This method is for entities with parent(s)
+	 */
+	@RequestMapping(value = "/{${entity.simpleName.toLowerCase()}}/index.html", method = RequestMethod.GET)
+    public String getItemHtml(Model model#foreach( $p in $ancestors ), 
+		@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end,
+		@PathVariable(value = "${entity.simpleName.toLowerCase()}") ${entity.pk.type} ${entity.simpleName.toLowerCase()}) {
+		LOG.debug("get item HTML");
+		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+			#end${p.simpleName.toLowerCase()}#end);
+        final ${entity.simpleName} item = dao.findByPrimaryKey(parentKey, ${entity.simpleName.toLowerCase()});
+        model.addAttribute("item", item);
+        return "item${entity.simpleName}";
     }
 	
 // ------------------- JSON interface -----------------------------------	
@@ -156,6 +172,18 @@ public abstract class Generated${entity.simpleName}Controller
         final List<${entity.simpleName}> list = dao.findAll();
         model.addAttribute("list", list);
         return "list${entity.simpleName}";
+    }
+	
+	/**
+	 * Queries for the ${entity.simpleName} Entity (by primary key) and responds with HTML.
+	 * This method is for root entities (without a parent)
+	 */
+	@RequestMapping(value = "/{${entity.pk.name}}/index.html", method = RequestMethod.GET)
+    public String getItemHtml(Model model, @PathVariable(value = "${entity.pk.name}") ${entity.pk.type} ${entity.pk.name}) {
+		LOG.debug("get item HTML");
+        final ${entity.simpleName} item = dao.findByPrimaryKey(${entity.pk.name});
+        model.addAttribute("item", item);
+        return "item${entity.simpleName}";
     }
 	
 // ------------------- JSON interface -----------------------------------	

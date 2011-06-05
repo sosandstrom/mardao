@@ -30,6 +30,7 @@ public class Entity implements Comparable<Entity> {
     private final Set<Entity>        dependsOn         = new TreeSet<Entity>();
     private List<Entity>             ancestors         = new ArrayList<Entity>();
     private List<Entity>             parents           = new ArrayList<Entity>();
+    private final Set<Entity>        children          = new TreeSet<Entity>();
 
     public void setClassName(String className) {
         this.className = className;
@@ -195,5 +196,9 @@ public class Entity implements Comparable<Entity> {
 
     public List<Entity> getParents() {
         return parents;
+    }
+
+    public Set<Entity> getChildren() {
+        return children;
     }
 }

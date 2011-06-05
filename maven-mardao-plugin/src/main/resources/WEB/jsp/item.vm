@@ -6,28 +6,36 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>${entity.simpleName} List</title>
+<title>${entity.simpleName} - <c:out value="${ESC}{item.${entity.pk.name}}" /></title>
 </head>
 <body>
-	<h1>${entity.simpleName} list</h1>
+	<jsp:include page="header.jsp">
+    </jsp:include>
+	<h1>${entity.simpleName} item</h1>
 	<table border="1">
 		<thead>
 			<tr>
-				<th>${entity.pk.name}</th>
-#foreach( $field in $entity.fields )
-		        <th>${field.name}</th>
-#end
+				<th>Attribute</th>
+				<th>Value</th>
 			</tr>
 		</thead>
 		<tbody>
-			<c:forEach items="${ESC}{list}" var="item">
 			<tr>
-				<td><a href="<c:out value='${ESC}{item.${entity.pk.name}}' />/"><c:out value="${ESC}{item.${entity.pk.name}}" /></a></td>
-#foreach( $field in $entity.fields )
-				<td><c:out value="${ESC}{item.${field.name}}" /></td>
-#end
+				<td><c:out value="${entity.pk.name}" /></td>
+				<td><c:out value="${ESC}{item.${entity.pk.name}}" /></td>
 			</tr>
-			</c:forEach>
+#foreach( $field in $entity.fields )
+			<tr>
+				<td><c:out value="${field.name}" /></td>
+				<td><c:out value="${ESC}{item.${field.name}}" /></td>
+			</tr>
+#end
+#foreach( $child in $entity.children )
+			<tr>
+				<td>+ Children</td>
+				<td><a href="<c:out value='${child.simpleName}' />/"><c:out value="${child.simpleName}" /></a></td>
+			</tr>
+#end
 		</tbody>
 	</table>
 </body>

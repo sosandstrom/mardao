@@ -28,16 +28,27 @@ public class UberDaoBean {
         book.setTitle("Good morning midnight");
         bookDao.persist(book);
 
-        Chapter chapter = new Chapter();
-        chapter.setId(42L);
-        chapter.setBook((Key) book.getPrimaryKey());
-        chapter.setName("Prologue");
-        chapterDao.persist(chapter);
+        Book book2 = new Book();
+        book2.setISBN("73-9482-49");
+        book2.setTitle("Animal Farm");
+        bookDao.persist(book2);
+
+        Chapter prologue = new Chapter();
+        prologue.setId(42L);
+        prologue.setBook((Key) book.getPrimaryKey());
+        prologue.setName("Prologue");
+        chapterDao.persist(prologue);
+
+        Chapter intermezzo = new Chapter();
+        intermezzo.setId(73L);
+        intermezzo.setBook((Key) book.getPrimaryKey());
+        intermezzo.setName("Intermezzo");
+        chapterDao.persist(intermezzo);
 
         Page page1 = new Page();
         page1.setBody("Lorem ipsum dolor ...");
         page1.setBook(book.getISBN());
-        page1.setChapter((Key) chapter.getPrimaryKey());
+        page1.setChapter((Key) prologue.getPrimaryKey());
         pageDao.persist(page1);
         LOG.info("persisted " + page1);
 

@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -62,27 +63,38 @@ public abstract class Generated${entity.simpleName}Controller
 	    return parentKey;
 	}
 
+// ------------------- Common interface -----------------------------------
+
+	/**
+	 * Invoked when creating the ${entity.simpleName} Entity.
+	 */
+	@RequestMapping(value = "/create.html", method = RequestMethod.POST)
+    public String create(Model model, @ModelAttribute("${entity.simpleName}") ${entity.simpleName} entity#foreach( $p in $ancestors ), 
+		${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
+		LOG.debug("create {}", entity);
+
+#if( $entity.parent )
+		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+			#end${p.simpleName.toLowerCase()}#end);
+		entity.set${helper.firstToUpper($entity.parent.name)}((${entity.parent.type}) parentKey);
+
+#end		
+		dao.persist(entity);
+        return "redirect:index.html";
+    }
+
+// ------------------- HTML interface -----------------------------------	
+
 	/**
 	 * Loads the create form for the ${entity.simpleName} Entity.
 	 * This method is for root entities (without a parent)
 	 */
 	@RequestMapping(value = "/create.html", method = RequestMethod.GET)
     public String getCreateForm(Model model) {
-		LOG.debug("get creae form HTML");
+		LOG.debug("get create form HTML");
         return "create${entity.simpleName}";
     }
 	
-#if( $entity.parent )
-## ---------------------- This is an Entity with at least one parent ------------------------------------
-	protected List<${entity.simpleName}> getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
-		#end${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
-		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
-			#end${p.simpleName.toLowerCase()}#end);
-        return dao.findBy${helper.firstToUpper($entity.parent.name)}(parentKey);
-	}
-	
-// ------------------- HTML interface -----------------------------------	
-
 	/**
 	 * Queries for all ${entity.simpleName} Entities and responds with HTML
 	 * This method is for entities with parent(s)
@@ -96,6 +108,15 @@ public abstract class Generated${entity.simpleName}Controller
         model.addAttribute("list", list);
         return "list${entity.simpleName}";
     }
+	
+#if( $entity.parent )
+## ---------------------- This is an Entity with at least one parent ------------------------------------
+	protected List<${entity.simpleName}> getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+		#end${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
+		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+			#end${p.simpleName.toLowerCase()}#end);
+        return dao.findBy${helper.firstToUpper($entity.parent.name)}(parentKey);
+	}
 	
 	/**
 	 * Queries for the ${entity.simpleName} Entity (by primary key) and responds with HTML.
@@ -170,20 +191,13 @@ public abstract class Generated${entity.simpleName}Controller
 
 #else
 ## ---------------------- This is a Root Entity without a parent ------------------------------------
+
+	protected List<${entity.simpleName}> getList() {
+        return dao.findAll();
+	}
+	
 // ------------------- HTML interface -----------------------------------	
 
-	/**
-	 * Queries for all ${entity.simpleName} Entities and responds with HTML.
-	 * This method is for root entities (without a parent)
-	 */
-	@RequestMapping(value = "/index.html", method = RequestMethod.GET)
-    public String getListHtml(Model model) {
-		LOG.debug("list All HTML");
-        final List<${entity.simpleName}> list = dao.findAll();
-        model.addAttribute("list", list);
-        return "list${entity.simpleName}";
-    }
-	
 	/**
 	 * Queries for the ${entity.simpleName} Entity (by primary key) and responds with HTML.
 	 * This method is for root entities (without a parent)

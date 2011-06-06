@@ -51,8 +51,6 @@ public abstract class Generated${entity.simpleName}Controller
 //        return request.getAttribute(ProjectHandlerInterceptor.KEY_PROJNAME);
 //    }
 	
-#if( $entity.parent )
-## ---------------------- This is an Entity with at least one parent ------------------------------------
 	protected final Object buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 		#end${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
 		Object parentKey = null;
@@ -64,6 +62,18 @@ public abstract class Generated${entity.simpleName}Controller
 	    return parentKey;
 	}
 
+	/**
+	 * Loads the create form for the ${entity.simpleName} Entity.
+	 * This method is for root entities (without a parent)
+	 */
+	@RequestMapping(value = "/create.html", method = RequestMethod.GET)
+    public String getCreateForm(Model model) {
+		LOG.debug("get creae form HTML");
+        return "create${entity.simpleName}";
+    }
+	
+#if( $entity.parent )
+## ---------------------- This is an Entity with at least one parent ------------------------------------
 	protected List<${entity.simpleName}> getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 		#end${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
 		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 

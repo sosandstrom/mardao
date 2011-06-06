@@ -5,7 +5,8 @@
 	<jsp:include page="header.jsp">
 		<jsp:param name="headTitle" value="${entity.simpleName} - <%=item.get${helper.firstToUpper($entity.pk.name)}()%>" />
     </jsp:include>
-	<h1>${entity.simpleName} item</h1>
+	<h1>Create ${entity.simpleName}</h1>
+	<form id="${entity.simpleName}" name="${entity.simpleName}" method="post" action="">
 	<table border="1">
 		<thead>
 			<tr>
@@ -15,23 +16,24 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><c:out value="${entity.pk.name}" /></td>
-				<td><c:out value="${ESC}{item.${entity.pk.name}}" /></td>
+				<td>${entity.pk.name}</td>
+				<td><input type="text" id="${entity.pk.name}" name="${entity.pk.name}" /></td>
 			</tr>
 #foreach( $field in $entity.fields )
 			<tr>
-				<td><c:out value="${field.name}" /></td>
-				<td><c:out value="${ESC}{item.${field.name}}" /></td>
-			</tr>
-#end
-#foreach( $child in $entity.children )
-			<tr>
-				<td>+ Children</td>
-				<td><a href="<c:out value='${child.simpleName}' />/"><c:out value="${child.simpleName}" /></a></td>
+				<td>${field.name}</td>
+				<td><input type="text" id="${field.name}" name="${field.name}" /></td>
 			</tr>
 #end
 		</tbody>
+		<tfoot >
+			<tr>
+				<td></td>
+				<td><input type="submit" /></td>
+			</tr>
+        </tfoot>
 	</table>
+	</form>
 	<jsp:include page="footer.jsp">
 		<jsp:param name="headTitle" value="${entity.simpleName} - <%=item.get${helper.firstToUpper($entity.pk.name)}()%>" />
     </jsp:include>

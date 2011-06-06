@@ -267,6 +267,14 @@
 					<property name="filePrefix" value="item" />
 					<property name="fileSuffix" value=".jsp" />
 				</bean>
+				<!-- create item JSP per entity: -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="WEB/jsp/create" />
+					<property name="typeAppend" value="false" />
+					<property name="destFolder" value="targetJsp" />
+					<property name="filePrefix" value="create" />
+					<property name="fileSuffix" value=".jsp" />
+				</bean>
 				<!-- spring-web.xml bean context -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
 					<property name="templatePrefix" value="WEB/spring-web" />

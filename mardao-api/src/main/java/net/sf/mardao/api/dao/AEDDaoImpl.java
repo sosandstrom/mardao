@@ -2,6 +2,7 @@ package net.sf.mardao.api.dao;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -64,7 +65,7 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
         }
         return (String) value;
     }
-
+    
     protected abstract Key createKey(T entity);
 
     protected abstract Key createKey(ID primaryKey);
@@ -103,6 +104,16 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
         final Entity entity = createEntity(primaryKey);
         populate(entity, nameValuePairs);
         return entity;
+    }
+    
+    protected abstract Entity createEntity(T domain);
+
+    protected List<Entity> createEntities(Iterable<T> domains) {
+    	final ArrayList<Entity> entities = new ArrayList<Entity>();
+    	for (T domain : domains) {
+    		entities.add(createEntity(domain));
+    	}
+    	return entities;
     }
 
     protected abstract void populate(Entity entity, Map<String, Object> nameValuePairs);
@@ -366,6 +377,38 @@ public abstract class AEDDaoImpl<T, ID extends Serializable> implements Dao<T, I
 
     public void update(T domain) {
         persist(domain);
+    }
+
+    protected List<Key> persist(Iterable<Entity> entities) {
+        final DatastoreService datastore = getDatastoreService();
+
+        return datastore.put(entities);
+    }
+
+    protected List<ID> update(Iterable<T> domains) {
+    	List<Entity> entities = createEntities(domains);
+    	List<Key> keys = persist(entities);
+    	return convert(keys);
+    }
+    
+    protected Key persist(Entity entity, String createdDateName, String createdByName, String createdByValue,
+            String updatedDateName, String updatedByName, String updatedByValue) {
+        final Date date = new Date();
+        if (null != createdDateName && 0 < createdDateName.length()) {
+            entity.setProperty(createdDateName, date);
+        }
+        if (null != createdByName && 0 < createdByName.length() && null != createdByValue) {
+            entity.setProperty(createdByName, createdByValue);
+        }
+
+        if (null != updatedDateName && 0 < updatedDateName.length()) {
+            entity.setProperty(updatedDateName, date);
+        }
+        if (null != updatedByName && 0 < updatedByName.length() && null != updatedByValue) {
+            entity.setProperty(updatedByName, updatedByValue);
+        }
+
+        return persist(entity);
     }
 
     public void delete(T domain) {

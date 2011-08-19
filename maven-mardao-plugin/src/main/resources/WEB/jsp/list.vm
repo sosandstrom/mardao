@@ -4,30 +4,35 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 	<jsp:include page="header.jsp">
 		<jsp:param name="headTitle" value="${entity.simpleName} List" />
+		<jsp:param name="headBreadcrumbHome" value="Home" />
+		<jsp:param name="headBreadcrumbHref" value="/" />
+		<jsp:param name="headBreadcrumbText" value="${entity.simpleName} list" />
     </jsp:include>
-	<h1>${entity.simpleName} list</h1>
-	<table border="1">
-		<thead>
-			<tr>
-				<th>${entity.pk.name}</th>
+	<h1 class="mardaoH1">${entity.simpleName} list</h1>
+	<table class="mardaoTable">
+		<thead class="mardaoTH">
+			<tr class="mardaoTHtr,mardaoTR">
+				<th class="mardaoTHth">${entity.pk.name}</th>
 #foreach( $field in $entity.fields )
-		        <th>${field.name}</th>
+		        <th class="mardaoTHth">${field.name}</th>
 #end
 			</tr>
 		</thead>
-		<tbody>
+		<tbody class="mardaoTB">
 			<c:forEach items="${ESC}{list}" var="item">
-			<tr>
-				<td><a href="<c:out value='${ESC}{item.${entity.pk.name}}' />/"><c:out value="${ESC}{item.${entity.pk.name}}" /></a></td>
+			<tr class="mardaoTR">
+				<td class="mardaoTD"><a href="<c:out value='${ESC}{item.${entity.pk.name}}' />/" class="mardaoA"><c:out value="${ESC}{item.${entity.pk.name}}" /></a></td>
 #foreach( $field in $entity.fields )
-				<td><c:out value="${ESC}{item.${field.name}}" /></td>
+				<td class="mardaoTD"><c:out value="${ESC}{item.${field.name}}" /></td>
 #end
 			</tr>
 			</c:forEach>
 		</tbody>
-		<tfoot>
-			<tr>
-                <td><form method="get" action="create.html"><input type="submit" value="Create ${entity.simpleName}" /></form></td>
+		<tfoot class="mardaoTF">
+			<tr class="mardaoTFtr,mardaoTR">
+                <td class="mardaoTFtd,mardaoTF"><form method="get" action="create.html">
+						<input class="mardaoSubmit" type="submit" value="Create ${entity.simpleName}" />
+				</form></td>
             </tr>
         </tfoot>
 	</table>

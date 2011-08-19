@@ -248,7 +248,7 @@
 					<property name="templateMiddle" value="Controller" />
 					<property name="typeAppend" value="false" />
 					<!-- <property name="destFolder" value="srcController" /> -->
-					<property name="destFolder" value="targetController" />
+					<property name="destFolder" value="srcController" />
 					<property name="fileSuffix" value="Controller.java" />
 				</bean>
 				<!-- list JSP per entity: -->
@@ -274,6 +274,36 @@
 					<property name="destFolder" value="targetJsp" />
 					<property name="filePrefix" value="create" />
 					<property name="fileSuffix" value=".jsp" />
+				</bean>
+				<!-- copy header JSP once -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="WEB/jsp/header" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="webappJsp" />
+					<property name="entity" value="false" />
+					<property name="listingEntities" value="true" />
+					<property name="filePrefix" value="header" />
+					<property name="fileSuffix" value=".jsp" />
+				</bean>
+				<!-- copy footer JSP once -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="WEB/jsp/footer" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="webappJsp" />
+					<property name="entity" value="false" />
+					<property name="listingEntities" value="true" />
+					<property name="filePrefix" value="footer" />
+					<property name="fileSuffix" value=".jsp" />
+				</bean>
+				<!-- copy stylesheet CSS once -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="WEB/mardao.css" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="webapp" />
+					<property name="entity" value="false" />
+					<property name="listingEntities" value="true" />
+					<property name="filePrefix" value="mardao" />
+					<property name="fileSuffix" value=".css" />
 				</bean>
 				<!-- spring-web.xml bean context -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">

@@ -72,6 +72,13 @@ public class AbstractMardaoMojo extends AbstractMojo {
     protected File                           resourceFolder;
 
     /**
+     * The webapp folder
+     * 
+     * @parameter expression="${generate.webappFolder}" default-value="${basedir}/src/main/webapp"
+     */
+    protected File                           webappFolder;
+
+    /**
      * @parameter expression="${generate.templateFolder}"
      */
     protected String                         templateFolder;
@@ -137,6 +144,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
     protected File                           srcDaoFolder;
     protected File                           srcDomainFolder;
     protected File                           srcControllerFolder;
+    protected File                           srcJspFolder;
 
     protected MergeScheme                    mergeScheme;
 
@@ -179,6 +187,10 @@ public class AbstractMardaoMojo extends AbstractMojo {
         if (false == srcControllerFolder.exists()) {
             srcControllerFolder.mkdirs();
         }
+        srcJspFolder = new File(webappFolder, "WEB-INF/jsp");
+        if (false == srcJspFolder.exists()) {
+            srcJspFolder.mkdirs();
+        }
 
         // create destFolders
         destFolders = new HashMap<String, File>();
@@ -188,6 +200,8 @@ public class AbstractMardaoMojo extends AbstractMojo {
         destFolders.put("targetDao", targetDaoFolder);
         destFolders.put("targetController", targetControllerFolder);
         destFolders.put("targetJsp", targetJspFolder);
+        destFolders.put("webappJsp", srcJspFolder);
+        destFolders.put("webapp", webappFolder);
         destFolders.put("resources", resourceFolder);
     }
 

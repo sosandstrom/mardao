@@ -19,6 +19,10 @@ public class EntityFieldVisitor implements FieldVisitor {
     static final String               DESC_ONE_TO_MANY  = "javax_persistence_OneToMany";
     static final String               DESC_ONE_TO_ONE   = "javax_persistence_OneToOne";
     static final String               DESC_PARENT       = "net_sf_mardao_api_Parent";
+    static final String               DESC_CREATED_BY   = "net_sf_mardao_api_CreatedBy";
+    static final String               DESC_CREATED_DATE = "net_sf_mardao_api_CreatedDate";
+    static final String               DESC_UPDATED_BY   = "net_sf_mardao_api_UpdatedBy";
+    static final String               DESC_UPDATED_DATE = "net_sf_mardao_api_UpdatedDate";
 
     private final Entity              entity;
     private final Field               field;
@@ -53,6 +57,24 @@ public class EntityFieldVisitor implements FieldVisitor {
             entity.getFields().remove(field);
             entity.setParent(field);
             return new EntityAnnotationVisitor(LOG, internal, entity, field, null, entities);
+        }
+        // created by and date
+        else if (DESC_CREATED_BY.equals(internal)) {
+            entity.getFields().remove(field);
+            entity.setCreatedBy(field);
+        }
+        else if (DESC_CREATED_DATE.equals(internal)) {
+            entity.getFields().remove(field);
+            entity.setCreatedDate(field);
+        }
+        // created by and date
+        else if (DESC_UPDATED_BY.equals(internal)) {
+            entity.getFields().remove(field);
+            entity.setUpdatedBy(field);
+        }
+        else if (DESC_UPDATED_DATE.equals(internal)) {
+            entity.getFields().remove(field);
+            entity.setUpdatedDate(field);
         }
         // one-to-one
         else if (DESC_ONE_TO_ONE.equals(internal)) {

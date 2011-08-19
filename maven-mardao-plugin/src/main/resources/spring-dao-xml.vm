@@ -92,9 +92,9 @@
 	<bean id="${helper.firstToLower($entity.simpleName)}Helper" class="${daoPackage}.${entity.simpleName}${persistenceType}Helper" 
      	autowire="byType" init-method="checkTables" depends-on="#foreach( $dependency in $entity.dependsOn )${helper.firstToLower($dependency.simpleName)}Helper #end" />
 #elseif( $persistenceType == "AED" )
-#end
 	<bean id="${helper.firstToLower($entity.simpleName)}Helper" class="${daoPackage}.${entity.simpleName}${persistenceType}Helper" 
      	autowire="byType" depends-on="#foreach( $dependency in $entity.dependsOn )${helper.firstToLower($dependency.simpleName)}Helper #end" />
+#end
 #end
 	
 #end

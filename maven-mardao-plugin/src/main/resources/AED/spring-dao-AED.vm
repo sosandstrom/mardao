@@ -36,6 +36,9 @@
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
 	<bean id="${helper.firstToLower($entity.simpleName)}Dao" 
 		class="${daoPackage}.${entity.simpleName}DaoBean">
+#foreach( $field in $entity.manyToOnes )
+		<property name="${field.name}Dao" ref="${field.name}Dao" />
+#end	
 	</bean>
 #end
 	

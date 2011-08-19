@@ -11,6 +11,11 @@ import ${daoPackage}.${entity.simpleName}Dao;
 #foreach( $p in $parents )
 import ${daoPackage}.${p.simpleName}Dao;
 #end	
+#foreach( $field in $entity.manyToOnes )
+import ${daoPackage}.${field.entity.simpleName}Dao;
+#end	
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +24,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.support.WebBindingInitializer;
+import org.springframework.web.context.request.WebRequest;
+
 /**
  * Implementation of Controller related to entity ${entity.simpleName}.
  */
@@ -30,7 +39,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(value = "#foreach( $p in $ancestors )/${p.simpleName}/{${p.simpleName.toLowerCase()}}#end/${entity.simpleName}")
 public abstract class Generated${entity.simpleName}Controller 
 ##	extends Generated${entity.simpleName}DaoImpl
-##		implements ${entity.simpleName}Dao 
+		implements WebBindingInitializer
 {
     protected static final Logger LOG = LoggerFactory.getLogger(Generated${entity.simpleName}Controller.class);
 
@@ -44,8 +53,12 @@ public abstract class Generated${entity.simpleName}Controller
 	protected ${p.simpleName}Dao parent${p.simpleName}Dao;
 #end	
 	/** dao for this entity */
-	protected ${entity.simpleName}Dao dao;
+	protected ${entity.simpleName}Dao ${helper.firstToLower($entity.simpleName)}Dao;
 	
+#foreach( $field in $entity.manyToOnes )
+	/** DAO for Many-To-One ${field.name} relation */
+	protected ${field.simpleType}Dao ${field.name}Dao;
+#end	
 	
 //    @ModelAttribute(ProjectHandlerInterceptor.KEY_PROJNAME)
 //    public Object populateProjName(HttpServletRequest request) {
@@ -63,6 +76,34 @@ public abstract class Generated${entity.simpleName}Controller
 	    return parentKey;
 	}
 
+    @Override
+    public void initBinder(WebDataBinder binder, WebRequest request) {
+#foreach( $field in $entity.manyToOnes )	
+        binder.registerCustomEditor(${field.entity.simpleType}.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) throws IllegalArgumentException {
+				final Key fk = KeyFactory.stringToKey(text);
+				final ${field.entity.simpleType} domain = new ${field.entity.simpleType}();
+#if( ${field.entity.pk.type} == "java.lang.String" )
+        domain.set${helper.firstToUpper(${field.entity.pk.name})}(fk.getName());
+#elseif( ${field.entity.pk.type} == "java.lang.Long" )
+        domain.set${helper.firstToUpper(${field.entity.pk.name})}(fk.getId());
+#elseif( ${field.entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+        domain.set${helper.firstToUpper(${field.entity.pk.name})}(fk);
+#else
+		throw new UnsupportedOperationException("Unsupported primary key type: ${field.entity.pk.type}");
+#end
+#if( $field.entity.parent )
+		// parent
+		domain.set${helper.firstToUpper(${entity.parent.name})}(fk.getParent());
+#end
+                setValue(domain);
+                LOG.debug("Converted {} to {}", text, getValue());
+            }
+        });
+#end		
+    }
+
 // ------------------- Common interface -----------------------------------
 
 	/**
@@ -70,7 +111,7 @@ public abstract class Generated${entity.simpleName}Controller
 	 */
 	@RequestMapping(value = "/create.html", method = RequestMethod.POST)
     public String create(Model model, @ModelAttribute("${entity.simpleName}") ${entity.simpleName} entity#foreach( $p in $ancestors ), 
-		${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
+		@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
 		LOG.debug("create {}", entity);
 
 #if( $entity.parent )
@@ -79,7 +120,7 @@ public abstract class Generated${entity.simpleName}Controller
 		entity.set${helper.firstToUpper($entity.parent.name)}((${entity.parent.type}) parentKey);
 
 #end		
-		dao.persist(entity);
+		${helper.firstToLower($entity.simpleName)}Dao.persist(entity);
         return "redirect:index.html";
     }
 
@@ -92,6 +133,10 @@ public abstract class Generated${entity.simpleName}Controller
 	@RequestMapping(value = "/create.html", method = RequestMethod.GET)
     public String getCreateForm(Model model) {
 		LOG.debug("get create form HTML");
+#foreach( $field in $entity.manyToOnes )
+		// populate ${field.name}s
+		model.addAttribute("${field.name}s", ${field.name}Dao.findAll());
+#end	
         return "create${entity.simpleName}";
     }
 	
@@ -100,9 +145,15 @@ public abstract class Generated${entity.simpleName}Controller
 	 * This method is for entities with parent(s)
 	 */
 	@RequestMapping(value = "index.html", method = RequestMethod.GET)
-    public String getList(Model model#foreach( $p in $ancestors ), 
+    public String getList(HttpServletRequest request, Model model#foreach( $p in $ancestors ), 
 		@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
 		LOG.debug("list by parent");
+		
+		// for breadcrumbs:
+        final String uri = request.getRequestURI();
+        final String paths[] = uri.split("/");
+		model.addAttribute("paths", paths);
+		
 		final List<${entity.simpleName}> list = getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 			#end${p.simpleName.toLowerCase()}#end);
         model.addAttribute("list", list);
@@ -115,7 +166,7 @@ public abstract class Generated${entity.simpleName}Controller
 		#end${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
 		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 			#end${p.simpleName.toLowerCase()}#end);
-        return dao.findBy${helper.firstToUpper($entity.parent.name)}(parentKey);
+        return ${helper.firstToLower($entity.simpleName)}Dao.findBy${helper.firstToUpper($entity.parent.name)}(parentKey);
 	}
 	
 	/**
@@ -129,7 +180,7 @@ public abstract class Generated${entity.simpleName}Controller
 		LOG.debug("get item HTML");
 		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 			#end${p.simpleName.toLowerCase()}#end);
-        final ${entity.simpleName} item = dao.findByPrimaryKey(parentKey, ${entity.simpleName.toLowerCase()});
+        final ${entity.simpleName} item = ${helper.firstToLower($entity.simpleName)}Dao.findByPrimaryKey(parentKey, ${entity.simpleName.toLowerCase()});
         model.addAttribute("item", item);
         return "item${entity.simpleName}";
     }
@@ -173,7 +224,7 @@ public abstract class Generated${entity.simpleName}Controller
 		LOG.debug("get child item {}", ${entity.pk.name});
 		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 			#end${p.simpleName.toLowerCase()}#end);
-        final ${entity.simpleName} body = dao.findByPrimaryKey(parentKey, ${entity.pk.name});
+        final ${entity.simpleName} body = ${helper.firstToLower($entity.simpleName)}Dao.findByPrimaryKey(parentKey, ${entity.pk.name});
 		return respond(body);
 	}
 	
@@ -193,7 +244,7 @@ public abstract class Generated${entity.simpleName}Controller
 ## ---------------------- This is a Root Entity without a parent ------------------------------------
 
 	protected List<${entity.simpleName}> getList() {
-        return dao.findAll();
+        return ${helper.firstToLower($entity.simpleName)}Dao.findAll();
 	}
 	
 // ------------------- HTML interface -----------------------------------	
@@ -205,7 +256,7 @@ public abstract class Generated${entity.simpleName}Controller
 	@RequestMapping(value = "/{${entity.pk.name}}/index.html", method = RequestMethod.GET)
     public String getItemHtml(Model model, @PathVariable(value = "${entity.pk.name}") ${entity.pk.type} ${entity.pk.name}) {
 		LOG.debug("get item HTML");
-        final ${entity.simpleName} item = dao.findByPrimaryKey(${entity.pk.name});
+        final ${entity.simpleName} item = ${helper.firstToLower($entity.simpleName)}Dao.findByPrimaryKey(${entity.pk.name});
         model.addAttribute("item", item);
         return "item${entity.simpleName}";
     }
@@ -219,7 +270,7 @@ public abstract class Generated${entity.simpleName}Controller
     @RequestMapping(value = "/list.json", method = RequestMethod.GET, headers="accept=application/json")
     public ResponseEntity<${entity.simpleName}[]> getListAcceptJson() {
 		LOG.debug("list All Accept");
-        final List<${entity.simpleName}> list = dao.findAll();
+        final List<${entity.simpleName}> list = ${helper.firstToLower($entity.simpleName)}Dao.findAll();
 		return listJson(list);
 	}
 	
@@ -230,7 +281,7 @@ public abstract class Generated${entity.simpleName}Controller
     @RequestMapping(value = "/index.json", method = RequestMethod.GET)
     public ResponseEntity<${entity.simpleName}[]> getListJson() {
 		LOG.debug("list All index.json");
-        final List<${entity.simpleName}> list = dao.findAll();
+        final List<${entity.simpleName}> list = ${helper.firstToLower($entity.simpleName)}Dao.findAll();
 		return listJson(list);
 	}
 	
@@ -241,7 +292,7 @@ public abstract class Generated${entity.simpleName}Controller
     @RequestMapping(value = "/{${entity.pk.name}}/index.json", method = RequestMethod.GET)
     public ResponseEntity<${entity.simpleName}> getItemJson(@PathVariable(value = "${entity.pk.name}") ${entity.pk.type} ${entity.pk.name}) {
 		LOG.debug("get root item {}", ${entity.pk.name});
-        final ${entity.simpleName} body = dao.findByPrimaryKey(${entity.pk.name});
+        final ${entity.simpleName} body = ${helper.firstToLower($entity.simpleName)}Dao.findByPrimaryKey(${entity.pk.name});
 		return respond(body);
 	}
 	
@@ -266,7 +317,14 @@ public abstract class Generated${entity.simpleName}Controller
 	
 
 // ------------------- DAO setter for this Entity -----------------------------------	
-	public final void setDao(${entity.simpleName}Dao dao) {
-		this.dao = dao;
+	public final void set${entity.simpleName}Dao(${entity.simpleName}Dao dao) {
+		this.${helper.firstToLower($entity.simpleName)}Dao = dao;
 	}
+	
+#foreach( $field in $entity.manyToOnes )
+	/** Setter for Many-To-One relation DAO */
+	public final void set${helper.firstToUpper($field.name)}Dao(${field.entity.simpleName}Dao dao) {
+		${field.name}Dao = dao;
+	}
+#end	
 }

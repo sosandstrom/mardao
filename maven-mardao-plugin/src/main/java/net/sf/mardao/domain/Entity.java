@@ -31,6 +31,10 @@ public class Entity implements Comparable<Entity> {
     private List<Entity>             ancestors         = new ArrayList<Entity>();
     private List<Entity>             parents           = new ArrayList<Entity>();
     private final Set<Entity>        children          = new TreeSet<Entity>();
+    private Field                    createdDate;
+    private Field                    createdBy;
+    private Field                    updatedDate;
+    private Field                    updatedBy;
 
     public void setClassName(String className) {
         this.className = className;
@@ -200,5 +204,37 @@ public class Entity implements Comparable<Entity> {
 
     public Set<Entity> getChildren() {
         return children;
+    }
+
+    public final Field getCreatedDate() {
+        return createdDate;
+    }
+
+    public final void setCreatedDate(Field createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public final Field getCreatedBy() {
+        return createdBy;
+    }
+
+    public final void setCreatedBy(Field createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public final Field getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public final void setUpdatedDate(Field updatedDate) {
+        this.updatedDate = updatedDate;
+    }
+
+    public final Field getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public final void setUpdatedBy(Field updatedBy) {
+        this.updatedBy = updatedBy;
     }
 }

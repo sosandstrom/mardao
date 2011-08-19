@@ -28,6 +28,16 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 	/** Table name for ${entity.simpleName} is "${entity.tableName}" */
 	public static final String TABLE_NAME = "${entity.tableName}";
 
+#foreach( $field in $entity.manyToOnes )
+    /** DAO for Many-To-One relation ${field.name} */
+    private Generated${field.entity.simpleName}DaoImpl ${field.name}Dao;
+	/** Setter for Many-To-One ${field.name} DAO */
+	public void set${helper.firstToUpper($field.name)}Dao(Generated${field.entity.simpleName}DaoImpl dao) {
+		${field.name}Dao = dao;
+	}
+#end
+	
+	
 	/** Default constructor */
    public Generated${entity.simpleName}DaoImpl() {
       super(${entity.simpleName}.class);
@@ -85,7 +95,12 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 
 		// many-to-one keys:
 #foreach( $field in $entity.manyToOnes )
-		domain.set${helper.firstToUpper($field.name)}(($field.type) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()}));
+        // ${field.name}
+        final Key ${field.name}Key = (Key) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()});
+        if (null != ${field.name}Key) {
+            final Entity ${field.name}Entity = new Entity(${field.name}Key);
+            domain.set${helper.firstToUpper($field.name)}(${field.name}Dao.convert(${field.name}Entity));
+        }
 #end
 
 		return domain;
@@ -148,10 +163,17 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 
 		// many-to-one keys:
 #foreach( $field in $entity.manyToOnes )
-		populate(entity, COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
+		final ${field.type} ${field.name} = domain.get${helper.firstToUpper($field.name)}();
+		if (null != ${field.name}) {
+			populate(entity, COLUMN_NAME_${field.name.toUpperCase()}, ${field.name}.getPrimaryKey());
+		}
 #end
 
 	return entity;
+   }
+
+   protected Entity createEntity(${entity.simpleName} domain) {
+   	return convert(domain);
    }
 
    protected Key createKey(${entity.pk.type} ${entity.pk.name}) {
@@ -240,11 +262,17 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 #if( $sourceVersion != "1.5" )
    @Override
 #end
-   public void persist(${entity.simpleName} domain) {
+   public void persist(${entity.simpleName} domain#if( $entity.createdBy ), 
+		${entity.createdBy.type} ${entity.createdBy.name}#end#if( $entity.updatedBy ), 
+		${entity.updatedBy.type} ${entity.updatedBy.name}#end) {
 		LOGGER.debug("persisting {} with Id of type ${entity.pk.type}", domain);
 		
 		final Entity entity = convert(domain);
-		final Key key = persist(entity);
+		final Key key = persist(entity,
+			#if( ${entity.createdDate} )"${entity.createdDate.name}"#else null#end,
+			#if( ${entity.createdBy} )"${entity.createdBy.name}", ${entity.createdBy.name}#else null, null#end,
+			#if( ${entity.updatedDate} )"${entity.updatedDate.name}"#else null#end,
+			#if( ${entity.updatedBy} )"${entity.updatedBy.name}", ${entity.updatedBy.name}#else null, null#end);
 		// update domain object with (generated) Key
 #if( ${entity.pk.type} == "java.lang.String" )
 		domain.set${helper.firstToUpper($entity.pk.name)}(key.getName());		
@@ -256,6 +284,24 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #end		
    }
+   
+#if( $entity.createdBy || $entity.updatedBy )
+	/**
+	 * Inserts a ${entity.simpleName} instance. The primary key attribute of the instance is updated.
+	 *
+	 * @param entity the ${entity.simpleName} entity to insert
+	 */
+#if( $sourceVersion != "1.5" )
+   @Override
+#end
+   public void persist(${entity.simpleName} domain) {
+		persist(domain#if( $entity.createdBy ), 
+			null#end#if( $entity.updatedBy ), 
+			null#end);
+	}
+#end	
+   
+## if( $entity.createdBy 
    
    public void delete(List<${entity.simpleName}> domains) {
 	   final List<Key> keys = new ArrayList<Key>(domains.size());
@@ -386,6 +432,15 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 	}
 	
 #if( $foreign )  
+	/**
+	 * find-by method for many-to-one field ${field.name}
+	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
+	 */
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}Key(Key ${field.name}Key) {
+		return findBy(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name}Key);
+	}	
+
 	/**
 	 * find-by method for many-to-one field ${field.name}
 	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key

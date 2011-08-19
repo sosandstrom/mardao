@@ -5,29 +5,29 @@
 	<jsp:include page="header.jsp">
 		<jsp:param name="headTitle" value="${entity.simpleName} - <%=item.get${helper.firstToUpper($entity.pk.name)}()%>" />
     </jsp:include>
-	<h1>${entity.simpleName} item</h1>
-	<table border="1">
-		<thead>
-			<tr>
-				<th>Attribute</th>
-				<th>Value</th>
+	<h1 class="mardaoT1">${entity.simpleName} item</h1>
+	<table class="mardaoTable">
+		<thead class="mardaoTH">
+			<tr class="mardaoTHtr,mardaoTR">
+				<th class="mardaoTHth,mardaoTD">Attribute</th>
+				<th class="mardaoTHth,mardaoTD">Value</th>
 			</tr>
 		</thead>
-		<tbody>
-			<tr>
-				<td><c:out value="${entity.pk.name}" /></td>
-				<td><c:out value="${ESC}{item.${entity.pk.name}}" /></td>
+		<tbody class="mardaoTB">
+			<tr class="mardaoTR">
+				<td class="mardaoTD,mardaoLabel"><c:out value="${entity.pk.name}" /></td>
+				<td class="mardaoTD"><c:out value="${ESC}{item.${entity.pk.name}}" /></td>
 			</tr>
 #foreach( $field in $entity.fields )
-			<tr>
-				<td><c:out value="${field.name}" /></td>
-				<td><c:out value="${ESC}{item.${field.name}}" /></td>
+			<tr class="mardaoTR">
+				<td class="mardaoTD,mardaoLabel"><c:out value="${field.name}" /></td>
+				<td class="mardaoTD"><c:out value="${ESC}{item.${field.name}}" /></td>
 			</tr>
 #end
 #foreach( $child in $entity.children )
-			<tr>
-				<td>+ Children</td>
-				<td><a href="<c:out value='${child.simpleName}' />/"><c:out value="${child.simpleName}" /></a></td>
+			<tr class="mardaoTR">
+				<td class="mardaoTD,mardaoLabel">+ Children</td>
+				<td class="mardaoTD"><a href="<c:out value='${child.simpleName}' />/" class="mardaoA"><c:out value="${child.simpleName}" /></a></td>
 			</tr>
 #end
 		</tbody>

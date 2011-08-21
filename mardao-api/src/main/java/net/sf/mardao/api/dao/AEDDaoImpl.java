@@ -387,7 +387,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
 
     public final void persist(T domain) {
         @SuppressWarnings({"rawtypes", "unchecked"})
-        final Entity entity = domain._createEntity();
+        final Entity entity = createEntity(domain);
         persistUpdateDates(domain, entity, new Date());
         final Key key = persist(entity);
         persistUpdateKeys(domain, key);

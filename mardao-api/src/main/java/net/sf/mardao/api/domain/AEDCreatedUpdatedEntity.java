@@ -40,13 +40,15 @@ public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends A
         return updatedDate;
     }
 
-    // public final void setCreatedDate(Date createdDate) {
-    // this.createdDate = createdDate;
-    // }
-    //
-    // public final void setUpdatedDate(Date updatedDate) {
-    // this.updatedDate = updatedDate;
-    // }
+    @Override
+    public final void _setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    @Override
+    public final void _setUpdatedDate(Date updatedDate) {
+        this.updatedDate = updatedDate;
+    }
 
     /**
      * Override this method to change the name under which the created date is stored
@@ -73,12 +75,8 @@ public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends A
     public Entity _createEntity() {
         final Entity entity = super._createEntity();
 
-        if (null != createdDate) {
-            populate(entity, _getNameCreatedDate(), createdDate);
-        }
-
-        // indicate to DAO that dates are enabled:
-        populate(entity, _getNameUpdatedDate(), DATE_FLAG);
+        populate(entity, _getNameCreatedDate(), createdDate);
+        populate(entity, _getNameUpdatedDate(), updatedDate);
 
         return entity;
     }

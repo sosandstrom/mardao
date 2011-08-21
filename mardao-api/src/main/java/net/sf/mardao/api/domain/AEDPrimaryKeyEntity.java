@@ -91,18 +91,26 @@ public abstract class AEDPrimaryKeyEntity<ID extends Serializable> implements Pr
         return null;
     }
 
+    public void _setCreatedDate(Date createdDate) {
+    }
+
+    public void _setUpdatedDate(Date updatedDate) {
+    }
+
     public static void populate(Entity entity, String name, Object value) {
-        if (null != value) {
-            // String properties must be 500 characters or less.
-            // Instead, use com.google.appengine.api.datastore.Text, which can store strings of any length.
-            if (value instanceof String) {
-                final String s = (String) value;
-                if (500 < s.length()) {
-                    value = new Text(s);
+        if (null != name && null != entity) {
+            if (null != value) {
+                // String properties must be 500 characters or less.
+                // Instead, use com.google.appengine.api.datastore.Text, which can store strings of any length.
+                if (value instanceof String) {
+                    final String s = (String) value;
+                    if (500 < s.length()) {
+                        value = new Text(s);
+                    }
                 }
             }
+            entity.setProperty(name, value);
         }
-        entity.setProperty(name, value);
     }
 
     public Entity _createEntity() {

@@ -67,10 +67,19 @@ public class UberDaoBean {
         footnoteDao.findAll();
 
         Book book = bookDao.findByPrimaryKey(ISBN);
+        if (false == book.getUpdatedDate().equals(book.getCreatedDate())) {
+            LOG.error("Expected updatedDate {} to be equal to createdDate {}", book.getUpdatedDate(), book.getCreatedDate());
+        }
 
         List<Chapter> chapters = chapterDao.findByBook((Key) book.getPrimaryKey());
         if (chapters.isEmpty()) {
             LOG.error("Expected chapters in book {}", ISBN);
+        }
+
+        book.setTitle("Updated book title");
+        bookDao.update(book);
+        if (book.getUpdatedDate().compareTo(book.getCreatedDate()) <= 0) {
+            LOG.error("Expected updatedDate {} to be after createdDate {}", book.getUpdatedDate(), book.getCreatedDate());
         }
     }
 

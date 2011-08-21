@@ -78,6 +78,9 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 		// parent
 		domain.set${helper.firstToUpper(${entity.parent.name})}(entity.getParent());
 #end
+	    // createdDate, updatedDate
+		convertCreatedUpdatedDates(entity, domain);
+		
 		// properties
 #foreach( $field in $entity.fields )
 #if( $field.type == "java.lang.String" )

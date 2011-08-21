@@ -46,6 +46,17 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
      */
     protected abstract T convert(Entity entity);
 
+    @SuppressWarnings("rawtypes")
+    protected static final void convertCreatedUpdatedDates(Entity from, AEDPrimaryKeyEntity domain) {
+        if (null != domain._getNameCreatedDate()) {
+            domain._setCreatedDate((Date) from.getProperty(domain._getNameCreatedDate()));
+        }
+
+        if (null != domain._getNameUpdatedDate()) {
+            domain._setUpdatedDate((Date) from.getProperty(domain._getNameUpdatedDate()));
+        }
+    }
+
     /**
      * Converts a datastore Key into the domain primary key. Implemented in Generated<T>DaoImpl
      * 
@@ -392,6 +403,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
             // only if not previously created
             if (null == entity.getProperty(propertyName)) {
                 entity.setProperty(propertyName, date);
+                domain._setCreatedDate(date);
             }
         }
 
@@ -401,6 +413,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
 
             // always update the date
             entity.setProperty(propertyName, date);
+            domain._setUpdatedDate(date);
         }
     }
 

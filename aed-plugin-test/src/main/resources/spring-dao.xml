@@ -8,11 +8,6 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
 	">
 
-	<!-- EntityManagerFactory should be created only once! -->
-	<bean id="entityManagerFactory" class="javax.persistence.Persistence" factory-method="createEntityManagerFactory" destroy-method="close">
-		<constructor-arg value="transactions-optional" />
-	</bean>
-
 <!-- Bean managed transactions -->
 
 	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.aed.domain ============ -->

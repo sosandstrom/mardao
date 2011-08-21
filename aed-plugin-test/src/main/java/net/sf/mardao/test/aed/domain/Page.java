@@ -10,7 +10,7 @@ import net.sf.mardao.api.domain.AEDPrimaryKeyEntity;
 import com.google.appengine.api.datastore.Key;
 
 @Entity
-public class Page extends AEDPrimaryKeyEntity {
+public class Page extends AEDPrimaryKeyEntity<Long> {
     @Id
     private Long              pageNumber;
 
@@ -27,7 +27,12 @@ public class Page extends AEDPrimaryKeyEntity {
     private static final long serialVersionUID = 5589616677376850910L;
 
     @Override
-    public Object getSimpleKey() {
+    public Class<Long> getIdClass() {
+        return Long.class;
+    }
+
+    @Override
+    public Long getSimpleKey() {
         return pageNumber;
     }
 

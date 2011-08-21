@@ -47,16 +47,16 @@ public class Expression {
 
     public static class Foreign<T extends PrimaryKeyEntity, ID extends Serializable> extends Expression {
 
-        private final AEDDaoImpl<T, ID> foreignDao;
-        private final Expression        foreignExpression;
+        private final Dao<T, ID> foreignDao;
+        private final Expression foreignExpression;
 
-        public Foreign(String column, String operation, AEDDaoImpl<T, ID> foreignDao, Expression foreignExpression) {
+        public Foreign(String column, String operation, Dao<T, ID> foreignDao, Expression foreignExpression) {
             super(column, operation, foreignExpression);
             this.foreignExpression = foreignExpression;
             this.foreignDao = foreignDao;
         }
 
-        public AEDDaoImpl<T, ID> getForeignDao() {
+        public Dao<T, ID> getForeignDao() {
             return foreignDao;
         }
 

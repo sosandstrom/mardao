@@ -11,24 +11,24 @@
 	<!-- ============== Controller Beans for entities in package net.sf.mardao.test.aed.domain ============ -->
 	
 	<bean id="bookController" class="net.sf.mardao.test.aed.web.BookController">
-	    <property name="dao" ref="bookDao" />
+	    <property name="bookDao" ref="bookDao" />
 	</bean>
 	
 	<bean id="chapterController" class="net.sf.mardao.test.aed.web.ChapterController">
-	    <property name="dao" ref="chapterDao" />
+	    <property name="chapterDao" ref="chapterDao" />
 	    <property name="parentDao" ref="bookDao" />
 	    <property name="parentBookDao" ref="bookDao" />
 	</bean>
 	
 	<bean id="pageController" class="net.sf.mardao.test.aed.web.PageController">
-	    <property name="dao" ref="pageDao" />
+	    <property name="pageDao" ref="pageDao" />
 	    <property name="parentDao" ref="chapterDao" />
 	    <property name="parentBookDao" ref="bookDao" />
 	    <property name="parentChapterDao" ref="chapterDao" />
 	</bean>
 	
 	<bean id="footnoteController" class="net.sf.mardao.test.aed.web.FootnoteController">
-	    <property name="dao" ref="footnoteDao" />
+	    <property name="footnoteDao" ref="footnoteDao" />
 	    <property name="parentDao" ref="pageDao" />
 	    <property name="parentBookDao" ref="bookDao" />
 	    <property name="parentChapterDao" ref="chapterDao" />

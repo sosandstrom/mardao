@@ -9,11 +9,11 @@ import net.sf.mardao.api.domain.AEDPrimaryKeyEntity;
 import com.google.appengine.api.datastore.Key;
 
 @Entity
-public class Footnote extends AEDPrimaryKeyEntity {
+public class Footnote extends AEDPrimaryKeyEntity<Long> {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private Key               key;
+    private Long              key;
 
     private String            name;
 
@@ -21,8 +21,13 @@ public class Footnote extends AEDPrimaryKeyEntity {
     private Key               page;
 
     @Override
-    public Object getSimpleKey() {
+    public Long getSimpleKey() {
         return key;
+    }
+
+    @Override
+    public Class<Long> getIdClass() {
+        return Long.class;
     }
 
     @Override
@@ -38,11 +43,11 @@ public class Footnote extends AEDPrimaryKeyEntity {
         this.name = name;
     }
 
-    public Key getKey() {
+    public Long getKey() {
         return key;
     }
 
-    public void setKey(Key key) {
+    public void setKey(Long key) {
         this.key = key;
     }
 

@@ -50,7 +50,7 @@ public class UberDaoBean {
         page1.setBook(book.getISBN());
         page1.setChapter((Key) prologue.getPrimaryKey());
         pageDao.persist(page1);
-        LOG.info("persisted " + page1);
+        LOG.info("persisted {}", page1);
 
         Footnote footnote = new Footnote();
         footnote.setName("Be aware that...");

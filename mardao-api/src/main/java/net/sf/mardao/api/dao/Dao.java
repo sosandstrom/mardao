@@ -4,10 +4,12 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public interface Dao<T, ID extends Serializable> {
+import net.sf.mardao.api.domain.PrimaryKeyEntity;
+
+public interface Dao<T extends PrimaryKeyEntity, ID extends Serializable> {
     void delete(T entity);
 
-    void delete(List<T> entities);
+    void delete(Iterable<T> entities);
 
     int deleteAll();
 
@@ -26,4 +28,10 @@ public interface Dao<T, ID extends Serializable> {
     void persist(T entity);
 
     void update(T entity);
+
+    List<String> getColumnNames();
+
+    String getTableName();
+
+    Object getPrimaryKeyColumnName();
 }

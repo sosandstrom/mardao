@@ -4,13 +4,12 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import net.sf.mardao.api.Parent;
-import net.sf.mardao.api.domain.AEDPrimaryKeyEntity;
+import net.sf.mardao.api.domain.AEDCreatedUpdatedEntity;
 
 import com.google.appengine.api.datastore.Key;
 
 @Entity
-// @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"book", "name"})})
-public class Chapter extends AEDPrimaryKeyEntity {
+public class Chapter extends AEDCreatedUpdatedEntity<Long> {
     private static final long serialVersionUID = -7257544633020164506L;
 
     @Id
@@ -23,13 +22,28 @@ public class Chapter extends AEDPrimaryKeyEntity {
     private Key               book;
 
     @Override
-    public Object getSimpleKey() {
+    public Long getSimpleKey() {
         return id;
     }
 
     @Override
     public Object getParentKey() {
         return book;
+    }
+
+    @Override
+    public Class<Long> getIdClass() {
+        return Long.class;
+    }
+
+    @Override
+    public String _getNameCreatedDate() {
+        return null;
+    }
+
+    @Override
+    public String _getNameUpdatedDate() {
+        return "chapterUpdatedDate";
     }
 
     public Long getId() {

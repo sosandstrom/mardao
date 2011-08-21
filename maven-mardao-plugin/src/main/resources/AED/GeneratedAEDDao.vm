@@ -39,26 +39,8 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
     Object createKey(Object parentKey, ${entity.pk.type} ${entity.pk.name});	
 	
 
-    // ----------------------- canonical deletes -------------------------------
-   /**
-    * Only implemented on AED
-	*/
-	void delete(Key primaryKey);
-
-   /**
-    * Only implemented on AED
-	*/
-    void deleteByCore(List<Key> primaryKeys);
-		
 #if( $entity.parent )
 #set( $field = $entity.parent )
-#if( ${entity.pk.type} != "com.google.appengine.api.datastore.Key" )
-	void delete(Object parentKey, List<${entity.pk.type}> childKeys);
-	
-	void delete(Object parentKey, ${entity.pk.type} childKey);
-	
-#end
-
 	// ----------------------- parent finder -------------------------------
 	/**
 	 * find-by method for parent field ${field.name}
@@ -70,14 +52,7 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
     List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(Object ${field.name});		
    
 	List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
-#else
-#if( ${entity.pk.type} != "com.google.appengine.api.datastore.Key" )
-	void deleteByKeys(List<${entity.pk.type}> primaryKeys);
-	
-	void delete(${entity.pk.type} primaryKey);
-	
-#end
-	
+
 #end   
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )

@@ -147,16 +147,16 @@ public abstract class Generated${entity.simpleName}Controller
 	@RequestMapping(value = "index.html", method = RequestMethod.GET)
     public String getList(HttpServletRequest request, Model model#foreach( $p in $ancestors ), 
 		@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
-		LOG.debug("list by parent");
+		final List<${entity.simpleName}> list = getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
+			#end${p.simpleName.toLowerCase()}#end);
+        model.addAttribute("list", list);
+		LOG.debug("list {} ${entity.simpleName}s", list.size());
 		
 		// for breadcrumbs:
         final String uri = request.getRequestURI();
         final String paths[] = uri.split("/");
 		model.addAttribute("paths", paths);
 		
-		final List<${entity.simpleName}> list = getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
-			#end${p.simpleName.toLowerCase()}#end);
-        model.addAttribute("list", list);
         return "list${entity.simpleName}";
     }
 	

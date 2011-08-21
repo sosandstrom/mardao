@@ -21,9 +21,9 @@
 		<tbody class="mardaoTB">
 			<c:forEach items="${ESC}{list}" var="item">
 			<tr class="mardaoTR">
-				<td class="mardaoTD"><a href="<c:out value='${ESC}{item.${entity.pk.name}}' />/" class="mardaoA"><c:out value="${ESC}{item.${entity.pk.name}}" /></a></td>
+				<td class="mardaoTD"><a href="${ESC}{item.${entity.pk.name}}/" class="mardaoA">${ESC}{item.${entity.pk.name}}</a></td>
 #foreach( $field in $entity.fields )
-				<td class="mardaoTD"><c:out value="${ESC}{item.${field.name}}" /></td>
+				<td class="mardaoTD">${ESC}{item.${field.name}}</td>
 #end
 			</tr>
 			</c:forEach>

@@ -4,7 +4,7 @@
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.10</version>
+	<version>1.11-SNAPSHOT</version>
 	<name>${groupId}:${artifactId}</name>
 	<url>http://mardao.sourceforge.net</url>
 
@@ -12,9 +12,11 @@
 		<module>maven-mardao-plugin</module>
 		<module>mardao-api</module>
 		<module>aed-plugin-test</module>
+		<!-- 
 		<module>basic-plugin-test</module>
 		<module>jpa-plugin-test</module>
 		<module>gae-plugin-test</module>
+		 -->
 	</modules>
 
 	<properties>
@@ -50,19 +52,6 @@
 		</plugins>
 	</build>
 
-	<profiles>
-		<profile>
-			<!-- Profile for building and packaging for the android platform -->
-			<id>test</id>
-			<modules>
-				<module>basic-plugin-test</module>
-				<module>jpa-plugin-test</module>
-			</modules>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-		</profile>
-	</profiles>
 	<distributionManagement>
         <repository>
             <id>sourceforge-releases</id>
@@ -91,9 +80,9 @@
 	</distributionManagement>
 
 	<scm>
-		<connection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/tags/parent-1.10</connection>
-		<developerConnection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/tags/parent-1.10</developerConnection>
-		<url>http://mardao.svn.sourceforge.net/viewvc/mardao/tags/parent-1.10</url>
+		<connection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/trunk</connection>
+		<developerConnection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/trunk</developerConnection>
+		<url>http://mardao.svn.sourceforge.net/viewvc/mardao/trunk</url>
 	</scm>
 
 	<reporting>

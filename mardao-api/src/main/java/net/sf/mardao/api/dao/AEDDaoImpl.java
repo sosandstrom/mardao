@@ -386,6 +386,10 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     }
 
     public final void persist(T domain) {
+        // cannot generate primary keys for Strings:
+        if (null == domain.getSimpleKey() && String.class.equals(domain.getIdClass())) {
+            throw new IllegalArgumentException("Cannot generate key for <String> ID: " + domain);
+        }
         @SuppressWarnings({"rawtypes", "unchecked"})
         final Entity entity = createEntity(domain);
         persistUpdateDates(domain, entity, new Date());

@@ -105,9 +105,11 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
             final List<Entity> ancestors = new ArrayList<Entity>();
             final List<Entity> parents = new ArrayList<Entity>();
             Field f = e.getParent();
-            Entity p;
+            Entity p = null;
             boolean direct = true;
-            while (null != f) {
+            
+            // break if self is parent
+            while (null != f && p != f.getEntity()) {
                 p = f.getEntity();
                 if (direct) {
                     direct = false;

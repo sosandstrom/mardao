@@ -444,7 +444,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         deleteByCore(key);
     }
 
-    public static final void deleteByCore(Key primaryKey) {
+    public final void deleteByCore(Key primaryKey) {
         final DatastoreService datastore = getDatastoreService();
         datastore.delete(primaryKey);
     }
@@ -457,7 +457,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         deleteByCore(keys);
     }
 
-    public static final void deleteByCore(Iterable<Key> primaryKeys) {
+    public final void deleteByCore(Iterable<Key> primaryKeys) {
         final DatastoreService datastore = getDatastoreService();
         datastore.delete(primaryKeys);
     }

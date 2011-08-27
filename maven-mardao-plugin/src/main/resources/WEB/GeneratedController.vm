@@ -33,13 +33,12 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.WebRequest;
 
 /**
- * Implementation of Controller related to entity ${entity.simpleName}.
+ * Generated Controller implementation related to entity ${entity.simpleName}.
  */
 @Controller
 @RequestMapping(value = "#foreach( $p in $ancestors )/${p.simpleName}/{${p.simpleName.toLowerCase()}}#end/${entity.simpleName}")
 public abstract class Generated${entity.simpleName}Controller 
-##	extends Generated${entity.simpleName}DaoImpl
-		implements WebBindingInitializer
+//		implements WebBindingInitializer
 {
     protected static final Logger LOG = LoggerFactory.getLogger(Generated${entity.simpleName}Controller.class);
 
@@ -76,7 +75,7 @@ public abstract class Generated${entity.simpleName}Controller
 	    return parentKey;
 	}
 
-    @Override
+//    @Override
     public void initBinder(WebDataBinder binder, WebRequest request) {
 #foreach( $field in $entity.manyToOnes )	
         binder.registerCustomEditor(${field.entity.simpleType}.class, new PropertyEditorSupport() {
@@ -144,7 +143,7 @@ public abstract class Generated${entity.simpleName}Controller
 	 * Queries for all ${entity.simpleName} Entities and responds with HTML
 	 * This method is for entities with parent(s)
 	 */
-	@RequestMapping(value = "index.html", method = RequestMethod.GET)
+	@RequestMapping(value = "/index.html", method = RequestMethod.GET)
     public String getList(HttpServletRequest request, Model model#foreach( $p in $ancestors ), 
 		@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()}#end) {
 		final List<${entity.simpleName}> list = getList(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 

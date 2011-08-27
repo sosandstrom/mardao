@@ -6,12 +6,22 @@ import java.util.Map;
 
 import net.sf.mardao.api.domain.PrimaryKeyEntity;
 
+import com.google.appengine.api.datastore.Key;
+
 public interface Dao<T extends PrimaryKeyEntity, ID extends Serializable> {
     void delete(T entity);
 
     void delete(Iterable<T> entities);
 
     int deleteAll();
+
+    void delete(Object parentKey, ID simpleKey);
+
+    void delete(Object parentKey, Iterable<ID> simpleKeys);
+
+    void deleteByCore(Key primaryKey);
+
+    void deleteByCore(Iterable<Key> primaryKeys);
 
     List<T> findAll();
 

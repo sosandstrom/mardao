@@ -45,18 +45,19 @@ public class Expression {
         }
     }
 
-    public static class Foreign<T extends PrimaryKeyEntity, ID extends Serializable> extends Expression {
+    public static class Foreign<T extends PrimaryKeyEntity, ID extends Serializable, P extends Serializable, C extends Serializable>
+            extends Expression {
 
-        private final Dao<T, ID> foreignDao;
-        private final Expression foreignExpression;
+        private final Dao<T, ID, P, C> foreignDao;
+        private final Expression       foreignExpression;
 
-        public Foreign(String column, String operation, Dao<T, ID> foreignDao, Expression foreignExpression) {
+        public Foreign(String column, String operation, Dao<T, ID, P, C> foreignDao, Expression foreignExpression) {
             super(column, operation, foreignExpression);
             this.foreignExpression = foreignExpression;
             this.foreignDao = foreignDao;
         }
 
-        public Dao<T, ID> getForeignDao() {
+        public Dao<T, ID, P, C> getForeignDao() {
             return foreignDao;
         }
 

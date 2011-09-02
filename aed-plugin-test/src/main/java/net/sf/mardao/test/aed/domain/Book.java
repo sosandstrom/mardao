@@ -3,10 +3,10 @@ package net.sf.mardao.test.aed.domain;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-import net.sf.mardao.api.domain.AEDCreatedUpdatedEntity;
+import net.sf.mardao.api.domain.AEDStringEntity;
 
 @Entity
-public class Book extends AEDCreatedUpdatedEntity<String> {
+public class Book extends AEDStringEntity {
     private static final long serialVersionUID = -5236891128669604072L;
 
     @Id
@@ -17,11 +17,6 @@ public class Book extends AEDCreatedUpdatedEntity<String> {
     @Override
     public String getSimpleKey() {
         return ISBN;
-    }
-
-    @Override
-    public Class<String> getIdClass() {
-        return String.class;
     }
 
     public String getISBN() {

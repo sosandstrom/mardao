@@ -3,16 +3,16 @@
 	<parent>
 		<groupId>net.sf.mardao</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.10-SNAPSHOT</version>
+		<version>1.11-SNAPSHOT</version>
 	</parent>
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>mardao-api</artifactId>
 	<packaging>jar</packaging>
-	<version>1.10-SNAPSHOT</version>
+	<version>1.11-SNAPSHOT</version>
 	<name>${groupId}:${artifactId}</name>
 
 	<properties>
-		<gae.version>1.3.7</gae.version>
+		<gae.version>1.5.2</gae.version>
 	</properties>
 
 	<build>

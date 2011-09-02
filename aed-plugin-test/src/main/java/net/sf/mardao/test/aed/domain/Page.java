@@ -5,12 +5,15 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import net.sf.mardao.api.Parent;
-import net.sf.mardao.api.domain.AEDPrimaryKeyEntity;
+import net.sf.mardao.api.domain.AEDLongEntity;
 
 import com.google.appengine.api.datastore.Key;
 
 @Entity
-public class Page extends AEDPrimaryKeyEntity<Long> {
+public class Page extends AEDLongEntity {
+    @Parent(kind = "Chapter")
+    private Key               chapter;
+
     @Id
     private Long              pageNumber;
 
@@ -21,15 +24,7 @@ public class Page extends AEDPrimaryKeyEntity<Long> {
     @Basic
     private String            book;
 
-    @Parent(kind = "Chapter")
-    private Key               chapter;
-
     private static final long serialVersionUID = 5589616677376850910L;
-
-    @Override
-    public Class<Long> getIdClass() {
-        return Long.class;
-    }
 
     @Override
     public Long getSimpleKey() {
@@ -37,7 +32,7 @@ public class Page extends AEDPrimaryKeyEntity<Long> {
     }
 
     @Override
-    public Object getParentKey() {
+    public Key getParentKey() {
         return chapter;
     }
 

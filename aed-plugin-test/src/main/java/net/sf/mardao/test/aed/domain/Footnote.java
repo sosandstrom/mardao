@@ -4,12 +4,12 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import net.sf.mardao.api.Parent;
-import net.sf.mardao.api.domain.AEDPrimaryKeyEntity;
+import net.sf.mardao.api.domain.AEDLongEntity;
 
 import com.google.appengine.api.datastore.Key;
 
 @Entity
-public class Footnote extends AEDPrimaryKeyEntity<Long> {
+public class Footnote extends AEDLongEntity {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -26,12 +26,7 @@ public class Footnote extends AEDPrimaryKeyEntity<Long> {
     }
 
     @Override
-    public Class<Long> getIdClass() {
-        return Long.class;
-    }
-
-    @Override
-    public Object getParentKey() {
+    public Key getParentKey() {
         return page;
     }
 

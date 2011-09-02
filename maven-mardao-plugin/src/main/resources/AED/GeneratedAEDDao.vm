@@ -15,7 +15,7 @@ import ${entity.className};
  * Generated on ${currentDate}.
  * @author mardao DAO generator (${helper.class.name})
  */
-public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleName}, ${entity.pk.type}> {
+public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleName}, ${entity.pk.type}, Key, Key> {
 
 	/** Column name for primary key attribute is "${entity.pk.columnName}" */
 	static final String COLUMN_NAME_${entity.pk.name.toUpperCase()} = "${entity.pk.columnName}";
@@ -31,13 +31,6 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 		COLUMN_NAME_${entity.pk.name.toUpperCase()}#foreach( $field in $allFields ), 
 		COLUMN_NAME_${field.name.toUpperCase()}#end);
 
-   /**
-    * Only implemented on AED
-	*/
-	Key createKey(Key parentKey, ${entity.pk.type} ${entity.pk.name});
-
-    Object createKey(Object parentKey, ${entity.pk.type} ${entity.pk.name});	
-	
 
 #if( $entity.parent )
 #set( $field = $entity.parent )
@@ -167,7 +160,7 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	 * Persist an entity given all attributes
 	 */
 	${entity.simpleName} persist(#if( $entity.parent )
-Object ${entity.parent.name},  	
+Key ${entity.parent.name},  	
 #end		${entity.pk.type} ${entity.pk.name}#foreach( $field in $entity.fields )
 , 
 		${field.type} ${field.name}#end

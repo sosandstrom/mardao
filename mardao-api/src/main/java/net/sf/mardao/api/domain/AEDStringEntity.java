@@ -5,14 +5,19 @@
 package net.sf.mardao.api.domain;
 
 /**
- *
+ * 
  * @author os
  */
 public abstract class AEDStringEntity extends AEDCreatedUpdatedEntity<String> {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8380169217299802124L;
 
     @Override
     public final Class<String> getIdClass() {
         return String.class;
     }
-    
+
 }

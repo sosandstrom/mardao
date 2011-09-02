@@ -43,7 +43,7 @@ public abstract class AEDPrimaryKeyEntity<ID extends Serializable> implements Pr
 
     public abstract Class<ID> getIdClass();
 
-    public Object getParentKey() {
+    public Key getParentKey() {
         return null;
     }
 
@@ -56,6 +56,10 @@ public abstract class AEDPrimaryKeyEntity<ID extends Serializable> implements Pr
         final Class<ID> idClass = getIdClass();
 
         LOG.debug("{}/{} for " + idClass.getSimpleName(), getParentKey(), sk);
+
+        if (null == sk) {
+            return null;
+        }
 
         // String ID
         if (String.class.equals(idClass)) {

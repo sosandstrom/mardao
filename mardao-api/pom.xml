@@ -3,12 +3,12 @@
 	<parent>
 		<groupId>net.sf.mardao</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.13-SNAPSHOT</version>
+		<version>1.13</version>
 	</parent>
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>mardao-api</artifactId>
 	<packaging>jar</packaging>
-	<version>1.13-SNAPSHOT</version>
+	<version>1.13</version>
 	<name>${groupId}:${artifactId}</name>
 
 	<properties>

@@ -23,7 +23,7 @@ import ${field.entity.className};
  * Concrete class without generics, for Spring container instatiation.
  */
 public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.simpleName}, ${entity.pk.type}> 
-	implements Generated${entity.simpleName}Dao {
+	implements Generated${entity.simpleName}Dao<Key, Key> {
 
 	/** Table name for ${entity.simpleName} is "${entity.tableName}" */
 	public static final String TABLE_NAME = "${entity.tableName}";

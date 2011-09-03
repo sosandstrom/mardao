@@ -56,9 +56,9 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
    }
    
 	
-   // ------ AbstractAEDHelper overrides -----------------------------
+   // ------ DaoImpl overrides -----------------------------
    
-   protected ${entity.simpleName} convert(Entity entity) {
+   protected ${entity.simpleName} createDomain(Entity entity) {
         // do null-check here only :-)
         if (null == entity)  {
         	return null;
@@ -124,24 +124,6 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
         return key.getId();
 #elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
         return key;
-#else
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#end
-   }
-   
-   protected List<${entity.pk.type}> convert(List<Key> keys) {
-#if( ${entity.pk.type} == "java.lang.String" || ${entity.pk.type} == "java.lang.Long")
-        // do null-check here only :-)
-        if (null == keys)  {
-        	return null;
-        }
-		final ArrayList<${entity.pk.type}> returnValue = new ArrayList<${entity.pk.type}>();
-		for (Key key : keys) {
-			returnValue.add(convert(key));
-		}
-        return returnValue;
-#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
-        return keys;
 #else
 		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #end

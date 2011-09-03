@@ -24,15 +24,17 @@ public interface Dao<T extends PrimaryKeyEntity, ID extends Serializable, P exte
 
     void delete(Iterable<T> entities);
 
-    int deleteAll();
-
     void delete(P parentKey, ID simpleKey);
 
     void delete(P parentKey, Iterable<ID> simpleKeys);
 
+    int deleteAll();
+
     void deleteByCore(C primaryKey);
 
     void deleteByCore(Iterable<C> primaryKeys);
+
+    void deleteByParent(P parentkey);
 
     List<T> findAll();
 

@@ -2,7 +2,6 @@ package net.sf.mardao.api.dao;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -10,9 +9,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import net.sf.mardao.api.domain.AEDPrimaryKeyEntity;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.sf.mardao.api.domain.CreatedUpdatedEntity;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -26,26 +23,12 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Text;
 
-public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends Serializable> implements Dao<T, ID, Key, Key> {
-
-    /** Using slf4j logging */
-    protected final Logger   LOG = LoggerFactory.getLogger(getClass());
-
-    /** mostly for logging */
-    protected final Class<T> persistentClass;
+public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends Serializable> extends
+        DaoImpl<T, ID, Key, Entity, Key> implements Dao<T, ID, Key, Key> {
 
     protected AEDDaoImpl(Class<T> type) {
-        this.persistentClass = type;
+        super(type);
     }
-
-    /**
-     * Converts a datastore Entity into the domain object. Implemented in Generated<T>DaoImpl
-     * 
-     * @param entity
-     *            the datastore Entity
-     * @return a domain object
-     */
-    protected abstract T convert(Entity entity);
 
     @SuppressWarnings("rawtypes")
     protected static final void convertCreatedUpdatedDates(Entity from, AEDPrimaryKeyEntity domain) {
@@ -58,17 +41,6 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         }
     }
 
-    /**
-     * Converts a datastore Key into the domain primary key. Implemented in Generated<T>DaoImpl
-     * 
-     * @param key
-     *            the datastore Key
-     * @return a domain primary key
-     */
-    protected abstract ID convert(Key key);
-
-    protected abstract List<ID> convert(List<Key> keys);
-
     protected static final String convertText(Object value) {
         if (null == value) {
             return null;
@@ -78,36 +50,6 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
             return text.getValue();
         }
         return (String) value;
-    }
-
-    protected abstract Key createKey(T entity);
-
-    public final Key createKey(ID primaryKey) {
-        return createKey(null, primaryKey);
-    }
-
-    public abstract Key createKey(Key parentKey, ID primaryKey);
-
-    public final Key createKey(Object parentKey, ID primaryKey) {
-        return createKey((Key) parentKey, primaryKey);
-    }
-
-    public final Iterable<Key> createKeys(Key parentKey, Iterable<ID> simpleKeys) {
-        final List<Key> returnValue = new ArrayList<Key>();
-
-        for(ID primaryKey : simpleKeys) {
-            returnValue.add(createKey(parentKey, primaryKey));
-        }
-
-        return returnValue;
-    }
-
-    public final Iterable<Key> createKeys(Object parentKey, Iterable<ID> simpleKeys) {
-        return createKeys((Key) parentKey, simpleKeys);
-    }
-
-    public final Iterable<Key> createKeys(Iterable<ID> primaryKeys) {
-        return createKeys(null, primaryKeys);
     }
 
     protected Entity createEntity(ID primaryKey) {
@@ -124,25 +66,10 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         return new Entity(getTableName(), parentKey);
     }
 
-    protected Entity createEntity(Map<String, Object> nameValuePairs) {
-        @SuppressWarnings("unchecked")
-        ID primaryKey = (ID) nameValuePairs.get(getPrimaryKeyColumnName());
-        final Entity entity = createEntity(primaryKey);
-        populate(entity, nameValuePairs);
-        return entity;
+    @Override
+    protected final Expression createEqualsFilter(String fieldName, Object param) {
+        return new FilterEqual(fieldName, param);
     }
-
-    protected abstract Entity createEntity(T domain);
-
-    protected List<Entity> createEntities(Iterable<T> domains) {
-        final ArrayList<Entity> entities = new ArrayList<Entity>();
-        for(T domain : domains) {
-            entities.add(createEntity(domain));
-        }
-        return entities;
-    }
-
-    protected abstract void populate(Entity entity, Map<String, Object> nameValuePairs);
 
     protected static void populate(Entity entity, String name, Object value) {
         if (null != value) {
@@ -177,7 +104,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
 
         T domain;
         for(Entity entity : pq.asIterable(fetchOptions)) {
-            domain = convert(entity);
+            domain = createDomain(entity);
             returnValue.add(domain);
             // LOGGER.debug("  entity {} -> domain {}", entity, domain);
         }
@@ -186,7 +113,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
 
     protected T asSingleEntity(PreparedQuery pq) {
         final Entity entity = pq.asSingleEntity();
-        final T domain = convert(entity);
+        final T domain = createDomain(entity);
         return domain;
     }
 
@@ -346,31 +273,19 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         return prepare(true, orderBy, ascending, filters);
     }
 
-    public T findByPrimaryKey(ID primaryKey) {
-        return findByPrimaryKey(null, primaryKey);
-    }
-
-    public Map<ID, T> findByPrimaryKeys(Iterable<ID> primaryKeys) {
-        return findByPrimaryKeys(null, primaryKeys);
-    }
-
     public final T findByPrimaryKey(Key parentKey, ID primaryKey) {
         T domain = null;
         final Key key = createKey((Key) parentKey, primaryKey);
         final DatastoreService datastore = getDatastoreService();
         try {
             final Entity entity = datastore.get(key);
-            domain = convert(entity);
+            domain = createDomain(entity);
         }
         catch (EntityNotFoundException ignore) {
         }
         LOG.debug("{} -> {}", key.toString(), domain);
 
         return domain;
-    }
-
-    public final T findByPrimaryKey(Object parentKey, ID primaryKey) {
-        return findByPrimaryKey((Key) parentKey, primaryKey);
     }
 
     public final Map<ID, T> findByPrimaryKeys(Key parentKey, Iterable<ID> primaryKeys) {
@@ -387,14 +302,10 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         ID id;
         for(Entry<Key, Entity> entry : entities.entrySet()) {
             id = convert(entry.getKey());
-            domain = convert(entry.getValue());
+            domain = createDomain(entry.getValue());
             returnValue.put(id, domain);
         }
         return returnValue;
-    }
-
-    public final Map<ID, T> findByPrimaryKeys(Object parentKey, Iterable<ID> primaryKeys) {
-        return findByPrimaryKeys((Key) parentKey, primaryKeys);
     }
 
     public List<ID> findAllKeys() {
@@ -402,20 +313,11 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         return asKeys(pq, -1, 0);
     }
 
-    protected static final Key persist(Entity entity) {
+    @Override
+    protected final Key persist(Entity entity) {
         final DatastoreService datastore = getDatastoreService();
 
         return datastore.put(entity);
-    }
-
-    public final ID update(T domain) {
-        return persist(domain);
-    }
-
-    @SuppressWarnings("unchecked")
-    public final ID persist(T domain) {
-        final List<ID> keys = persist(Arrays.asList(domain));
-        return keys.get(0);
     }
 
     public List<ID> persist(Iterable<T> entities) {
@@ -424,7 +326,9 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
 
     protected abstract void persistUpdateKeys(T domain, Key key);
 
-    private final void persistUpdateDates(AEDPrimaryKeyEntity<ID> domain, Entity entity, Date date) {
+    @Override
+    protected final void persistUpdateDates(CreatedUpdatedEntity domain, Entity entity, Date date) {
+
         // populate createdDate
         String propertyName = domain._getNameCreatedDate();
         if (null != propertyName) {
@@ -452,69 +356,20 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         return datastore.put(entities);
     }
 
-    public final List<ID> update(Iterable<T> domains) {
-        List<Entity> entities = new ArrayList<Entity>();
-        final Date date = new Date();
-        for(T domain : domains) {
-            final Entity entity = domain._createEntity();
-            persistUpdateDates(domain, entity, date);
-            entities.add(entity);
-        }
-        List<Key> keys = persistByCore(entities);
-        return convert(keys);
+    protected final List<Key> updateByCore(Iterable<Entity> entities) {
+        return persistByCore(entities);
     }
 
-    public final void delete(T domain) {
-        final Key key = (Key) domain.getPrimaryKey();
-        deleteByCore(key);
-    }
-
+    @Override
     public final void deleteByCore(Key primaryKey) {
+        // trivial optimization
         final DatastoreService datastore = getDatastoreService();
         datastore.delete(primaryKey);
-    }
-
-    public final void delete(Iterable<T> domains) {
-        final List<Key> keys = new ArrayList<Key>();
-        for(T domain : domains) {
-            keys.add(domain.getPrimaryKey());
-        }
-        deleteByCore(keys);
     }
 
     public final void deleteByCore(Iterable<Key> primaryKeys) {
         final DatastoreService datastore = getDatastoreService();
         datastore.delete(primaryKeys);
-    }
-
-    public final void delete(ID key) {
-        deleteByCore(createKey(key));
-    }
-
-    public final void delete(Key parentKey, ID simpleKey) {
-        deleteByCore(createKey(parentKey, simpleKey));
-    }
-
-    public final void delete(Key parentKey, Iterable<ID> simpleKeys) {
-        deleteByCore(createKeys(parentKey, simpleKeys));
-    }
-
-    public final void deleteByKeys(List<ID> primaryKeys) {
-        deleteByCore(createKeys(primaryKeys));
-    }
-
-    public List<T> findAll() {
-        LOG.debug(persistentClass.getSimpleName());
-        return findBy(null, false, -1, 0);
-    }
-
-    protected T findUniqueBy(String fieldName, Object param) {
-        PreparedQuery pq = prepare(null, false, new Expression(fieldName, Query.FilterOperator.EQUAL, param));
-        return asSingleEntity(pq);
-    }
-
-    protected List<T> findBy(String fieldName, Object param) {
-        return findBy(null, false, -1, 0, new Expression(fieldName, Query.FilterOperator.EQUAL, param));
     }
 
     protected List<T> findByKey(String fieldName, Class<?> foreignClass, Object key) {
@@ -529,20 +384,6 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     protected T findBy(Expression... filters) {
         PreparedQuery pq = prepare(null, false, filters);
         return asSingleEntity(pq);
-    }
-
-    protected List<T> findBy(Map<String, Object> args, String orderBy, boolean ascending) {
-        return findBy(args, orderBy, ascending, -1, 0);
-    }
-
-    protected List<T> findBy(Map<String, Object> args, String orderBy, boolean ascending, String secondaryOrderBy,
-            boolean secondaryDirection) {
-        return findBy(args, orderBy, ascending, secondaryOrderBy, secondaryDirection, -1, 0);
-    }
-
-    protected List<T> findBy(Map<String, Object> filters, String orderBy, boolean ascending, int limit, int offset) {
-        PreparedQuery pq = prepare(filters, orderBy, ascending);
-        return asIterable(pq, limit, offset);
     }
 
     protected List<T> findBy(Map<String, Object> filters, String primaryOrderBy, boolean primaryDirection,
@@ -561,8 +402,9 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         return asKeys(pq, limit, offset);
     }
 
-    protected List<T> findBy(String orderBy, boolean ascending, int limit, Expression... args) {
-        return findBy(orderBy, ascending, limit, 0, args);
+    protected List<Key> findKeysByParent(Key parentKey) {
+        final PreparedQuery query = prepare(true, parentKey, null, null, false);
+        return asCoreKeys(query, -1, 0);
     }
 
     public List<T> findByManyToMany(String primaryKeyName, String fieldName, String foreignSimpleClass, String foreignFieldName,
@@ -570,21 +412,11 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         throw new UnsupportedOperationException("Not yet implemented for AED");
     }
 
-    protected List<ID> findKeysBy(String fieldName, Object param) {
-        return findKeysBy(null, false, -1, 0, new Expression(fieldName, Query.FilterOperator.EQUAL, param));
-    }
-
-    public int deleteAll() {
+    public final int deleteAll() {
         PreparedQuery pq = prepareKeys(null, false);
         List<Key> keys = asCoreKeys(pq, -1, 0);
         deleteByCore(keys);
         return keys.size();
-    }
-
-    public T persist(Map<String, Object> nameValuePairs) {
-        final Entity entity = createEntity(nameValuePairs);
-        persist(entity);
-        return convert(entity);
     }
 
     public int update(Map<String, Object> values, Expression... expressions) {

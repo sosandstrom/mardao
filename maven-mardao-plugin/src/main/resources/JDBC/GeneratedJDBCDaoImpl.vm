@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-
-import net.sf.mardao.api.dao.AEDDaoImpl;
+import net.sf.mardao.api.dao.JDBCDaoImpl;
+import net.sf.mardao.api.jdbc.Entity;
 
 import ${entity.className};
 #foreach( $field in $entity.oneToOnes )
@@ -21,8 +18,8 @@ import ${field.entity.className};
 /**
  * Concrete class without generics, for Spring container instatiation.
  */
-public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.simpleName}, ${entity.pk.type}> 
-	implements Generated${entity.simpleName}Dao<Key, Key> {
+public class Generated${entity.simpleName}DaoImpl extends JDBCDaoImpl<${entity.simpleName}, ${entity.pk.type}> 
+	implements Generated${entity.simpleName}Dao<Long, Long> {
 
 	/** Table name for ${entity.simpleName} is "${entity.tableName}" */
 	public static final String TABLE_NAME = "${entity.tableName}";
@@ -63,123 +60,52 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
         	return null;
         }
         
-        final ${entity.simpleName} domain = new ${entity.simpleName}();
-#if( ${entity.pk.type} == "java.lang.String" )
-        domain.set${helper.firstToUpper(${entity.pk.name})}(entity.getKey().getName());
-#elseif( ${entity.pk.type} == "java.lang.Long" )
-        domain.set${helper.firstToUpper(${entity.pk.name})}(entity.getKey().getId());
-#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
-        domain.set${helper.firstToUpper(${entity.pk.name})}(entity.getKey());
-#else
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#end
-#if( $entity.parent )
-		// parent
-		domain.set${helper.firstToUpper(${entity.parent.name})}(entity.getParent());
-#end
-	    // createdDate, updatedDate
-		convertCreatedUpdatedDates(entity, domain);
-		
-		// properties
-#foreach( $field in $entity.fields )
-#if( $field.type == "java.lang.String" )
-		// String properties must be 500 characters or less.  Instead, use com.google.appengine.api.datastore.Text, which can store strings of any length.
-		domain.set${helper.firstToUpper($field.name)}(convertText(entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()})));
-#else
-		domain.set${helper.firstToUpper($field.name)}(($field.type) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()}));
-#end		
-#end
-
-		// one-to-one keys:
-#foreach( $field in $entity.oneToOnes )
-		domain.set${helper.firstToUpper($field.name)}(($field.type) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()}));
-#end
-
-		// many-to-one keys:
-#foreach( $field in $entity.manyToOnes )
-        // ${field.name}
-        final Key ${field.name}Key = (Key) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()});
-        if (null != ${field.name}Key) {
-            final Entity ${field.name}Entity = new Entity(${field.name}Key);
-            domain.set${helper.firstToUpper($field.name)}(${field.name}Dao.convert(${field.name}Entity));
+        ${entity.simpleName} domain = (${entity.simpleName}) entity.getDomain();
+        if (null != entity.getResultSet()) {
+            if (null == domain) {
+                domain = new ${entity.simpleName}();
+            }
+			
+			// TODO: use Mapper 
+			
+            // convertCreatedUpdatedDates(entity, domain);
         }
-#end
-
-		return domain;
+        
+        return domain;
    }
    
-   protected ${entity.pk.type} convert(Key key) {
+   protected ${entity.pk.type} convert(Long core) {
 #if( ${entity.pk.type} == "java.lang.String" )
-        // do null-check here only :-)
-        if (null == key)  {
-        	return null;
-        }
-        return key.getName();
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #elseif( ${entity.pk.type} == "java.lang.Long" )
-        // do null-check here only :-)
-        if (null == key)  {
-        	return null;
-        }
-        return key.getId();
-#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
-        return key;
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #else
 		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #end
    }
    
    protected Entity createEntity(${entity.simpleName} domain) {
-        final Entity entity = domain._createEntity();
-
-		// properties
-#foreach( $field in $entity.fields )
-		populate(entity, COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
-#end
-
-		// one-to-one keys:
-#foreach( $field in $entity.oneToOnes )
-		populate(entity, COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
-#end
-
-		// many-to-one keys:
-#foreach( $field in $entity.manyToOnes )
-		final ${field.type} ${field.name} = domain.get${helper.firstToUpper($field.name)}();
-		if (null != ${field.name}) {
-			populate(entity, COLUMN_NAME_${field.name.toUpperCase()}, ${field.name}.getPrimaryKey());
-		}
-#end
-
+        final Entity entity = new Entity(domain, null, -1);
 	return entity;
    }
 
-   public final Key createKey(Key parentKey, ${entity.pk.type} ${entity.pk.name}) {
+   public final Long createKey(Long parentKey, ${entity.pk.type} ${entity.pk.name}) {
+       // TODO: SELECT pk WHERE ID=id AND parentKey = parentKey
 #if( ${entity.pk.type} == "java.lang.String" )
-		return KeyFactory.createKey(parentKey, getTableName(), ${entity.pk.name});
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #elseif( ${entity.pk.type} == "java.lang.Long" )
-		return KeyFactory.createKey(parentKey, getTableName(), ${entity.pk.name});
-#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
-		return ${entity.pk.name};
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #else
 		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #end
    }
 
-   protected Key createKey(${entity.simpleName} domain) {
+   protected Long createKey(${entity.simpleName} domain) {
+	   // TODO: if Root entity, return the domain.ID
 #if( ${entity.pk.type} == "java.lang.String" )
-		if (null != domain.get${helper.firstToUpper(${entity.pk.name})}()) {
-			return KeyFactory.createKey((Key) domain.getParentKey(), getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
-		}
-		return null;
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #elseif( ${entity.pk.type} == "java.lang.Long" )
-		if (null != domain.get${helper.firstToUpper(${entity.pk.name})}()) {
-			return KeyFactory.createKey((Key) domain.getParentKey(), getTableName(), domain.get${helper.firstToUpper(${entity.pk.name})}());
-		}
-		return null;
-#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
-		if (null != domain.get${helper.firstToUpper(${entity.pk.name})}()) {
-			return domain.get${helper.firstToUpper(${entity.pk.name})}();
-		}
-		return null;
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #else
 		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #end
@@ -187,38 +113,26 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
    
    
    protected void populate(Entity entity, Map<String, Object> nameValuePairs) {
-		// properties
+		// TODO: is anything needed here for JDBC?
 #foreach( $field in $entity.fields )
-		populate(entity, COLUMN_NAME_${field.name.toUpperCase()}, nameValuePairs.get(COLUMN_NAME_${field.name.toUpperCase()}));
+	// TODO: ${field.name}
 #end
 
 		// one-to-one keys:
 #foreach( $field in $entity.oneToOnes )
-		populate(entity, COLUMN_NAME_${field.name.toUpperCase()}, nameValuePairs.get(COLUMN_NAME_${field.name.toUpperCase()}));
+	// TODO: ${field.name}
 #end
 
 		// many-to-one keys:
 #foreach( $field in $entity.manyToOnes )
-		populate(entity, COLUMN_NAME_${field.name.toUpperCase()}, nameValuePairs.get(COLUMN_NAME_${field.name.toUpperCase()}));
+	// TODO: ${field.name}
 #end
 
    }
    
 #if( $entity.parent )
 #set( $field = $entity.parent )
-	@Override
-    protected final void persistUpdateKeys(${entity.simpleName} domain, Key key) {
-#if( ${entity.pk.type} == "java.lang.String" )
-		domain.set${helper.firstToUpper($field.name)}(key.getParent());
-		domain.set${helper.firstToUpper($entity.pk.name)}(key.getName());
-#elseif( ${entity.pk.type} == "java.lang.Long" )
-		domain.set${helper.firstToUpper($field.name)}(key.getParent());
-		domain.set${helper.firstToUpper($entity.pk.name)}(key.getId());
-#else
-		<!-- Unsupported primary key type for children: ${entity.pk.type} -->
-#end
-	}
-	
+
 	// ----------------------- parent finders -------------------------------
 	/**
 	 * find-by method for parent field ${field.name}
@@ -226,7 +140,8 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 	 * @return a List of ${entity.simpleName}s with the specified parent
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-	    return findByParent(${field.name});
+		final PreparedQuery query = prepare(false, ${field.name}, null, null, false);
+		return asIterable(query, -1, 0);
 	}
 
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(Object ${field.name}) {
@@ -239,26 +154,22 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 	 * @return a List of ${entity.simpleName}s with the specified parent
 	 */
 	public final List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		return findKeysByParent(${field.name});
+		final PreparedQuery query = prepare(true, ${field.name}, null, null, false);
+		return asKeys(query, -1, 0);
 	}
-#else
-
-	@Override
-    protected final void persistUpdateKeys(${entity.simpleName} domain, Key key) {
+	
+#end   
+   
+    protected final void persistUpdateKeys(${entity.simpleName} domain, Long core) {
 #if( ${entity.pk.type} == "java.lang.String" )
-		domain.set${helper.firstToUpper($entity.pk.name)}(key.getName());
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #elseif( ${entity.pk.type} == "java.lang.Long" )
-		domain.set${helper.firstToUpper($entity.pk.name)}(key.getId());
-#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
-		domain.set${helper.firstToUpper($entity.pk.name)}(key);
+		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
 #else
-		<!-- Unsupported primary key type: ${entity.pk.type} -->
+		<!-- Unsupported primary key type for children: ${entity.pk.type} -->
 #end
 	}
 	
-	
-#end
-
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
 #if( $entity.isUnique($field.name) )

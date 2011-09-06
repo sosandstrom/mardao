@@ -273,6 +273,12 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         return prepare(true, orderBy, ascending, filters);
     }
 
+    @Override
+    protected final List<T> findByParent(Key parentKey) {
+        final PreparedQuery query = prepare(false, parentKey, null, null, false);
+        return asIterable(query, -1, 0);
+    }
+
     public final T findByPrimaryKey(Key parentKey, ID primaryKey) {
         T domain = null;
         final Key key = createKey((Key) parentKey, primaryKey);
@@ -314,17 +320,16 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     }
 
     @Override
-    protected final Key persist(Entity entity) {
+    protected final Key persistEntity(Entity entity) {
         final DatastoreService datastore = getDatastoreService();
 
         return datastore.put(entity);
     }
 
-    public List<ID> persist(Iterable<T> entities) {
-        return update(entities);
+    public List<ID> persist(Iterable<T> domains) {
+        final List<ID> ids = update(domains);
+        return ids;
     }
-
-    protected abstract void persistUpdateKeys(T domain, Key key);
 
     @Override
     protected final void persistUpdateDates(CreatedUpdatedEntity domain, Entity entity, Date date) {
@@ -402,9 +407,16 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         return asKeys(pq, limit, offset);
     }
 
-    protected List<Key> findKeysByParent(Key parentKey) {
+    @Override
+    protected List<Key> findCoreKeysByParent(Key parentKey) {
         final PreparedQuery query = prepare(true, parentKey, null, null, false);
         return asCoreKeys(query, -1, 0);
+    }
+
+    @Override
+    protected List<ID> findKeysByParent(Key parentKey) {
+        final PreparedQuery query = prepare(true, parentKey, null, null, false);
+        return asKeys(query, -1, 0);
     }
 
     public List<T> findByManyToMany(String primaryKeyName, String fieldName, String foreignSimpleClass, String foreignFieldName,

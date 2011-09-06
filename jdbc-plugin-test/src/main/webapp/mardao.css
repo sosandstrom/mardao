@@ -1,0 +1,44 @@
+@CHARSET "UTF-8";
+
+.mardaoHtml {}
+
+.mardaoBody {}
+
+.mardaoBreadcrumbs {}
+
+.mardaoA {}
+
+.mardaoH1 {}
+
+.mardaoTable {
+    border-style: solid;
+    border-color: gray;
+    border-width: 1px;
+}
+
+.mardaoTH {
+    background-color: silver;
+}
+
+.mardaoTHtr {}
+
+.mardaoTR {}
+
+.mardaoTHth {}
+
+.mardaoTD {}
+
+.mardaoTB {}
+
+.mardaoLabel {
+    padding-right: 3px;
+    color: gray;
+}
+
+.mardaoTF {}
+
+.mardaoTFtr {}
+
+.mardaoTFtd {}
+
+.mardaoSubmit {}

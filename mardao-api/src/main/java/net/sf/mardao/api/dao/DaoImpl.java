@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -59,8 +60,10 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
 
     protected final List<ID> convert(List<C> keys) {
         final List<ID> ids = new ArrayList<ID>();
+        ID id;
         for(C key : keys) {
-            ids.add(convert(key));
+            id = convert(key);
+            ids.add(id);
         }
         return ids;
     }
@@ -154,7 +157,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
     }
 
     public void deleteByParent(P parentKey) {
-        deleteByCore(findKeysByParent(parentKey));
+        deleteByCore(findCoreKeysByParent(parentKey));
     }
 
     // ----------------------- find methods -------------------------
@@ -191,6 +194,11 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
     protected abstract List<T> findBy(Map<String, Object> filters, String primaryOrderBy, boolean primaryDirection,
             String secondaryOrderBy, boolean secondaryDirection, int limit, int offset);
 
+    protected List<T> findByParent(P parentKey) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     public T findByPrimaryKey(ID primaryKey) {
         return findByPrimaryKey((P) null, primaryKey);
     }
@@ -209,13 +217,15 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
         return findByPrimaryKeys((P) parentKey, primaryKeys);
     }
 
+    protected abstract List<C> findCoreKeysByParent(P parentKey);
+
     protected abstract List<ID> findKeysBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters);
 
     protected List<ID> findKeysBy(String fieldName, Object param) {
         return findKeysBy(null, false, -1, 0, createEqualsFilter(fieldName, param));
     }
 
-    protected abstract List<C> findKeysByParent(P parentKey);
+    protected abstract List<ID> findKeysByParent(P parentKey);
 
     protected T findUniqueBy(String fieldName, Object param) {
         return findBy(createEqualsFilter(fieldName, param));
@@ -223,7 +233,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
 
     // ----------------------- persist methods -------------------------
 
-    protected abstract C persist(E entity);
+    protected abstract C persistEntity(E entity);
 
     @SuppressWarnings("unchecked")
     public ID persist(T domain) {
@@ -233,11 +243,21 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
 
     public T persist(Map<String, Object> nameValuePairs) {
         final E entity = createEntity(nameValuePairs);
-        persist(entity);
+        persistEntity(entity);
         return createDomain(entity);
     }
 
     protected abstract void persistUpdateDates(CreatedUpdatedEntity domain, E entity, Date date);
+
+    protected abstract void persistUpdateKeys(T domain, C key);
+
+    private final void persistUpdateKeys(Iterable<T> domains, Iterable<C> keys) {
+        final Iterator<T> i = domains.iterator();
+
+        for(C key : keys) {
+            persistUpdateKeys(i.next(), key);
+        }
+    }
 
     protected abstract void populate(E entity, Map<String, Object> nameValuePairs);
 
@@ -256,8 +276,10 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
             entities.add(entity);
         }
         List<C> keys = updateByCore(entities);
+        persistUpdateKeys(domains, keys);
         return convert(keys);
     }
 
     protected abstract List<C> updateByCore(Iterable<E> entities);
+
 }

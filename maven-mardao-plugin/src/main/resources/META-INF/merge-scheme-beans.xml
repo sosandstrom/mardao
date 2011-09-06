@@ -234,6 +234,59 @@
 		</property>
 	</bean>
 
+	<bean id="mergeSchemeJDBC" class="net.sf.mardao.domain.MergeScheme">
+		<constructor-arg name="parent" ref="mergeSchemeGeneric" />
+		<property name="templates">
+			<list>
+				<!-- Generated{Entity}DaoImpl (abstract bean)-->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="Generated" />
+					<property name="templateSuffix" value="DaoImpl.vm" />
+					<property name="typeSpecific" value="true" />
+					<property name="typeAppend" value="false" />
+					<property name="destFolder" value="targetDao" />
+					<property name="filePrefix" value="Generated" />
+					<property name="fileSuffix" value="DaoImpl.java" />
+				</bean>
+
+				<!-- {Entity}Dao.java (interface) -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templateMiddle" value="Dao" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="typeSpecific" value="true" />
+					<property name="typeAppend" value="false" />
+					<property name="destFolder" value="srcDao" />
+					<property name="fileMiddle" value="Dao" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+
+				<!-- spring-dao.xml bean context -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="spring-dao-" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="typeSpecific" value="true" />
+					<property name="typeAppend" value="false" />
+					<property name="destFolder" value="resources" />
+					<property name="entity" value="false" />
+					<property name="listingEntities" value="true" />
+					<property name="filePrefix" value="spring-dao" />
+					<property name="fileSuffix" value=".xml" />
+				</bean>
+
+				<!-- MySQL create sql scripts, one per TABLE/Entity -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="MySQL-CREATE-" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="typeSpecific" value="true" />
+					<property name="typeAppend" value="false" />
+					<property name="destFolder" value="resources" />
+					<property name="filePrefix" value="MySQL/CREATE-" />
+					<property name="fileSuffix" value=".sql" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
 	<bean id="mergeSchemeWEB" class="net.sf.mardao.domain.MergeScheme">
 		<constructor-arg name="parent" ref="mergeSchemeRoot" />
 		<property name="templates">

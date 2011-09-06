@@ -1,16 +1,15 @@
-package net.sf.mardao.test.aed.dao;
+package net.sf.mardao.test.jdbc.dao;
 
 import java.util.List;
 
-import net.sf.mardao.test.aed.domain.Book;
-import net.sf.mardao.test.aed.domain.Chapter;
-import net.sf.mardao.test.aed.domain.Footnote;
-import net.sf.mardao.test.aed.domain.Page;
+import net.sf.mardao.api.jdbc.Key;
+import net.sf.mardao.test.jdbc.domain.Book;
+import net.sf.mardao.test.jdbc.domain.Chapter;
+import net.sf.mardao.test.jdbc.domain.Footnote;
+import net.sf.mardao.test.jdbc.domain.Page;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.appengine.api.datastore.Key;
 
 public class UberDaoBean {
     static final Logger LOG  = LoggerFactory.getLogger(UberDaoBean.class);
@@ -44,11 +43,6 @@ public class UberDaoBean {
         intermezzo.setBook(book.getPrimaryKey());
         intermezzo.setName("Intermezzo");
         chapterDao.persist(intermezzo);
-
-        Chapter generated = chapterDao.persist(book.getPrimaryKey(), null, "GeneratedChapter");
-        LOG.info("Persisted generated chapter {}", generated);
-        Chapter actual = chapterDao.findByPrimaryKey(book.getPrimaryKey(), generated.getId());
-        LOG.info("Queried generated chapter {}", actual);
 
         Page page1 = new Page();
         page1.setBody("Lorem ipsum dolor ...");

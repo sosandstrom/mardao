@@ -7,12 +7,10 @@ import javax.persistence.Id;
 import net.sf.mardao.api.Parent;
 import net.sf.mardao.api.domain.JDBCLongEntity;
 
-import net.sf.mardao.api.jdbc.Key;
-
 @Entity
 public class Page extends JDBCLongEntity {
     @Parent(kind = "Chapter")
-    private Key               chapter;
+    private Long              chapter;
 
     @Id
     private Long              pageNumber;
@@ -32,7 +30,7 @@ public class Page extends JDBCLongEntity {
     }
 
     @Override
-    public Key getParentKey() {
+    public Long getParentKey() {
         return chapter;
     }
 
@@ -52,11 +50,11 @@ public class Page extends JDBCLongEntity {
         this.book = book;
     }
 
-    public void setChapter(Key chapter) {
+    public void setChapter(Long chapter) {
         this.chapter = chapter;
     }
 
-    public Key getChapter() {
+    public Long getChapter() {
         return chapter;
     }
 

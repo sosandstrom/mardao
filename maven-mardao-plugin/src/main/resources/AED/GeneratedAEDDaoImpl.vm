@@ -230,7 +230,7 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 	}
 
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(Object ${field.name}) {
-		return findBy${helper.firstToUpper($field.name)}((${field.type}) ${field.name});
+		return findByParent((${field.type}) ${field.name});
 	}
 	
 	/**

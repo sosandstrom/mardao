@@ -160,13 +160,20 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 #end
    public void persist(${entity.simpleName} entity) {
 		LOGGER.debug("insert(" + entity + ")");
-		
-		// get id from next in sequence:
-		final long id = incrementer.nextLongValue();
-		entity.set${helper.firstToUpper(${entity.pk.name})}(id);
+
+		// generate key?
+		if (null == entity.get${helper.firstToUpper(${entity.pk.name})}()) {
+			// get id from next in sequence:
+			final long id = incrementer.nextLongValue();
+#if( $entity.pk.simpleType == "String")
+			entity.set${helper.firstToUpper(${entity.pk.name})}("GEN-" + id);
+#else
+			entity.set${helper.firstToUpper(${entity.pk.name})}(id);
+#end
+		}
 		
 		HashMap<String,Object> parameters = new HashMap<String,Object>();
-		parameters.put(getPrimaryKeyColumnName(), id);
+		parameters.put(getPrimaryKeyColumnName(), entity.get${helper.firstToUpper(${entity.pk.name})}());
 		
 		// properties
 #foreach( $field in $entity.fields )
@@ -199,11 +206,21 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 		}
 		LOGGER.debug("insert(" + nameValuePairs + ")");
 		final ${entity.simpleName} entity = new ${entity.simpleName}();
-		
-		// get id from next in sequence:
-		final long id = incrementer.nextLongValue();
-		entity.set${helper.firstToUpper(${entity.pk.name})}(id);
-		nameValuePairs.put(getPrimaryKeyColumnName(), id);
+
+#set( $field = $entity.pk )		
+		entity.set${helper.firstToUpper($field.name)}((${field.type}) nameValuePairs.get(COLUMN_NAME_${field.name.toUpperCase()}));
+
+		// generate key?
+		if (null == entity.get${helper.firstToUpper(${field.name})}()) {
+			// get id from next in sequence:
+			final long id = incrementer.nextLongValue();
+#if( $field.simpleType == "String")
+			entity.set${helper.firstToUpper(${field.name})}("GEN-" + id);
+#else
+			entity.set${helper.firstToUpper(${field.name})}(id);
+#end
+			nameValuePairs.put(getPrimaryKeyColumnName(), entity.get${helper.firstToUpper($field.name)}());
+		}
 		
 		// properties
 #foreach( $field in $entity.fields )

@@ -6,8 +6,6 @@ import javax.persistence.Id;
 import net.sf.mardao.api.Parent;
 import net.sf.mardao.api.domain.JDBCLongEntity;
 
-import net.sf.mardao.api.jdbc.Key;
-
 @Entity
 public class Footnote extends JDBCLongEntity {
     private static final long serialVersionUID = 1L;
@@ -18,7 +16,7 @@ public class Footnote extends JDBCLongEntity {
     private String            name;
 
     @Parent(kind = "Page")
-    private Key               page;
+    private Long              page;
 
     @Override
     public Long getSimpleKey() {
@@ -26,7 +24,7 @@ public class Footnote extends JDBCLongEntity {
     }
 
     @Override
-    public Key getParentKey() {
+    public Long getParentKey() {
         return page;
     }
 
@@ -46,11 +44,11 @@ public class Footnote extends JDBCLongEntity {
         this.key = key;
     }
 
-    public Key getPage() {
+    public Long getPage() {
         return page;
     }
 
-    public void setPage(Key page) {
+    public void setPage(Long page) {
         this.page = page;
     }
 

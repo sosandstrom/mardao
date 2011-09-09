@@ -8,21 +8,40 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
 	">
 
+	<!-- EntityManagerFactory should be created only once! -->
+	<bean id="entityManagerFactory" class="javax.persistence.Persistence" factory-method="createEntityManagerFactory" destroy-method="close">
+		<constructor-arg value="transactions-optional" />
+	</bean>
+
 <!-- Bean managed transactions -->
 
-	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.aed.domain ============ -->
-	<bean id="bookDao" 
-		class="net.sf.mardao.test.aed.dao.BookDaoBean">
+	<bean id="daoProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"><ref bean="propertyUrlResource"/></property>
 	</bean>
-	<bean id="chapterDao" 
-		class="net.sf.mardao.test.aed.dao.ChapterDaoBean">
+
+	<!-- ============== DataSource and Incrementors ============ -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${dao.driver.classname}" />
+		<property name="url" value="${dao.connection.url}" />
+		<property name="username" value="${dao.connection.username}" />
+		<property name="password" value="${dao.connection.password}" />
+		<property name="validationQuery" value="${dao.connection.validationQuery}" />
 	</bean>
-	<bean id="pageDao" 
-		class="net.sf.mardao.test.aed.dao.PageDaoBean">
+	<bean id="daoIncrementerMYSQL" class="org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer">
+		<property name="dataSource" ref="dataSource" />
+		<property name="incrementerName" value="id_sequence" />
+		<property name="columnName" value="highest" />
 	</bean>
-	<bean id="footnoteDao" 
-		class="net.sf.mardao.test.aed.dao.FootnoteDaoBean">
-	</bean>
+
+	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.jdbc.domain ============ -->
+	<bean id="bookDao" class="net.sf.mardao.test.jdbc.dao.BookDaoBean" 
+		autowire="constructor" />
+	<bean id="chapterDao" class="net.sf.mardao.test.jdbc.dao.ChapterDaoBean" 
+		autowire="constructor" />
+	<bean id="pageDao" class="net.sf.mardao.test.jdbc.dao.PageDaoBean" 
+		autowire="constructor" />
+	<bean id="footnoteDao" class="net.sf.mardao.test.jdbc.dao.FootnoteDaoBean" 
+		autowire="constructor" />
 	
 
 </beans>

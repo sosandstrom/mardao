@@ -1,8 +1,11 @@
 package ${daoBasePackage};
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.sql.DataSource;
 
 import net.sf.mardao.api.dao.JDBCDaoImpl;
 import net.sf.mardao.api.jdbc.Entity;
@@ -14,6 +17,9 @@ import ${field.entity.className};
 #foreach( $field in $entity.manyToOnes )
 import ${field.entity.className};
 #end
+
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
 
 /**
  * Concrete class without generics, for Spring container instatiation.
@@ -34,9 +40,23 @@ public class Generated${entity.simpleName}DaoImpl extends JDBCDaoImpl<${entity.s
 #end
 	
 	
-	/** Default constructor */
-   public Generated${entity.simpleName}DaoImpl() {
-      super(${entity.simpleName}.class);
+	/** Constructor */
+   public Generated${entity.simpleName}DaoImpl(DataFieldMaxValueIncrementer incrementer) {
+      super(${entity.simpleName}.class, incrementer);
+   }
+   
+   @Override
+   protected SimpleJdbcInsert createJdbcInsert(DataSource dataSource) {
+        // create the JDBC insert with specific columns and table name:
+		this.insert = new SimpleJdbcInsert(dataSource)
+			.withTableName(getTableName())
+			.usingColumns(COLUMN_NAME_${entity.pk.name.toUpperCase()}#foreach( $field in $entity.fields )
+, COLUMN_NAME_${field.name.toUpperCase()}#end
+#foreach( $field in $entity.oneToOnes )
+, COLUMN_NAME_${field.name.toUpperCase()}#end
+#foreach( $field in $entity.manyToOnes )
+, COLUMN_NAME_${field.name.toUpperCase()}#end);
+       return insert;
    }
    
    public String getTableName() {
@@ -85,8 +105,32 @@ public class Generated${entity.simpleName}DaoImpl extends JDBCDaoImpl<${entity.s
    }
    
    protected Entity createEntity(${entity.simpleName} domain) {
-        final Entity entity = new Entity(domain, null, -1);
-	return entity;
+		HashMap<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put(getPrimaryKeyColumnName(), domain.getPrimaryKey());
+		
+		// properties
+#foreach( $field in $entity.fields )
+		parameters.put(COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
+#end
+
+		// one-to-one keys:
+#foreach( $field in $entity.oneToOnes )
+		final ${field.type} ${field.name} = domain.get${helper.firstToUpper($field.name)}();
+		if (null != ${field.name}) {
+			parameters.put(COLUMN_NAME_${field.name.toUpperCase()}, toForeignKey(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}()));
+		}
+#end
+
+		// many-to-one keys:
+#foreach( $field in $entity.manyToOnes )
+		final ${field.type} ${field.name} = domain.get${helper.firstToUpper($field.name)}();
+		if (null != ${field.name}) {
+			parameters.put(COLUMN_NAME_${field.name.toUpperCase()}, toForeignKey(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}()));
+		}
+#end
+        final Entity entity = new Entity(domain, null, -1, parameters);
+		
+		return entity;
    }
 
    public final Long createKey(Long parentKey, ${entity.pk.type} ${entity.pk.name}) {
@@ -140,12 +184,11 @@ public class Generated${entity.simpleName}DaoImpl extends JDBCDaoImpl<${entity.s
 	 * @return a List of ${entity.simpleName}s with the specified parent
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		final PreparedQuery query = prepare(false, ${field.name}, null, null, false);
-		return asIterable(query, -1, 0);
+	    return findByParent(${field.name});
 	}
 
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(Object ${field.name}) {
-		return findBy${helper.firstToUpper($field.name)}((${field.type}) ${field.name});
+		return findByParent((${field.type}) ${field.name});
 	}
 	
 	/**
@@ -154,8 +197,7 @@ public class Generated${entity.simpleName}DaoImpl extends JDBCDaoImpl<${entity.s
 	 * @return a List of ${entity.simpleName}s with the specified parent
 	 */
 	public final List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		final PreparedQuery query = prepare(true, ${field.name}, null, null, false);
-		return asKeys(query, -1, 0);
+		return findKeysByParent(${field.name});
 	}
 	
 #end   
@@ -337,7 +379,7 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	 * Persist an entity given all attributes
 	 */
 	public ${entity.simpleName} persist(#if( $entity.parent )
-Key ${entity.parent.name},  	
+Long ${entity.parent.name},  	
 #end		${entity.pk.type} ${entity.pk.name}#foreach( $field in $entity.fields )
 , 
 		${field.type} ${field.name}#end

@@ -2,7 +2,6 @@ package net.sf.mardao.test.jdbc.dao;
 
 import java.util.List;
 
-import net.sf.mardao.api.jdbc.Key;
 import net.sf.mardao.test.jdbc.domain.Book;
 import net.sf.mardao.test.jdbc.domain.Chapter;
 import net.sf.mardao.test.jdbc.domain.Footnote;
@@ -53,14 +52,14 @@ public class UberDaoBean {
 
         Footnote footnote = new Footnote();
         footnote.setName("Be aware that...");
-        footnote.setPage((Key) page1.getPrimaryKey());
+        footnote.setPage(page1.getPrimaryKey());
         footnoteDao.persist(footnote);
 
         test();
     }
 
     public void test() {
-        List<Book> books = bookDao.findAll();
+        bookDao.findAll();
         chapterDao.findAll();
         pageDao.findAll();
         footnoteDao.findAll();
@@ -70,7 +69,7 @@ public class UberDaoBean {
             LOG.error("Expected updatedDate {} to be equal to createdDate {}", book.getUpdatedDate(), book.getCreatedDate());
         }
 
-        List<Chapter> chapters = chapterDao.findByBook((Key) book.getPrimaryKey());
+        List<Chapter> chapters = chapterDao.findByBook(book.getPrimaryKey());
         if (chapters.isEmpty()) {
             LOG.error("Expected chapters in book {}", ISBN);
         }

@@ -8,13 +8,17 @@
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 		
+	<bean id="propertyUrlResource" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg value="jdbc.properties" />
+	</bean>
+		
 	<mvc:annotation-driven />
 
 	<import resource="classpath:spring-dao.xml" />
 
 	<import resource="classpath:spring-web.xml" />
 
-	<bean id="uberDao" class="net.sf.mardao.test.aed.dao.UberDaoBean" 
+	<bean id="uberDao" class="net.sf.mardao.test.jdbc.dao.UberDaoBean" 
 		init-method="setup" destroy-method="destroy">
 		<property name="bookDao" ref="bookDao" />
 		<property name="chapterDao" ref="chapterDao" />

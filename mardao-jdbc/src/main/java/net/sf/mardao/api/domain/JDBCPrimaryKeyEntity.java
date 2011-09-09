@@ -39,7 +39,7 @@ public abstract class JDBCPrimaryKeyEntity<ID extends Serializable> implements P
     }
 
     public Entity _createEntity() {
-        return new Entity(this, null, -1);
+        return new Entity(this, null, -1, null);
     }
 
     public String _getNameCreatedDate() {

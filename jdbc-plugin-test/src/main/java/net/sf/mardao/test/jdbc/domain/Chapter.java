@@ -5,7 +5,6 @@ import javax.persistence.Id;
 
 import net.sf.mardao.api.Parent;
 import net.sf.mardao.api.domain.JDBCLongEntity;
-import net.sf.mardao.api.jdbc.Key;
 
 @Entity
 public class Chapter extends JDBCLongEntity {
@@ -56,11 +55,11 @@ public class Chapter extends JDBCLongEntity {
         this.name = name;
     }
 
-    public Key getBook() {
+    public Long getBook() {
         return book;
     }
 
-    public void setBook(Key book) {
+    public void setBook(Long book) {
         this.book = book;
     }
 

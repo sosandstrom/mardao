@@ -166,7 +166,7 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 			// get id from next in sequence:
 			final long id = incrementer.nextLongValue();
 #if( $entity.pk.simpleType == "String")
-			entity.set${helper.firstToUpper(${entity.pk.name})}("GEN-" + id);
+			entity.set${helper.firstToUpper(${entity.pk.name})}("${entity.simpleName}-" + id);
 #else
 			entity.set${helper.firstToUpper(${entity.pk.name})}(id);
 #end
@@ -215,7 +215,7 @@ public class ${entity.simpleName}SpringHelper extends AbstractSpringHelper<${ent
 			// get id from next in sequence:
 			final long id = incrementer.nextLongValue();
 #if( $field.simpleType == "String")
-			entity.set${helper.firstToUpper(${field.name})}("GEN-" + id);
+			entity.set${helper.firstToUpper(${field.name})}("${entity.simpleName}-" + id);
 #else
 			entity.set${helper.firstToUpper(${field.name})}(id);
 #end

@@ -12,10 +12,10 @@
 		<module>maven-mardao-plugin</module>
 		<module>mardao-api</module>
 		<module>mardao-jdbc</module>
+		<module>basic-plugin-test</module>
 		<module>aed-plugin-test</module>
 		<!-- 
 		<module>jdbc-plugin-test</module>
-		<module>basic-plugin-test</module>
 		<module>jpa-plugin-test</module>
 		<module>gae-plugin-test</module>
 		 -->
@@ -55,26 +55,24 @@
 	</build>
 
 	<distributionManagement>
-        <repository>
-            <id>sourceforge-releases</id>
-            <name>Sourceforge Release Repository</name>
-            <url>http://oss.sonatype.org/content/repositories/sourceforge-releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>sourceforge-snapshots</id>
-            <name>Sourceforge Snapshot Repository</name>
-            <!-- 
-            <url>http://oss.sonatype.org/content/repositories/sourceforge-snapshots</url>
-             -->
-            <url>http://oss.sonatype.org/content/repositories/sourceforge-with-staging</url>
-        </snapshotRepository>
-        <!-- use the following if you ARE using a snapshot version.
+	        <repository>
+	            <id>sourceforge-releases</id>
+	            <name>Sourceforge Release Repository</name>
+	            <url>http://oss.sonatype.org/content/repositories/sourceforge-releases</url>
+	        </repository>
+	<!-- use the following for OSS Sonatype snapshot uploads
+	        <snapshotRepository>
+	            <id>sourceforge-snapshots</id>
+	            <name>Sourceforge Snapshot Repository</name>
+	            <url>http://oss.sonatype.org/content/repositories/sourceforge-with-staging</url>
+	        </snapshotRepository>
+	-->
+        <!-- use the following if you ARE using a snapshot version -->
 		<snapshotRepository>
 			<id>ppSnapshots</id>
 			<name>Snapshots Repository</name>
 			<url>http://192.168.1.97:8180/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
-		 -->
 		<site>
 			<id>sourceforge.net</id>
 			<url>scp://web.sourceforge.net/home/groups/m/ma/mardao/htdocs</url>

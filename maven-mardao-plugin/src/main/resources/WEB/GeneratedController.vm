@@ -15,6 +15,8 @@ import ${daoPackage}.${p.simpleName}Dao;
 import ${daoPackage}.${field.entity.simpleName}Dao;
 #end	
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -69,6 +71,14 @@ public abstract class Generated${entity.simpleName}Controller
 		Object parentKey = null;
 #foreach( $p in $ancestors )
 		// ${p.simpleName}
+#if( $entity.pk.type == "java.lang.String" )
+		try {
+			${p.simpleName.toLowerCase()} = URLDecoder.decode(${p.simpleName.toLowerCase()}, "UTF-8");
+		} 
+		catch (UnsupportedEncodingException willNeverHappen) {}
+		
+#end	
+		
         final Object parent${p.simpleName}Key = parent${p.simpleName}Dao.createKey(parentKey, ${p.simpleName.toLowerCase()});
 	    parentKey = parent${p.simpleName}Key;
 #end
@@ -220,6 +230,13 @@ public abstract class Generated${entity.simpleName}Controller
     public ResponseEntity<${entity.simpleName}> getItemJson(#foreach( $p in $ancestors )@PathVariable(value = "${p.simpleName.toLowerCase()}") ${p.pk.type} ${p.simpleName.toLowerCase()},
 		#end
 		@PathVariable(value = "${entity.pk.name}") ${entity.pk.type} ${entity.pk.name}) {
+#if( $entity.pk.type == "java.lang.String" )
+		try {
+			${entity.pk.name} = URLDecoder.decode(${entity.pk.name}, "UTF-8");
+		} 
+		catch (UnsupportedEncodingException willNeverHappen) {}
+		
+#end	
 		LOG.debug("get child item {}", ${entity.pk.name});
 		final Object parentKey = buildParentKey(#foreach( $p in $ancestors )#if( $velocityCount != 1 ), 
 			#end${p.simpleName.toLowerCase()}#end);
@@ -290,6 +307,12 @@ public abstract class Generated${entity.simpleName}Controller
 	 */
     @RequestMapping(value = "/{${entity.pk.name}}/index.json", method = RequestMethod.GET)
     public ResponseEntity<${entity.simpleName}> getItemJson(@PathVariable(value = "${entity.pk.name}") ${entity.pk.type} ${entity.pk.name}) {
+#if( $entity.pk.type == "java.lang.String" )
+		try {
+			${entity.pk.name} = URLDecoder.decode(${entity.pk.name}, "UTF-8");
+		} 
+		catch (UnsupportedEncodingException willNeverHappen) {} 
+#end	
 		LOG.debug("get root item {}", ${entity.pk.name});
         final ${entity.simpleName} body = ${helper.firstToLower($entity.simpleName)}Dao.findByPrimaryKey(${entity.pk.name});
 		return respond(body);

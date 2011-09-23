@@ -27,6 +27,12 @@
 	    <property name="parentChapterDao" ref="chapterDao" />
 	</bean>
 	
+	<bean id="appendixController" class="net.sf.mardao.test.aed.web.AppendixController">
+	    <property name="appendixDao" ref="appendixDao" />
+	    <property name="parentDao" ref="bookDao" />
+	    <property name="parentBookDao" ref="bookDao" />
+	</bean>
+	
 	<bean id="footnoteController" class="net.sf.mardao.test.aed.web.FootnoteController">
 	    <property name="footnoteDao" ref="footnoteDao" />
 	    <property name="parentDao" ref="pageDao" />

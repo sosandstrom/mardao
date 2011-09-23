@@ -20,6 +20,7 @@
 		<property name="chapterDao" ref="chapterDao" />
 		<property name="pageDao" ref="pageDao" />
 		<property name="footnoteDao" ref="footnoteDao" />
+		<property name="appendixDao" ref="appendixDao" />
 	</bean>
 
 

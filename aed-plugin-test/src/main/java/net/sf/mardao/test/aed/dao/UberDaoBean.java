@@ -2,6 +2,7 @@ package net.sf.mardao.test.aed.dao;
 
 import java.util.List;
 
+import net.sf.mardao.test.aed.domain.Appendix;
 import net.sf.mardao.test.aed.domain.Book;
 import net.sf.mardao.test.aed.domain.Chapter;
 import net.sf.mardao.test.aed.domain.Footnote;
@@ -21,6 +22,7 @@ public class UberDaoBean {
     private ChapterDao  chapterDao;
     private PageDao     pageDao;
     private FootnoteDao footnoteDao;
+    private AppendixDao appendixDao;
 
     public void setup() {
         Book book = new Book();
@@ -32,6 +34,10 @@ public class UberDaoBean {
         book2.setISBN("73-9482-49");
         book2.setTitle("Animal Farm");
         bookDao.persist(book2);
+
+        Book book3 = bookDao.persist("25/34 & = \"}", "25/34 & =");
+
+        Appendix appendixA = appendixDao.persist(book3.getPrimaryKey(), "Appendix 3/4 & \"B\"");
 
         Chapter prologue = new Chapter();
         prologue.setId(42L);
@@ -86,6 +92,12 @@ public class UberDaoBean {
         if (book.getUpdatedDate().compareTo(book.getCreatedDate()) <= 0) {
             LOG.error("Expected updatedDate {} to be after createdDate {}", book.getUpdatedDate(), book.getCreatedDate());
         }
+
+        book = bookDao.findByPrimaryKey("25/34 & = \"}");
+        Appendix appendix = appendixDao.findByPrimaryKey(book.getPrimaryKey(), "Appendix 3/4 & \"B\"");
+        if (null == appendix) {
+            LOG.error("Expected to find appendix for book {}", book);
+        }
     }
 
     public void destroy() {
@@ -122,6 +134,10 @@ public class UberDaoBean {
 
     public void setFootnoteDao(FootnoteDao footnoteDao) {
         this.footnoteDao = footnoteDao;
+    }
+
+    public final void setAppendixDao(AppendixDao appendixDao) {
+        this.appendixDao = appendixDao;
     }
 
 }

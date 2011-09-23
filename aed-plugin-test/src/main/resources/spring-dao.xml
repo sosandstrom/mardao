@@ -20,6 +20,9 @@
 	<bean id="pageDao" 
 		class="net.sf.mardao.test.aed.dao.PageDaoBean">
 	</bean>
+	<bean id="appendixDao" 
+		class="net.sf.mardao.test.aed.dao.AppendixDaoBean">
+	</bean>
 	<bean id="footnoteDao" 
 		class="net.sf.mardao.test.aed.dao.FootnoteDaoBean">
 	</bean>

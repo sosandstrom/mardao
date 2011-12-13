@@ -22,9 +22,14 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends Serializable> extends
         DaoImpl<T, ID, Key, Entity, Key> implements Dao<T, ID, Key, Key> {
+    
+    /** Using slf4j logging */
+    protected final Logger   LOG = LoggerFactory.getLogger(getClass());
 
     protected AEDDaoImpl(Class<T> type) {
         super(type);

@@ -10,8 +10,6 @@ import java.util.Map;
 
 import net.sf.mardao.api.domain.CreatedUpdatedEntity;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is the base class for all implementations of the Dao Bean.
@@ -29,9 +27,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Serializable, P extends Serializable, E extends Serializable, C extends Serializable>
         implements Dao<T, ID, P, C> {
-
-    /** Using slf4j logging */
-    protected final Logger   LOG = LoggerFactory.getLogger(getClass());
 
     /** mostly for logging */
     protected final Class<T> persistentClass;

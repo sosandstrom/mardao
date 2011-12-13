@@ -219,6 +219,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
         }
 
         Map<String, String> mySqlTypes = new HashMap<String, String>();
+        Map<String, String> sqLiteTypes = new HashMap<String, String>();
         Map<String, String> mySqlDefaults = new HashMap<String, String>();
         // for MySQL
         mySqlTypes.put(Long.class.getName(), "BIGINT");
@@ -237,10 +238,19 @@ public class AbstractMardaoMojo extends AbstractMojo {
         mySqlDefaults.put(String.class.getName(), "DEFAULT NULL");
         mySqlDefaults.put(Boolean.class.getName(), "DEFAULT NULL");
         mySqlDefaults.put(java.util.Date.class.getName(), "NOT NULL DEFAULT CURRENT_TIMESTAMP");
+        
+        // for SQLite
+        sqLiteTypes.put(Long.class.getName(), "INT");
+        sqLiteTypes.put(String.class.getName(), "TEXT");
 
-        // FIXME: other DB types
-        vc.put("dbTypes", mySqlTypes);
-        vc.put("dbDefaults", mySqlDefaults);
+        if ("Android".equals(persistenceType)) {
+            vc.put("dbTypes", sqLiteTypes);
+        }
+        else {
+            // FIXME: other DB types
+            vc.put("dbTypes", mySqlTypes);
+            vc.put("dbDefaults", mySqlDefaults);
+        }
 
         Date current = new Date();
         vc.put("currentDate", DATEFORMAT.format(current));

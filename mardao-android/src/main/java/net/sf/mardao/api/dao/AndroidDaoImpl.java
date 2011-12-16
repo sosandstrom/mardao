@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
+import java.util.Iterator;
 import net.sf.mardao.api.domain.AndroidLongEntity;
 import net.sf.mardao.api.domain.AndroidPrimaryKeyEntity;
 import net.sf.mardao.api.domain.CreatedUpdatedEntity;
@@ -67,13 +68,27 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
 
     public final int deleteAll() {
-        // TODO Auto-generated method stub
-        return 0;
+        return database.delete(getTableName(), "1", null);
+    }
+
+    @Override
+    public void deleteByCore(Long primaryKey) {
+        final String whereArgs[] = {primaryKey.toString()};
+        Log.d(TAG, "delete " + getTableName() + " WHERE _id = " + primaryKey.toString());
+        database.delete(getTableName(), "_id = ?", whereArgs);
     }
 
     public void deleteByCore(Iterable<Long> primaryKeys) {
-        // TODO Auto-generated method stub
-
+        StringBuffer sb = new StringBuffer();
+        Long id;
+        for (Iterator<Long> i = primaryKeys.iterator(); i.hasNext(); ) {
+            id = i.next();
+            sb.append(id);
+            sb.append(i.hasNext() ? "," : "");
+        }
+        Log.d(TAG, "delete WHERE _id IN " + sb.toString());
+        final String whereArgs[] = {sb.toString()};
+        database.delete(getTableName(), "_id IN (?)", whereArgs);
     }
 
     public T findByPrimaryKey(Long parentKey, Long primaryKey) {
@@ -151,7 +166,9 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     @Override
     public Long persist(T domain) {
         final AndroidEntity entity = createEntity(domain);
-        return persistEntity(entity);
+        final Long id = persistEntity(entity);
+        persistUpdateKeys(domain, id);
+        return id;
     }
     
     @Override

@@ -14,20 +14,14 @@ public abstract class AndroidPrimaryKeyEntity<ID extends Serializable> implement
         return getClass().getSimpleName();
     }
 
-    private Long _primaryKey;
-
     public abstract ID getSimpleKey();
 
     public Long getParentKey() {
         return null;
     }
 
-    public final Long getPrimaryKey() {
-        return _primaryKey;
-    }
-
-    public final void setPrimaryKey(Long primaryKey) {
-        this._primaryKey = primaryKey;
+    public final ID getPrimaryKey() {
+        return getSimpleKey();
     }
 
     public AndroidEntity _createEntity() {

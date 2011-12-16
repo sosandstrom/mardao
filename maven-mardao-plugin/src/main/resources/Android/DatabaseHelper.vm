@@ -1,0 +1,66 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package ${daoPackage};
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+/**
+ *
+ * @author mardao
+ */
+public class DatabaseHelper extends SQLiteOpenHelper {
+    static final String TAG = DatabaseHelper.class.getSimpleName();
+    
+    protected static final String DATABASE_NAME = "mardao";
+    
+    private final SQLiteDatabase database;
+    
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+    private final ${entity.simpleName}Dao ${helper.firstToLower($entity.simpleName)}Dao;
+#end
+#end
+    
+    public DatabaseHelper(Context context) {
+        super(context, DATABASE_NAME, null, 1);
+        Log.i(TAG, "DatabaseHelper.<init>");
+        database = super.getWritableDatabase();
+
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+        ${entity.simpleName}Dao = new ${entity.simpleName}DaoBean(database);
+#end
+#end
+    }
+    
+
+    @Override
+    public void onCreate(SQLiteDatabase sqld) {
+        Log.i(TAG, "DatabaseHelper.onCreate()");
+
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+        ${entity.simpleName}DaoBean.onCreate(sqld);
+#end
+#end
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase sqld, int fromVersion, int toVersion) {
+        Log.i(TAG, "DatabaseHelper.onUpgrade()");
+
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+        ${entity.simpleName}DaoBean.onUpgrade(sqld, fromVersion, toVersion);
+#end
+#end
+    }
+    
+    // TODO: write your public business methods here!
+    
+}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -128,6 +129,51 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 		return domain;
    }
    
+   protected ${entity.simpleName} createDomain(Cursor cursor) {
+        // do null-check here only :-)
+        if (null == cursor)  {
+        	return null;
+        }
+        
+        final ${entity.simpleName} domain = new ${entity.simpleName}();
+        int i = 0;
+        domain.set${helper.firstToUpper(${entity.pk.name})}(cursor.getLong(i++));
+#if( $entity.parent )
+		// parent
+		domain.set${helper.firstToUpper(${entity.parent.name})}(entity.getParent());
+#end
+	    // createdDate, updatedDate
+		// convertCreatedUpdatedDates(entity, domain);
+		
+		// properties
+#foreach( $field in $entity.fields )
+#if( $field.type == "java.lang.String" )
+		domain.set${helper.firstToUpper($field.name)}(cursor.getString(i++));
+#elseif( $field.type == "java.lang.Long" ) 
+		domain.set${helper.firstToUpper($field.name)}(cursor.getLong(i++));
+#elseif( $field.type == "java.util.Date" ) 
+		domain.set${helper.firstToUpper($field.name)}(new Date(cursor.getLong(i++)));
+#end
+#end
+
+		// one-to-one keys:
+#foreach( $field in $entity.oneToOnes )
+		domain.set${helper.firstToUpper($field.name)}(($field.type) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()}));
+#end
+
+		// many-to-one keys:
+#foreach( $field in $entity.manyToOnes )
+        // ${field.name}
+        final Key ${field.name}Key = (Key) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()});
+        if (null != ${field.name}Key) {
+            final Entity ${field.name}Entity = new Entity(${field.name}Key);
+            domain.set${helper.firstToUpper($field.name)}(${field.name}Dao.convert(${field.name}Entity));
+        }
+#end
+
+		return domain;
+   }
+   
    protected AndroidEntity createEntity(${entity.simpleName} domain) {
         final AndroidEntity entity = domain._createEntity();
 
@@ -211,20 +257,10 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 	}
 #else
 
-/*
 	@Override
-    protected final void persistUpdateKeys(${entity.simpleName} domain, Key key) {
-#if( ${entity.pk.type} == "java.lang.String" )
-		domain.set${helper.firstToUpper($entity.pk.name)}(key.getName());
-#elseif( ${entity.pk.type} == "java.lang.Long" )
-		domain.set${helper.firstToUpper($entity.pk.name)}(key.getId());
-#elseif( ${entity.pk.type} == "com.google.appengine.api.datastore.Key" )		
+    protected final void persistUpdateKeys(${entity.simpleName} domain, Long key) {
 		domain.set${helper.firstToUpper($entity.pk.name)}(key);
-#else
-		<!-- Unsupported primary key type: ${entity.pk.type} -->
-#end
 	}
-*/	
 	
 #end
 

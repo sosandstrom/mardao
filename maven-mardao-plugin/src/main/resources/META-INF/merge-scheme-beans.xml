@@ -260,17 +260,28 @@
 					<property name="fileSuffix" value=".java" />
 				</bean>
 
-				<!-- spring-dao.xml bean context -->
+				<!-- Override {Entity}DaoBean.java (the Spring Bean injected into controllers) -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
-					<property name="templatePrefix" value="spring-dao-" />
+					<property name="templateMiddle" value="DaoBean" />
 					<property name="templateSuffix" value=".vm" />
-					<property name="typeSpecific" value="true" />
+					<property name="typeSpecific" value="false" />
 					<property name="typeAppend" value="false" />
-					<property name="destFolder" value="resources" />
+					<property name="destFolder" value="srcDao" />
+					<property name="fileMiddle" value="DaoBean" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+
+				<!-- DatabaseHelper (UberDao) -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="DatabaseHelper" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="typeSpecific" value="false" />
+					<property name="typeAppend" value="false" />
+					<property name="destFolder" value="srcDao" />
 					<property name="entity" value="false" />
 					<property name="listingEntities" value="true" />
-					<property name="filePrefix" value="spring-dao" />
-					<property name="fileSuffix" value=".xml" />
+					<property name="filePrefix" value="DatabaseHelper" />
+					<property name="fileSuffix" value=".java" />
 				</bean>
 			</list>
 		</property>

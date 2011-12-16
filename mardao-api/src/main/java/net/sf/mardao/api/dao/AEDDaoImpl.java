@@ -1,5 +1,6 @@
 package net.sf.mardao.api.dao;
 
+import com.google.appengine.api.datastore.DatastoreFailureException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +18,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyRange;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -363,7 +365,27 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     protected static final List<Key> persistByCore(Iterable<Entity> entities) {
         final DatastoreService datastore = getDatastoreService();
 
-        return datastore.put(entities);
+        try {
+            return datastore.put(entities);
+        }
+        catch (DatastoreFailureException ex) {
+            LoggerFactory.getLogger(AEDDaoImpl.class).warn("Re-trying with allocated ids: {}", ex.getMessage());
+            // the id allocated for a new entity was already in use, please try again
+            ArrayList<Key> keys = new ArrayList<Key>();
+            for (Entity entity : entities) {
+                KeyRange range = datastore.allocateIds(entity.getParent(), entity.getKind(), 1);
+                Entity clone = new Entity(range.getStart());
+                clone.setPropertiesFrom(entity);
+                try {
+                    keys.add(datastore.put(clone));
+                }
+                catch (DatastoreFailureException inner) {
+                    LoggerFactory.getLogger(AEDDaoImpl.class).error("Could not persist Clone with Key" + clone.getKey(), inner);
+                    throw inner;
+                }
+            }
+            return keys;
+        }
     }
 
     protected final List<Key> updateByCore(Iterable<Entity> entities) {

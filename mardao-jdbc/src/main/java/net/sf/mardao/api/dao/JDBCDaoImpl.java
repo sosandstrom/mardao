@@ -12,12 +12,15 @@ import net.sf.mardao.api.domain.CreatedUpdatedEntity;
 import net.sf.mardao.api.domain.JDBCPrimaryKeyEntity;
 import net.sf.mardao.api.jdbc.Entity;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
 
 public abstract class JDBCDaoImpl<T extends JDBCPrimaryKeyEntity<ID>, ID extends Serializable> extends
         DaoImpl<T, ID, Long, Entity, Long> {
+    protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     /** the Spring SimpleJDBC template */
     protected SimpleJdbcTemplate                 template;

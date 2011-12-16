@@ -1,5 +1,6 @@
 package net.sf.mardao.api.dao;
 
+import android.database.Cursor;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Map;
 
 import android.database.sqlite.SQLiteDatabase;
 
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import net.sf.mardao.api.domain.AndroidLongEntity;
@@ -18,6 +20,8 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     protected final String TAG = getClass().getSimpleName();
     
     protected final SQLiteDatabase database;
+    
+    protected final CursorFactory cursorFactory = new CursorIterableFactory(this);
 
     protected AndroidDaoImpl(Class<T> type, SQLiteDatabase database) {
         super(type);
@@ -39,6 +43,8 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
             domain._setUpdatedDate(new Date((Long)from.getProperty(domain._getNameUpdatedDate())));
         }
     }
+    
+    protected abstract T createDomain(Cursor cursor);
 
     protected AndroidEntity createEntity(Long primaryKey) {
         // TODO Auto-generated method stub
@@ -93,15 +99,19 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
 
     @Override
     protected List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
-        // TODO Auto-generated method stub
-        return null;
+        final List<T> returnValue = new ArrayList<T>();
+
+        for (T domain : queryBy(orderBy, ascending, limit, offset, filters)) {
+            returnValue.add(domain);
+        }
+        
+        return returnValue;
     }
 
     @Override
     protected List<T> findBy(Map<String, Object> filters, String primaryOrderBy, boolean primaryDirection,
             String secondaryOrderBy, boolean secondaryDirection, int limit, int offset) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -152,16 +162,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         }
         catch (SQLiteException e) {
             Log.d(TAG, e.getMessage() + " updating existing row");
-            try {
-                id = entity.getContentValues().getAsLong(getPrimaryKeyColumnName());
-                String whereArgs[] = {id.toString()};
-                database.update(getTableName(), entity.getContentValues(), "WHERE _id = ", whereArgs);
-            }
-            catch (SQLiteException e2) {
-                Log.e(TAG, "SQLiteException" + e2.getMessage() + e2.toString());
-                id = -1L;
-            }
-
+            id = updateByCore(entity);
         }
         return id;
     }
@@ -200,10 +201,44 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
             entity.setProperty(name, value);
         }
     }
+    
+    public CursorIterable<T> queryAll() {
+        return queryBy(null, false, -1, 0);
+    }
+
+    protected CursorIterable<T> queryBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
+        // TODO: 
+        String selection = null;
+        final String orderByClause = null != orderBy ? orderBy + (ascending ? " ASC" : " DESC") : null;
+        final String limitClause = 0 < limit ? "LIMIT " + limit + (0 < offset ? " OFFSET " + offset : "") : null;
+        CursorIterable<T> cursor = (CursorIterable<T>) database.queryWithFactory(
+                cursorFactory, true, getTableName(), 
+                null, selection, null, null, null, orderByClause, limitClause);
+        return cursor;
+    }
 
     protected List<Long> updateByCore(Iterable<AndroidEntity> entities) {
-        // TODO Auto-generated method stub
-        return null;
+        final List<Long> ids = new ArrayList<Long>();
+        
+        for (AndroidEntity entity : entities) {
+            ids.add(updateByCore(entity));
+        }
+        
+        return ids;
+    }
+
+    protected Long updateByCore(AndroidEntity entity) {
+        Long id = -1L;
+        try {
+            id = entity.getContentValues().getAsLong(getPrimaryKeyColumnName());
+            String whereArgs[] = {id.toString()};
+            database.update(getTableName(), entity.getContentValues(), "WHERE _id = ", whereArgs);
+        }
+        catch (SQLiteException e2) {
+            Log.e(TAG, "SQLiteException" + e2.getMessage() + e2.toString());
+            id = -1L;
+        }
+        return id;
     }
 
 }

@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
-import java.util.Collections;
 import java.util.Iterator;
 import net.sf.mardao.api.domain.AndroidLongEntity;
 import net.sf.mardao.api.domain.AndroidPrimaryKeyEntity;
@@ -35,6 +34,28 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     protected Long convert(Long key) {
         return key;
     }
+    
+    protected List<T> convert(CursorIterable<T> cursor) {
+        final List<T> returnValue = new ArrayList<T>();
+
+        for (T domain : cursor) {
+            returnValue.add(domain);
+        }
+        
+        return returnValue;
+        
+    }
+
+    protected List<Long> convert(Cursor cursor) {
+        final List<Long> returnValue = new ArrayList<Long>();
+
+        for ( ; !cursor.isAfterLast(); cursor.moveToNext()) {
+            returnValue.add(cursor.getLong(0));
+        }
+        
+        return returnValue;
+        
+    }
 
     protected static final void convertCreatedUpdatedDates(AndroidEntity from, AndroidPrimaryKeyEntity domain) {
         if (null != domain._getNameCreatedDate()) {
@@ -49,19 +70,16 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     protected abstract T createDomain(Cursor cursor);
 
     protected AndroidEntity createEntity(Long primaryKey) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     protected Expression createEqualsFilter(String fieldName, Object param) {
-        // TODO Auto-generated method stub
-        return null;
+        return new Expression(fieldName, "=?", param);
     }
 
     public Long createKey(Long parentKey, Long simpleKey) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     protected Long createKey(T entity) {
@@ -93,35 +111,27 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
 
     public T findByPrimaryKey(Long parentKey, Long primaryKey) {
-        // TODO Auto-generated method stub
-        return null;
+        return findUniqueBy(getPrimaryKeyColumnName(), primaryKey);
     }
 
     public Map<Long, T> findByPrimaryKeys(Long parentKey, Iterable<Long> primaryKeys) {
         // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public List<Long> findAllKeys() {
-        // TODO Auto-generated method stub
-        return null;
+        return findKeysBy(null, false, -1, 0);
     }
 
     @Override
     protected T findBy(Expression... filters) {
-        // TODO Auto-generated method stub
-        return null;
+        List<T> list = findBy(null, false, 1, 0, filters);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     @Override
     protected List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
-        final List<T> returnValue = new ArrayList<T>();
-
-        for (T domain : queryBy(orderBy, ascending, limit, offset, filters)) {
-            returnValue.add(domain);
-        }
-        
-        return returnValue;
+        return convert(queryBy(orderBy, ascending, limit, offset, filters));
     }
 
     @Override
@@ -133,24 +143,19 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     @Override
     protected List<Long> findCoreKeysByParent(Long parentKey) {
         // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     protected List<Long> findKeysBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
-        // TODO Auto-generated method stub
-        return null;
+        Cursor cursor = queryKeysBy(orderBy, ascending, limit, offset, filters);
+        return convert(cursor);
     }
 
     @Override
     protected List<Long> findKeysByParent(Long parentKey) {
         // TODO Auto-generated method stub
-        return null;
-    }
-
-    public String getTableName() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public List<Long> persist(Iterable<T> domains) {
@@ -225,7 +230,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
     
     protected CursorIterable<T> queryBy(String columnName, Object value) {
-        return queryBy(null, false, -1, 0, new Expression(columnName, "=", value));
+        return queryBy(null, false, -1, 0, createEqualsFilter(columnName, value));
     }    
 
     protected CursorIterable<T> queryBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
@@ -233,7 +238,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
     
     protected Cursor queryKeysBy(String columnName, Object value) {
-        return queryKeysBy(null, false, -1, 0, new Expression(columnName, "=", value));
+        return queryKeysBy(null, false, -1, 0, createEqualsFilter(columnName, value));
     }
 
     protected Cursor queryKeysBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
@@ -256,14 +261,15 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
             }
             sb.append(filter.getColumn());
             sb.append(filter.getOperation());
-            sb.append("?");
+            // included in operation to support IN better
+            // sb.append("?");
             sArgs.add(String.valueOf(filter.getOperand()));
             selection = sb.toString();
         }
         final String[] selectionArgs = sArgs.isEmpty() ? null : sArgs.toArray(new String[0]);
         Log.d("queryBy", "WHERE " + selection);
         final String orderByClause = null != orderBy ? orderBy + (ascending ? " ASC" : " DESC") : null;
-        final String limitClause = 0 < limit ? "LIMIT " + limit + (0 < offset ? " OFFSET " + offset : "") : null;
+        final String limitClause = 0 < limit ? String.valueOf(limit) + (0 < offset ? "," + offset : "") : null;
         CursorIterable<T> cursor = (CursorIterable<T>) database.queryWithFactory(
                 factory, true, getTableName(), 
                 columns, selection, selectionArgs, 

@@ -260,7 +260,20 @@
 					<property name="fileSuffix" value=".java" />
 				</bean>
 
-				<!-- Override {Entity}DaoBean.java (the Spring Bean injected into controllers) -->
+				<!-- Extra GeneratedAndroid{Entity}Dao.java (with query methods) -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="Generated" />
+					<property name="templateMiddle" value="Dao" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="typeSpecific" value="true" />
+					<property name="typeAppend" value="true" />
+					<property name="destFolder" value="targetDao" />
+					<property name="filePrefix" value="Generated" />
+					<property name="fileMiddle" value="Dao" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+
+				<!-- Override {Entity}DaoBean.java (to contain DatabaseHelper methods) -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
 					<property name="templateMiddle" value="DaoBean" />
 					<property name="templateSuffix" value=".vm" />

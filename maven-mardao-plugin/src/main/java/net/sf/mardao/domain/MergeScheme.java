@@ -21,6 +21,8 @@ public class MergeScheme {
 	}
 
 	public void setTemplates(List<MergeTemplate> templatesToAppend) {
-		templates.addAll(templatesToAppend);
+            templatesToAppend.addAll(templates);
+            templates = templatesToAppend;
+		// templates.addAll(templatesToAppend);
 	}
 }

@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
+import java.util.Collections;
 import java.util.Iterator;
 import net.sf.mardao.api.domain.AndroidLongEntity;
 import net.sf.mardao.api.domain.AndroidPrimaryKeyEntity;
@@ -222,18 +223,54 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     public CursorIterable<T> queryAll() {
         return queryBy(null, false, -1, 0);
     }
+    
+    protected CursorIterable<T> queryBy(String columnName, Object value) {
+        return queryBy(null, false, -1, 0, new Expression(columnName, "=", value));
+    }    
 
     protected CursorIterable<T> queryBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
+        return (CursorIterable<T>) queryBy(false, orderBy, ascending, limit, offset, filters);
+    }
+    
+    protected Cursor queryKeysBy(String columnName, Object value) {
+        return queryKeysBy(null, false, -1, 0, new Expression(columnName, "=", value));
+    }
+
+    protected Cursor queryKeysBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
+        return queryBy(true, orderBy, ascending, limit, offset, filters);
+    }
+
+    private Cursor queryBy(boolean keysOnly, String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
         // TODO: 
+        CursorFactory factory = keysOnly ? null : cursorFactory;
+        String[] columns = {getPrimaryKeyColumnName()};
+        if (!keysOnly) {
+            columns = null;
+        }
         String selection = null;
+        StringBuffer sb = new StringBuffer();
+        ArrayList<String> sArgs = new ArrayList<String>();
+        for (Expression filter : filters) {
+            if (0 < sb.length()) {
+                sb.append(" AND ");
+            }
+            sb.append(filter.getColumn());
+            sb.append(filter.getOperation());
+            sb.append("?");
+            sArgs.add(String.valueOf(filter.getOperand()));
+            selection = sb.toString();
+        }
+        final String[] selectionArgs = sArgs.isEmpty() ? null : sArgs.toArray(new String[0]);
+        Log.d("queryBy", "WHERE " + selection);
         final String orderByClause = null != orderBy ? orderBy + (ascending ? " ASC" : " DESC") : null;
         final String limitClause = 0 < limit ? "LIMIT " + limit + (0 < offset ? " OFFSET " + offset : "") : null;
         CursorIterable<T> cursor = (CursorIterable<T>) database.queryWithFactory(
-                cursorFactory, true, getTableName(), 
-                null, selection, null, null, null, orderByClause, limitClause);
+                factory, true, getTableName(), 
+                columns, selection, selectionArgs, 
+                null, null, orderByClause, limitClause);
         return cursor;
     }
-
+    
     protected List<Long> updateByCore(Iterable<AndroidEntity> entities) {
         final List<Long> ids = new ArrayList<Long>();
         

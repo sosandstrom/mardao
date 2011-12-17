@@ -1,5 +1,7 @@
 package ${daoPackage};
 
+import android.database.Cursor;
+
 import net.sf.mardao.api.dao.CursorIterable;
 
 import ${entity.className};
@@ -14,6 +16,32 @@ import ${entity.className};
  */
 public interface Generated${entity.simpleName}DaoAndroid {
 
+    /**
+     * Queries the database and returns a CursorIterable of all ${entity.simpleName}s
+     * @return a CursorIterable of all ${entity.simpleName}s
+     */
     CursorIterable<${entity.simpleName}> queryAll();
 	
+    // ----------------------- field finders -------------------------------
+#foreach( $field in $entity.fields )
+
+#if( $entity.isUnique($field.name) )
+    // ${field.name} is unique, so use findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) method instead
+#else
+    /**
+     * query method for attribute field ${field.name}
+     * @param ${field.name} the specified attribute
+     * @return a CursorIterable of ${entity.simpleName}s with the specified attribute
+     */
+    CursorIterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+
+    /**
+     * query-primary-key-by method for attribute field ${field.name}
+     * @param ${field.name} the specified attribute
+     * @return a CursorIterable of keys to the ${entity.simpleName}s with the specified attribute
+     */
+    Cursor queryKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+#end	
+#end	
+		  
 }

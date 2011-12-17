@@ -4,12 +4,12 @@
     <parent>
         <groupId>net.sf.mardao</groupId>
         <artifactId>parent</artifactId>
-        <version>1.17</version>
+        <version>1.17-SNAPSHOT</version>
     </parent>
     <groupId>net.sf.mardao</groupId>
     <artifactId>mardao-android</artifactId>
     <packaging>jar</packaging>
-    <version>1.17</version>
+    <version>1.17-SNAPSHOT</version>
     <name>${groupId}:${artifactId}</name>
 
     <properties>

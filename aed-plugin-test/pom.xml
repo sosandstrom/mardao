@@ -4,13 +4,13 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>net.sf.mardao</groupId>
-		<version>1.17-SNAPSHOT</version>
+		<version>1.17</version>
 	</parent>
 
 	<!-- The Basics -->
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>aed-plugin-test</artifactId>
-	<version>1.17-SNAPSHOT</version>
+	<version>1.17</version>
 	<packaging>war</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -27,7 +27,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>mardao-api</artifactId>
+			<artifactId>mardao-aed</artifactId>
 			<version>${project.version}</version>
 		</dependency>	
 	

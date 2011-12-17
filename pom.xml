@@ -11,6 +11,8 @@
 	<modules>
 		<module>maven-mardao-plugin</module>
 		<module>mardao-api</module>
+		<module>mardao-aed</module>
+                <module>mardao-android</module>
 		<module>mardao-jdbc</module>
 		<module>basic-plugin-test</module>
 		<module>aed-plugin-test</module>
@@ -84,6 +86,22 @@
 		<developerConnection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/trunk</developerConnection>
 		<url>http://mardao.svn.sourceforge.net/viewvc/mardao/trunk</url>
 	</scm>
+        
+        <developers>
+            <developer>
+                <id>f94os</id>
+                <email>s.o.sandstrom@gmail.com</email>
+                <url>http://www.linkedin.com/in/sosandstrom</url>
+                <organization>Golden Gekko</organization>
+                <organizationUrl>http://www.goldengekko.com</organizationUrl>
+                <timezone>7</timezone>
+            </developer>
+            <developer>
+                <id>ivar_grimstad</id>
+                <email>ivar.grimstad@gmail.com</email>
+                <timezone>1</timezone>
+            </developer>
+        </developers>
 
 	<reporting>
 		<plugins>

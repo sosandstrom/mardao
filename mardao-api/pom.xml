@@ -12,7 +12,6 @@
 	<name>${groupId}:${artifactId}</name>
 
 	<properties>
-		<gae.version>1.5.2</gae.version>
 	</properties>
 
 	<build>
@@ -23,6 +22,18 @@
 					<source>1.5</source>
 					<target>1.5</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -41,18 +52,6 @@
 	</build>
 
 	<dependencies>
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-1.0-sdk</artifactId>
-			<version>${gae.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.6.1</version>
-		</dependency>
-
 		<!-- Test scope dependencies: -->
 		<dependency>
 			<groupId>junit</groupId>

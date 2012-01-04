@@ -4,13 +4,13 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>net.sf.mardao</groupId>
-		<version>1.15-SNAPSHOT</version>
+		<version>1.18-SNAPSHOT</version>
 	</parent>
 
 	<!-- The Basics -->
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>jdbc-plugin-test</artifactId>
-	<version>1.15-SNAPSHOT</version>
+	<version>1.18-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -20,11 +20,6 @@
 	</pluginRepositories>
 
 	<dependencies>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>mardao-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>	
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>mardao-jdbc</artifactId>
@@ -209,7 +204,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1-beta-1</version>
+				<version>2.1.1</version>
 				<configuration>
 					<webResources>
 						<resource>
@@ -315,37 +310,5 @@
 			sources -->
 		<downloadSources>false</downloadSources>
 	</properties>
-
-	<profiles>
-		<!-- We can configure our integration server to activate this profile and 
-			perform gae:deploy, thus uploading latest snapshot to the http://1.latest.<applicationName>.appspot.com 
-			automatically -->
-		<profile>
-			<id>integration-build</id>
-			<properties>
-				<gae.application.version>stage</gae.application.version>
-			</properties>
-		</profile>
-
-		<!-- This profile will activate automatically during release and upload 
-			application to the http://2.latest.<applicationName>.appspot.com (We might 
-			want to set the 2nd version as our applications Default version to be accessible 
-			at http://<applicationName>.appspot.com) -->
-		<profile>
-			<id>release-build</id>
-			<activation>
-				<property>
-					<name>performRelease</name>
-					<value>true</value>
-				</property>
-			</activation>
-
-			<properties>
-				<!-- During release, set application version in appengine-web.xml to 
-					2 -->
-				<gae.application.version>release</gae.application.version>
-			</properties>
-		</profile>
-	</profiles>
 
 </project>

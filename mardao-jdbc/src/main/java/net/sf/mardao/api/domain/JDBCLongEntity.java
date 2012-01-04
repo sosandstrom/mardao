@@ -20,4 +20,5 @@ public abstract class JDBCLongEntity extends JDBCCreatedUpdatedEntity<Long> {
         return Long.class;
     }
 
+//    public abstract void setPrimaryKey(Long id);
 }

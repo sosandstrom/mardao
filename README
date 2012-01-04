@@ -1,5 +1,5 @@
 README for the mardao Architect's Java DAO generator
-Version: 1.9
+Version: 1.17
 License: http://www.gnu.org/licenses/lgpl.html
 
 Mardao is a maven plugin, which you configure in your project's pom.xml.
@@ -9,12 +9,18 @@ For support, visit the mardao-usage mailing list at
 https://lists.sourceforge.net/lists/listinfo/mardao-usage
 
 pom.xml example:
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>basic-plugin-test</artifactId>
 	<packaging>jar</packaging>
 	<name>${groupId}::${artifactId}</name>
+
+	<properties>
+		<mardao.version>1.17</mardao.version>
+		<spring.version>3.0.6.RELEASE</spring.version>
+	</properties>
 
 	<build>
 		<plugins>
@@ -49,7 +55,7 @@ pom.xml example:
 			<plugin>
 				<groupId>net.sf.mardao</groupId>
 				<artifactId>maven-mardao-plugin</artifactId>
-				<version>1.9</version>
+				<version>${mardao.version}</version>
 				<executions>
 					<execution>
 						<id>generate-generics</id>
@@ -67,6 +73,9 @@ pom.xml example:
 					</execution>
 				</executions>
 				<configuration>
+					<!-- default is Spring JDBC 
+					<persistenceType>AED</persistenceType>
+					-->
 					<!--
 						Templates are retreived from plugin jar by default:
 						<templateFolder>C:/workspaces/Misc/eclipse/Scanner/src/main/resources</templateFolder>
@@ -145,7 +154,7 @@ pom.xml example:
 		<dependency>
 			<groupId>net.sf.mardao</groupId>
 			<artifactId>mardao-api</artifactId>
-			<version>1.9</version>
+			<version>${mardao.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.aspectj</groupId>
@@ -186,6 +195,29 @@ pom.xml example:
 ================================================================================
 Release History
 
+Release 1.17 Overview:
+Support for Android DAO generation, based on SQLiteDatabase and SQLiteHelper
+Release date: 2011-12-18
+You set the plugin configuration
+
+<persistenceType>Android</persistenceType>
+
+and use the dependency
+
+<dependency>
+	<groupId>net.sf.mardao</groupId>
+	<artifactId>mardao-android</artifactId>
+	<version>${mardao.version}</version>
+<dependency>
+
+to use for Android.
+
+New features:
+Support for Android
+
+Fixed bugs:
+
+--------------------------------------------------------------------------------
 Release 1.9 Overview:
 Good support for AppEngine low-level API, and parent keys.
 You set

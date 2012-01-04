@@ -130,7 +130,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
 
     @Override
-    protected List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
+    protected List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Long parentKey, Expression... filters) {
         return convert(queryBy(orderBy, ascending, limit, offset, filters));
     }
 

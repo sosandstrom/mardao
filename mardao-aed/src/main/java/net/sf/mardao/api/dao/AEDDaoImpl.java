@@ -427,8 +427,8 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         return asIterable(pq, limit, offset);
     }
 
-    protected List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
-        PreparedQuery pq = prepare(orderBy, ascending, filters);
+    protected List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Key parentKey, Expression... filters) {
+        PreparedQuery pq = prepare(false, parentKey, null, orderBy, ascending, filters);
         return asIterable(pq, limit, offset);
     }
 

@@ -5,7 +5,7 @@
 	<artifactId>parent</artifactId>
 	<packaging>pom</packaging>
 	<version>1.18-SNAPSHOT</version>
-	<name>${groupId}:${artifactId}</name>
+	<name>${project.groupId}:${project.artifactId}</name>
 	<url>http://mardao.sourceforge.net</url>
 
 	<modules>
@@ -97,7 +97,7 @@
                 <timezone>7</timezone>
             </developer>
             <developer>
-                <id>ivar_grimstad</id>
+                <id>ivargrimstad</id>
                 <email>ivar.grimstad@gmail.com</email>
                 <timezone>1</timezone>
             </developer>

@@ -35,13 +35,13 @@
 
 	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.jdbc.domain ============ -->
 	<bean id="bookDao" class="net.sf.mardao.test.jdbc.dao.BookDaoBean" 
-		autowire="constructor" />
+		autowire="byType" />
 	<bean id="chapterDao" class="net.sf.mardao.test.jdbc.dao.ChapterDaoBean" 
-		autowire="constructor" />
+		autowire="byType" />
 	<bean id="pageDao" class="net.sf.mardao.test.jdbc.dao.PageDaoBean" 
-		autowire="constructor" />
+		autowire="byType" />
 	<bean id="footnoteDao" class="net.sf.mardao.test.jdbc.dao.FootnoteDaoBean" 
-		autowire="constructor" />
+		autowire="byType" />
 	
 
 </beans>

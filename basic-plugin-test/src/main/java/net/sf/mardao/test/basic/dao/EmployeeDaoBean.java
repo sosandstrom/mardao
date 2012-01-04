@@ -37,6 +37,6 @@ public class EmployeeDaoBean
 		Expression org = new Expression(organizationDao.COLUMN_NAME_NAME, "=", orgName);
 		Expression.Foreign<Organization, Long> foreign = new Expression.Foreign<Organization, Long>(
 				COLUMN_NAME_CURRENTEMPLOYER, "=", (GenericDaoImpl<Organization, Long>) organizationDao, org);
-		return findBy(COLUMN_NAME_NAME, true, -1, foreign);
+		return findBy(COLUMN_NAME_NAME, true, -1, 0, foreign);
 	}
 }

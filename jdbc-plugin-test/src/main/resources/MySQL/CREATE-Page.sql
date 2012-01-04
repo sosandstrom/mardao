@@ -1,4 +1,4 @@
--- Created by mardao DAO generator 2011-09-04T10:34:57.651+0700
+-- Created by mardao DAO generator 2012-01-04T13:29:33.474+0700
 -- CREATE script for TABLE Page corresponding to Entity Page 
 --
 CREATE TABLE `Page` (

@@ -62,7 +62,7 @@
 	<!-- ============== DaoBeans for entities in package ${group.name} ============ -->
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
 	<bean id="${helper.firstToLower($entity.simpleName)}Dao" class="${daoPackage}.${entity.simpleName}DaoBean" 
-		autowire="constructor" />
+		autowire="byType" />
 #end
 	
 #end

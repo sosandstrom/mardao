@@ -361,12 +361,11 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	    // [LIMIT [<offset>,]<count>]
 	    // [OFFSET <offset>]
 	    if (0 < limit) {
+	    	sql.append(" LIMIT ");
 	    	if (0 < offset) {
 	    		sql.append(offset);
 	    		sql.append(',');
 	    	}
-	    	
-	    	sql.append(" LIMIT ");
 	    	sql.append(limit);
 	    }
 	    else if (0 < offset) {
@@ -387,7 +386,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
      * @param expressions the specified column-operation-operand expressions
      * @return the matching entities for the specified attributes
      */
-    public List<T> findBy(String orderBy, boolean ascending, int limit, Expression... expressions) {
+    public List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Expression... expressions) {
 		LOGGER.debug("find" + persistentClass.getSimpleName() + "sBy(" + Arrays.toString(expressions) + ")");
 		if (null != orderBy && !getColumnNames().contains(orderBy))
 		{
@@ -424,10 +423,20 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 			sql.append(ascending ? " ASC" : " DESC");
 		}
 		
-		if (0 < limit) {
-			sql.append(" LIMIT ");
-			sql.append(limit);
-		}
+                // [LIMIT [<offset>,]<count>]
+                // [OFFSET <offset>]
+                if (0 < limit) {
+                    sql.append(" LIMIT ");
+                    if (0 < offset) {
+                            sql.append(offset);
+                            sql.append(',');
+                    }
+                    sql.append(limit);
+                }
+                else if (0 < offset) {
+                    sql.append(" OFFSET ");
+                    sql.append(offset); 
+                }
 		
 		final List<T> returnValue = template.query(sql.toString(), getRowMapper(), args);
 		

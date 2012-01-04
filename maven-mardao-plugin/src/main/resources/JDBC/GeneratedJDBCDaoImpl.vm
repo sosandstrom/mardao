@@ -1,5 +1,8 @@
 package ${daoBasePackage};
 
+import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,14 +21,21 @@ import ${field.entity.className};
 import ${field.entity.className};
 #end
 
+import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
 
 /**
  * Concrete class without generics, for Spring container instatiation.
  */
-public class Generated${entity.simpleName}DaoImpl extends JDBCDaoImpl<${entity.simpleName}, ${entity.pk.type}> 
-	implements Generated${entity.simpleName}Dao<Long, Long> {
+public class Generated${entity.simpleName}DaoImpl 
+#if( $entity.parent )
+        extends JDBCDaoImpl<${entity.simpleName}, ${entity.pk.type}, ${entity.parent.type}> 
+	implements Generated${entity.simpleName}Dao<${entity.parent.type}, ${entity.pk.type}> {
+#else
+        extends JDBCDaoImpl<${entity.simpleName}, ${entity.pk.type}, Serializable> 
+	implements Generated${entity.simpleName}Dao<Serializable, ${entity.pk.type}> {
+#end
 
 	/** Table name for ${entity.simpleName} is "${entity.tableName}" */
 	public static final String TABLE_NAME = "${entity.tableName}";
@@ -40,9 +50,9 @@ public class Generated${entity.simpleName}DaoImpl extends JDBCDaoImpl<${entity.s
 #end
 	
 	
-	/** Constructor */
-   public Generated${entity.simpleName}DaoImpl(DataFieldMaxValueIncrementer incrementer) {
-      super(${entity.simpleName}.class, incrementer);
+	/** Default Constructor */
+   public Generated${entity.simpleName}DaoImpl() {
+      super(${entity.simpleName}.class);
    }
    
    @Override
@@ -71,42 +81,69 @@ public class Generated${entity.simpleName}DaoImpl extends JDBCDaoImpl<${entity.s
         return COLUMN_NAMES;
    }
    
+	/** Mapper for the ${entity.simpleName} row retrieval */
+	private static final ParameterizedRowMapper<${entity.simpleName}> MAPPER = 
+		new ParameterizedRowMapper<${entity.simpleName}>() {
+		public ${entity.simpleName} mapRow(ResultSet rs, int rowNum) throws SQLException {
+			final ${entity.simpleName} entity = new ${entity.simpleName}();
+#set( $field = $entity.pk )
+			entity.set${helper.firstToUpper($field.name)}(rs.get${helper.firstToUpper($field.simpleType)}(COLUMN_NAME_${field.name.toUpperCase()}));
+#foreach( $field in $entity.fields )
+#if( $field.simpleType == "Date" )
+			entity.set${helper.firstToUpper($field.name)}(rs.getTimestamp(COLUMN_NAME_${field.name.toUpperCase()}));
+#elseif( $field.simpleType == "Integer")
+			entity.set${helper.firstToUpper($field.name)}(rs.getInt(COLUMN_NAME_${field.name.toUpperCase()}));
+#else
+			entity.set${helper.firstToUpper($field.name)}(rs.get${helper.firstToUpper($field.simpleType)}(COLUMN_NAME_${field.name.toUpperCase()}));
+#end			
+#end			
+#foreach( $field in $entity.oneToOnes )
+
+			// one-to-one ${field.name}:
+			final ${field.entity.pk.simpleType} ${field.name}${helper.firstToUpper($field.entity.pk.name)} = rs.get${helper.firstToUpper($field.entity.pk.simpleType)}(COLUMN_NAME_${field.name.toUpperCase()});
+			if (null != ${field.name}${helper.firstToUpper($field.entity.pk.name)}) {
+    			final ${field.entity.simpleName} ${field.name} = new ${field.entity.simpleName}();
+    			${field.name}.set${helper.firstToUpper($field.entity.pk.name)}(${field.name}${helper.firstToUpper($field.entity.pk.name)});
+				entity.set${helper.firstToUpper($field.name)}(${field.name});
+			}
+#end
+#foreach( $field in $entity.manyToOnes )
+
+			// many-to-one ${field.name}:
+			final ${field.entity.pk.simpleType} ${field.name}${helper.firstToUpper($field.entity.pk.name)} = rs.get${helper.firstToUpper($field.entity.pk.simpleType)}(COLUMN_NAME_${field.name.toUpperCase()});
+			if (null != ${field.name}${helper.firstToUpper($field.entity.pk.name)}) {
+    			final ${field.entity.simpleName} ${field.name} = new ${field.entity.simpleName}();
+    			${field.name}.set${helper.firstToUpper($field.entity.pk.name)}(${field.name}${helper.firstToUpper($field.entity.pk.name)});
+				entity.set${helper.firstToUpper($field.name)}(${field.name});
+			}
+#end
+
+			return entity;			
+		}
+	};
+	protected final ParameterizedRowMapper<${entity.simpleName}> getRowMapper() {
+		return MAPPER;
+	}
+	
 	
    // ------ DaoImpl overrides -----------------------------
    
-   protected ${entity.simpleName} createDomain(Entity entity) {
-        // do null-check here only :-)
-        if (null == entity)  {
-        	return null;
-        }
-        
-        ${entity.simpleName} domain = (${entity.simpleName}) entity.getDomain();
-        if (null != entity.getResultSet()) {
-            if (null == domain) {
-                domain = new ${entity.simpleName}();
-            }
-			
-			// TODO: use Mapper 
-			
-            // convertCreatedUpdatedDates(entity, domain);
-        }
-        
-        return domain;
+    /** Convert from core key type to domain primary key type, trivial for JDBC */
+   protected ${entity.pk.type} convert(${entity.pk.type} core) {
+        return core;
    }
    
-   protected ${entity.pk.type} convert(Long core) {
-#if( ${entity.pk.type} == "java.lang.String" )
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#elseif( ${entity.pk.type} == "java.lang.Long" )
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#else
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#end
+    @Override
+   protected Entity createEntity(${entity.pk.type} primaryKey) {
+		final Entity parameters = new Entity();
+		parameters.put(getPrimaryKeyColumnName(), primaryKey);
+		
+		return parameters;
    }
-   
+
+    @Override
    protected Entity createEntity(${entity.simpleName} domain) {
-		HashMap<String,Object> parameters = new HashMap<String,Object>();
-		parameters.put(getPrimaryKeyColumnName(), domain.getPrimaryKey());
+		final Entity parameters = createEntity(domain.getPrimaryKey());
 		
 		// properties
 #foreach( $field in $entity.fields )
@@ -128,34 +165,10 @@ public class Generated${entity.simpleName}DaoImpl extends JDBCDaoImpl<${entity.s
 			parameters.put(COLUMN_NAME_${field.name.toUpperCase()}, toForeignKey(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}()));
 		}
 #end
-        final Entity entity = new Entity(domain, null, -1, parameters);
 		
-		return entity;
+		return parameters;
    }
 
-   public final Long createKey(Long parentKey, ${entity.pk.type} ${entity.pk.name}) {
-       // TODO: SELECT pk WHERE ID=id AND parentKey = parentKey
-#if( ${entity.pk.type} == "java.lang.String" )
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#elseif( ${entity.pk.type} == "java.lang.Long" )
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#else
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#end
-   }
-
-   protected Long createKey(${entity.simpleName} domain) {
-	   // TODO: if Root entity, return the domain.ID
-#if( ${entity.pk.type} == "java.lang.String" )
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#elseif( ${entity.pk.type} == "java.lang.Long" )
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#else
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#end
-   }
-   
-   
    protected void populate(Entity entity, Map<String, Object> nameValuePairs) {
 		// TODO: is anything needed here for JDBC?
 #foreach( $field in $entity.fields )
@@ -201,15 +214,10 @@ public class Generated${entity.simpleName}DaoImpl extends JDBCDaoImpl<${entity.s
 	}
 	
 #end   
-   
-    protected final void persistUpdateKeys(${entity.simpleName} domain, Long core) {
-#if( ${entity.pk.type} == "java.lang.String" )
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#elseif( ${entity.pk.type} == "java.lang.Long" )
-		throw new UnsupportedOperationException("Unsupported primary key type: ${entity.pk.type}");
-#else
-		<!-- Unsupported primary key type for children: ${entity.pk.type} -->
-#end
+
+        @Override
+        protected final void persistUpdateKeys(${entity.simpleName} domain, ${entity.pk.type} core) {
+            domain.set${helper.firstToUpper($entity.pk.name)}(core);
 	}
 	
 	// ----------------------- field finders -------------------------------
@@ -379,7 +387,7 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	 * Persist an entity given all attributes
 	 */
 	public ${entity.simpleName} persist(#if( $entity.parent )
-Long ${entity.parent.name},  	
+${entity.parent.type} ${entity.parent.name},  	
 #end		${entity.pk.type} ${entity.pk.name}#foreach( $field in $entity.fields )
 , 
 		${field.type} ${field.name}#end

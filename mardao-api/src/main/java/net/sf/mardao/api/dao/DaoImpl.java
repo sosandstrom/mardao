@@ -163,7 +163,11 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
 
     protected abstract T findBy(Expression... filters);
 
-    protected abstract List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters);
+    protected abstract List<T> findBy(String orderBy, boolean ascending, int limit, int offset, P parentKey, Expression... filters);
+
+    protected final List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
+        return findBy(orderBy, ascending, limit, offset, (P) null, filters);
+    }
 
     protected List<T> findBy(String fieldName, Object param) {
         return findBy(null, false, -1, 0, createEqualsFilter(fieldName, param));

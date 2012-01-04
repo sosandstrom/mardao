@@ -17,7 +17,7 @@ public class Chapter extends JDBCLongEntity {
 
     /** References the book's ISBN */
     @Parent(kind = "Book")
-    private Long              book;
+    private String            book;
 
     @Override
     public Long getSimpleKey() {
@@ -25,7 +25,7 @@ public class Chapter extends JDBCLongEntity {
     }
 
     @Override
-    public Long getParentKey() {
+    public String getParentKey() {
         return book;
     }
 
@@ -55,11 +55,11 @@ public class Chapter extends JDBCLongEntity {
         this.name = name;
     }
 
-    public Long getBook() {
+    public String getBook() {
         return book;
     }
 
-    public void setBook(Long book) {
+    public void setBook(String book) {
         this.book = book;
     }
 

@@ -140,7 +140,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	}
 	
 	/** Logs and executes the specified sql String */
-	protected void executeOperations(final String sql) throws org.springframework.jdbc.BadSqlGrammarException
+	public void executeOperations(final String sql) throws org.springframework.jdbc.BadSqlGrammarException
 	{
 		final JdbcOperations ops = getJdbcOperations();
 		LOGGER.info(sql);
@@ -148,7 +148,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	}
 	
 	/** Logs and queries the specified sql String */
-	protected int queryForInt(final String sql) throws org.springframework.jdbc.BadSqlGrammarException
+	public int queryForInt(final String sql) throws org.springframework.jdbc.BadSqlGrammarException
 	{
 		final JdbcOperations ops = getJdbcOperations();
 		LOGGER.info(sql);
@@ -156,7 +156,7 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 	}
 	
 	/** Logs and updates the specified sql String */
-	protected void updateOperations(final String sql) throws org.springframework.jdbc.BadSqlGrammarException
+	public void updateOperations(final String sql) throws org.springframework.jdbc.BadSqlGrammarException
 	{
 		final JdbcOperations ops = getJdbcOperations();
 		LOGGER.info(sql);

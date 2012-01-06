@@ -95,7 +95,17 @@ public interface AbstractHelper<T, ID extends Serializable> extends GenericDao<T
 	int update(Map<String, Object> values, Expression... expressions);
 	
 	// for Helper exposure to GenericDao:
+
 	String getTableName();
 	String getPrimaryKeyColumnName();
 	List<String> getColumnNames();
+
+	/** Logs and executes the specified sql String */
+	void executeOperations(final String sql) throws org.springframework.jdbc.BadSqlGrammarException;
+	
+	/** Logs and queries the specified sql String */
+	int queryForInt(final String sql) throws org.springframework.jdbc.BadSqlGrammarException;
+	
+	/** Logs and updates the specified sql String */
+	void updateOperations(final String sql) throws org.springframework.jdbc.BadSqlGrammarException;
 }

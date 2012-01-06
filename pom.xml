@@ -14,9 +14,9 @@
 		<module>mardao-aed</module>
                 <module>mardao-android</module>
 		<module>mardao-jdbc</module>
-		<module>basic-plugin-test</module>
 		<module>aed-plugin-test</module>
 		<!-- 
+		<module>basic-plugin-test</module>
 		<module>jdbc-plugin-test</module>
 		<module>jpa-plugin-test</module>
 		<module>gae-plugin-test</module>

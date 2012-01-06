@@ -4,13 +4,13 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>net.sf.mardao</groupId>
-		<version>1.18-SNAPSHOT</version>
+		<version>1.18</version>
 	</parent>
 
 	<!-- The Basics -->
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>aed-plugin-test</artifactId>
-	<version>1.18-SNAPSHOT</version>
+	<version>1.18</version>
 	<packaging>war</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>

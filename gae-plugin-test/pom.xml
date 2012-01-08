@@ -4,6 +4,7 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>net.sf.mardao</groupId>
+		<version>1.19-SNAPSHOT</version>
 	</parent>
 
 	<!-- The Basics -->

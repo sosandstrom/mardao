@@ -291,7 +291,7 @@
 				<artifactId>maven-gae-plugin</artifactId>
 				<version>0.7.2</version>
 				<configuration>
-					<port>8282</port>
+					<port>8686</port>
 					<monitorPort>8287</monitorPort>
 				</configuration>
 				<dependencies>

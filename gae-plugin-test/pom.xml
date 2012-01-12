@@ -209,9 +209,9 @@
 			<!-- two phases: to generate generics (in generate-sources), then generate 
 				daos (in process-sources) -->
 			<plugin>
-				<groupId>net.sf.mardao</groupId>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>maven-mardao-plugin</artifactId>
-				<version>1.10</version>
+				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>generate-generics</id>

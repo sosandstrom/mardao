@@ -33,7 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 #foreach( $group in $packages.values() )
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
-        ${entity.simpleName}Dao = new ${entity.simpleName}DaoBean(database);
+        ${helper.firstToLower($entity.simpleName)}Dao = new ${entity.simpleName}DaoBean(database);
 #end
 #end
     }

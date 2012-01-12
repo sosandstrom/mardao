@@ -98,36 +98,41 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
         	return null;
         }
         
+                // instantiate and primary key
         final ${entity.simpleName} domain = new ${entity.simpleName}();
         domain.set${helper.firstToUpper(${entity.pk.name})}((Long)entity.getProperty(getPrimaryKeyColumnName()));
+
 #if( $entity.parent )
-		// parent
-		domain.set${helper.firstToUpper(${entity.parent.name})}(entity.getParent());
+        // parent
+        domain.set${helper.firstToUpper(${entity.parent.name})}(entity.getParent());
 #end
-	    // createdDate, updatedDate
-		convertCreatedUpdatedDates(entity, domain);
+        // createdDate, updatedDate
+        convertCreatedUpdatedDates(entity, domain);
 		
 		// properties
 #foreach( $field in $entity.fields )
-		domain.set${helper.firstToUpper($field.name)}(($field.type) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()}));
+        // ${field.name}
+        domain.set${helper.firstToUpper($field.name)}(($field.type) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()}));
 #end
 
 		// one-to-one keys:
 #foreach( $field in $entity.oneToOnes )
-		domain.set${helper.firstToUpper($field.name)}(($field.type) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()}));
+        // ${field.name}
+        domain.set${helper.firstToUpper($field.name)}(($field.type) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()}));
 #end
 
 		// many-to-one keys:
 #foreach( $field in $entity.manyToOnes )
         // ${field.name}
-        final Key ${field.name}Key = (Key) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()});
+        final Long ${field.name}Key = (Long) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()});
         if (null != ${field.name}Key) {
-            final Entity ${field.name}Entity = new Entity(${field.name}Key);
-            domain.set${helper.firstToUpper($field.name)}(${field.name}Dao.convert(${field.name}Entity));
+            final AndroidEntity ${field.name}Entity = new AndroidEntity();
+            ${field.name}Entity.setProperty(${field.name}Dao.getPrimaryKeyColumnName(), ${field.name}Key);
+            domain.set${helper.firstToUpper($field.name)}(${field.name}Dao.createDomain(${field.name}Entity));
         }
 #end
 
-		return domain;
+        return domain;
    }
    
    protected ${entity.simpleName} createDomain(Cursor cursor) {
@@ -165,10 +170,11 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 		// many-to-one keys:
 #foreach( $field in $entity.manyToOnes )
         // ${field.name}
-        final Key ${field.name}Key = (Key) entity.getProperty(COLUMN_NAME_${field.name.toUpperCase()});
+        final Long ${field.name}Key = (Long) cursor.getLong(i++);
         if (null != ${field.name}Key) {
-            final Entity ${field.name}Entity = new Entity(${field.name}Key);
-            domain.set${helper.firstToUpper($field.name)}(${field.name}Dao.convert(${field.name}Entity));
+            final AndroidEntity ${field.name}Entity = new AndroidEntity();
+            ${field.name}Entity.setProperty(${field.name}Dao.getPrimaryKeyColumnName(), ${field.name}Key);
+            domain.set${helper.firstToUpper($field.name)}(${field.name}Dao.createDomain(${field.name}Entity));
         }
 #end
 
@@ -352,17 +358,17 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}());
+		return findBy${helper.firstToUpper($field.name)}Key(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}());
 	}
 	
 #if( $foreign )  
 	/**
 	 * find-by method for many-to-one field ${field.name}
-	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @param ${field.name}${foreign.pk.name} the related ${field.type} entity's primary key
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
-	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}Key(Key ${field.name}Key) {
-		return findBy(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name}Key);
+	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}Key(Long ${field.name}${foreign.pk.name}) {
+		return findBy(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name}${foreign.pk.name});
 	}	
 
 	/**
@@ -371,7 +377,7 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
 	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
-		return findByKey(COLUMN_NAME_${field.name.toUpperCase()}, ${field.type}.class, ${foreign.pk.name});
+		return findBy${helper.firstToUpper($field.name)}Key(${foreign.pk.name});
 	}	
 #end	
 	

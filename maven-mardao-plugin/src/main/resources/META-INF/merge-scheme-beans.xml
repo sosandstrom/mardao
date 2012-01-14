@@ -286,6 +286,17 @@
 
 				<!-- DatabaseHelper (UberDao) -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="GeneratedDatabaseHelper" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="typeSpecific" value="true" />
+					<property name="typeAppend" value="false" />
+					<property name="destFolder" value="targetDao" />
+					<property name="entity" value="false" />
+					<property name="listingEntities" value="true" />
+					<property name="filePrefix" value="GeneratedDatabaseHelper" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+				<bean class="net.sf.mardao.domain.MergeTemplate">
 					<property name="templatePrefix" value="DatabaseHelper" />
 					<property name="templateSuffix" value=".vm" />
 					<property name="typeSpecific" value="true" />

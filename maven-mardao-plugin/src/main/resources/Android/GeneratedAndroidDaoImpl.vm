@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import net.sf.mardao.api.dao.AbstractDatabaseHelper;
 import net.sf.mardao.api.dao.AndroidDaoImpl;
 import net.sf.mardao.api.dao.AndroidEntity;
 import net.sf.mardao.api.dao.CursorIterable;
@@ -40,8 +41,8 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 	
 	
 	/** Constructor */
-   public Generated${entity.simpleName}DaoImpl(SQLiteDatabase database) {
-      super(${entity.simpleName}.class, database);
+   public Generated${entity.simpleName}DaoImpl(AbstractDatabaseHelper databaseHelper) {
+      super(${entity.simpleName}.class, databaseHelper);
    }
    
    public String getTableName() {

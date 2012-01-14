@@ -1,0 +1,53 @@
+package ${daoPackage};
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import net.sf.mardao.api.dao.AbstractDatabaseHelper;
+
+/**
+ * Generated Database Helper, which instantiates the entity Dao(s).
+ * @author mardao
+ */
+public abstract class GeneratedDatabaseHelper extends AbstractDatabaseHelper {
+
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+    protected final ${entity.simpleName}Dao ${helper.firstToLower($entity.simpleName)}Dao;
+#end
+#end
+    
+    protected GeneratedDatabaseHelper(Context context) {
+        super(context);
+
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+        ${helper.firstToLower($entity.simpleName)}Dao = new ${entity.simpleName}DaoBean(this);
+#end
+#end
+    }
+    
+    @Override
+    public void onCreate(SQLiteDatabase sqld) {
+        Log.i(TAG, "DatabaseHelper.onCreate()");
+
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+        ${entity.simpleName}DaoBean.onCreate(sqld);
+#end
+#end
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase sqld, int fromVersion, int toVersion) {
+        Log.i(TAG, "DatabaseHelper.onUpgrade()");
+
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+        ${entity.simpleName}DaoBean.onUpgrade(sqld, fromVersion, toVersion);
+#end
+#end
+    }
+    
+}

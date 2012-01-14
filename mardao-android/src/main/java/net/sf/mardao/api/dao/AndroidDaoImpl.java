@@ -20,14 +20,67 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         DaoImpl<T, Long, Long, AndroidEntity, Long> {
     protected final String TAG = getClass().getSimpleName();
     
-    protected final SQLiteDatabase database;
+    private final ThreadLocal<SQLiteDatabase> database = new ThreadLocal<SQLiteDatabase>();
+    private final ThreadLocal<Integer> connDepth = new ThreadLocal<Integer>();
     
+    protected final AbstractDatabaseHelper databaseHelper;
     protected final CursorFactory cursorFactory = new CursorIterableFactory(this);
 
-    protected AndroidDaoImpl(Class<T> type, SQLiteDatabase database) {
+    protected AndroidDaoImpl(Class<T> type, AbstractDatabaseHelper helper) {
         super(type);
+        this.databaseHelper = helper;
         Log.d(TAG, "<init>");
-        this.database = database;
+    }
+    
+    /** To be called from DatabaseHelper.beginTransaction only */
+    protected final void setDbConnection(SQLiteDatabase dbConnection) {
+        database.set(dbConnection);
+    }
+    
+    protected final void clearDbConnection() {
+        database.remove();
+    }
+    
+    protected final synchronized SQLiteDatabase getDbConnection() {
+        SQLiteDatabase dbCon = database.get();
+        Integer depth = connDepth.get();
+        
+        if (null == dbCon) {
+            // create new connection
+            dbCon = databaseHelper.getDbConnection();
+            depth = 0;
+            database.set(dbCon);
+        }
+        else {
+            if (null == depth) {
+                depth = 1;
+            }
+        }
+        
+        // increase depth
+        connDepth.set(depth + 1);
+        
+        return dbCon;
+    }
+    
+    protected final synchronized void releaseDbConnection() {
+        Integer depth = connDepth.get();
+
+        // close when depth is back on 0 only
+        if (null == depth || 1 == depth) {
+            final SQLiteDatabase dbCon = database.get();
+            
+            if (null != dbCon) {
+                dbCon.close();
+                database.remove();
+            }
+            
+            connDepth.remove();
+        }
+        else {
+            // decrease depth
+            connDepth.set(depth - 1);
+        }
     }
 
     @Override
@@ -87,14 +140,24 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
 
     public final int deleteAll() {
-        return database.delete(getTableName(), "1", null);
+        return deleteWithConnection("1", null);
+    }
+    
+    private final int deleteWithConnection(String whereClause, String whereArgs[]) {
+        final SQLiteDatabase dbCon = getDbConnection();
+        try {
+            return dbCon.delete(getTableName(), whereClause, whereArgs);
+        }
+        finally {
+            releaseDbConnection();
+        }
     }
 
     @Override
     public void deleteByCore(Long primaryKey) {
         final String whereArgs[] = {primaryKey.toString()};
         Log.d(TAG, "delete " + getTableName() + " WHERE _id = " + primaryKey.toString());
-        database.delete(getTableName(), "_id = ?", whereArgs);
+        deleteWithConnection("_id = ?", whereArgs);
     }
 
     public void deleteByCore(Iterable<Long> primaryKeys) {
@@ -107,9 +170,9 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         }
         Log.d(TAG, "delete WHERE _id IN " + sb.toString());
         final String whereArgs[] = {sb.toString()};
-        database.delete(getTableName(), "_id IN (?)", whereArgs);
+        deleteWithConnection("_id IN (?)", whereArgs);
     }
-
+    
     public T findByPrimaryKey(Long parentKey, Long primaryKey) {
         return findUniqueBy(getPrimaryKeyColumnName(), primaryKey);
     }
@@ -180,12 +243,16 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     @Override
     protected Long persistEntity(AndroidEntity entity) {
         Long id = -1L;
+        final SQLiteDatabase dbCon = getDbConnection();
         try {
-            id = database.insertOrThrow(getTableName(), null, entity.getContentValues());
+            id = dbCon.insertOrThrow(getTableName(), null, entity.getContentValues());
         }
         catch (SQLiteException e) {
             Log.d(TAG, e.getMessage() + " updating existing row");
             id = updateByCore(entity);
+        }
+        finally {
+            releaseDbConnection();
         }
         return id;
     }
@@ -270,11 +337,18 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         Log.d("queryBy", "WHERE " + selection);
         final String orderByClause = null != orderBy ? orderBy + (ascending ? " ASC" : " DESC") : null;
         final String limitClause = 0 < limit ? String.valueOf(limit) + (0 < offset ? "," + offset : "") : null;
-        CursorIterable<T> cursor = (CursorIterable<T>) database.queryWithFactory(
-                factory, true, getTableName(), 
-                columns, selection, selectionArgs, 
-                null, null, orderByClause, limitClause);
-        return cursor;
+        
+        final SQLiteDatabase dbCon = getDbConnection();
+        try {
+            CursorIterable<T> cursor = (CursorIterable<T>) dbCon.queryWithFactory(
+                    factory, true, getTableName(), 
+                    columns, selection, selectionArgs, 
+                    null, null, orderByClause, limitClause);
+            return cursor;
+        }
+        finally {
+            releaseDbConnection();
+        }
     }
     
     protected List<Long> updateByCore(Iterable<AndroidEntity> entities) {
@@ -288,15 +362,19 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
 
     protected Long updateByCore(AndroidEntity entity) {
+        final SQLiteDatabase dbCon = getDbConnection();
         Long id = -1L;
         try {
             id = entity.getContentValues().getAsLong(getPrimaryKeyColumnName());
             String whereArgs[] = {id.toString()};
-            database.update(getTableName(), entity.getContentValues(), "WHERE _id = ", whereArgs);
+            dbCon.update(getTableName(), entity.getContentValues(), "WHERE _id = ", whereArgs);
         }
         catch (SQLiteException e2) {
             Log.e(TAG, "SQLiteException" + e2.getMessage() + e2.toString());
             id = -1L;
+        }
+        finally {
+            releaseDbConnection();
         }
         return id;
     }

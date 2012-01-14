@@ -27,6 +27,30 @@ public abstract class GeneratedDatabaseHelper extends AbstractDatabaseHelper {
 #end
 #end
     }
+
+    @Override
+    protected SQLiteDatabase getDbConnection() {
+        final SQLiteDatabase dbCon = super.getDbConnection();
+
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+        ${helper.firstToLower($entity.simpleName)}Dao.setDbConnection(dbCon);
+#end
+#end
+
+        return dbCon;
+    }
+
+    protected void releaseDbConnection(SQLiteDatabase dbCon) {
+
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+        ${helper.firstToLower($entity.simpleName)}Dao.clearDbConnection();
+#end
+#end
+
+        super.releaseDbConnection(dbCon);
+    }
     
     @Override
     public void onCreate(SQLiteDatabase sqld) {

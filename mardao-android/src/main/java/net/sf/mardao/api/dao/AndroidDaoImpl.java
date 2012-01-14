@@ -32,12 +32,12 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         Log.d(TAG, "<init>");
     }
     
-    /** To be called from DatabaseHelper.beginTransaction only */
-    protected final void setDbConnection(SQLiteDatabase dbConnection) {
+    /** To be called from GeneratedDatabaseHelper.getDbConnection only */
+    public final void setDbConnection(SQLiteDatabase dbConnection) {
         database.set(dbConnection);
     }
     
-    protected final void clearDbConnection() {
+    public final void clearDbConnection() {
         database.remove();
     }
     
@@ -63,7 +63,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         return dbCon;
     }
     
-    protected final synchronized void releaseDbConnection() {
+    public final synchronized void releaseDbConnection() {
         Integer depth = connDepth.get();
 
         // close when depth is back on 0 only

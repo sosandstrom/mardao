@@ -63,4 +63,7 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
         return getWritableDatabase();
     }
 
+    protected void releaseDbConnection(SQLiteDatabase dbCon) {
+        dbCon.close();
+    }
 }

@@ -378,6 +378,50 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 		return returnValue;
 	}
 	
+     protected static void append(StringBuffer sb, Map<String,Object> operands, Expression expression) {
+         sb.append('(');
+
+         final Object o1 = expression.getO1();
+         if (o1 instanceof Expression) {
+             append(sb, operands, (Expression) o1);
+         }
+         else {
+             sb.append(o1);
+         }
+
+         sb.append(' ');
+         final Object o2 = expression.getO2();
+         if (null != o2)  {
+             sb.append(expression.getOperator());
+             sb.append(' ');
+
+             if (o2 instanceof Expression) {
+                 append(sb, operands, (Expression) o2);
+             }
+             else {
+                // :operand0
+                final String key = "operand" + operands.size();
+
+                // IN requires (:key)
+                if (expression instanceof Expression.IN) {
+                    sb.append("(:");
+                    sb.append(key);
+                    sb.append(')');
+                }
+                else {
+                    sb.append(':');
+                    sb.append(key);
+                }
+                operands.put(key, o2);
+             }
+         }
+         else {
+             sb.append("IS NULL");
+         }
+
+         sb.append(')');
+     }
+
     /**
      * find-by method for unique attributes
      * @param orderBy the attribute to order by
@@ -399,22 +443,16 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 		
 		// and arguments map
 		boolean isFirst = true;
-		int i = 0;
 		final Map<String,Object> args = new HashMap<String,Object>();
 		for (Expression ex : expressions) {
 			//  check that column exists
-			if (!getColumnNames().contains(ex.getColumn())) {
-				throw new IllegalArgumentException("No such WHERE column " + ex.getColumn());
-			}
+            if (ex.getO1() instanceof String && !getColumnNames().contains(ex.getO1())) {
+                throw new IllegalArgumentException("No such WHERE column " + ex.getO1());
+            }
 		
 			sql.append(isFirst ? " WHERE " : " AND ");
 			isFirst = false;
-			sql.append(ex.getColumn());
-			sql.append(ex.getOperation());
-			String key = "operand" + i;
-			sql.append(ex.getToken(key));
-			args.put(key, ex.getOperand());
-			i++;
+            append(sql, args, ex);
 		}
 
 		if (null != orderBy) {
@@ -504,18 +542,13 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 		i = 0;
 		for (Expression ex : expressions) {
 			//  check that column exists
-			if (!getColumnNames().contains(ex.getColumn())) {
-				throw new IllegalArgumentException("No such WHERE column " + ex.getColumn());
-			}
+            if (ex.getO1() instanceof String && !getColumnNames().contains(ex.getO1())) {
+                throw new IllegalArgumentException("No such WHERE column " + ex.getO1());
+            }
 		
 			sql.append(isFirst ? " WHERE " : " AND ");
 			isFirst = false;
-			sql.append(ex.getColumn());
-			sql.append(ex.getOperation());
-			String key = "operand" + i;
-			sql.append(ex.getToken(key));
-			args.put(key, ex.getOperand());
-			i++;
+            append(sql, args, ex);
 		}
 		
 		LOGGER.debug("update" + persistentClass.getSimpleName() + "(" + args + ")");

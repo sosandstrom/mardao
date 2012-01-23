@@ -10,13 +10,13 @@
 
 	<modules>
 		<module>maven-mardao-plugin</module>
+		<module>basic-plugin-test</module>
 		<module>mardao-api</module>
 		<module>mardao-aed</module>
                 <module>mardao-android</module>
 		<module>mardao-jdbc</module>
 		<module>aed-plugin-test</module>
 		<!-- 
-		<module>basic-plugin-test</module>
 		<module>jdbc-plugin-test</module>
 		<module>jpa-plugin-test</module>
 		<module>gae-plugin-test</module>
@@ -62,14 +62,14 @@
 	            <name>Sourceforge Release Repository</name>
 	            <url>http://oss.sonatype.org/content/repositories/sourceforge-releases</url>
 	        </repository>
-	<!-- use the following for OSS Sonatype snapshot uploads
-	        <snapshotRepository>
-	            <id>sourceforge-snapshots</id>
-	            <name>Sourceforge Snapshot Repository</name>
-	            <url>http://oss.sonatype.org/content/repositories/sourceforge-with-staging</url>
-	        </snapshotRepository>
-	-->
-        <!-- use the following if you ARE using a snapshot version -->
+		<!-- use the following for OSS Sonatype snapshot uploads
+			  <snapshotRepository>
+				  <id>sourceforge-snapshots</id>
+				  <name>Sourceforge Snapshot Repository</name>
+				  <url>http://oss.sonatype.org/content/repositories/sourceforge-with-staging</url>
+			  </snapshotRepository>
+	  -->
+		<!-- use the following if you ARE using a snapshot version -->
 		<snapshotRepository>
 			<id>ppSnapshots</id>
 			<name>Snapshots Repository</name>
@@ -140,7 +140,8 @@
 	</mailingLists>
 
 	<issueManagement>
-		<system>sourceforge</system><!--don't care -->
+		<system>sourceforge</system>
+		<!--don't care -->
 		<url>http://sourceforge.net/tracker/?group_id=324173</url>
 	</issueManagement>
 </project>

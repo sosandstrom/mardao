@@ -3,12 +3,12 @@
 	<parent>
 		<groupId>net.sf.mardao</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.19</version>
+		<version>1.20-SNAPSHOT</version>
 	</parent>
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>basic-plugin-test</artifactId>
 	<packaging>jar</packaging>
-	<version>1.19</version>
+	<version>1.20-SNAPSHOT</version>
 	<name>${project.groupId}:${project.artifactId}</name>
 
 	<build>

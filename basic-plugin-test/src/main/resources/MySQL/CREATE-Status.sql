@@ -1,4 +1,4 @@
--- Created by mardao DAO generator 2010-11-03T10:56:35.616+0700
+-- Created by mardao DAO generator 2012-03-19T14:03:16.812+0700
 -- CREATE script for TABLE tStatus corresponding to Entity Status 
 --
 CREATE TABLE `tStatus` (

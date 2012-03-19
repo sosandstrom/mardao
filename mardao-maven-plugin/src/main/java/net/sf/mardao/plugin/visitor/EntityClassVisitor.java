@@ -20,11 +20,6 @@ public class EntityClassVisitor extends EmptyClassVisitor {
     private final Entity              entity;
     private final Log                 LOG;
     private final Map<String, Entity> entities;
-    // private String simpleName;
-    // private String packageName;
-    // private String className;
-    // private EntityAnnotationVisitor annotationVisitor;
-    // private EntityFieldVisitor fieldVisitor;
 
     private Field                     field;
 
@@ -35,19 +30,11 @@ public class EntityClassVisitor extends EmptyClassVisitor {
         this.entities = entities;
         this.entity = entity;
         LOG.debug("EntityClassVisitor.<init>");
-        // annotationVisitor = new EntityAnnotationVisitor(null);
-        // fieldVisitor = new EntityFieldVisitor();
     }
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         LOG.info("---- Second pass for Entity " + entity.getSimpleName() + " ----");
-        // className = name.replace('/', '.');
-        // int index = className.lastIndexOf('.');
-        // simpleName = className.substring(index+1);
-        // packageName = className.substring(0, index);
-        // entity = null;
-        // group = null;
     }
 
     static final String DESC_ENTITY = "javax/persistence/Entity";
@@ -64,17 +51,21 @@ public class EntityClassVisitor extends EmptyClassVisitor {
         return null;
     }
 
-    // public Group getGroup() {
-    // return group;
-    // }
-
     @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         if (0 == (access & ACCESS_STATIC) && null != entity && null != desc && null != Type.getType(desc)) {
             field = new Field();
             field.setName(name);
             try {
-                field.setType(Type.getType(desc).getInternalName().replace('/', '.'));
+                String type = Type.getType(desc).getInternalName().replace('/', '.');
+                
+                // replace [L[Ltype;; with type[][]
+                while (null != type && type.startsWith("[L") && type.endsWith(";")) {
+                    int beginIndex = type.lastIndexOf("[L");
+                    int endIndex = type.indexOf(";", beginIndex);
+                    type = type.substring(beginIndex+2, endIndex) + "[]" + type.substring(endIndex+1);
+                }
+                field.setType(type);
             }
             catch (NullPointerException npe) {
                 LOG.warn("        !!!!!!!! " + entity.getClassName() + " " + name + " desc " + desc + " " + Type.getType(desc));

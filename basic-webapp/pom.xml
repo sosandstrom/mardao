@@ -1,15 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="utf-8"?>
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	
 	<parent>
 		<groupId>net.sf.mardao</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.6-SNAPSHOT</version>
+		<version>1.20-SNAPSHOT</version>
 	</parent>
-	<groupId>net.sf.mardao</groupId>
+	
 	<artifactId>basic-webapp</artifactId>
+	
 	<packaging>war</packaging>
-	<version>1.6-SNAPSHOT</version>
+	
 	<name>${groupId}::${artifactId}</name>
 	<url>http://mardao.sf.net</url>
 
@@ -27,9 +32,7 @@
 					<target>1.6</target>
 				</configuration>
 				<executions>
-					<!--
-						extra compile step of domain classes before generator processing
-					-->
+					<!-- extra compile step of domain classes before generator processing -->
 					<execution>
 						<id>compile-entities</id>
 						<phase>generate-sources</phase>
@@ -54,13 +57,11 @@
 					<wtpversion>1.5</wtpversion>
 				</configuration>
 			</plugin>
-			<!--
-				two phases: to generate generics (in generate-sources), then
-				generate daos (in process-sources)
-			-->
+			<!-- two phases: to generate generics (in generate-sources), then generate 
+				daos (in process-sources) -->
 			<plugin>
 				<groupId>net.sf.mardao</groupId>
-				<artifactId>maven-mardao-plugin</artifactId>
+				<artifactId>mardao-maven-plugin</artifactId>
 				<version>1.6-SNAPSHOT</version>
 				<executions>
 					<execution>
@@ -79,35 +80,15 @@
 					</execution>
 				</executions>
 				<configuration>
-					<!--
-						Templates are retreived from plugin jar by default:
-						<templateFolder>C:/workspaces/Misc/eclipse/Scanner/src/main/resources</templateFolder>
-					-->
+					<!-- Templates are retreived from plugin jar by default: <templateFolder>C:/workspaces/Misc/eclipse/Scanner/src/main/resources</templateFolder> -->
 					<basePackage>net.sf.mardao.test.webapp</basePackage>
-					<!--
-						Scan here for entity classes:
-						<classpathElement>target/entity-classes</classpathElement>
-					-->
-					<!--
-						<additionalClasspathElements> <param>c:/develop</param>
-						<param>h:/</param> </additionalClasspathElements>
-					-->
-					<!--
-						Override default ${basePackage}.domain
-						<domanBasePackage></domanBasePackage>
-					-->
-					<!--
-						Override default ${basePackage}.dao
-						<daoBasePackage></daoBasePackage>
-					-->
-					<!--
-						default is transactions-optional:
-						<persistenceUnitName>JpaPU2</persistenceUnitName>
-					-->
-					<!--
-						default is true:
-						<containerManagedEntityManager>false</containerManagedEntityManager>
-					-->
+					<!-- Scan here for entity classes: <classpathElement>target/entity-classes</classpathElement> -->
+					<!-- <additionalClasspathElements> <param>c:/develop</param> <param>h:/</param> 
+						</additionalClasspathElements> -->
+					<!-- Override default ${basePackage}.domain <domanBasePackage></domanBasePackage> -->
+					<!-- Override default ${basePackage}.dao <daoBasePackage></daoBasePackage> -->
+					<!-- default is transactions-optional: <persistenceUnitName>JpaPU2</persistenceUnitName> -->
+					<!-- default is true: <containerManagedEntityManager>false</containerManagedEntityManager> -->
 				</configuration>
 			</plugin>
 			<plugin>
@@ -180,11 +161,11 @@
 			<artifactId>geronimo-jpa_3.0_spec</artifactId>
 			<version>1.1.1</version>
 		</dependency>
-      <dependency>
-         <groupId>commons-dbcp</groupId>
-         <artifactId>commons-dbcp</artifactId>
-         <version>1.4</version>
-      </dependency>
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>1.4</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
@@ -196,7 +177,7 @@
 			<version>${spring.version}</version>
 		</dependency>
 
-		<!--  Test scope dependencies: -->
+		<!-- Test scope dependencies: -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

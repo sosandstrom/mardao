@@ -1,16 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="utf-8"?>
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	
 	<parent>
-		<artifactId>parent</artifactId>
 		<groupId>net.sf.mardao</groupId>
-		<version>1.19-SNAPSHOT</version>
+		<artifactId>parent</artifactId>
+		<version>1.20-SNAPSHOT</version>
 	</parent>
 
-	<!-- The Basics -->
-	<groupId>net.sf.mardao</groupId>
 	<artifactId>gae-plugin-test</artifactId>
-	<version>1.19-SNAPSHOT</version>
+
 	<packaging>war</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -84,15 +86,13 @@
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jpa_3.0_spec</artifactId>
 			<version>1.1.1</version>
-			<!-- For javax.persistence annotations
-			 <scope>provided</scope>
-			 -->
+			<!-- For javax.persistence annotations <scope>provided</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jta_1.1_spec</artifactId>
 			<version>1.1.1</version>
-			 <scope>runtime</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.appengine.orm</groupId>
@@ -113,13 +113,8 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- 
-		<dependency>
-			<groupId>javax.transaction</groupId>
-			<artifactId>jta</artifactId>
-			<version>1.1</version>
-		</dependency>
-		 -->
+		<!-- <dependency> <groupId>javax.transaction</groupId> <artifactId>jta</artifactId> 
+			<version>1.1</version> </dependency> -->
 
 
 		<!-- Make use of JSP tags. Remove, if you don't use JSPs -->
@@ -210,7 +205,7 @@
 				daos (in process-sources) -->
 			<plugin>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>maven-mardao-plugin</artifactId>
+				<artifactId>mardao-maven-plugin</artifactId>
 				<version>${project.version}</version>
 				<executions>
 					<execution>
@@ -312,15 +307,8 @@
 								<include>**/appengine-web.xml</include>
 							</includes>
 						</resource>
-						<!-- 
-						<resource>
-							<directory>src/main/webapp</directory>
-							<filtering>false</filtering>
-							<includes>
-								<include>WEB-INF/jsp/**/*</include>
-							</includes>
-						</resource>
-						 -->
+						<!-- <resource> <directory>src/main/webapp</directory> <filtering>false</filtering> 
+							<includes> <include>WEB-INF/jsp/**/*</include> </includes> </resource> -->
 					</webResources>
 				</configuration>
 			</plugin>
@@ -369,15 +357,15 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.6</version>
 				<configuration>
-                    <forkMode>pertest</forkMode>
-                    <argLine>-Xms256m -Xmx512m</argLine>
-                    <testFailureIgnore>false</testFailureIgnore>
+					<forkMode>pertest</forkMode>
+					<argLine>-Xms256m -Xmx512m</argLine>
+					<testFailureIgnore>false</testFailureIgnore>
 					<skip>true</skip>
 				</configuration>
 				<executions>
@@ -404,7 +392,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 
 			<!-- Upload application to the appspot automatically, during release:perform -->
 			<plugin>

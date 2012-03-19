@@ -41,7 +41,7 @@
 			-->
 			<plugin>
 				<groupId>net.sf.mardao</groupId>
-				<artifactId>maven-mardao-plugin</artifactId>
+				<artifactId>mardao-maven-plugin</artifactId>
 				<version>1.1</version>
 				<executions>
 					<execution>

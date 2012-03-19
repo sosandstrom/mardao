@@ -1,5 +1,5 @@
 README for the mardao Architect's Java DAO generator
-Version: 1.17
+Version: 1.20
 License: http://www.gnu.org/licenses/lgpl.html
 
 Mardao is a maven plugin, which you configure in your project's pom.xml.
@@ -18,7 +18,7 @@ pom.xml example:
 	<name>${groupId}::${artifactId}</name>
 
 	<properties>
-		<mardao.version>1.17</mardao.version>
+		<mardao.version>1.20</mardao.version>
 		<spring.version>3.0.6.RELEASE</spring.version>
 	</properties>
 
@@ -54,7 +54,7 @@ pom.xml example:
 			-->
 			<plugin>
 				<groupId>net.sf.mardao</groupId>
-				<artifactId>maven-mardao-plugin</artifactId>
+				<artifactId>mardao-maven-plugin</artifactId>
 				<version>${mardao.version}</version>
 				<executions>
 					<execution>
@@ -195,6 +195,16 @@ pom.xml example:
 ================================================================================
 Release History
 
+Release 1.20 Overview:
+Support for @Basic arrays, rename to mardao-maven-plugin
+Release date: 2012-03-19
+
+New features:
+Support for @Basic arrays
+
+Fixed bugs:
+
+--------------------------------------------------------------------------------
 Release 1.17 Overview:
 Support for Android DAO generation, based on SQLiteDatabase and SQLiteHelper
 Release date: 2011-12-18

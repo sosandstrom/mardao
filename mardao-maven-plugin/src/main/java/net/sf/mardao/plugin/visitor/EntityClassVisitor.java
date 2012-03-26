@@ -65,6 +65,11 @@ public class EntityClassVisitor extends EmptyClassVisitor {
                     int endIndex = type.indexOf(";", beginIndex);
                     type = type.substring(beginIndex+2, endIndex) + "[]" + type.substring(endIndex+1);
                 }
+                
+                // replace [J with long[]
+                if ("[J".equals(type)) {
+                    type = "long[]";
+                }
                 field.setType(type);
             }
             catch (NullPointerException npe) {

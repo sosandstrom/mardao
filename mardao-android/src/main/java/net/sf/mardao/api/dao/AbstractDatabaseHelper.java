@@ -8,6 +8,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import java.util.List;
+import net.sf.mardao.api.domain.AndroidLongEntity;
 
 /**
  *
@@ -65,5 +67,9 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
 
     protected void releaseDbConnection(SQLiteDatabase dbCon) {
         dbCon.close();
+    }
+    
+    public static final <T extends AndroidLongEntity> List<Long> asKeys(List<T> entities) {
+        return AndroidDaoImpl.asKeys(entities);
     }
 }

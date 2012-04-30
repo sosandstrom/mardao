@@ -1,16 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="utf-8"?>
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>net.sf.mardao</groupId>
-		<version>1.18-SNAPSHOT</version>
+		<version>1.20-SNAPSHOT</version>
 	</parent>
 
-	<!-- The Basics -->
-	<groupId>net.sf.mardao</groupId>
 	<artifactId>aed-plugin-test</artifactId>
-	<version>1.18-SNAPSHOT</version>
+	
 	<packaging>war</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -29,8 +31,8 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>mardao-aed</artifactId>
 			<version>${project.version}</version>
-		</dependency>	
-	
+		</dependency>
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
@@ -100,15 +102,13 @@
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jpa_3.0_spec</artifactId>
 			<version>1.1.1</version>
-			<!-- For javax.persistence annotations
-			 <scope>provided</scope>
-			 -->
+			<!-- For javax.persistence annotations <scope>provided</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jta_1.1_spec</artifactId>
 			<version>1.1.1</version>
-			 <scope>runtime</scope>
+			<scope>runtime</scope>
 		</dependency>
 
 		<!-- These dependencies are here just for enabling logging -->
@@ -162,7 +162,7 @@
 				daos (in process-sources) -->
 			<plugin>
 				<groupId>net.sf.mardao</groupId>
-				<artifactId>maven-mardao-plugin</artifactId>
+				<artifactId>mardao-maven-plugin</artifactId>
 				<version>${project.version}</version>
 				<executions>
 					<execution>
@@ -186,9 +186,7 @@
 							<goal>process-classes</goal>
 						</goals>
 						<configuration>
-							<!-- 
-							<basePackage>net.sf.mardao.test.aed</basePackage>
-							 -->
+							<!-- <basePackage>net.sf.mardao.test.aed</basePackage> -->
 							<persistenceType>WEB</persistenceType>
 						</configuration>
 					</execution>
@@ -291,7 +289,7 @@
 				<artifactId>maven-gae-plugin</artifactId>
 				<version>0.7.2</version>
 				<configuration>
-					<port>8282</port>
+					<port>8686</port>
 					<monitorPort>8287</monitorPort>
 				</configuration>
 				<dependencies>
@@ -328,15 +326,15 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.6</version>
 				<configuration>
-                    <forkMode>pertest</forkMode>
-                    <argLine>-Xms256m -Xmx512m</argLine>
-                    <testFailureIgnore>false</testFailureIgnore>
+					<forkMode>pertest</forkMode>
+					<argLine>-Xms256m -Xmx512m</argLine>
+					<testFailureIgnore>false</testFailureIgnore>
 					<skip>true</skip>
 				</configuration>
 				<executions>
@@ -363,7 +361,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 
 			<!-- Upload application to the appspot automatically, during release:perform -->
 			<plugin>

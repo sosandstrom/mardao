@@ -83,6 +83,16 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         }
     }
 
+    public static final <T extends AndroidLongEntity> List<Long> asKeys(List<T> entities) {
+        final List<Long> keys = new ArrayList<Long>(entities.size());
+        
+        for (T e : entities) {
+            keys.add(e.getSimpleKey());
+        }
+        
+        return keys;
+    }    
+    
     @Override
     protected Long convert(Long key) {
         return key;
@@ -367,7 +377,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         try {
             id = entity.getContentValues().getAsLong(getPrimaryKeyColumnName());
             String whereArgs[] = {id.toString()};
-            dbCon.update(getTableName(), entity.getContentValues(), "WHERE _id = ", whereArgs);
+            dbCon.update(getTableName(), entity.getContentValues(), "_id = ?", whereArgs);
         }
         catch (SQLiteException e2) {
             Log.e(TAG, "SQLiteException" + e2.getMessage() + e2.toString());

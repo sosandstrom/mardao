@@ -25,17 +25,31 @@ public class AndroidEntity implements Serializable {
     }
 
     public void setProperty(String name, Object value) {
-        if (value instanceof Long) {
-            contentValues.put(name, (Long)value);
-        }
-        else if (value instanceof String) {
-            contentValues.put(name, (String)value);
-        }
-        else if (value instanceof Date) {
-            contentValues.put(name, ((Date)value).getTime());
+        if (null != value) {
+            if (value instanceof Long) {
+                contentValues.put(name, (Long)value);
+            }
+            else if (value instanceof String) {
+                contentValues.put(name, (String)value);
+            }
+            else if (value instanceof Date) {
+                contentValues.put(name, ((Date)value).getTime());
+            }
+            else if (value instanceof Boolean) {
+                contentValues.put(name, (Boolean) value);
+            }
+            else if (value instanceof Double) {
+                contentValues.put(name, (Double) value);
+            }
+            else if (value instanceof Float) {
+                contentValues.put(name, (Float) value);
+            }
+            else {
+                throw new UnsupportedOperationException("Not supported yet " + name + ":" + value.getClass().getName());
+            }
         }
         else {
-            throw new UnsupportedOperationException("Not supported yet.");
+            contentValues.remove(name);
         }
     }
     

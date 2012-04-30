@@ -242,6 +242,9 @@ public class AbstractMardaoMojo extends AbstractMojo {
         // for SQLite
         sqLiteTypes.put(Long.class.getName(), "INT");
         sqLiteTypes.put(String.class.getName(), "TEXT");
+        sqLiteTypes.put(Boolean.class.getName(), "TINYINT");
+        sqLiteTypes.put(Float.class.getName(), "REAL");
+        sqLiteTypes.put(Double.class.getName(), "REAL");
 
         if ("Android".equals(persistenceType)) {
             vc.put("dbTypes", sqLiteTypes);

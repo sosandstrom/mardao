@@ -24,9 +24,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Text;
-import net.sf.mardao.api.dao.Dao;
-import net.sf.mardao.api.dao.DaoImpl;
-import net.sf.mardao.api.dao.Expression;
+import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -233,7 +231,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
      */
     protected PreparedQuery prepare(boolean keysOnly, Key parentKey, Key simpleKey, String orderBy, boolean ascending,
             Expression... filters) {
-        LOG.debug("findUnique {} with filters {}", getTableName(), filters);
+        LOG.debug("prepare {} with filters {}", getTableName(), filters);
         final DatastoreService datastore = getDatastoreService();
 
         Query q = new Query(getTableName(), parentKey);
@@ -419,6 +417,20 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     protected T findBy(Expression... filters) {
         PreparedQuery pq = prepare(null, false, filters);
         return asSingleEntity(pq);
+    }
+
+    protected List<T> findBy(String fieldName, Collection param) {
+        final Expression filters[] = new Expression[param.size()];
+        
+        int i = 0;
+        for (Object p : param) {
+            filters[i++] = createEqualsFilter(fieldName, p);
+        }
+        
+        LOG.debug("Multiple values for {} should match {}", fieldName, filters);
+        
+        final PreparedQuery pq = prepare(null, false, filters);
+        return asIterable(pq, -1, 0);
     }
 
     protected List<T> findBy(Map<String, Object> filters, String primaryOrderBy, boolean primaryDirection,

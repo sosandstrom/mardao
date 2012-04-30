@@ -173,6 +173,10 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
         return findBy(null, false, -1, 0, createEqualsFilter(fieldName, param));
     }
 
+//    protected List<T> findBy(Map<String, Object> args) {
+//        return findBy(args, null, false, -1, 0);
+//    }
+//
     protected List<T> findBy(Map<String, Object> args, String orderBy, boolean ascending) {
         return findBy(args, orderBy, ascending, -1, 0);
     }

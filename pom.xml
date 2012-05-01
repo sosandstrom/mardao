@@ -4,7 +4,7 @@
 	
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>parent</artifactId>
-	<version>1.21</version>
+	<version>1.22-SNAPSHOT</version>
 	
 	<packaging>pom</packaging>
 	
@@ -82,9 +82,9 @@
 	</distributionManagement>
 
 	<scm>
-		<connection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/tags/parent-1.21</connection>
-		<developerConnection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/tags/parent-1.21</developerConnection>
-		<url>http://mardao.svn.sourceforge.net/viewvc/mardao/tags/parent-1.21</url>
+		<connection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/trunk</connection>
+		<developerConnection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/trunk</developerConnection>
+		<url>http://mardao.svn.sourceforge.net/viewvc/mardao/trunk</url>
 	</scm>
 
 	<developers>

@@ -204,7 +204,14 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
 
     @Override
     protected List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Long parentKey, Expression... filters) {
-        return convert(queryBy(orderBy, ascending, limit, offset, filters));
+        getDbConnection();
+        try {
+            return convert(queryBy(orderBy, ascending, limit, offset, filters));
+        }
+        finally {
+            releaseDbConnection();
+        }
+               
     }
 
     @Override
@@ -344,7 +351,6 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
             selection = sb.toString();
         }
         final String[] selectionArgs = sArgs.isEmpty() ? null : sArgs.toArray(new String[0]);
-        Log.d("queryBy", "WHERE " + selection);
         final String orderByClause = null != orderBy ? orderBy + (ascending ? " ASC" : " DESC") : null;
         final String limitClause = 0 < limit ? String.valueOf(limit) + (0 < offset ? "," + offset : "") : null;
         
@@ -354,6 +360,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
                     factory, true, getTableName(), 
                     columns, selection, selectionArgs, 
                     null, null, orderByClause, limitClause);
+            Log.d("queryBy", getTableName() + " WHERE " + selection + " returns " + cursor.getCount());
             return cursor;
         }
         finally {

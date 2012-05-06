@@ -1,6 +1,7 @@
 package ${daoBasePackage};
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import ${field.entity.className};
 #foreach( $field in $entity.manyToOnes )
 import ${field.entity.className};
 #end
+import net.sf.mardao.manytomany.dao.AndroidManyToManyDaoBean;
 
 /**
  * Concrete class without generics, for Spring container instatiation.
@@ -39,7 +41,15 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 	}
 #end
 	
-	
+#foreach( $field in $entity.manyToManys )
+    /** DAO for Many-To-Many relation ${field.name} */
+    private AndroidManyToManyDaoBean ${field.name}Dao;
+	/** Setter for Many-To-One ${field.name} DAO */
+	public void set${helper.firstToUpper($field.name)}Dao(AndroidManyToManyDaoBean m2mDao) {
+		${field.name}Dao = m2mDao;
+	}
+#end
+
 	/** Constructor */
    public Generated${entity.simpleName}DaoImpl(AbstractDatabaseHelper databaseHelper) {
       super(${entity.simpleName}.class, databaseHelper);
@@ -60,8 +70,8 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
     /**
      * Override this to get custom create statement
      */
-    protected static String getCreateDbSql() {
-        return "CREATE TABLE " + TABLE_NAME + " (" +
+    protected String getCreateDbSql() {
+        return "CREATE TABLE " + getTableName() + " (" +
 	"${entity.pk.columnName} INTEGER PRIMARY KEY AUTOINCREMENT" +
 #foreach( $column in $entity.fields )
 	", ${column.columnName} $dbTypes.get($column.type)" +
@@ -84,7 +94,7 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
         ");";
     }
    
-    public static void onCreate(SQLiteDatabase db) {
+    public void onCreate(SQLiteDatabase db) {
         final String sql = getCreateDbSql();
         Log.i(TABLE_NAME, "Creating Table: " + sql);
         db.execSQL(sql);
@@ -389,44 +399,37 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 #if( $entities.get($field.type) )  
 #set( $foreign = $entities.get($field.type))
 	/**
-	 * find-by method for many-to-many field ${field.name}
-	 * @param ${field.name} the related ${field.type} entity
-	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
-	 */
-	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-#if( $persistenceType == "JPA" )
-      return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
+	 * find-by method for many-to-many field ${field.name} related to foreign Entity ${field.simpleType}
+#if( $field.mappedBy )		 
+	 * This is inverse side (mappedBy="${field.mappedBy}")
 #else
-		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
+	 * This is owning side
 #end
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return a Collection of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	public final Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
 	}
 	
 	/**
-	 * find-by method for many-to-many field ${field.name}
-	 * @param ${foreign.pk.type} the related ${field.type} entity's primary key
-	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
-	 */
-	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
-#if( $persistenceType == "JPA" )
-
-      return findByManyToMany("${entity.pk.name}",
-                                         "${field.name}_${foreign.pk.name}",
-                                         "${field.simpleType}",
-                                         "${field.mappedBy}_${entity.pk.name}",
-                                         ${foreign.pk.name});
-#else
-		// FIXME: implement properly
-		return findByManyToMany("${entity.pk.name}", // primaryKeyName
+	 * find-by method for many-to-many field ${field.name} related to foreign Entity ${field.simpleType}
 #if( $field.mappedBy )		 
-			"${field.mappedBy}_${entity.pk.name}", // this side's column in the join table (mappedBy="${field.mappedBy}")
+	 * This is inverse side (mappedBy="${field.mappedBy}")
 #else
-#set( $relatedField = $foreign.mappedBy.get($field.name) )
-			"${helper.firstToLower($relatedField.name)}_${entity.pk.name}", // this side's column in the join table  
+	 * This is owning side
 #end
-			"${field.simpleType}", // related entity class simple name
-			"${field.name}_${foreign.pk.name}", // the related side's column in the join table
+	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @return a Collection of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	public final Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+		return findByManyToMany(${field.name}Dao, 
+#if( $field.mappedBy )		 
+			false, // this insverse side (mappedBy="${field.mappedBy}")
+#else
+                        true, // this is owning side
+#end
 			${foreign.pk.name}); 			 
-#end
 	}
 #end	
 	
@@ -445,11 +448,7 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 ${helper.firstToUpper($field.name)}#end(#foreach( $field in $uniqueFields )
 ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #end) {
-		final java.util.Map<String,Object> args = new java.util.HashMap<String,Object>($uniqueFields.size());
-#foreach( $field in $uniqueFields )
-		args.put(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
-#end
-		return findBy(args);
+                return findBy(#foreach( $field in $uniqueFields )#if( 1 < $velocityCount ), #end createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name})#end);
 	}
 #end
 
@@ -478,13 +477,12 @@ ${entity.parent.name}, #end${entity.pk.name});
 		
 #if( 0 < $entity.uniqueFieldsSets.size() )
 #set( $uniqueFields = $entity.uniqueFieldsSets.get(0) )
-		// use find-by unique column set
+		// use find-by unique column set and finder above
 		if (null == domain) {
-			final java.util.Map<String,Object> args = new java.util.HashMap<String,Object>($uniqueFields.size());
-#foreach( $field in $uniqueFields )
-			args.put(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
-#end
-			domain = findBy(args);
+			domain = findBy#foreach( $field in $uniqueFields )
+${helper.firstToUpper($field.name)}#end(#foreach( $field in $uniqueFields )
+${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
+#end);
 		}
 #end		
 		// create new?

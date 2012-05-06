@@ -21,6 +21,9 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
     
     /** The database name is 'mardao' */
     protected static final String DATABASE_NAME = "mardao";
+
+    private static final ThreadLocal<SQLiteDatabase> database = new ThreadLocal<SQLiteDatabase>();
+    private static final ThreadLocal<Integer> connDepth = new ThreadLocal<Integer>();
     
     /** Override to change database name from 'mardao' */
     protected String getDatabaseName() {
@@ -46,7 +49,7 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
             }
         }
         finally {
-            dbCon.close();
+            releaseDbConnection();
         }
     }
     
@@ -57,16 +60,49 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
             }
         }
         finally {
-            dbCon.close();
+            releaseDbConnection();
         }
     }
     
     protected SQLiteDatabase getDbConnection() {
-        return getWritableDatabase();
+        SQLiteDatabase dbCon = database.get();
+        Integer depth = connDepth.get();
+        
+        if (null == dbCon) {
+            // create new connection
+            dbCon = getWritableDatabase();
+            depth = 0;
+            database.set(dbCon);
+        }
+        else {
+            if (null == depth) {
+                depth = 1;
+            }
+        }
+        
+        // increase depth
+        connDepth.set(depth + 1);
+        
+        return dbCon;
     }
 
-    protected void releaseDbConnection(SQLiteDatabase dbCon) {
-        dbCon.close();
+    protected void releaseDbConnection() {
+        Integer depth = connDepth.get();
+
+        // close when depth is going back to 0 only
+        if (null == depth || depth.equals(1)) {
+            connDepth.remove();
+            
+            final SQLiteDatabase dbCon = database.get();
+            if (null != dbCon) {
+                database.remove();
+                dbCon.close();
+            }
+        }
+        else {
+            // decrease depth
+            connDepth.set(depth - 1);
+        }
     }
     
     public static final <T extends AndroidLongEntity> List<Long> asKeys(List<T> entities) {

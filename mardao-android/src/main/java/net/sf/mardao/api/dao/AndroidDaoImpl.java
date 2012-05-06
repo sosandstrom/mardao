@@ -11,17 +11,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
-import java.util.Iterator;
+import java.util.*;
 import net.sf.mardao.api.domain.AndroidLongEntity;
 import net.sf.mardao.api.domain.AndroidPrimaryKeyEntity;
 import net.sf.mardao.api.domain.CreatedUpdatedEntity;
+import net.sf.mardao.manytomany.dao.AndroidManyToManyDaoBean;
+import net.sf.mardao.manytomany.domain.AndroidManyToMany;
 
 public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         DaoImpl<T, Long, Long, AndroidEntity, Long> {
     protected final String TAG = getClass().getSimpleName();
-    
-    private final ThreadLocal<SQLiteDatabase> database = new ThreadLocal<SQLiteDatabase>();
-    private final ThreadLocal<Integer> connDepth = new ThreadLocal<Integer>();
     
     protected final AbstractDatabaseHelper databaseHelper;
     protected final CursorFactory cursorFactory = new CursorIterableFactory(this);
@@ -32,55 +31,12 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         Log.d(TAG, "<init>");
     }
     
-    /** To be called from GeneratedDatabaseHelper.getDbConnection only */
-    public final void setDbConnection(SQLiteDatabase dbConnection) {
-        database.set(dbConnection);
-    }
-    
-    public final void clearDbConnection() {
-        database.remove();
-    }
-    
     protected final synchronized SQLiteDatabase getDbConnection() {
-        SQLiteDatabase dbCon = database.get();
-        Integer depth = connDepth.get();
-        
-        if (null == dbCon) {
-            // create new connection
-            dbCon = databaseHelper.getDbConnection();
-            depth = 0;
-            database.set(dbCon);
-        }
-        else {
-            if (null == depth) {
-                depth = 1;
-            }
-        }
-        
-        // increase depth
-        connDepth.set(depth + 1);
-        
-        return dbCon;
+        return databaseHelper.getDbConnection();
     }
     
-    public final synchronized void releaseDbConnection() {
-        Integer depth = connDepth.get();
-
-        // close when depth is back on 0 only
-        if (null == depth || 1 == depth) {
-            final SQLiteDatabase dbCon = database.get();
-            
-            if (null != dbCon) {
-                dbCon.close();
-                database.remove();
-            }
-            
-            connDepth.remove();
-        }
-        else {
-            // decrease depth
-            connDepth.set(depth - 1);
-        }
+    protected final synchronized void releaseDbConnection() {
+        databaseHelper.releaseDbConnection();
     }
 
     public static final <T extends AndroidLongEntity> List<Long> asKeys(List<T> entities) {
@@ -183,6 +139,17 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         deleteWithConnection("_id IN (?)", whereArgs);
     }
     
+    public Collection<T> findByManyToMany(AndroidManyToManyDaoBean m2mDao, 
+            boolean owning, Long foreignId) {
+        final List<AndroidManyToMany> mappings = owning ?
+            m2mDao.findByInverseId(foreignId) : m2mDao.findByOwningId(foreignId);
+        final List<Long> ids = new ArrayList<Long>(mappings.size());
+        for (AndroidManyToMany m : mappings) {
+            ids.add(owning ? m.getOwningId() : m.getInverseId());
+        }
+        return findByPrimaryKeys(ids).values();
+    }
+    
     public T findByPrimaryKey(Long parentKey, Long primaryKey) {
         return findUniqueBy(getPrimaryKeyColumnName(), primaryKey);
     }
@@ -204,12 +171,20 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
 
     @Override
     protected List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Long parentKey, Expression... filters) {
-        getDbConnection();
+        return findBy(this,
+                false, orderBy, ascending, 
+                limit, offset, parentKey, filters);
+    }
+    
+    protected static <R extends AndroidLongEntity> List<R> findBy(AndroidDaoImpl dao,
+            boolean keysOnly, String orderBy, boolean ascending, 
+            int limit, int offset, Long parentKey, Expression... filters) {
+        dao.getDbConnection();
         try {
-            return convert(queryBy(orderBy, ascending, limit, offset, filters));
+            return dao.convert(queryBy(dao, keysOnly, orderBy, ascending, limit, offset, filters));
         }
         finally {
-            releaseDbConnection();
+            dao.releaseDbConnection();
         }
                
     }
@@ -328,11 +303,19 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     protected Cursor queryKeysBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
         return queryBy(true, orderBy, ascending, limit, offset, filters);
     }
-
+    
     private Cursor queryBy(boolean keysOnly, String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
+        return queryBy(this,
+                keysOnly, orderBy, ascending,
+                limit, offset, filters);
+    }
+
+    private static Cursor queryBy(AndroidDaoImpl dao,
+            boolean keysOnly, String orderBy, boolean ascending, 
+            int limit, int offset, Expression... filters) {
         // TODO: 
-        CursorFactory factory = keysOnly ? null : cursorFactory;
-        String[] columns = {getPrimaryKeyColumnName()};
+        CursorFactory factory = keysOnly ? null : dao.cursorFactory;
+        String[] columns = {dao.getPrimaryKeyColumnName()};
         if (!keysOnly) {
             columns = null;
         }
@@ -354,17 +337,17 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         final String orderByClause = null != orderBy ? orderBy + (ascending ? " ASC" : " DESC") : null;
         final String limitClause = 0 < limit ? String.valueOf(limit) + (0 < offset ? "," + offset : "") : null;
         
-        final SQLiteDatabase dbCon = getDbConnection();
+        final SQLiteDatabase dbCon = dao.getDbConnection();
         try {
-            CursorIterable<T> cursor = (CursorIterable<T>) dbCon.queryWithFactory(
-                    factory, true, getTableName(), 
+            CursorIterable cursor = (CursorIterable) dbCon.queryWithFactory(
+                    factory, true, dao.getTableName(), 
                     columns, selection, selectionArgs, 
                     null, null, orderByClause, limitClause);
-            Log.d("queryBy", getTableName() + " WHERE " + selection + " returns " + cursor.getCount());
+            Log.d("queryBy", dao.getTableName() + " WHERE " + selection + " returns " + cursor.getCount());
             return cursor;
         }
         finally {
-            releaseDbConnection();
+            dao.releaseDbConnection();
         }
     }
     

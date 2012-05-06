@@ -17,9 +17,6 @@ import ${entity.className};
  */
 public interface Generated${entity.simpleName}DaoAndroid {
 
-    void setDbConnection(SQLiteDatabase dbConnection);
-    void clearDbConnection();
-
     /**
      * Queries the database and returns a CursorIterable of all ${entity.simpleName}s
      * @return a CursorIterable of all ${entity.simpleName}s

@@ -2,6 +2,7 @@ package ${daoPackage};
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import net.sf.mardao.api.dao.Dao;
@@ -108,7 +109,7 @@ public interface Generated${entity.simpleName}Dao<P extends Serializable, C exte
 	/**
 	 * find-by method for many-to-one field ${field.name}
 	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
-	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
+	 * @return a Collection of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
 	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
 #end	
@@ -123,15 +124,15 @@ public interface Generated${entity.simpleName}Dao<P extends Serializable, C exte
 	 * @param ${field.name} the related ${field.type} entity
 	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
 	 */
-	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+	Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
 	
 #if( $foreign )  
 	/**
 	 * find-by method for many-to-many field ${field.name}
 	 * @param ${foreign.pk.type} the related ${field.type} entity's primary key
-	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
+	 * @return a Collection of ${entity.simpleName}s belonging to the many-to-many relation
 	 */
-	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
+	Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
 #end	
 	
 #end	

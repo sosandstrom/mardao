@@ -37,6 +37,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
     private final Map<String, Group>  packages    = new HashMap<String, Group>();
     private final Map<String, Entity> entities    = new HashMap<String, Entity>();
     private final Map<File, Entity>   entityFiles = new TreeMap<File, Entity>();
+    private final Map<String, Field> inverseFields = new HashMap<String, Field>();
 
     /**
      * Calls super.execute(), then process the configured classpaths
@@ -61,7 +62,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
         return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
 
-    public static List<Entity> getEntitiesResolved(Map<String, Entity> entities) {
+    public List<Entity> getEntitiesResolved(Map<String, Entity> entities) {
         List<Entity> resolved = new ArrayList<Entity>();
         List<Entity> remaining = new ArrayList<Entity>(entities.values());
         for(Entity e : entities.values()) {
@@ -71,7 +72,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
         return resolved;
     }
 
-    private static void resolveEntity(List<Entity> resolved, Entity e, List<Entity> remaining) {
+    private void resolveEntity(List<Entity> resolved, Entity e, List<Entity> remaining) {
         System.out.println("resolveEntity " + e.getSimpleName() + " " + remaining.contains(e));
         // only process if remaining
         if (remaining.contains(e)) {
@@ -123,6 +124,16 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
             e.setAncestors(ancestors);
             e.setParents(parents);
 
+            // populate owner-inverse-map
+            String key;
+            for (Field m2m : e.getManyToManys()) {
+                if (null != m2m.getMappedBy()) {
+                    key = String.format("%s.%s", m2m.getEntity().getSimpleName(), m2m.getMappedBy());
+                    System.out.println("  m2m " + key + "->" + m2m);
+                    inverseFields.put(key,
+                            m2m);
+                }
+            }
         }
     }
 
@@ -158,6 +169,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
     private void mergePackages() {
         vc.put("packages", packages);
         vc.put("entities", entities);
+        vc.put("inverseFields", inverseFields);
 
         for(Group p : packages.values()) {
 

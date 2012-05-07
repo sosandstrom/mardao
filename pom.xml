@@ -1,27 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>parent</artifactId>
 	<version>1.23-SNAPSHOT</version>
-	
+
 	<packaging>pom</packaging>
-	
+
 	<name>${project.groupId}:${project.artifactId}</name>
 	<url>http://mardao.sourceforge.net</url>
 
 	<modules>
 		<module>mardao-maven-plugin</module>
-		<module>basic-plugin-test</module>
 		<module>mardao-api</module>
 		<module>mardao-aed</module>
 		<module>mardao-android</module>
 		<module>mardao-jdbc</module>
-		<module>aed-plugin-test</module>
-		<!-- <module>jdbc-plugin-test</module> <module>jpa-plugin-test</module> 
-			<module>gae-plugin-test</module> -->
 	</modules>
+
+	<profiles>
+		<profile>
+			<id>mysql</id>
+			<modules>
+				<module>basic-plugin-test</module>
+				<module>aed-plugin-test</module>
+				<module>jdbc-plugin-test</module>
+				<module>jpa-plugin-test</module>
+				<module>gae-plugin-test</module>
+			</modules>
+		</profile>
+	</profiles>
 
 	<properties>
 		<spring.version>3.0.2.RELEASE</spring.version>
@@ -36,7 +48,7 @@
 				<version>3.8.1</version>
 				<scope>test</scope>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>log4j</groupId>
 				<artifactId>log4j</artifactId>
@@ -51,7 +63,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-                                <version>2.2.2</version>
+				<version>2.2.2</version>
 				<configuration>
 					<preparationGoals>clean install</preparationGoals>
 				</configuration>
@@ -96,13 +108,13 @@
 			<organizationUrl>http://www.goldengekko.com</organizationUrl>
 			<timezone>7</timezone>
 		</developer>
-		
+
 		<developer>
 			<id>ivargrimstad</id>
 			<email>ivar.grimstad@gmail.com</email>
 			<timezone>1</timezone>
 		</developer>
-		
+
 		<developer>
 			<id>alex-richards</id>
 			<timezone>7</timezone>

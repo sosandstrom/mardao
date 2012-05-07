@@ -1,5 +1,7 @@
 package ${daoPackage};
 
+import java.util.Colletion;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -23,6 +25,12 @@ public interface Generated${entity.simpleName}DaoAndroid {
      */
     CursorIterable<${entity.simpleName}> queryAll();
 	
+    /**
+	 * @return a CursorIterable of ${entity.simpleName}s
+	 * @since 1.24
+	 */
+    CursorIterable<${entity.simpleName}> queryByPrimaryKeys(Collection<Long> primaryKeys);
+		
     // ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
 

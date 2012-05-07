@@ -1,6 +1,6 @@
 package ${daoPackage};
 
-import java.util.Colletion;
+import java.util.Collection;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;

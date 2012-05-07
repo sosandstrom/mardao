@@ -1,115 +1,120 @@
 package net.sf.mardao.api.dao;
 
-import android.database.Cursor;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import android.database.sqlite.SQLiteDatabase;
-
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
-import android.database.sqlite.SQLiteException;
-import android.util.Log;
-import java.util.*;
 import net.sf.mardao.api.domain.AndroidLongEntity;
 import net.sf.mardao.api.domain.AndroidPrimaryKeyEntity;
 import net.sf.mardao.api.domain.CreatedUpdatedEntity;
 import net.sf.mardao.manytomany.dao.AndroidManyToManyDaoBean;
 import net.sf.mardao.manytomany.domain.AndroidManyToMany;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteException;
+import android.util.Log;
 
-public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
-        DaoImpl<T, Long, Long, AndroidEntity, Long> {
-    protected final String TAG = getClass().getSimpleName();
-    
+public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImpl<T, Long, Long, AndroidEntity, Long> {
+    protected final String                 TAG           = getClass().getSimpleName();
+
     protected final AbstractDatabaseHelper databaseHelper;
-    protected final CursorFactory cursorFactory = new CursorIterableFactory(this);
+    protected final CursorFactory          cursorFactory = new CursorIterableFactory(this);
 
-    protected AndroidDaoImpl(Class<T> type, AbstractDatabaseHelper helper) {
+    protected AndroidDaoImpl(final Class<T> type, final AbstractDatabaseHelper helper) {
         super(type);
         this.databaseHelper = helper;
         Log.d(TAG, "<init>");
     }
-    
+
     protected final synchronized SQLiteDatabase getDbConnection() {
         return databaseHelper.getDbConnection();
     }
-    
+
     protected final synchronized void releaseDbConnection() {
         databaseHelper.releaseDbConnection();
     }
 
-    public static final <T extends AndroidLongEntity> List<Long> asKeys(List<T> entities) {
+    public static final <T extends AndroidLongEntity> List<Long> asKeys(final List<T> entities) {
         final List<Long> keys = new ArrayList<Long>(entities.size());
-        
+
         for (T e : entities) {
             keys.add(e.getSimpleKey());
         }
-        
+
         return keys;
-    }    
-    
+    }
+
     @Override
-    protected Long convert(Long key) {
+    protected Long convert(final Long key) {
         return key;
     }
-    
-    protected List<T> convert(CursorIterable<T> cursor) {
+
+    protected List<T> convert(final CursorIterable<T> cursor) {
         final List<T> returnValue = new ArrayList<T>();
 
         for (T domain : cursor) {
             returnValue.add(domain);
         }
-        
+
         return returnValue;
-        
+
     }
 
-    protected List<Long> convert(Cursor cursor) {
+    protected List<Long> convert(final Cursor cursor) {
         final List<Long> returnValue = new ArrayList<Long>();
 
-        for ( ; !cursor.isAfterLast(); cursor.moveToNext()) {
+        for (; !cursor.isAfterLast(); cursor.moveToNext()) {
             returnValue.add(cursor.getLong(0));
         }
-        
+
         return returnValue;
-        
+
     }
 
-    protected static final void convertCreatedUpdatedDates(AndroidEntity from, AndroidPrimaryKeyEntity domain) {
+    protected static final void convertCreatedUpdatedDates(final AndroidEntity from, final AndroidPrimaryKeyEntity domain) {
         if (null != domain._getNameCreatedDate()) {
-            domain._setCreatedDate(new Date((Long)from.getProperty(domain._getNameCreatedDate())));
+            domain._setCreatedDate(new Date((Long) from.getProperty(domain._getNameCreatedDate())));
         }
 
         if (null != domain._getNameUpdatedDate()) {
-            domain._setUpdatedDate(new Date((Long)from.getProperty(domain._getNameUpdatedDate())));
+            domain._setUpdatedDate(new Date((Long) from.getProperty(domain._getNameUpdatedDate())));
         }
     }
-    
+
     protected abstract T createDomain(Cursor cursor);
 
-    protected AndroidEntity createEntity(Long primaryKey) {
+    @Override
+    protected AndroidEntity createEntity(final Long primaryKey) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    protected Expression createEqualsFilter(String fieldName, Object param) {
+    protected Expression createEqualsFilter(final String fieldName, final Object param) {
         return new Expression(fieldName, "=?", param);
     }
 
-    public Long createKey(Long parentKey, Long simpleKey) {
+    protected Expression createInFilter(final String fieldName, final Object param) {
+        return new Expression(fieldName, "IN (?)", param);
+    }
+
+    public Long createKey(final Long parentKey, final Long simpleKey) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    protected Long createKey(T entity) {
+    @Override
+    protected Long createKey(final T entity) {
         return entity.getSimpleKey();
     }
 
     public final int deleteAll() {
         return deleteWithConnection("1", null);
     }
-    
-    private final int deleteWithConnection(String whereClause, String whereArgs[]) {
+
+    private final int deleteWithConnection(final String whereClause, final String whereArgs[]) {
         final SQLiteDatabase dbCon = getDbConnection();
         try {
             return dbCon.delete(getTableName(), whereClause, whereArgs);
@@ -120,16 +125,16 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
 
     @Override
-    public void deleteByCore(Long primaryKey) {
+    public void deleteByCore(final Long primaryKey) {
         final String whereArgs[] = {primaryKey.toString()};
         Log.d(TAG, "delete " + getTableName() + " WHERE _id = " + primaryKey.toString());
         deleteWithConnection("_id = ?", whereArgs);
     }
 
-    public void deleteByCore(Iterable<Long> primaryKeys) {
+    public void deleteByCore(final Iterable<Long> primaryKeys) {
         StringBuffer sb = new StringBuffer();
         Long id;
-        for (Iterator<Long> i = primaryKeys.iterator(); i.hasNext(); ) {
+        for (Iterator<Long> i = primaryKeys.iterator(); i.hasNext();) {
             id = i.next();
             sb.append(id);
             sb.append(i.hasNext() ? "," : "");
@@ -138,23 +143,21 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         final String whereArgs[] = {sb.toString()};
         deleteWithConnection("_id IN (?)", whereArgs);
     }
-    
-    public Collection<T> findByManyToMany(AndroidManyToManyDaoBean m2mDao, 
-            boolean owning, Long foreignId) {
-        final List<AndroidManyToMany> mappings = owning ?
-            m2mDao.findByInverseId(foreignId) : m2mDao.findByOwningId(foreignId);
+
+    public Collection<T> findByManyToMany(final AndroidManyToManyDaoBean m2mDao, final boolean owning, final Long foreignId) {
+        final List<AndroidManyToMany> mappings = owning ? m2mDao.findByInverseId(foreignId) : m2mDao.findByOwningId(foreignId);
         final List<Long> ids = new ArrayList<Long>(mappings.size());
         for (AndroidManyToMany m : mappings) {
             ids.add(owning ? m.getOwningId() : m.getInverseId());
         }
         return findByPrimaryKeys(ids).values();
     }
-    
-    public T findByPrimaryKey(Long parentKey, Long primaryKey) {
+
+    public T findByPrimaryKey(final Long parentKey, final Long primaryKey) {
         return findUniqueBy(getPrimaryKeyColumnName(), primaryKey);
     }
 
-    public Map<Long, T> findByPrimaryKeys(Long parentKey, Iterable<Long> primaryKeys) {
+    public Map<Long, T> findByPrimaryKeys(final Long parentKey, final Iterable<Long> primaryKeys) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -164,21 +167,20 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
 
     @Override
-    protected T findBy(Expression... filters) {
+    protected T findBy(final Expression... filters) {
         List<T> list = findBy(null, false, 1, 0, filters);
         return list.isEmpty() ? null : list.get(0);
     }
 
     @Override
-    protected List<T> findBy(String orderBy, boolean ascending, int limit, int offset, Long parentKey, Expression... filters) {
-        return findBy(this,
-                false, orderBy, ascending, 
-                limit, offset, parentKey, filters);
+    protected List<T> findBy(final String orderBy, final boolean ascending, final int limit, final int offset,
+            final Long parentKey, final Expression... filters) {
+        return findBy(this, false, orderBy, ascending, limit, offset, parentKey, filters);
     }
-    
-    protected static <R extends AndroidLongEntity> List<R> findBy(AndroidDaoImpl dao,
-            boolean keysOnly, String orderBy, boolean ascending, 
-            int limit, int offset, Long parentKey, Expression... filters) {
+
+    protected static <R extends AndroidLongEntity> List<R> findBy(final AndroidDaoImpl dao, final boolean keysOnly,
+            final String orderBy, final boolean ascending, final int limit, final int offset, final Long parentKey,
+            final Expression... filters) {
         dao.getDbConnection();
         try {
             return dao.convert(queryBy(dao, keysOnly, orderBy, ascending, limit, offset, filters));
@@ -186,38 +188,39 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
         finally {
             dao.releaseDbConnection();
         }
-               
+
     }
 
     @Override
-    protected List<T> findBy(Map<String, Object> filters, String primaryOrderBy, boolean primaryDirection,
-            String secondaryOrderBy, boolean secondaryDirection, int limit, int offset) {
+    protected List<T> findBy(final Map<String, Object> filters, final String primaryOrderBy, final boolean primaryDirection,
+            final String secondaryOrderBy, final boolean secondaryDirection, final int limit, final int offset) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    protected List<Long> findCoreKeysByParent(Long parentKey) {
+    protected List<Long> findCoreKeysByParent(final Long parentKey) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    protected List<Long> findKeysBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
+    protected List<Long> findKeysBy(final String orderBy, final boolean ascending, final int limit, final int offset,
+            final Expression... filters) {
         Cursor cursor = queryKeysBy(orderBy, ascending, limit, offset, filters);
         return convert(cursor);
     }
 
     @Override
-    protected List<Long> findKeysByParent(Long parentKey) {
+    protected List<Long> findKeysByParent(final Long parentKey) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public List<Long> persist(Iterable<T> domains) {
+    public List<Long> persist(final Iterable<T> domains) {
         Log.d(TAG, "persist(Iterable)");
         final List<Long> ids = new ArrayList<Long>();
         Long id;
-        for(T domain : domains) {
+        for (T domain : domains) {
             id = persist(domain);
             ids.add(id);
         }
@@ -225,15 +228,15 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
 
     @Override
-    public Long persist(T domain) {
+    public Long persist(final T domain) {
         final AndroidEntity entity = createEntity(domain);
         final Long id = persistEntity(entity);
         persistUpdateKeys(domain, id);
         return id;
     }
-    
+
     @Override
-    protected Long persistEntity(AndroidEntity entity) {
+    protected Long persistEntity(final AndroidEntity entity) {
         Long id = -1L;
         final SQLiteDatabase dbCon = getDbConnection();
         try {
@@ -250,7 +253,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
 
     @Override
-    protected final void persistUpdateDates(CreatedUpdatedEntity domain, AndroidEntity entity, Date date) {
+    protected final void persistUpdateDates(final CreatedUpdatedEntity domain, final AndroidEntity entity, final Date date) {
 
         // populate createdDate
         String propertyName = domain._getNameCreatedDate();
@@ -274,46 +277,50 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
     }
 
     @Override
-    protected void persistUpdateKeys(T domain, Long key) {
+    protected void persistUpdateKeys(final T domain, final Long key) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    protected void populate(AndroidEntity entity, String name, Object value) {
+    protected void populate(final AndroidEntity entity, final String name, final Object value) {
         if (null != entity && null != name) {
             entity.setProperty(name, value);
         }
     }
-    
+
     public CursorIterable<T> queryAll() {
         return queryBy(null, false, -1, 0);
     }
-    
-    protected CursorIterable<T> queryBy(String columnName, Object value) {
-        return queryBy(null, false, -1, 0, createEqualsFilter(columnName, value));
-    }    
 
-    protected CursorIterable<T> queryBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
+    public CursorIterable<T> queryByPrimaryKeys(final Collection<Long> primaryKeys) {
+        return queryBy(null, false, -1, 0, createInFilter(getPrimaryKeyColumnName(), primaryKeys));
+    }
+
+    protected CursorIterable<T> queryBy(final String columnName, final Object value) {
+        return queryBy(null, false, -1, 0, createEqualsFilter(columnName, value));
+    }
+
+    protected CursorIterable<T> queryBy(final String orderBy, final boolean ascending, final int limit, final int offset,
+            final Expression... filters) {
         return (CursorIterable<T>) queryBy(false, orderBy, ascending, limit, offset, filters);
     }
-    
-    protected Cursor queryKeysBy(String columnName, Object value) {
+
+    protected Cursor queryKeysBy(final String columnName, final Object value) {
         return queryKeysBy(null, false, -1, 0, createEqualsFilter(columnName, value));
     }
 
-    protected Cursor queryKeysBy(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
+    protected Cursor queryKeysBy(final String orderBy, final boolean ascending, final int limit, final int offset,
+            final Expression... filters) {
         return queryBy(true, orderBy, ascending, limit, offset, filters);
     }
-    
-    private Cursor queryBy(boolean keysOnly, String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
-        return queryBy(this,
-                keysOnly, orderBy, ascending,
-                limit, offset, filters);
+
+    private Cursor queryBy(final boolean keysOnly, final String orderBy, final boolean ascending, final int limit,
+            final int offset, final Expression... filters) {
+        return queryBy(this, keysOnly, orderBy, ascending, limit, offset, filters);
     }
 
-    private static Cursor queryBy(AndroidDaoImpl dao,
-            boolean keysOnly, String orderBy, boolean ascending, 
-            int limit, int offset, Expression... filters) {
-        // TODO: 
+    private static Cursor queryBy(final AndroidDaoImpl dao, final boolean keysOnly, final String orderBy,
+            final boolean ascending, final int limit, final int offset, final Expression... filters) {
+        // TODO:
         CursorFactory factory = keysOnly ? null : dao.cursorFactory;
         String[] columns = {dao.getPrimaryKeyColumnName()};
         if (!keysOnly) {
@@ -330,19 +337,17 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
             sb.append(filter.getOperation());
             // included in operation to support IN better
             // sb.append("?");
-            sArgs.add(String.valueOf(filter.getOperand()));
+            sArgs.add(buildOperand(filter.getOperand()));
             selection = sb.toString();
         }
         final String[] selectionArgs = sArgs.isEmpty() ? null : sArgs.toArray(new String[0]);
         final String orderByClause = null != orderBy ? orderBy + (ascending ? " ASC" : " DESC") : null;
         final String limitClause = 0 < limit ? String.valueOf(limit) + (0 < offset ? "," + offset : "") : null;
-        
+
         final SQLiteDatabase dbCon = dao.getDbConnection();
         try {
-            CursorIterable cursor = (CursorIterable) dbCon.queryWithFactory(
-                    factory, true, dao.getTableName(), 
-                    columns, selection, selectionArgs, 
-                    null, null, orderByClause, limitClause);
+            CursorIterable cursor = (CursorIterable) dbCon.queryWithFactory(factory, true, dao.getTableName(), columns,
+                    selection, selectionArgs, null, null, orderByClause, limitClause);
             Log.d("queryBy", dao.getTableName() + " WHERE " + selection + " returns " + cursor.getCount());
             return cursor;
         }
@@ -350,18 +355,38 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends
             dao.releaseDbConnection();
         }
     }
-    
-    protected List<Long> updateByCore(Iterable<AndroidEntity> entities) {
+
+    private static String buildOperand(final Object operand) {
+        if (operand instanceof Boolean) {
+            return Boolean.TRUE.equals(operand) ? "1" : "0";
+        }
+        else if (operand instanceof Collection<?>) {
+            StringBuilder builder = new StringBuilder();
+            for (Object object : (Collection<?>) operand) {
+                if (builder.length() > 0) {
+                    builder.append(',');
+                }
+                builder.append(buildOperand(object));
+            }
+            return builder.toString();
+        }
+        else {
+            return String.valueOf(operand);
+        }
+    }
+
+    @Override
+    protected List<Long> updateByCore(final Iterable<AndroidEntity> entities) {
         final List<Long> ids = new ArrayList<Long>();
-        
+
         for (AndroidEntity entity : entities) {
             ids.add(updateByCore(entity));
         }
-        
+
         return ids;
     }
 
-    protected Long updateByCore(AndroidEntity entity) {
+    protected Long updateByCore(final AndroidEntity entity) {
         final SQLiteDatabase dbCon = getDbConnection();
         Long id = -1L;
         try {

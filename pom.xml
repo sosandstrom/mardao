@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>net.sf.mardao</groupId>
 	<artifactId>parent</artifactId>
-	<version>1.23-SNAPSHOT</version>
+	<version>1.23</version>
 
 	<packaging>pom</packaging>
 
@@ -94,9 +91,9 @@
 	</distributionManagement>
 
 	<scm>
-		<connection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/trunk</connection>
-		<developerConnection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/trunk</developerConnection>
-		<url>http://mardao.svn.sourceforge.net/viewvc/mardao/trunk</url>
+		<connection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/tags/parent-1.23</connection>
+		<developerConnection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/tags/parent-1.23</developerConnection>
+		<url>http://mardao.svn.sourceforge.net/viewvc/mardao/tags/parent-1.23</url>
 	</scm>
 
 	<developers>

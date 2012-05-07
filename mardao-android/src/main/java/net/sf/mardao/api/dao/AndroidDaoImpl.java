@@ -183,7 +183,11 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
             final Expression... filters) {
         dao.getDbConnection();
         try {
-            return dao.convert(queryBy(dao, keysOnly, orderBy, ascending, limit, offset, filters));
+            CursorIterable<AndroidLongEntity> cursor = (CursorIterable<AndroidLongEntity>) queryBy(dao, keysOnly, orderBy,
+                    ascending, limit, offset, filters);
+            List<R> r = dao.convert(cursor);
+            cursor.close();
+            return r;
         }
         finally {
             dao.releaseDbConnection();

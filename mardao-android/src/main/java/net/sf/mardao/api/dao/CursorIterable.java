@@ -19,10 +19,10 @@ import android.database.sqlite.SQLiteQuery;
  */
 public class CursorIterable<T extends AndroidLongEntity> extends SQLiteCursor implements Iterable<T> {
 
-    private boolean        iterating   = false;
-    private boolean        inIteration = false;
+    private boolean           iterating   = false;
+    private boolean           inIteration = false;
 
-    private AndroidDaoImpl dao;
+    private AndroidDaoImpl<T> dao;
 
     public CursorIterable(final SQLiteDatabase db, final SQLiteCursorDriver driver, final String editTable,
             final SQLiteQuery query) {
@@ -30,19 +30,19 @@ public class CursorIterable<T extends AndroidLongEntity> extends SQLiteCursor im
     }
 
     public CursorIterable(final SQLiteDatabase db, final SQLiteCursorDriver driver, final String editTable,
-            final SQLiteQuery query, final AndroidDaoImpl dao) {
+            final SQLiteQuery query, final AndroidDaoImpl<T> dao) {
         super(db, driver, editTable, query);
         this.dao = dao;
     }
 
     public Iterator<T> iterator() {
-        iterating = true;
         moveToFirst();
+        iterating = true;
         return new CursorIterator();
     }
 
     @Override
-    public boolean onMove(final int oldPosition, final int newPosition) {
+    public synchronized boolean onMove(final int oldPosition, final int newPosition) {
         if (inIteration) {
             if (!iterating) {
                 throw new ConcurrentModificationException();
@@ -62,12 +62,12 @@ public class CursorIterable<T extends AndroidLongEntity> extends SQLiteCursor im
             return !isAfterLast();
         }
 
-        public T next() {
+        public synchronized T next() {
             // use cursor, create domain object, move to next
             if (isAfterLast()) {
                 return null;
             }
-            T domain = (T) dao.createDomain(CursorIterable.this);
+            T domain = dao.createDomain(CursorIterable.this);
             inIteration = true;
             moveToNext();
             inIteration = false;

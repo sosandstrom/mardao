@@ -22,7 +22,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
     protected final String                 TAG           = getClass().getSimpleName();
 
     protected final AbstractDatabaseHelper databaseHelper;
-    protected final CursorFactory          cursorFactory = new CursorIterableFactory(this);
+    protected final CursorFactory          cursorFactory = new CursorIterableFactory<T>(this);
 
     protected AndroidDaoImpl(final Class<T> type, final AbstractDatabaseHelper helper) {
         super(type);
@@ -78,7 +78,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
 
     }
 
-    protected static final void convertCreatedUpdatedDates(final AndroidEntity from, final AndroidPrimaryKeyEntity domain) {
+    protected static final void convertCreatedUpdatedDates(final AndroidEntity from, final AndroidPrimaryKeyEntity<Long> domain) {
         String nameCreatedDate = domain._getNameCreatedDate();
         if (null != nameCreatedDate) {
             Long createdDate = (Long) from.getProperty(nameCreatedDate);
@@ -105,11 +105,11 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
 
     @Override
     protected Expression createEqualsFilter(final String fieldName, final Object param) {
-        return new Expression(fieldName, "=?", param);
+        return new Expression(fieldName, " = ? ", param);
     }
 
     protected Expression createInFilter(final String fieldName, final Object param) {
-        return new Expression(fieldName, "IN (?)", param);
+        return new Expression(fieldName, " IN (?) ", param);
     }
 
     public Long createKey(final Long parentKey, final Long simpleKey) {
@@ -186,17 +186,16 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
     @Override
     protected List<T> findBy(final String orderBy, final boolean ascending, final int limit, final int offset,
             final Long parentKey, final Expression... filters) {
-        return findBy(this, false, orderBy, ascending, limit, offset, parentKey, filters);
+        return findBy(this, orderBy, ascending, limit, offset, parentKey, filters);
     }
 
-    protected static <R extends AndroidLongEntity> List<R> findBy(final AndroidDaoImpl dao, final boolean keysOnly,
-            final String orderBy, final boolean ascending, final int limit, final int offset, final Long parentKey,
-            final Expression... filters) {
+    protected static <T extends AndroidLongEntity> List<T> findBy(final AndroidDaoImpl<T> dao, final String orderBy,
+            final boolean ascending, final int limit, final int offset, final Long parentKey, final Expression... filters) {
         dao.getDbConnection();
         try {
-            CursorIterable<AndroidLongEntity> cursor = (CursorIterable<AndroidLongEntity>) queryBy(dao, keysOnly, orderBy,
-                    ascending, limit, offset, filters);
-            List<R> list = dao.convert(cursor);
+            @SuppressWarnings("unchecked")
+            CursorIterable<T> cursor = (CursorIterable<T>) queryBy(dao, false, orderBy, ascending, limit, offset, filters);
+            List<T> list = dao.convert(cursor);
             cursor.close();
             return list;
         }

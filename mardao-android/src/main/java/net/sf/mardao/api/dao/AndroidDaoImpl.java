@@ -17,9 +17,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
+import java.util.*;
 
 public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImpl<T, Long, Long, AndroidEntity, Long> {
     protected final String                 TAG           = getClass().getSimpleName();
+    protected static final String OPERATION_IN = " IN (%s)";
 
     protected final AbstractDatabaseHelper databaseHelper;
     protected final CursorFactory          cursorFactory = new CursorIterableFactory<T>(this);
@@ -51,6 +53,17 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
     @Override
     protected Long convert(final Long key) {
         return key;
+    }
+
+    protected Map<Long, T> convertToMap(final CursorIterable<T> cursor) {
+        final Map<Long, T> returnValue = new TreeMap<Long,T>();
+
+        for (T domain : cursor) {
+            returnValue.put(domain.getSimpleKey(), domain);
+        }
+
+        return returnValue;
+
     }
 
     protected List<T> convert(final CursorIterable<T> cursor) {
@@ -109,7 +122,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
     }
 
     protected Expression createInFilter(final String fieldName, final Object param) {
-        return new Expression(fieldName, " IN (?) ", param);
+        return new Expression(fieldName, OPERATION_IN, param);
     }
 
     public Long createKey(final Long parentKey, final Long simpleKey) {
@@ -158,19 +171,30 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
     public Collection<T> findByManyToMany(final AndroidManyToManyDaoBean m2mDao, final boolean owning, final Long foreignId) {
         final List<AndroidManyToMany> mappings = owning ? m2mDao.findByInverseId(foreignId) : m2mDao.findByOwningId(foreignId);
         final List<Long> ids = new ArrayList<Long>(mappings.size());
+        Long id;
         for (AndroidManyToMany m : mappings) {
-            ids.add(owning ? m.getOwningId() : m.getInverseId());
+            id = owning ? m.getOwningId() : m.getInverseId();
+//            Log.d("findByManyToMany", "owning=" + owning + ", " + m);
+            ids.add(id);
         }
-        return findByPrimaryKeys(ids).values();
+        return findByPrimaryKeys(null, ids).values();
     }
 
     public T findByPrimaryKey(final Long parentKey, final Long primaryKey) {
         return findUniqueBy(getPrimaryKeyColumnName(), primaryKey);
     }
 
-    public Map<Long, T> findByPrimaryKeys(final Long parentKey, final Iterable<Long> primaryKeys) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Map<Long, T> findByPrimaryKeys(Long parentKey, final Iterable<Long> primaryKeys) {
+        getDbConnection();
+        try {
+            CursorIterable<T> cursor = (CursorIterable<T>) queryByPrimaryKeys(primaryKeys);
+            Map<Long, T> list = convertToMap(cursor);
+            cursor.close();
+            return list;
+        }
+        finally {
+            releaseDbConnection();
+        }
     }
 
     public List<Long> findAllKeys() {
@@ -256,6 +280,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
         Long id = -1L;
         final SQLiteDatabase dbCon = getDbConnection();
         try {
+            Log.d(TAG, "persistEntity " + getTableName() + " " + entity);
             id = dbCon.insertOrThrow(getTableName(), null, entity.getContentValues());
         }
         catch (SQLiteException e) {
@@ -307,7 +332,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
         return queryBy(null, false, -1, 0);
     }
 
-    public CursorIterable<T> queryByPrimaryKeys(final Collection<Long> primaryKeys) {
+    public CursorIterable<T> queryByPrimaryKeys(final Iterable<Long> primaryKeys) {
         return queryBy(null, false, -1, 0, createInFilter(getPrimaryKeyColumnName(), primaryKeys));
     }
 
@@ -343,6 +368,8 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
             columns = null;
         }
         String selection = null;
+        Object operation;
+        String operand;
         StringBuffer sb = new StringBuffer();
         ArrayList<String> sArgs = new ArrayList<String>();
         for (Expression filter : filters) {
@@ -350,10 +377,16 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
                 sb.append(" AND ");
             }
             sb.append(filter.getColumn());
-            sb.append(filter.getOperation());
-            // included in operation to support IN better
-            // sb.append("?");
-            sArgs.add(buildOperand(filter.getOperand()));
+            
+            operand = buildOperand(filter.getOperand());
+            if (OPERATION_IN.equals(filter.getOperation())) {
+                operation = String.format(OPERATION_IN, operand);
+            }
+            else {
+                operation = filter.getOperation();
+                sArgs.add(operand);
+            }
+            sb.append(operation);
             selection = sb.toString();
         }
         final String[] selectionArgs = sArgs.isEmpty() ? null : sArgs.toArray(new String[sArgs.size()]);
@@ -364,6 +397,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
         try {
             Cursor cursor = dbCon.queryWithFactory(factory, true, dao.getTableName(), columns, selection, selectionArgs, null,
                     null, orderByClause, limitClause);
+            Log.d("queryBy", "sArgs=" + sArgs);
             Log.d("queryBy", dao.getTableName() + " WHERE " + selection + " returns " + cursor.getCount());
             return cursor;
         }
@@ -384,7 +418,9 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
                 }
                 builder.append(buildOperand(object));
             }
-            return builder.toString();
+            final String returnValue = builder.toString();
+//            Log.d("buildOperand", returnValue);
+            return returnValue;
         }
         else {
             return String.valueOf(operand);
@@ -408,6 +444,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
         try {
             id = entity.getContentValues().getAsLong(getPrimaryKeyColumnName());
             String whereArgs[] = {id.toString()};
+            Log.d(TAG, "updateByCore " + getTableName() + " "+ entity);
             dbCon.update(getTableName(), entity.getContentValues(), "_id = ?", whereArgs);
         }
         catch (SQLiteException e2) {

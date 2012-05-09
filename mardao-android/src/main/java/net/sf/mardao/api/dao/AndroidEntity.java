@@ -56,4 +56,11 @@ public class AndroidEntity implements Serializable {
     public Object getProperty(String name) {
         return contentValues.get(name);
     }
+
+    @Override
+    public String toString() {
+        return contentValues.toString();
+    }
+    
+    
 }

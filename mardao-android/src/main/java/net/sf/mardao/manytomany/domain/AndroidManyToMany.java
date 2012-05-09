@@ -47,5 +47,11 @@ public class AndroidManyToMany extends AndroidLongEntity {
     public void setOwningId(Long owningId) {
         this.owningId = owningId;
     }
+
+    @Override
+    protected String attrToString() {
+        return String.format("owningId:%d, inverseId:%d", owningId, inverseId);
+    }
+    
     
 }

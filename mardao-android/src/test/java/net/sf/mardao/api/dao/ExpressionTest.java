@@ -19,12 +19,12 @@ public class ExpressionTest {
 
     private AndroidDaoImpl<AndroidLongEntity> daoImpl;
 
-    @Test
-    public void testIn() throws Exception {
-        Expression inFilter = daoImpl.createInFilter("test", 12);
-        String expressionString = new StringBuilder().append(inFilter.getColumn()).append(inFilter.getOperation()).toString();
-        assertTrue(Pattern.matches("^\\s?\\w+\\sIN\\s?\\([\\w\\?]?\\)\\s?$", expressionString));
-    }
+//    @Test
+//    public void testIn() throws Exception {
+//        Expression inFilter = daoImpl.createInFilter("test", 12);
+//        String expressionString = new StringBuilder().append(inFilter.getColumn()).append(inFilter.getOperation()).toString();
+//        assertTrue(Pattern.matches("^\\s?\\w+\\sIN\\s?\\([\\w\\?]?\\)\\s?$", expressionString));
+//    }
 
     @Test
     public void testEquals() throws Exception {

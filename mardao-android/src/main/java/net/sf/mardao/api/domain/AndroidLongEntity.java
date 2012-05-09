@@ -20,4 +20,14 @@ public abstract class AndroidLongEntity extends AndroidCreatedUpdatedEntity<Long
         return Long.class;
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s{_id:%d, updated:%d, %s}", getClass().getSimpleName(),
+                getSimpleKey(), getUpdatedDate(), attrToString());
+    }
+
+    /** Override to add attributes to toString */
+    protected String attrToString() {
+        return "";
+    }
 }

@@ -4,36 +4,57 @@
  */
 package net.sf.mardao.api.dao;
 
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+
+import net.sf.mardao.api.domain.AndroidLongEntity;
 import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteCursorDriver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQuery;
-import java.util.Iterator;
-import net.sf.mardao.api.domain.AndroidLongEntity;
 
 /**
- *
+ * 
  * @author os
  */
 public class CursorIterable<T extends AndroidLongEntity> extends SQLiteCursor implements Iterable<T> {
 
+    private boolean        iterating   = false;
+    private boolean        inIteration = false;
+
     private AndroidDaoImpl dao;
-    
-    public CursorIterable(SQLiteDatabase db, SQLiteCursorDriver driver, String editTable, SQLiteQuery query) {
+
+    public CursorIterable(final SQLiteDatabase db, final SQLiteCursorDriver driver, final String editTable,
+            final SQLiteQuery query) {
         super(db, driver, editTable, query);
     }
-    
-    public CursorIterable(SQLiteDatabase db, SQLiteCursorDriver driver, String editTable, SQLiteQuery query, AndroidDaoImpl dao) {
+
+    public CursorIterable(final SQLiteDatabase db, final SQLiteCursorDriver driver, final String editTable,
+            final SQLiteQuery query, final AndroidDaoImpl dao) {
         super(db, driver, editTable, query);
         this.dao = dao;
     }
-    
+
     public Iterator<T> iterator() {
+        iterating = true;
         moveToFirst();
-        return new CursorIterator<T>();
+        return new CursorIterator();
     }
 
-    private class CursorIterator<T extends AndroidLongEntity> implements Iterator<T> {
+    @Override
+    public boolean onMove(final int oldPosition, final int newPosition) {
+        if (inIteration) {
+            if (!iterating) {
+                throw new ConcurrentModificationException();
+            }
+        }
+        else {
+            iterating = false;
+        }
+        return super.onMove(oldPosition, newPosition);
+    }
+
+    private class CursorIterator implements Iterator<T> {
         public CursorIterator() {
         }
 
@@ -51,7 +72,9 @@ public class CursorIterable<T extends AndroidLongEntity> extends SQLiteCursor im
                 return null;
             }
             T domain = (T) dao.createDomain(CursorIterable.this);
+            inIteration = true;
             moveToNext();
+            inIteration = false;
             return domain;
         }
 
@@ -59,5 +82,4 @@ public class CursorIterable<T extends AndroidLongEntity> extends SQLiteCursor im
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }
-    
 }

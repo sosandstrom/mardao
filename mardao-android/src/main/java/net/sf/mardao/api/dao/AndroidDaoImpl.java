@@ -67,8 +67,11 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
     protected List<Long> convert(final Cursor cursor) {
         final List<Long> returnValue = new ArrayList<Long>();
 
-        for (; !cursor.isAfterLast(); cursor.moveToNext()) {
-            returnValue.add(cursor.getLong(0));
+        if (cursor.moveToFirst()) {
+            do {
+                returnValue.add(cursor.getLong(0));
+            }
+            while (cursor.moveToNext());
         }
 
         return returnValue;
@@ -76,12 +79,20 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
     }
 
     protected static final void convertCreatedUpdatedDates(final AndroidEntity from, final AndroidPrimaryKeyEntity domain) {
-        if (null != domain._getNameCreatedDate()) {
-            domain._setCreatedDate(new Date((Long) from.getProperty(domain._getNameCreatedDate())));
+        String nameCreatedDate = domain._getNameCreatedDate();
+        if (null != nameCreatedDate) {
+            Long createdDate = (Long) from.getProperty(nameCreatedDate);
+            if (null != createdDate) {
+                domain._setCreatedDate(new Date(createdDate));
+            }
         }
 
-        if (null != domain._getNameUpdatedDate()) {
-            domain._setUpdatedDate(new Date((Long) from.getProperty(domain._getNameUpdatedDate())));
+        String nameUpdatedDate = domain._getNameUpdatedDate();
+        if (null != nameCreatedDate) {
+            Long updatedDate = (Long) from.getProperty(nameUpdatedDate);
+            if (null != updatedDate) {
+                domain._setUpdatedDate(new Date(updatedDate));
+            }
         }
     }
 
@@ -185,9 +196,9 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
         try {
             CursorIterable<AndroidLongEntity> cursor = (CursorIterable<AndroidLongEntity>) queryBy(dao, keysOnly, orderBy,
                     ascending, limit, offset, filters);
-            List<R> r = dao.convert(cursor);
+            List<R> list = dao.convert(cursor);
             cursor.close();
-            return r;
+            return list;
         }
         finally {
             dao.releaseDbConnection();
@@ -211,7 +222,9 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
     protected List<Long> findKeysBy(final String orderBy, final boolean ascending, final int limit, final int offset,
             final Expression... filters) {
         Cursor cursor = queryKeysBy(orderBy, ascending, limit, offset, filters);
-        return convert(cursor);
+        List<Long> list = convert(cursor);
+        cursor.close();
+        return list;
     }
 
     @Override
@@ -344,14 +357,14 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
             sArgs.add(buildOperand(filter.getOperand()));
             selection = sb.toString();
         }
-        final String[] selectionArgs = sArgs.isEmpty() ? null : sArgs.toArray(new String[0]);
+        final String[] selectionArgs = sArgs.isEmpty() ? null : sArgs.toArray(new String[sArgs.size()]);
         final String orderByClause = null != orderBy ? orderBy + (ascending ? " ASC" : " DESC") : null;
         final String limitClause = 0 < limit ? String.valueOf(limit) + (0 < offset ? "," + offset : "") : null;
 
         final SQLiteDatabase dbCon = dao.getDbConnection();
         try {
-            CursorIterable cursor = (CursorIterable) dbCon.queryWithFactory(factory, true, dao.getTableName(), columns,
-                    selection, selectionArgs, null, null, orderByClause, limitClause);
+            Cursor cursor = dbCon.queryWithFactory(factory, true, dao.getTableName(), columns, selection, selectionArgs, null,
+                    null, orderByClause, limitClause);
             Log.d("queryBy", dao.getTableName() + " WHERE " + selection + " returns " + cursor.getCount());
             return cursor;
         }

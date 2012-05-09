@@ -11,18 +11,19 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteQuery;
 
 /**
- *
+ * 
  * @author os
  */
 public class CursorIterableFactory implements CursorFactory {
+
     private final AndroidDaoImpl dao;
 
-    public CursorIterableFactory(AndroidDaoImpl dao) {
+    public CursorIterableFactory(final AndroidDaoImpl dao) {
         this.dao = dao;
     }
-    
-    public Cursor newCursor(SQLiteDatabase sqld, SQLiteCursorDriver sqlcd, String string, SQLiteQuery sqlq) {
+
+    public Cursor newCursor(final SQLiteDatabase sqld, final SQLiteCursorDriver sqlcd, final String string, final SQLiteQuery sqlq) {
         return new CursorIterable(sqld, sqlcd, string, sqlq, dao);
     }
-    
+
 }

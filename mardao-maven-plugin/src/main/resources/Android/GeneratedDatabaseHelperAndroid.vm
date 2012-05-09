@@ -25,7 +25,7 @@ public abstract class GeneratedDatabaseHelper extends AbstractDatabaseHelper {
 #set( $key = $entity.simpleName + "." + $field.name )
 #set( $inverse = $inverseFields.get($key))
             /** Dao for Many-To-Many relation ${field.name} */
-            private final AndroidManyToManyDaoBean m2m_${field.name}_${inverse.name}Dao;
+            protected final AndroidManyToManyDaoBean m2m_${field.name}_${inverse.name}Dao;
 #end
 #end
 #end

@@ -1,7 +1,5 @@
 package ${daoPackage};
 
-import java.util.Collection;
-
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -29,7 +27,7 @@ public interface Generated${entity.simpleName}DaoAndroid {
 	 * @return a CursorIterable of ${entity.simpleName}s
 	 * @since 1.24
 	 */
-    CursorIterable<${entity.simpleName}> queryByPrimaryKeys(Collection<Long> primaryKeys);
+    CursorIterable<${entity.simpleName}> queryByPrimaryKeys(Iterable<Long> primaryKeys);
 		
     // ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
@@ -53,4 +51,18 @@ public interface Generated${entity.simpleName}DaoAndroid {
 #end	
 #end	
 		  
+	// ----------------------- uniqueFields populate -------------------------
+#foreach( $uniqueFields in $entity.uniqueFieldsSets )
+	/**
+	 * populate method for unique attributes
+#foreach( $field in $uniqueFields )	 
+	 * @param ${field.name} the specified ${field.name}
+#end	 
+	 * @return the unique ${entity.simpleName} for the specified fields
+	 */
+	${entity.simpleName} populate(#foreach( $field in $uniqueFields )
+${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
+#end);
+#end
+
 }

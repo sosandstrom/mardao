@@ -550,5 +550,37 @@ ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #e
 #end
 #end
 
+	// ----------------------- uniqueFields populate -------------------------
+#foreach( $uniqueFields in $entity.uniqueFieldsSets )
+	/**
+	 * populate method for unique attributes
+#foreach( $field in $uniqueFields )	 
+	 * @param ${field.name} the specified ${field.name}
+#end	 
+	 * @return the unique ${entity.simpleName} for the specified fields
+	 */
+	public final ${entity.simpleName} populate(#foreach( $field in $uniqueFields )
+${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
+#end) {
+            ${entity.simpleName} domain = findBy#foreach( $field in $uniqueFields )
+${helper.firstToUpper($field.name)}#end(#foreach( $field in $uniqueFields )
+${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
+#end);
+
+            // need to insert new?
+            if (null == domain) {
+                domain = persist(null#foreach( $field in $entity.fields )
+, #if( $uniqueFields.contains($field) )${field.name}#else (${field.type})null#end#end
+#foreach( $field in $entity.oneToOnes )	 
+, #if( $uniqueFields.contains($field) )${field.name}#else (${field.type})null#end#end
+#foreach( $field in $entity.manyToOnes )	 
+, #if( $uniqueFields.contains($field) )${field.name}#else (${field.type})null#end#end
+);
+            }
+
+            return domain;
+	}
+#end
+
 	
 }

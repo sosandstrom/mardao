@@ -59,11 +59,7 @@ public class CursorIterable<T extends AndroidLongEntity> extends SQLiteCursor im
         }
 
         public boolean hasNext() {
-            boolean returnValue = !isAfterLast();
-            if (!returnValue) {
-                close();
-            }
-            return returnValue;
+            return !isAfterLast();
         }
 
         public T next() {

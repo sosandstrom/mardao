@@ -2,6 +2,7 @@ package net.sf.mardao.api.domain;
 
 import java.io.Serializable;
 import java.util.Date;
+import net.sf.mardao.api.dao.AndroidEntity;
 
 /**
  * 
@@ -20,6 +21,20 @@ public abstract class AndroidCreatedUpdatedEntity<ID extends Serializable> exten
     private Date               createdDate;
     private Date               updatedDate;
 
+    @Override
+    public AndroidEntity _createEntity() {
+        final AndroidEntity to = super._createEntity();
+
+        if (null != createdDate) {
+            to.setProperty(_getNameCreatedDate(), createdDate.getTime());
+        }
+        if (null != updatedDate) {
+            to.setProperty(_getNameUpdatedDate(), updatedDate.getTime());
+        }
+        
+        return to;
+    }
+    
     /**
      * Returns when this Entity was created, i.e. first persisted
      * 

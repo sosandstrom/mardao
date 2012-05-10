@@ -65,4 +65,23 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #end);
 #end
 
+	// ----------------------- many-to-many updates -------------------------
+#foreach( $field in $entity.manyToManys )
+#if( $entities.get($field.type) )  
+#set( $foreign = $entities.get($field.type))
+	/**
+	 * update method for many-to-many field ${field.name} related to foreign Entity ${field.simpleType}
+#if( $field.mappedBy )		 
+	 * This is inverse side (mappedBy="${field.mappedBy}")
+#else
+	 * This is owning side
+#end
+	 * @param ${field.name} the related ${field.type} entity
+	 */
+	void update${helper.firstToUpper($field.name)}(final Long ${entity.pk.name},
+            final Iterable<Long> ${field.name}Ids);
+#end	
+	
+#end
+
 }

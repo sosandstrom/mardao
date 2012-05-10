@@ -24,6 +24,15 @@ public class AndroidManyToMany extends AndroidLongEntity {
         return _id;
     }
 
+    public AndroidManyToMany() {
+    }
+    
+    public AndroidManyToMany(Long owningId, Long inverseId) {
+        this._id = null;
+        this.owningId = owningId;
+        this.inverseId = inverseId;
+    }
+
     public Long get_id() {
         return _id;
     }

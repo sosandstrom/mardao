@@ -2,6 +2,7 @@ package ${daoBasePackage};
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -71,8 +72,11 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
      * Override this to get custom create statement
      */
     protected String getCreateDbSql() {
+        final ${entity.simpleName} instance = new ${entity.simpleName}();
         return "CREATE TABLE " + getTableName() + " (" +
-	"${entity.pk.columnName} INTEGER PRIMARY KEY AUTOINCREMENT" +
+	"${entity.pk.columnName} INTEGER PRIMARY KEY AUTOINCREMENT, " +
+        instance._getNameCreatedDate() + " INTEGER, " +
+        instance._getNameUpdatedDate() + " INTEGER" +
 #foreach( $column in $entity.fields )
 	", ${column.columnName} $dbTypes.get($column.type)" +
 #end
@@ -109,16 +113,17 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
         	return null;
         }
         
-                // instantiate and primary key
+        // instantiate and primary key
         final ${entity.simpleName} domain = new ${entity.simpleName}();
         domain.set${helper.firstToUpper(${entity.pk.name})}((Long)entity.getProperty(getPrimaryKeyColumnName()));
+
+        // createdDate, updatedDate
+        convertCreatedUpdatedDates(entity, domain);
 
 #if( $entity.parent )
         // parent
         domain.set${helper.firstToUpper(${entity.parent.name})}(entity.getParent());
 #end
-        // createdDate, updatedDate
-        convertCreatedUpdatedDates(entity, domain);
 		
 		// properties
 #foreach( $field in $entity.fields )
@@ -155,12 +160,14 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
         final ${entity.simpleName} domain = new ${entity.simpleName}();
         int i = 0;
         domain.set${helper.firstToUpper(${entity.pk.name})}(cursor.getLong(i++));
+
+	    // createdDate, updatedDate
+        domain._setCreatedDate(new Date(cursor.getLong(i++)));
+        domain._setUpdatedDate(new Date(cursor.getLong(i++)));
 #if( $entity.parent )
 		// parent
 		domain.set${helper.firstToUpper(${entity.parent.name})}(entity.getParent());
 #end
-	    // createdDate, updatedDate
-		// convertCreatedUpdatedDates(entity, domain);
 		
 		// properties
 #foreach( $field in $entity.fields )
@@ -580,6 +587,33 @@ ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 
             return domain;
 	}
+#end
+
+	// ----------------------- many-to-many updates -------------------------
+#foreach( $field in $entity.manyToManys )
+#if( $entities.get($field.type) )  
+#set( $foreign = $entities.get($field.type))
+	/**
+	 * update method for many-to-many field ${field.name} related to foreign Entity ${field.simpleType}
+#if( $field.mappedBy )		 
+	 * This is inverse side (mappedBy="${field.mappedBy}")
+#else
+	 * This is owning side
+#end
+	 * @param ${field.name} the related ${field.type} entity
+	 */
+	public final void update${helper.firstToUpper($field.name)}(final Long ${entity.pk.name},
+            final Iterable<Long> ${field.name}Ids) {
+		updateManyToMany(${field.name}Dao, 
+#if( $field.mappedBy )		 
+			false, // this insverse side (mappedBy="${field.mappedBy}")
+#else
+                        true, // this is owning side
+#end
+			${entity.pk.name}, ${field.name}Ids); 			 
+	}
+#end	
+	
 #end
 
 	

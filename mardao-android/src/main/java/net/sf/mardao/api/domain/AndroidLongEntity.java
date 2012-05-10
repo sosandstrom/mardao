@@ -14,7 +14,7 @@ public abstract class AndroidLongEntity extends AndroidCreatedUpdatedEntity<Long
      * 
      */
     private static final long serialVersionUID = 206571318641512930L;
-
+    
     @Override
     public final Class<Long> getIdClass() {
         return Long.class;
@@ -23,7 +23,7 @@ public abstract class AndroidLongEntity extends AndroidCreatedUpdatedEntity<Long
     @Override
     public String toString() {
         return String.format("%s{_id:%d, updated:%d, %s}", getClass().getSimpleName(),
-                getSimpleKey(), getUpdatedDate(), attrToString());
+                getSimpleKey(), getUpdatedDate().getTime(), attrToString());
     }
 
     /** Override to add attributes to toString */

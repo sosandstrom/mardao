@@ -18,6 +18,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import java.util.*;
+import net.sf.mardao.api.domain.BasicLongEntity;
 
 public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImpl<T, Long, Long, AndroidEntity, Long> {
     protected final String                 TAG           = getClass().getSimpleName();
@@ -40,10 +41,10 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
         databaseHelper.releaseDbConnection();
     }
 
-    public static final <T extends AndroidLongEntity> List<Long> asKeys(final List<T> entities) {
+    public static final <D extends AndroidLongEntity> List<Long> asKeys(final Collection<D> entities) {
         final List<Long> keys = new ArrayList<Long>(entities.size());
 
-        for (T e : entities) {
+        for (D e : entities) {
             keys.add(e.getSimpleKey());
         }
 
@@ -126,7 +127,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
     }
 
     public Long createKey(final Long parentKey, final Long simpleKey) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return simpleKey;
     }
 
     @Override
@@ -163,12 +164,13 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
             sb.append(id);
             sb.append(i.hasNext() ? "," : "");
         }
-        Log.d(TAG, "delete WHERE _id IN " + sb.toString());
-        final String whereArgs[] = {sb.toString()};
-        deleteWithConnection("_id IN (?)", whereArgs);
+        final String whereClause = String.format("%s IN (%s)", getPrimaryKeyColumnName(), sb.toString());
+        Log.d(TAG, "delete " + getTableName() + " WHERE " + whereClause);
+        final String whereArgs[] = {};
+        deleteWithConnection(whereClause, whereArgs);
     }
-
-    public Collection<T> findByManyToMany(final AndroidManyToManyDaoBean m2mDao, final boolean owning, final Long foreignId) {
+    
+    protected Collection<Long> fetchKeysForManyToMany(final AndroidManyToManyDaoBean m2mDao, final boolean owning, final Long foreignId) {
         final List<AndroidManyToMany> mappings = owning ? m2mDao.findByInverseId(foreignId) : m2mDao.findByOwningId(foreignId);
         final List<Long> ids = new ArrayList<Long>(mappings.size());
         Long id;
@@ -177,6 +179,24 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
 //            Log.d("findByManyToMany", "owning=" + owning + ", " + m);
             ids.add(id);
         }
+        return ids;
+    }
+    
+    protected Collection<AndroidLongEntity> fetchForManyToMany(final AndroidManyToManyDaoBean m2mDao, final boolean owning, final Long foreignId) {
+        final Collection<Long> ids = fetchKeysForManyToMany(m2mDao, owning, foreignId);
+        
+        final List<AndroidLongEntity> returnValue = new ArrayList<AndroidLongEntity>(ids.size());
+        AndroidLongEntity domain;
+        for (Long id : ids) {
+            domain = new BasicLongEntity(id);
+            returnValue.add(domain);
+        }
+        
+        return returnValue;
+    }
+
+    protected Collection<T> findByManyToMany(final AndroidManyToManyDaoBean m2mDao, final boolean owning, final Long foreignId) {
+        final Collection<Long> ids = fetchKeysForManyToMany(m2mDao, owning, foreignId);
         return findByPrimaryKeys(null, ids).values();
     }
 
@@ -270,6 +290,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
     @Override
     public Long persist(final T domain) {
         final AndroidEntity entity = createEntity(domain);
+        persistUpdateDates(domain, entity, new Date());
         final Long id = persistEntity(entity);
         persistUpdateKeys(domain, id);
         return id;
@@ -302,7 +323,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
 
             // only if not previously created
             if (null == entity.getProperty(propertyName)) {
-                entity.setProperty(propertyName, date);
+                entity.setProperty(propertyName, date.getTime());
                 domain._setCreatedDate(date);
             }
         }
@@ -312,7 +333,7 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
         if (null != propertyName) {
 
             // always update the date
-            entity.setProperty(propertyName, date);
+            entity.setProperty(propertyName, date.getTime());
             domain._setUpdatedDate(date);
         }
     }
@@ -457,4 +478,36 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
         return id;
     }
 
+    protected void updateManyToMany(final AndroidManyToManyDaoBean m2mDao,  boolean owning,
+            final Long id, final Iterable<Long> relatedIds) {
+        final SQLiteDatabase trans = databaseHelper.beginTransaction();
+        try {
+            final List<AndroidManyToMany> mappings = owning ? m2mDao.findByOwningId(id) : 
+                    m2mDao.findByInverseId(id);
+
+            // collect existing related ids:
+            final Map<Long,AndroidManyToMany> existing = new HashMap<Long,AndroidManyToMany>(mappings.size());
+            for (AndroidManyToMany m : mappings) {
+                existing.put(owning ? m.getInverseId() : m.getOwningId(), m);
+            }
+
+            // create new for missing
+            AndroidManyToMany exist;
+            final List<AndroidManyToMany> insert = new ArrayList<AndroidManyToMany>();
+            for (Long r : relatedIds) {
+                exist = existing.remove(r);
+                if (null == exist) {
+                    insert.add(new AndroidManyToMany(owning ? id : r, owning ? r : id));
+                }
+            }
+            m2mDao.persist(insert);
+            
+            // remove those not present in related
+            final Collection<AndroidManyToMany> entities = existing.values();
+            m2mDao.delete(null, asKeys(entities));
+        }
+        finally {
+            databaseHelper.commitTransaction(trans);
+        }
+    }
 }

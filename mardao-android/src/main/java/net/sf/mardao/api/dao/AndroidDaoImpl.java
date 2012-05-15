@@ -356,6 +356,11 @@ public abstract class AndroidDaoImpl<T extends AndroidLongEntity> extends DaoImp
     public CursorIterable<T> queryByPrimaryKeys(final Iterable<Long> primaryKeys) {
         return queryBy(null, false, -1, 0, createInFilter(getPrimaryKeyColumnName(), primaryKeys));
     }
+    
+    protected CursorIterable<T> queryByManyToMany(final AndroidManyToManyDaoBean m2mDao, final boolean owning, final Long foreignId) {
+        final Collection<Long> ids = fetchKeysForManyToMany(m2mDao, owning, foreignId);
+        return queryByPrimaryKeys(ids);
+    }
 
     protected CursorIterable<T> queryBy(final String columnName, final Object value) {
         return queryBy(null, false, -1, 0, createEqualsFilter(columnName, value));

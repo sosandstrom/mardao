@@ -438,6 +438,40 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 #end
 			${foreign.pk.name}); 			 
 	}
+
+	/**
+	 * query-by method for many-to-many field ${field.name} related to foreign Entity ${field.simpleType}
+#if( $field.mappedBy )		 
+	 * This is inverse side (mappedBy="${field.mappedBy}")
+#else
+	 * This is owning side
+#end
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return a CursorIterable of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	public final CursorIterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+		return queryBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
+	}
+	
+	/**
+	 * query-by method for many-to-many field ${field.name} related to foreign Entity ${field.simpleType}
+#if( $field.mappedBy )		 
+	 * This is inverse side (mappedBy="${field.mappedBy}")
+#else
+	 * This is owning side
+#end
+	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @return a CursorIterable of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	public final CursorIterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+		return queryByManyToMany(${field.name}Dao, 
+#if( $field.mappedBy )		 
+			false, // this insverse side (mappedBy="${field.mappedBy}")
+#else
+                        true, // this is owning side
+#end
+			${foreign.pk.name}); 			 
+	}
 #end	
 	
 #end

@@ -37,7 +37,7 @@ public class AndroidManyToManyDaoBean
      * @param fromVersion
      * @param toVersion 
      */
-    protected static void onUpgrade(SQLiteDatabase sqld, int fromVersion, int toVersion) {
+    public static void onUpgrade(SQLiteDatabase sqld, int fromVersion, int toVersion) {
         // upgrade version-by-version, one step at a time:
         for (int v = fromVersion; v < toVersion; v++) {
             switch (v) {

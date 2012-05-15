@@ -20,12 +20,12 @@ public abstract class GeneratedDatabaseHelper extends AbstractDatabaseHelper {
 ## loop inner Many-To-Many daos
 #foreach( $field in $entity.manyToManys )
 #if( $field.mappedBy )		 
-	 // This is inverse side (mappedBy="${field.mappedBy}")
-#else
-#set( $key = $entity.simpleName + "." + $field.name )
-#set( $inverse = $inverseFields.get($key))
+##  This is inverse side (mappedBy="lorem")
+#set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
             /** Dao for Many-To-Many relation ${field.name} */
-            protected final AndroidManyToManyDaoBean m2m_${field.name}_${inverse.name}Dao;
+            protected final AndroidManyToManyDaoBean ${daoName};
+#else
+	 // This is owning side
 #end
 #end
 #end
@@ -84,10 +84,9 @@ public abstract class GeneratedDatabaseHelper extends AbstractDatabaseHelper {
 ## loop inner Many-To-Many daos
 #foreach( $field in $entity.manyToManys )
 #if( $field.mappedBy )		 
-#else
-#set( $key = $entity.simpleName + "." + $field.name )
-#set( $inverse = $inverseFields.get($key))
-            m2m_${field.name}_${inverse.name}Dao.onCreate(sqld);
+##  This is inverse side (mappedBy="lorem")
+#set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
+            ${daoName}.onCreate(sqld);
 #end
 #end
 #end
@@ -101,6 +100,14 @@ public abstract class GeneratedDatabaseHelper extends AbstractDatabaseHelper {
 #foreach( $group in $packages.values() )
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
         ${entity.simpleName}DaoBean.onUpgrade(sqld, fromVersion, toVersion);
+## loop inner Many-To-Many daos
+#foreach( $field in $entity.manyToManys )
+#if( $field.mappedBy )		 
+##  This is inverse side (mappedBy="lorem")
+#set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
+            ${daoName}.onUpgrade(sqld, fromVersion, toVersion);
+#end
+#end
 #end
 #end
     }

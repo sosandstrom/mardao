@@ -1,5 +1,7 @@
 package ${daoPackage};
 
+import java.util.Collection;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -51,6 +53,61 @@ public interface Generated${entity.simpleName}DaoAndroid {
 #end	
 #end	
 		  
+	// ----------------------- many-to-many finders -------------------------
+#foreach( $field in $entity.manyToManys )
+#if( $entities.get($field.type) )  
+#set( $foreign = $entities.get($field.type))
+	/**
+	 * find-by method for many-to-many field ${field.name} related to foreign Entity ${field.simpleType}
+#if( $field.mappedBy )		 
+	 * This is inverse side (mappedBy="${field.mappedBy}")
+#else
+	 * This is owning side
+#end
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return a Collection of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+	
+	/**
+	 * find-by method for many-to-many field ${field.name} related to foreign Entity ${field.simpleType}
+#if( $field.mappedBy )		 
+	 * This is inverse side (mappedBy="${field.mappedBy}")
+#else
+	 * This is owning side
+#end
+	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @return a Collection of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
+
+	/**
+	 * query-by method for many-to-many field ${field.name} related to foreign Entity ${field.simpleType}
+#if( $field.mappedBy )		 
+	 * This is inverse side (mappedBy="${field.mappedBy}")
+#else
+	 * This is owning side
+#end
+	 * @param ${field.name} the related ${field.type} entity
+	 * @return a CursorIterable of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	CursorIterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+	
+	/**
+	 * query-by method for many-to-many field ${field.name} related to foreign Entity ${field.simpleType}
+#if( $field.mappedBy )		 
+	 * This is inverse side (mappedBy="${field.mappedBy}")
+#else
+	 * This is owning side
+#end
+	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
+	 * @return a CursorIterable of ${entity.simpleName}s belonging to the many-to-many relation
+	 */
+	CursorIterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
+#end	
+	
+#end
+
 	// ----------------------- uniqueFields populate -------------------------
 #foreach( $uniqueFields in $entity.uniqueFieldsSets )
 	/**

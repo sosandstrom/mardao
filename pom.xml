@@ -91,9 +91,9 @@
 	</distributionManagement>
 
 	<scm>
-		<connection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/trunk</connection>
-		<developerConnection>scm:svn:https://mardao.svn.sourceforge.net/svnroot/mardao/trunk</developerConnection>
-		<url>http://mardao.svn.sourceforge.net/viewvc/mardao/trunk</url>
+		<connection>scm:git:ssh://${scm.user}@mardao.git.sourceforge.net/gitroot/mardao/mardao</connection>
+		<developerConnection>scm:git:ssh://${scm.user}@mardao.git.sourceforge.net/gitroot/mardao/mardao</developerConnection>
+		<url>http://mardao.git.sourceforge.net/git/gitweb-index.cgi</url>
 	</scm>
 
 	<developers>

@@ -35,6 +35,7 @@
 	<properties>
 		<spring.version>3.0.2.RELEASE</spring.version>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+		<scm.user>jenkinsandroid</scm.user>
 	</properties>
 
 	<dependencyManagement>

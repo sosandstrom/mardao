@@ -175,8 +175,16 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 		domain.set${helper.firstToUpper($field.name)}(cursor.getString(i++));
 #elseif( $field.type == "java.lang.Long" ) 
 		domain.set${helper.firstToUpper($field.name)}(cursor.getLong(i++));
+#elseif( $field.type == "java.lang.Integer" ) 
+		domain.set${helper.firstToUpper($field.name)}(cursor.getInteger(i++));
+#elseif( $field.type == "java.lang.Float" ) 
+		domain.set${helper.firstToUpper($field.name)}(cursor.getFloat(i++));
+#elseif( $field.type == "java.lang.Double" ) 
+		domain.set${helper.firstToUpper($field.name)}(cursor.getDouble(i++));
 #elseif( $field.type == "java.util.Date" ) 
 		domain.set${helper.firstToUpper($field.name)}(new Date(cursor.getLong(i++)));
+#else
+		// $field.type is unsupported
 #end
 #end
 

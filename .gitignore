@@ -1,6 +1,10 @@
+pom.xml.releaseBackup
+release.properties
+
 .project
 .classpath
 .settings/
+
 target/
 bin/
 tmp/

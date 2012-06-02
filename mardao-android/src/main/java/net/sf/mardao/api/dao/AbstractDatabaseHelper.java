@@ -23,8 +23,13 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
     /** The database name is 'mardao' */
     protected static final String DATABASE_NAME = "mardao";
 
+    /** when using multiple database connection strategy */
     private static final ThreadLocal<SQLiteDatabase> database = new ThreadLocal<SQLiteDatabase>();
+    /** when using multiple database connection strategy */
     private static final ThreadLocal<Integer> connDepth = new ThreadLocal<Integer>();
+    
+    /** for singleton database connection strategy */
+    private static SQLiteDatabase _db = null;
     
     /** Override to change database name from 'mardao' */
     protected String getDatabaseName() {
@@ -66,6 +71,14 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
     }
     
     protected SQLiteDatabase getDbConnection() {
+        // singleton strategy
+        if (null == _db) {
+            _db = getWritableDatabase();
+        }
+        return _db;
+        
+        /* 
+        //multiple connection strategy
         SQLiteDatabase dbCon = database.get();
         Integer depth = connDepth.get();
         
@@ -83,11 +96,14 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
         
         // increase depth
         connDepth.set(depth + 1);
-        
         return dbCon;
+        
+        */
     }
 
     protected void releaseDbConnection() {
+        /* 
+        //multiple connection strategy
         Integer depth = connDepth.get();
 
         // close when depth is going back to 0 only
@@ -103,6 +119,14 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
         else {
             // decrease depth
             connDepth.set(depth - 1);
+        }
+        */
+    }
+    
+    protected void closeDbConnection() {
+        if (null != _db) {
+            _db.close();
+            _db = null;
         }
     }
     

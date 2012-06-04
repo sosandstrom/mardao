@@ -79,9 +79,9 @@ public abstract class AbstractSpringHelper<T, ID extends Serializable>  implemen
 					executeOperations(in);
 					
 					// create incrementer and version tables?
-					checkTable("id_sequence", "create table id_sequence (highest int not null) type=MYISAM;", 
+					checkTable("id_sequence", "create table id_sequence (highest int not null) ENGINE=InnoDB DEFAULT CHARSET=utf8;", 
 						"insert into id_sequence values(0);");
-					checkTable("db_version", "create table db_version (currentVersion int not null) type=MYISAM;",
+					checkTable("db_version", "create table db_version (currentVersion int not null) ENGINE=InnoDB DEFAULT CHARSET=utf8;",
 						"insert into db_version values(1);");
 
 				} catch (IOException e1) {

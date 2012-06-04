@@ -226,6 +226,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
         mySqlTypes.put(Integer.class.getName(), "INTEGER");
         mySqlTypes.put(Short.class.getName(), "SMALLINT");
         mySqlTypes.put(Byte.class.getName(), "TINYINT");
+        mySqlTypes.put(Double.class.getName(), "DOUBLE PRECISION");
         // MySQL max key length is 767:
         mySqlTypes.put(String.class.getName(), "VARCHAR(255)");
         mySqlTypes.put(Boolean.class.getName(), "BIT(1)");
@@ -235,6 +236,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
         mySqlDefaults.put(Integer.class.getName(), "DEFAULT NULL");
         mySqlDefaults.put(Short.class.getName(), "DEFAULT NULL");
         mySqlDefaults.put(Byte.class.getName(), "DEFAULT NULL");
+        mySqlDefaults.put(Double.class.getName(), "DEFAULT NULL");
         mySqlDefaults.put(String.class.getName(), "DEFAULT NULL");
         mySqlDefaults.put(Boolean.class.getName(), "DEFAULT NULL");
         mySqlDefaults.put(java.util.Date.class.getName(), "NOT NULL DEFAULT CURRENT_TIMESTAMP");

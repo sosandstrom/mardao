@@ -8,7 +8,8 @@ import net.sf.mardao.api.dao.Expression;
  * @author os
  */
 public interface GeoDao<G extends GeoModel> {
-    String getColumnName();
-    Collection<G> findGeo(String orderBy, boolean ascending, int offset, int limit, Expression... filters);
-    void save(G model);
+    String getGeoboxesColumnName();
+    Collection<G> findGeoBase(String orderBy, boolean ascending, int limit, int offset, Expression... filters);
+    Collection<G> findInGeobox(float lat, float lng, int resolution, int slice, String orderBy, boolean ascending, int offset, int limit, Expression... filters);
+    Long save(G model);
 }

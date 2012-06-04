@@ -36,14 +36,14 @@ public class GeoDaoImpl<T extends AEDPrimaryKeyEntity<Long>, G extends GeoModel>
         final String box = Geobox.compute(lng, lat, resolution, slice);
         
         final Expression geoFilters[] = Arrays.copyOf(filters, filters != null ? filters.length + 1 : 1, Expression[].class);
-        geoFilters[geoFilters.length-1] = new FilterEqual(dao.getColumnName(), box);
+        geoFilters[geoFilters.length-1] = new FilterEqual(dao.getGeoboxesColumnName(), box);
 //        if (filter == null) {
 //            filter = "";
 //        } else {
 //            filter += " && ";
 //        }
-//        filter += dao.getColumnName() + "=='" + box + "'";        
-        return findGeo(orderBy, ascending, offset, limit, geoFilters);
+//        filter += dao.getGeoboxesColumnName() + "=='" + box + "'";        
+        return findGeoBase(orderBy, ascending, limit, offset, geoFilters);
     }
 
     public Collection<G> findNearest(final float lat, final float lng, String orderBy, boolean ascending, int offset, int limit, Expression... filters) {
@@ -81,9 +81,9 @@ public class GeoDaoImpl<T extends AEDPrimaryKeyEntity<Long>, G extends GeoModel>
     }
     
     @Override
-    public void save(G model) {
+    public Long save(G model) {
         preStore(model);
-        dao.save(model);
+        return dao.save(model);
     }
 
     private void preStore(G model) {
@@ -101,8 +101,8 @@ public class GeoDaoImpl<T extends AEDPrimaryKeyEntity<Long>, G extends GeoModel>
     }
 
     @Override
-    public Collection<G> findGeo(String orderBy, boolean ascending, int offset, int limit, Expression... filters) {
-        final Collection<G> list = dao.findGeo(orderBy, ascending, offset, limit, filters);
+    public Collection<G> findGeoBase(String orderBy, boolean ascending, int limit, int offset, Expression... filters) {
+        final Collection<G> list = dao.findGeoBase(orderBy, ascending, limit, offset, filters);
         
         LOG.debug("findGeo with offset {} and limit {} returns {} entities", new Object[] {offset, limit, list.size()});
         
@@ -110,8 +110,8 @@ public class GeoDaoImpl<T extends AEDPrimaryKeyEntity<Long>, G extends GeoModel>
     }
 
     @Override
-    public String getColumnName() {
-        return dao.getColumnName();
+    public String getGeoboxesColumnName() {
+        return dao.getGeoboxesColumnName();
     }
 
     /**

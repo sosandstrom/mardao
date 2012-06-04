@@ -183,8 +183,10 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 		domain.set${helper.firstToUpper($field.name)}(cursor.getDouble(i++));
 #elseif( $field.type == "java.util.Date" ) 
 		domain.set${helper.firstToUpper($field.name)}(new Date(cursor.getLong(i++)));
+#elseif( $field.type == "java.lang.Boolean" ) 
+		domain.set${helper.firstToUpper($field.name)}(false == Short.valueOf((short)0).equals(cursor.getShort(i++)));
 #else
-		// $field.type is unsupported
+		// FIXME: $field.type is unsupported!
 #end
 #end
 

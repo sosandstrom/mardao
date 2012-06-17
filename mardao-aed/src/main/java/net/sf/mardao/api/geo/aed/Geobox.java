@@ -2,11 +2,116 @@ package net.sf.mardao.api.geo.aed;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Geobox {
     static final Logger LOG = LoggerFactory.getLogger(Geobox.class);
+    
+    static final float[] D_MAJOR = new float[58];
+    
+    /** 17 bits gives a box of 307m */
+    public static final int BITS_17_307m = 17;
+    
+    /** 20 bits gives a box of 38m */
+    public static final int BITS_20_38m = 20;
+    
+    /** 22 bits gives a box of 9.4m */
+    public static final int BITS_22_94dm = 22;
+    
+    /** 23 bits gives a box of 4.7m */
+    public static final int BITS_23_47dm = 23;
+    
+    public static final int BITS_25 = 25;
+    
+    static {
+        // initialize floating point once and for all
+        double deg = 180.0;
+        for (int i = 0; i < D_MAJOR.length; i++) {
+            D_MAJOR[i] = (float) deg;
+            deg = deg/2;
+        }
+    }
+    
+    public static long getMask(float x, float base, int bits) {
+        return (long) Math.floor(((x+base)/(2*base)) * (1<<(bits-1)));
+    }
+    
+    public static long getHash(float lat, float lng, int bits) {
+        if (bits <=0) {
+            throw new IllegalArgumentException("bits must be greater than zero");
+        }
+        if (29 < bits) {
+            throw new IllegalArgumentException("bits must not be greater than 29");
+        }
+        final long precision = ((long)bits) << 59L;
+        final long mLat = getMask(lat, 90f, bits);
+        final long mLng = getMask(lng, 180f, bits+1);
+        final long hash = precision | (mLat<<30L) | mLng;
+        LOG.info("lat 0x{}, long 0x{}, bits 0x" + Long.toHexString(precision), Long.toHexString(mLat), Long.toHexString(mLng));
+        
+        return hash;
+    }
+    
+    public static Set<Long> getTuple(float lat, float lng, int bits) {
+        if (bits <=0) {
+            throw new IllegalArgumentException("bits must be greater than zero");
+        }
+        if (29 < bits) {
+            throw new IllegalArgumentException("bits must not be greater than 29");
+        }
+        final long precision = ((long)bits) << 59L;
+        final long mLat = getMask(lat, 90f, bits);
+        final long mLng = getMask(lng, 180f, bits+1);
+        
+        final Set<Long> tuple = new TreeSet<Long>();
+        int i = 0;
+        for (int y = -1; y < 2; y++) {
+            for (int x = -1; x < 2; x++) {
+                tuple.add(precision | ((mLat+y)<<30L) | (mLng+x));
+            }
+        }
+        
+        return tuple;
+    }
+    
+    protected static long getHashRecursive(float major, float minor, int bit, float dMajor, float dMinor) {
+        final long hash = major < 0f ? 0L : 1L << bit;
+        final float dM = dMajor/2;
+        long tail = 0;
+        if (0 < bit) {
+            tail = getHashRecursive(minor, major + (major < 0 ? dM : -dM), bit-1, dMinor, dM);
+        }
+        LOG.info("bit {}, maj {}, dM {} hash 0b{}", new Object[] {
+           Integer.toString(bit), Float.toString(major), Float.toString(dMajor), Long.toBinaryString(hash)});
+        return hash | tail;
+    }
+    
+    protected static long getHashIterative(float major, float minor, final int bits) {
+        // initial values,
+        // start with -180..180 longitude
+        long hash = 0;
+        float temp;
+        for (int b = bits, i = 0; 0 <= b; b--, i++) {
+            temp = minor;
+
+            if (major < 0f) {
+                minor = major + D_MAJOR[i+1];
+            }
+            else {
+                hash |= 1L << b;
+                minor = major - D_MAJOR[i+1];
+            }
+            LOG.debug("bit {}, maj {}, dM {} hash 0b{} 0x{}", new Object[] {
+                Integer.toString(b), Float.toString(major), Float.toString(D_MAJOR[i]), 
+                Long.toBinaryString(hash), Long.toHexString(hash)});
+            
+            major = temp;
+        }
+        return hash;
+    }
     
     /**
      * 

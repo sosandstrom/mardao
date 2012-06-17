@@ -19,6 +19,11 @@ import ${entity.className};
  */
 public interface Generated${entity.simpleName}DaoAndroid {
 
+    /** Boolean are mapped to TINYINT */
+    short TINYINT_FALSE = (short)0;
+    /** Boolean are mapped to TINYINT */
+    short TINYINT_TRUE = (short)1;
+
     /**
      * Queries the database and returns a CursorIterable of all ${entity.simpleName}s
      * @return a CursorIterable of all ${entity.simpleName}s

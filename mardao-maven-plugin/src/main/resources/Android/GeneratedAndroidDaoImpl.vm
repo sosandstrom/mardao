@@ -184,7 +184,7 @@ public class Generated${entity.simpleName}DaoImpl extends AndroidDaoImpl<${entit
 #elseif( $field.type == "java.util.Date" ) 
 		domain.set${helper.firstToUpper($field.name)}(new Date(cursor.getLong(i++)));
 #elseif( $field.type == "java.lang.Boolean" ) 
-		domain.set${helper.firstToUpper($field.name)}(false == Short.valueOf((short)0).equals(cursor.getShort(i++)));
+		domain.set${helper.firstToUpper($field.name)}(Generated${entity.simpleName}DaoAndroid.TINYINT_FALSE != cursor.getShort(i++));
 #else
 		// FIXME: $field.type is unsupported!
 #end

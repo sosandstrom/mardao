@@ -10,7 +10,7 @@ import java.util.Collection;
 public interface GeoModel {
     Long getId();
     GeoPt getLocation();
-    double getLatitude();
-    double getLongitude();
-    void setGeoboxes(Collection<String> geoboxes);
+    float getLatitude();
+    float getLongitude();
+    void setGeoboxes(Collection<Long> geoboxes);
 }

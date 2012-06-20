@@ -12,19 +12,38 @@ public class Geobox {
     
     static final float[] D_MAJOR = new float[58];
     
-    /** 17 bits gives a box of 307m */
+    /** 10 bits gives a box of 39km at the Equator */
+    public static final int BITS_10_39km = 10;
+    
+    /** 12 bits gives a box of 9.8km at the Equator */
+    public static final int BITS_12_10km = 12;
+    
+    /** 15 bits gives a box of 1224m at the Equator */
+    public static final int BITS_15_1224m = 15;
+    
+    /** 17 bits gives a box of 307m at the Equator */
     public static final int BITS_17_307m = 17;
     
-    /** 20 bits gives a box of 38m */
-    public static final int BITS_20_38m = 20;
+    /** 18 bits gives a box of 154m at the Equator */
+    public static final int BITS_18_154m = 18;
     
-    /** 22 bits gives a box of 9.4m */
-    public static final int BITS_22_94dm = 22;
+    /** 19 bits gives a box of 77.5m at the Equator */
+    public static final int BITS_19_77m = 19;
     
-    /** 23 bits gives a box of 4.7m */
-    public static final int BITS_23_47dm = 23;
+    /** 20 bits gives a box of 39m at the Equator */
+    public static final int BITS_20_39m = 20;
     
-    public static final int BITS_25 = 25;
+    /** 21 bits gives a box of 19.1m at the Equator */
+    public static final int BITS_21_19m = 21;
+    
+    /** 22 bits gives a box of 10.6m at the Equator */
+    public static final int BITS_22_10m = 22;
+    
+    /** 23 bits gives a box of 5.3m at the Equator */
+    public static final int BITS_23_53dm = 23;
+    
+    /** 24 bits gives a box of 3.2m at the Equator */
+    public static final int BITS_24_32dm = 24;
     
     static {
         // initialize floating point once and for all

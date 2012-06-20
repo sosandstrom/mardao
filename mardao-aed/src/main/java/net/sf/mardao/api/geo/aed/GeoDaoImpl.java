@@ -18,6 +18,10 @@ public class GeoDaoImpl<T extends AEDPrimaryKeyEntity<Long>, G extends GeoModel>
           { 3, 8, 0 },
           { 3, 16, 0 },
           { 2, 5, 0 } };
+    
+    private static List<Integer> boxBits = Arrays.asList(
+        Geobox.BITS_12_10km, Geobox.BITS_15_1224m, Geobox.BITS_18_154m
+    );
 
     private static final int RADIUS = 6378135;
     
@@ -27,58 +31,69 @@ public class GeoDaoImpl<T extends AEDPrimaryKeyEntity<Long>, G extends GeoModel>
         this.dao = dao;
     }
 
-    public Collection<G> findInGeobox(float lat, float lng, int predefinedBox, String orderBy, boolean ascending, int offset, int limit, Expression... filters) {
-        return findInGeobox(lat, lng, GEOBOX_CONFIGS[predefinedBox][0], GEOBOX_CONFIGS[predefinedBox][1], orderBy, ascending, offset, limit, filters);     
-    }
-
-    public Collection<G> findInGeobox(float lat, float lng, int resolution, int slice, String orderBy, boolean ascending, int offset, int limit, Expression... filters) {
-        // FIXME: fishy lat/long order
-        final String box = Geobox.compute(lng, lat, resolution, slice);
+    public Collection<G> findInGeobox(float lat, float lng, int bits, String orderBy, boolean ascending, int offset, int limit, Expression... filters) {
+        if (!boxBits.contains(bits)) {
+            throw new IllegalArgumentException("Unboxed resolution, hashed are " + boxBits);
+        }
+        
+        final long box = Geobox.getHash(lat, lng, bits);
         
         final Expression geoFilters[] = Arrays.copyOf(filters, filters != null ? filters.length + 1 : 1, Expression[].class);
         geoFilters[geoFilters.length-1] = new FilterEqual(dao.getGeoboxesColumnName(), box);
-//        if (filter == null) {
-//            filter = "";
-//        } else {
-//            filter += " && ";
-//        }
-//        filter += dao.getGeoboxesColumnName() + "=='" + box + "'";        
         return findGeoBase(orderBy, ascending, limit, offset, geoFilters);
     }
 
+//    public Collection<G> findInGeobox(float lat, float lng, int resolution, int slice, String orderBy, boolean ascending, int offset, int limit, Expression... filters) {
+//        // FIXME: fishy lat/long order
+//        final String box = Geobox.compute(lng, lat, resolution, slice);
+//        
+//        final Expression geoFilters[] = Arrays.copyOf(filters, filters != null ? filters.length + 1 : 1, Expression[].class);
+//        geoFilters[geoFilters.length-1] = new FilterEqual(dao.getGeoboxesColumnName(), box);
+////        if (filter == null) {
+////            filter = "";
+////        } else {
+////            filter += " && ";
+////        }
+////        filter += dao.getGeoboxesColumnName() + "=='" + box + "'";        
+//        return findGeoBase(orderBy, ascending, limit, offset, geoFilters);
+//    }
+//
     public Collection<G> findNearest(final float lat, final float lng, String orderBy, boolean ascending, int offset, int limit, Expression... filters) {
-        LinkedHashMap<Object, G> uniqueList = new LinkedHashMap<Object, G>();
-        int length = offset + limit;
-        for (int i = 0; i < GEOBOX_CONFIGS.length; i++) {       
-            Collection<G> subList = findInGeobox(lat, lng, i, orderBy, ascending, 0, limit, filters);
+        final GeoPt p = new GeoPt(lat, lng);
+        int size = offset + (0 < limit ? limit : 10000);
+        
+        // sorting on distance has to be done outside datastore, i.e. here in application:
+        Map<Double, G> orderedMap = new TreeMap<Double, G>();
+        for (int bits : boxBits) {       
+            final Collection<G> subList = findInGeobox(lat, lng, bits, orderBy, ascending, 0, limit, filters);
             for (G model : subList) {
-                uniqueList.put(model.getId(), model);
+                double d = distance(model.getLocation(), p);
+                orderedMap.put(d, model);
             }
-            if (uniqueList.size() >= length) {
+            
+            if (size <= orderedMap.size()) {
                 break;
             }
         }
-
-        List<G> list = new ArrayList<G>();
-        int i = 0;
-        for (Object key : uniqueList.keySet()) {
-            if (i >= offset && i <= length) {
-                list.add(uniqueList.get(key));
-            }
-            i++;
-        }
-
-        final GeoPt p = new GeoPt(lat, lng);
-        Collections.sort(list, new Comparator<G>() {
-            public int compare(G model1, G model2) {                
-                double distance1 = distance(model1.getLocation(), p);
-                double distance2 = distance(model2.getLocation(), p);
-                return Double.compare(distance1, distance2);
-            }
-        });
-
-        return list;
+        // return with specified offset and limit
+        final Collection<G> values = orderedMap.values();
+        G[] page = (G[]) Arrays.copyOfRange(values.toArray(), 
+                Math.min(offset, values.size()), Math.min(size, values.size()));
+        return Arrays.asList(page);
     }
+
+    /** returns the configured resolutions for calculating boxes,
+     * defaults to 12, 15 and 18 bits (10km, 1224m and 154m)
+     */
+    public static List<Integer> getBoxBits() {
+        return boxBits;
+    }
+
+    public static void setBoxBits(List<Integer> boxBits) {
+        GeoDaoImpl.boxBits = boxBits;
+    }
+    
+    
     
     @Override
     public Long save(G model) {
@@ -86,16 +101,16 @@ public class GeoDaoImpl<T extends AEDPrimaryKeyEntity<Long>, G extends GeoModel>
         return dao.save(model);
     }
 
-    private void preStore(G model) {
+    /**
+     * populates the GeoModel with nearby boxes for configured resolutions
+     * @param model 
+     */
+    protected static void preStore(GeoModel model) {
+        
         // geoboxes are needed to findGeo the nearest entities and sort them by distance
-        Collection<String> geoboxes = new ArrayList<String>();
-        for (int[] geobox : GEOBOX_CONFIGS) {
-             // use set
-             if (geobox[2] == 1) {
-                 geoboxes.addAll(Geobox.computeSet(model.getLatitude(), model.getLongitude(), geobox[0], geobox[1]));
-             } else {
-                 geoboxes.add(Geobox.compute(model.getLatitude(), model.getLongitude(), geobox[0], geobox[1]));
-             }
+        Collection<Long> geoboxes = new ArrayList<Long>();
+        for (int bits : boxBits) {
+            geoboxes.addAll(Geobox.getTuple(model.getLatitude(), model.getLongitude(), bits));
         }
         model.setGeoboxes(geoboxes);
     }

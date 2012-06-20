@@ -5,6 +5,7 @@
 package net.sf.mardao.api.geo.aed;
 
 import com.google.appengine.api.datastore.GeoPt;
+import java.util.Set;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,18 +88,49 @@ public class GeoboxTest extends TestCase {
 //    }
     
     public void testSize() {
-        for (int b = 0; b < 50; b++) {
-            LOG.info("b {}, x1 {}", new Object[] {
-                b, 
-                Geobox.getMask(56.34f + ((float)b*0.00001f), 90f, Geobox.BITS_22_94dm) 
-            });
+        final float lat = 25.18f;
+        for (int bits = 10; bits < 25; bits++) {
+            final long maskLat = Geobox.getMask(lat, 90f, bits);
+
+            // decrease until limit
+            long m = maskLat;
+            float latMin = lat;
+            while (m == maskLat) {
+                latMin -= 0.00001f;
+                m = Geobox.getMask(latMin, 90f, bits);
+            }
+//            LOG.info("latMin = {}", latMin);
+
+
+            // increase until limit
+            m = maskLat;
+            float latMax = lat;
+            while (m == maskLat) {
+                latMax += 0.00001f;
+                m = Geobox.getMask(latMax, 90f, bits);
+            }
+//            LOG.info("latMax = {}", latMax);
+
+            GeoPt pMin = new GeoPt(latMin, lat);
+            GeoPt pMax = new GeoPt(latMax, lat);
+            LOG.info("lat distance for {} bits is {}m", bits, GeoDaoImpl.distance(pMin, pMax));
+
+            pMin = new GeoPt(lat, latMin);
+            pMax = new GeoPt(lat, latMax);
+//            LOG.info("long distance at N{} is {}m", lat, GeoDaoImpl.distance(pMin, pMax));
         }
     }
     
     public void testTuple() {
-        LOG.info("tuple20={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_20_38m));
-        LOG.info("tuple22={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_22_94dm));
-        LOG.info("tuple23={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_23_47dm));
+        LOG.info("tuple20={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_20_39m));
+        LOG.info("tuple22={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_22_10m));
+        LOG.info("tuple23={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_23_53dm));
+        
+        final long hash = Geobox.getHash(55.6030006409f, 13.0010004044f, Geobox.BITS_12_10km);
+        LOG.info("geoHash 12 = {}", hash);
+        Set<Long> boxes = Geobox.getTuple(55.6030006409f, 13.0010004044f, Geobox.BITS_12_10km);
+        LOG.info("tuple 12 = {}", boxes);
+        assertTrue("TupleContains", boxes.contains(hash));
     }
     
 //    public void testGetHashMatrix4x4() {

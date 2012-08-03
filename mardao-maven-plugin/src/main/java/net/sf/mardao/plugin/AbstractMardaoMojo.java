@@ -167,14 +167,6 @@ public class AbstractMardaoMojo extends AbstractMojo {
         if (false == targetDaoFolder.exists()) {
             targetDaoFolder.mkdirs();
         }
-        targetControllerFolder = new File(targetFolder, controllerBasePackage.replace('.', '/'));
-        if (false == targetControllerFolder.exists()) {
-            targetControllerFolder.mkdirs();
-        }
-        targetJspFolder = new File(targetResourcesFolder, "WEB-INF/jsp");
-        if (false == targetJspFolder.exists()) {
-            targetJspFolder.mkdirs();
-        }
         srcDaoFolder = new File(sourceFolder, daoBasePackage.replace('.', '/'));
         if (false == srcDaoFolder.exists()) {
             srcDaoFolder.mkdirs();
@@ -183,13 +175,24 @@ public class AbstractMardaoMojo extends AbstractMojo {
         if (false == srcDomainFolder.exists()) {
             srcDomainFolder.mkdirs();
         }
-        srcControllerFolder = new File(sourceFolder, controllerBasePackage.replace('.', '/'));
-        if (false == srcControllerFolder.exists()) {
-            srcControllerFolder.mkdirs();
-        }
-        srcJspFolder = new File(webappFolder, "WEB-INF/jsp");
-        if (false == srcJspFolder.exists()) {
-            srcJspFolder.mkdirs();
+        
+        if ("WEB".equals(persistenceType)) {
+            srcControllerFolder = new File(sourceFolder, controllerBasePackage.replace('.', '/'));
+            if (false == srcControllerFolder.exists()) {
+                srcControllerFolder.mkdirs();
+            }
+            targetControllerFolder = new File(targetFolder, controllerBasePackage.replace('.', '/'));
+            if (false == targetControllerFolder.exists()) {
+                targetControllerFolder.mkdirs();
+            }
+            srcJspFolder = new File(webappFolder, "WEB-INF/jsp");
+            if (false == srcJspFolder.exists()) {
+                srcJspFolder.mkdirs();
+            }
+            targetJspFolder = new File(targetResourcesFolder, "WEB-INF/jsp");
+            if (false == targetJspFolder.exists()) {
+                targetJspFolder.mkdirs();
+            }
         }
 
         // create destFolders

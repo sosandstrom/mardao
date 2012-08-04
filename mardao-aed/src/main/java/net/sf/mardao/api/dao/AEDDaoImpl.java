@@ -33,9 +33,29 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     
     /** Using slf4j logging */
     protected final Logger   LOG = LoggerFactory.getLogger(getClass());
+    
+    /** Will be populated by the children in afterPropertiesSet */
+    protected final Collection<AEDDaoImpl> childDaos = new ArrayList<AEDDaoImpl>();
 
+    /** Will be populated by the all children in afterPropertiesSet */
+    private static final Collection<AEDDaoImpl> applicationDaos = new ArrayList<AEDDaoImpl>();
+
+    private static AEDDaoImpl mardaoParentDao;
+    
     protected AEDDaoImpl(Class<T> type) {
         super(type);
+    }
+
+    /** Registers at applicationDaos and optionally at parentDao */
+    public void init() {
+        AEDDaoImpl.getApplicationDaos().add(this);
+        if (null != mardaoParentDao) {
+            mardaoParentDao.registerChildDao(this);
+        }
+    }
+    
+    protected final void registerChildDao(AEDDaoImpl childDao) {
+        childDaos.add(childDao);
     }
 
     @SuppressWarnings("rawtypes")
@@ -475,6 +495,18 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
 
     public int update(Map<String, Object> values, Expression... expressions) {
         throw new UnsupportedOperationException("Not yet implemented for AED");
+    }
+
+    public static AEDDaoImpl getMardaoParentDao() {
+        return mardaoParentDao;
+    }
+
+    public static void setMardaoParentDao(AEDDaoImpl parentDao) {
+        AEDDaoImpl.mardaoParentDao = parentDao;
+    }
+
+    public static Collection<AEDDaoImpl> getApplicationDaos() {
+        return applicationDaos;
     }
 
 }

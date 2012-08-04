@@ -35,8 +35,13 @@
 	<!-- ============== DaoBeans for entities in package ${group.name} ============ -->
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
 	<bean id="${helper.firstToLower($entity.simpleName)}Dao" 
-		class="${daoPackage}.${entity.simpleName}DaoBean">
+		class="${daoPackage}.${entity.simpleName}DaoBean"
+                init-method="init">
+#if( $entity.parent )
+                <property name="mardaoParentDao" ref="${helper.firstToLower($entity.parent.entity.simpleName)}Dao" />
+#end
 #foreach( $field in $entity.manyToOnes )
+                <!-- for ${field.name} Many-To-One relation -->
 		<property name="${field.name}Dao" ref="${field.name}Dao" />
 #end	
 	</bean>

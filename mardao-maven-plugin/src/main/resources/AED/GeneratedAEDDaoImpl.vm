@@ -55,7 +55,7 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
         return COLUMN_NAMES;
    }
    
-	
+
    // ------ DaoImpl overrides -----------------------------
    
    protected ${entity.simpleName} createDomain(Entity entity) {

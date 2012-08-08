@@ -1,10 +1,14 @@
 package net.sf.mardao.api.dao;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.Writer;
 import java.util.List;
 import java.util.Map;
+import javax.xml.transform.TransformerConfigurationException;
 
 import net.sf.mardao.api.domain.PrimaryKeyEntity;
+import org.xml.sax.SAXException;
 
 /**
  * 
@@ -80,4 +84,7 @@ public interface Dao<T extends PrimaryKeyEntity, ID extends Serializable, P exte
 
     Iterable<C> createKeys(Object parentKey, Iterable<ID> simpleKeys);
 
+    void xmlGenerateEntities(Writer writer, Object appArg0, Iterable<T> cursor) throws SAXException, IOException, TransformerConfigurationException;
+    
+    Iterable<T> xmlFindAll();
 }

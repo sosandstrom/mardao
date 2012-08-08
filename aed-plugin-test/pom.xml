@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>net.sf.mardao</groupId>
-		<version>1.23-SNAPSHOT</version>
+		<version>1.33-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>aed-plugin-test</artifactId>

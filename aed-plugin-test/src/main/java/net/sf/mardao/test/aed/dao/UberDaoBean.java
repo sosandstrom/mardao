@@ -12,6 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.Key;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import net.sf.mardao.api.dao.DaoImpl;
+import org.xml.sax.SAXException;
 
 public class UberDaoBean {
     static final Logger LOG  = LoggerFactory.getLogger(UberDaoBean.class);
@@ -24,7 +29,7 @@ public class UberDaoBean {
     private FootnoteDao footnoteDao;
     private AppendixDao appendixDao;
 
-    public void setup() {
+    public void setup() throws SAXException, FileNotFoundException {
         Book book = new Book();
         book.setISBN(ISBN);
         book.setTitle("Good morning midnight");
@@ -69,6 +74,9 @@ public class UberDaoBean {
         footnoteDao.persist(footnote);
 
         test();
+        
+        final File dest = new File("UberDaoBeans.xml");
+        DaoImpl.xmlGenerateEntities(dest, bookDao, chapterDao, pageDao, footnoteDao);
     }
 
     public void test() {

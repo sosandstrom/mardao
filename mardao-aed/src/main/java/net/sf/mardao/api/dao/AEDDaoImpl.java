@@ -1,5 +1,7 @@
 package net.sf.mardao.api.dao;
 
+import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,21 +20,32 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.KeyRange;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.files.AppEngineFile;
+import com.google.appengine.api.files.FileService;
+import com.google.appengine.api.files.FileServiceFactory;
+import com.google.appengine.api.files.FileWriteChannel;
+import com.google.apphosting.api.ApiProxy.ApiDeadlineExceededException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.nio.channels.Channels;
 import java.util.*;
-import org.slf4j.Logger;
+import javax.xml.transform.TransformerConfigurationException;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
 
 public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends Serializable> extends
         DaoImpl<T, ID, Key, Entity, Key> implements Dao<T, ID, Key, Key> {
-    
-    /** Using slf4j logging */
-    protected final Logger   LOG = LoggerFactory.getLogger(getClass());
     
     /** Will be populated by the children in afterPropertiesSet */
     protected final Collection<AEDDaoImpl> childDaos = new ArrayList<AEDDaoImpl>();
@@ -40,7 +53,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     /** Will be populated by the all children in afterPropertiesSet */
     private static final Collection<AEDDaoImpl> applicationDaos = new ArrayList<AEDDaoImpl>();
 
-    private static AEDDaoImpl mardaoParentDao;
+    private AEDDaoImpl mardaoParentDao;
     
     protected AEDDaoImpl(Class<T> type) {
         super(type);
@@ -137,6 +150,13 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
             // LOGGER.debug("  entity {} -> domain {}", entity, domain);
         }
         return returnValue;
+    }
+
+    protected QueryResultIterable asQueryResultIterable(PreparedQuery pq) {
+        FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
+        fetchOptions.chunkSize(100);
+
+        return pq.asQueryResultIterable(fetchOptions);
     }
 
     protected T asSingleEntity(PreparedQuery pq) {
@@ -492,21 +512,168 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         deleteByCore(keys);
         return keys.size();
     }
+    
+    public QueryResultIterable<T> queryAll() {
+        return queryBy(null, false, null);
+    }
+
+    protected QueryResultIterable<T> queryBy(String orderBy, boolean ascending, Key parentKey, Expression... filters) {
+        PreparedQuery pq = prepare(false, parentKey, null, orderBy, ascending, filters);
+        return new CursorIterable(asQueryResultIterable(pq));
+    }
 
     public int update(Map<String, Object> values, Expression... expressions) {
         throw new UnsupportedOperationException("Not yet implemented for AED");
     }
 
-    public static AEDDaoImpl getMardaoParentDao() {
+    private static String blobKeyFormat = "%s";
+    /**
+     * Also supports Key
+     * @param value
+     * @return 
+     */
+    @Override
+    protected String xmlFieldValue(Object value) {
+        if (value instanceof Key) {
+            return KeyFactory.keyToString((Key)value);
+        }
+        if (value instanceof BlobKey) {
+            return String.format(blobKeyFormat, ((BlobKey)value).getKeyString());
+        }
+        return super.xmlFieldValue(value);
+    }
+
+    @Override
+    protected void xmlGenerateFields(ContentHandler ch, T domain) throws SAXException {
+        super.xmlGenerateFields(ch, domain);
+        xmlGenerateField(ch, FIELD_NAME_PARENT, domain.getParentKey());
+    }
+
+    /**
+     * Overrides to return queryAll()
+     * @return a QueryResultIterable from queryAll()
+     */
+    @Override
+    public Iterable<T> xmlFindAll() {
+        return queryAll();
+    }
+    
+    static class XmlArg {
+        protected FileWriteChannel channel;
+        protected AppEngineFile file;
+        protected Writer writer;
+        protected final Collection<String> blobUrls = new ArrayList<String>();
+    }
+    
+    public static BlobKey xmlWriteToBlob(Dao... daos) throws IOException, SAXException, TransformerConfigurationException {
+        final XmlArg arg = new XmlArg();
+        
+        // setup XML transformer, then for each dao invoke xmlGenerateEntities
+        xmlGenerateEntityDaos(arg.writer, arg, daos);
+        
+        FileService fileService = FileServiceFactory.getFileService();
+        arg.file = fileService.createNewBlobFile("text/plain", "DaoEntities.txt");
+        arg.channel = fileService.openWriteChannel(arg.file, true);
+        arg.writer = Channels.newWriter(arg.channel, "UTF-8");
+        final PrintWriter pw = new PrintWriter(arg.writer);
+        
+        for (String blobUrl : arg.blobUrls) {
+            pw.println(blobUrl);
+        }
+        
+        pw.flush();
+        pw.close();
+        arg.channel.closeFinally();
+        final BlobKey blobKey = fileService.getBlobKey(arg.file);
+        
+        return blobKey;
+    }
+    
+    @Override
+    public void xmlGenerateEntities(Writer willBeNull, Object appArg0, Iterable<T> cursor) throws SAXException, IOException, TransformerConfigurationException {
+        final XmlArg arg = (XmlArg) appArg0;
+        
+        // create new
+        final FileService fileService = FileServiceFactory.getFileService();
+        arg.file = fileService.createNewBlobFile("text/xml", getTableName() + ".xml");
+        arg.channel = fileService.openWriteChannel(arg.file, true);
+        arg.writer = Channels.newWriter(arg.channel, "UTF-8");
+
+        super.xmlGenerateEntities(arg.writer, appArg0, cursor);
+        
+        // close
+        try {
+            arg.writer.flush();
+            arg.writer.close();
+            arg.channel.closeFinally();
+        }
+        catch (ApiDeadlineExceededException ignore) {
+            LOG.warn("{} when closing for {}", ignore.getMessage(), getTableName());
+        }
+
+        // format and add blobUrl
+        final BlobKey blobKey = fileService.getBlobKey(arg.file);
+        final String blobUrl = xmlFieldValue(blobKey.getKeyString());
+        arg.blobUrls.add(blobUrl);
+        
+        LOG.info("   generated entities for {} on {}", getTableName(), blobUrl);
+    }
+    
+    public class CursorIterable<T> implements QueryResultIterable<T> {
+        final private QueryResultIterable<Entity> _iterable;
+
+        public CursorIterable(QueryResultIterable<Entity> _iterable) {
+            this._iterable = _iterable;
+        }
+        
+        
+        public QueryResultIterator<T> iterator() {
+            return new CursorIterator<T>(_iterable.iterator());
+        }
+    }
+
+    class CursorIterator<T> implements QueryResultIterator<T> {
+        private final QueryResultIterator<Entity> _iterator;
+
+        protected CursorIterator(QueryResultIterator<Entity> _iterator) {
+            this._iterator = _iterator;
+        }
+
+        public boolean hasNext() {
+            return _iterator.hasNext();
+        }
+
+        public T next() {
+            return (T) createDomain(_iterator.next());
+        }
+
+        public void remove() {
+            _iterator.remove();
+        }
+
+        public Cursor getCursor() {
+            return _iterator.getCursor();
+        }
+    }
+    
+    public AEDDaoImpl getMardaoParentDao() {
         return mardaoParentDao;
     }
 
-    public static void setMardaoParentDao(AEDDaoImpl parentDao) {
-        AEDDaoImpl.mardaoParentDao = parentDao;
+    public void setMardaoParentDao(AEDDaoImpl parentDao) {
+        this.mardaoParentDao = parentDao;
     }
 
     public static Collection<AEDDaoImpl> getApplicationDaos() {
         return applicationDaos;
+    }
+
+    public static String getBlobKeyFormat() {
+        return blobKeyFormat;
+    }
+
+    public static void setBlobKeyFormat(String format) {
+        blobKeyFormat = format;
     }
 
 }

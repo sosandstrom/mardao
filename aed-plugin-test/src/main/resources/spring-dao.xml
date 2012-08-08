@@ -12,19 +12,28 @@
 
 	<!-- ============== DaoBeans for entities in package net.sf.mardao.test.aed.domain ============ -->
 	<bean id="bookDao" 
-		class="net.sf.mardao.test.aed.dao.BookDaoBean">
+		class="net.sf.mardao.test.aed.dao.BookDaoBean"
+                init-method="init">
 	</bean>
 	<bean id="chapterDao" 
-		class="net.sf.mardao.test.aed.dao.ChapterDaoBean">
+		class="net.sf.mardao.test.aed.dao.ChapterDaoBean"
+                init-method="init">
+                <property name="mardaoParentDao" ref="bookDao" />
 	</bean>
 	<bean id="pageDao" 
-		class="net.sf.mardao.test.aed.dao.PageDaoBean">
+		class="net.sf.mardao.test.aed.dao.PageDaoBean"
+                init-method="init">
+                <property name="mardaoParentDao" ref="chapterDao" />
 	</bean>
 	<bean id="appendixDao" 
-		class="net.sf.mardao.test.aed.dao.AppendixDaoBean">
+		class="net.sf.mardao.test.aed.dao.AppendixDaoBean"
+                init-method="init">
+                <property name="mardaoParentDao" ref="bookDao" />
 	</bean>
 	<bean id="footnoteDao" 
-		class="net.sf.mardao.test.aed.dao.FootnoteDaoBean">
+		class="net.sf.mardao.test.aed.dao.FootnoteDaoBean"
+                init-method="init">
+                <property name="mardaoParentDao" ref="pageDao" />
 	</bean>
 	
 

@@ -9,6 +9,9 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+
 import net.sf.mardao.api.dao.AEDDaoImpl;
 
 import ${entity.className};
@@ -520,5 +523,31 @@ ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #e
 #end
 #end
 
-	
+    // ----------------------- XML marshalling methods -------------------------
+
+    /**
+     * Overrides to generate the domain object's properties.
+     * @param ch
+     * @param domain
+     * @throws SAXException 
+     */
+    protected void xmlGenerateFields(ContentHandler ch, ${entity.simpleName} domain) throws SAXException {
+        // createdDate, updatedDate and parent:
+        super.xmlGenerateFields(ch, domain);
+
+        // basic fields
+#foreach( $field in $entity.fields )
+        xmlGenerateField(ch, COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
+#end
+        // one-to-ones
+#foreach( $field in $entity.oneToOnes )	 
+        xmlGenerateField(ch, COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
+#end
+        // many-to-ones
+#foreach( $field in $entity.manyToOnes )	 
+        xmlGenerateField(ch, COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
+#end
+
+    }
+    
 }

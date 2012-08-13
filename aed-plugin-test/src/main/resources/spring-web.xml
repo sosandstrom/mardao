@@ -27,6 +27,10 @@
 	    <property name="parentChapterDao" ref="chapterDao" />
 	</bean>
 	
+	<bean id="dCategoryController" class="net.sf.mardao.test.aed.web.DCategoryController">
+	    <property name="dCategoryDao" ref="dCategoryDao" />
+	</bean>
+	
 	<bean id="appendixController" class="net.sf.mardao.test.aed.web.AppendixController">
 	    <property name="appendixDao" ref="appendixDao" />
 	    <property name="parentDao" ref="bookDao" />

@@ -57,7 +57,7 @@ public abstract class AEDPrimaryKeyEntity<ID extends Serializable> implements Pr
         final ID sk = getSimpleKey();
         final Class<ID> idClass = getIdClass();
 
-        LOG.debug("{}/{} for " + idClass.getSimpleName(), getParentKey(), sk);
+//        LOG.debug("{}/{} for " + idClass.getSimpleName(), getParentKey(), sk);
 
         if (null == sk) {
             return null;

@@ -15,8 +15,8 @@
 		<module>mardao-maven-plugin</module>
 		<module>mardao-api</module>
 		<module>mardao-aed</module>
-		<module>mardao-android</module>
-		<module>mardao-jdbc</module>
+<!--		<module>mardao-android</module>
+		<module>mardao-jdbc</module>-->
 	</modules>
 
 	<profiles>
@@ -46,7 +46,25 @@
 				<version>3.8.1</version>
 				<scope>test</scope>
 			</dependency>
+                        <dependency>
+                            <groupId>org.easymock</groupId>
+                            <artifactId>easymock</artifactId>
+                            <version>3.1</version>
+                            <scope>test</scope>
+                        </dependency>
 
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>1.6.1</version>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-jdk14</artifactId>
+				<version>1.6.1</version>
+				<scope>test</scope>
+			</dependency>
 			<dependency>
 				<groupId>log4j</groupId>
 				<artifactId>log4j</artifactId>

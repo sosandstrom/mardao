@@ -12,10 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.Key;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import net.sf.mardao.api.dao.DaoImpl;
+import java.io.IOException;
+import java.util.ArrayList;
+import javax.xml.transform.TransformerConfigurationException;
+import net.sf.mardao.api.dao.AEDDaoImpl;
+import net.sf.mardao.test.aed.domain.DCategory;
 import org.xml.sax.SAXException;
 
 public class UberDaoBean {
@@ -28,8 +30,9 @@ public class UberDaoBean {
     private PageDao     pageDao;
     private FootnoteDao footnoteDao;
     private AppendixDao appendixDao;
+    private DCategoryDao categoryDao;
 
-    public void setup() throws SAXException, FileNotFoundException {
+    public void setup() throws SAXException, FileNotFoundException, IOException, TransformerConfigurationException {
         Book book = new Book();
         book.setISBN(ISBN);
         book.setTitle("Good morning midnight");
@@ -72,11 +75,16 @@ public class UberDaoBean {
         footnote.setName("Be aware that...");
         footnote.setPage((Key) page1.getPrimaryKey());
         footnoteDao.persist(footnote);
+        
+        for (int i = 0; i < 10; i++) {
+            DCategory cat = new DCategory();
+            cat.setTitle("Category number " + i);
+            categoryDao.persist(cat);
+        }
 
         test();
         
-        final File dest = new File("UberDaoBeans.xml");
-        DaoImpl.xmlGenerateEntities(dest, bookDao, chapterDao, pageDao, footnoteDao);
+        AEDDaoImpl.xmlWriteToBlobs(bookDao, chapterDao, pageDao, footnoteDao);
     }
 
     public void test() {
@@ -105,6 +113,26 @@ public class UberDaoBean {
         Appendix appendix = appendixDao.findByPrimaryKey(book.getPrimaryKey(), "Appendix 3/4 & \"B\"");
         if (null == appendix) {
             LOG.error("Expected to find appendix for book {}", book);
+        }
+        
+        // cache exercise
+        List<DCategory> cats = null;
+        for (int i = 0; i < 10; i++) {
+            cats = categoryDao.findAll();
+        }
+        DCategory fifth = cats.get(4);
+        List<Long> ids = new ArrayList<Long>();
+        for (int i = 2; i < 7; i++) {
+            ids.add(cats.get(i).getSimpleKey());
+        }
+        
+        // update fifth element
+        fifth.setTitle("Updated title for fifth cat");
+        categoryDao.update(fifth);
+        
+        // re-retrieve
+        for (int i = 0; i < 2; i++) {
+            categoryDao.findByPrimaryKeys(ids);
         }
     }
 
@@ -146,6 +174,10 @@ public class UberDaoBean {
 
     public final void setAppendixDao(AppendixDao appendixDao) {
         this.appendixDao = appendixDao;
+    }
+
+    public void setCategoryDao(DCategoryDao categoryDao) {
+        this.categoryDao = categoryDao;
     }
 
 }

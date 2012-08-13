@@ -1,16 +1,21 @@
 package net.sf.mardao.api.dao;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
@@ -19,10 +24,12 @@ import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
 import net.sf.mardao.api.domain.CreatedUpdatedEntity;
+import net.sf.mardao.api.xml.MardaoContentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.AttributesImpl;
 
 
@@ -253,34 +260,126 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
     }
 
     // ----------------------- persist methods -------------------------
+    
+    protected abstract List<C> persistByCore(Iterable<E> entities);
+    
+    protected abstract void persistUpdateKeys(T domain, C key);
 
-    protected abstract C persistEntity(E entity);
+    protected abstract void populate(E entity, String name, Object value);
 
+    private final void populate(E entity, Map<String, Object> nameValuePairs) {
+        for (Entry<String, Object> entry : nameValuePairs.entrySet()) {
+            populate(entity, entry.getKey(), entry.getValue());
+        }
+    }
+    
+    private static final void persistUpdateDates(CreatedUpdatedEntity domain, Date date) {
+        // only if not previously created
+        if (null != domain._getNameCreatedDate() && null == domain.getCreatedDate()) {
+            domain._setCreatedDate(date);
+        }
+
+        // always update the date
+        if (null != domain._getNameUpdatedDate()) {
+            domain._setUpdatedDate(date);
+        }
+    }
+    
+    /**
+     * Override this method if you want to update MemCache for example
+     * @param domains
+     * @return 
+     */
+    protected List<C> persistStep1(Iterable<T> domains) {
+        final List<E> entities = new ArrayList<E>();
+        final Date date = new Date();
+        for(T domain : domains) {
+            persistUpdateDates(domain, date);
+            final E entity = createEntity(domain);
+            entities.add(entity);
+        }
+        final List<C> keys = updateByCore(entities);
+        persistUpdateKeys(domains, keys);
+        return keys;
+    }
+
+    protected List<ID> persistStep2(Iterable<T> domains) {
+        final List<C> keys = persistStep1(domains);
+        return convert(keys);
+    }
+
+//    protected abstract C persistEntity(E entity);
+
+    /**
+     * If you want to override, override persistImpl instead
+     * @param domains
+     * @return 
+     */
+    @Override
+    public final List<ID> persist(Iterable<T> domains) {
+        return persistStep2(domains);
+    }
+    
+    /**
+     * If you want to override, override persistImpl instead
+     * This method invokes persist(Iterable)
+     * @param domain
+     * @return 
+     */
     @SuppressWarnings("unchecked")
-    public ID persist(T domain) {
+    public final ID persist(T domain) {
         final List<ID> keys = persist(Arrays.asList(domain));
         return keys.get(0);
     }
 
-    public T persist(Map<String, Object> nameValuePairs) {
+    public final T persist(Map<String, Object> nameValuePairs) {
         final E entity = createEntity(nameValuePairs);
-        persistEntity(entity);
-        return createDomain(entity);
+        final T domain = createDomain(entity);
+        final ID id = persist(domain);
+        return domain;
     }
 
-    protected abstract void persistUpdateDates(CreatedUpdatedEntity domain, E entity, Date date);
-
-    protected abstract void persistUpdateKeys(T domain, C key);
+//    protected abstract void persistUpdateDates(CreatedUpdatedEntity domain, E entity, Date date);
 
     private final void persistUpdateKeys(Iterable<T> domains, Iterable<C> keys) {
         final Iterator<T> i = domains.iterator();
+        final Map<C, T> cacheMap = new HashMap<C, T>();
 
+        T domain;
         for(C key : keys) {
-            persistUpdateKeys(i.next(), key);
+            domain = i.next();
+            persistUpdateKeys(domain, key);
         }
     }
 
-    protected abstract void populate(E entity, Map<String, Object> nameValuePairs);
+    protected abstract List<C> updateByCore(Iterable<E> entities);
+    
+    /**
+     * Override this method if you want to update MemCache for example
+     * @param domains
+     * @return 
+     */
+    protected List<C> updateStep1(Iterable<T> domains) {
+        final List<E> entities = new ArrayList<E>();
+        final Date date = new Date();
+        for(T domain : domains) {
+            persistUpdateDates(domain, date);
+            final E entity = createEntity(domain);
+            entities.add(entity);
+        }
+        final List<C> keys = updateByCore(entities);
+        persistUpdateKeys(domains, keys);
+        return keys;
+    }
+
+    protected List<ID> updateStep2(Iterable<T> domains) {
+        final List<C> keys = persistStep1(domains);
+        return convert(keys);
+    }
+
+    public final List<ID> update(Iterable<T> domains) {
+        return updateStep2(domains);
+    }
 
     public ID update(T domain) {
         @SuppressWarnings("unchecked")
@@ -288,21 +387,6 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
         return keys.get(0);
     }
 
-    public final List<ID> update(Iterable<T> domains) {
-        List<E> entities = new ArrayList<E>();
-        final Date date = new Date();
-        for(T domain : domains) {
-            final E entity = createEntity(domain);
-            persistUpdateDates(domain, entity, date);
-            entities.add(entity);
-        }
-        List<C> keys = updateByCore(entities);
-        persistUpdateKeys(domains, keys);
-        return convert(keys);
-    }
-
-    protected abstract List<C> updateByCore(Iterable<E> entities);
-    
     // ----------------------- XML marshalling methods -------------------------
 
     /**
@@ -326,10 +410,12 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
     public static final String TAG_FIELD = "field";
     public static final String TAG_VALUE = "value";
     
+    public static final String ATTR_NAME = "name";
+    public static final String ATTR_VALUE = "value";
     protected void xmlGenerateMultiValue(ContentHandler ch, Object value) throws SAXException {
         if (null != value) {
             final AttributesImpl atts = new AttributesImpl();
-            atts.addAttribute(NAMESPACE_URI, "", "value", "String", xmlFieldValue(value));
+            atts.addAttribute(NAMESPACE_URI, "", ATTR_VALUE, "String", xmlFieldValue(value));
             ch.startElement(NAMESPACE_URI, "", TAG_VALUE, atts);
             ch.endElement(NAMESPACE_URI, "", TAG_VALUE);
         }
@@ -340,7 +426,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
     protected void xmlGenerateFieldCData(ContentHandler ch, String name, String value) throws SAXException {
         if (null != value) {
             final AttributesImpl atts = new AttributesImpl();
-            atts.addAttribute(NAMESPACE_URI, "", "name", "String", name);
+            atts.addAttribute(NAMESPACE_URI, "", ATTR_NAME, "String", name);
             ch.startElement(NAMESPACE_URI, "", TAG_FIELD, atts);
             ch.characters(CDATA_BEGIN, 0, CDATA_BEGIN.length);
             final char v[] = value.toCharArray();
@@ -353,7 +439,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
     protected void xmlGenerateField(ContentHandler ch, String name, Object value) throws SAXException {
         if (null != value) {
             final AttributesImpl atts = new AttributesImpl();
-            atts.addAttribute(NAMESPACE_URI, "", "name", "String", name);
+            atts.addAttribute(NAMESPACE_URI, "", ATTR_NAME, "String", name);
             if (value instanceof Collection) {
                 ch.startElement(NAMESPACE_URI, "", TAG_FIELD, atts);
                 for (Object v : (Collection)value) {
@@ -361,7 +447,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
                 }
             }
             else {
-                atts.addAttribute(NAMESPACE_URI, "", "value", "", xmlFieldValue(value));
+                atts.addAttribute(NAMESPACE_URI, "", ATTR_VALUE, "", xmlFieldValue(value));
                 ch.startElement(NAMESPACE_URI, "", TAG_FIELD, atts);
             }
             ch.endElement(NAMESPACE_URI, "", TAG_FIELD);
@@ -389,13 +475,15 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
     }
 
     public static final String TAG_ENTITY = "entity";
+    public static final String ATTR_CLASS = "class";
+    public static final String ATTR_ID = "id";
     protected void xmlGenerateEntity(ContentHandler ch, T domain) throws SAXException {
         final String id = xmlFieldValue(domain.getSimpleKey());
 //        LOG.info("      entity id={}", id);
                 
         final AttributesImpl atts = new AttributesImpl();
-        atts.addAttribute(NAMESPACE_URI, "", "id", "", id);
-        atts.addAttribute(NAMESPACE_URI, "", "class", "String", domain.getClass().getName());
+        atts.addAttribute(NAMESPACE_URI, "", ATTR_ID, "", id);
+        atts.addAttribute(NAMESPACE_URI, "", ATTR_CLASS, "String", domain.getClass().getName());
         ch.startElement(NAMESPACE_URI, "", TAG_ENTITY, atts);
         xmlGenerateFields(ch, domain);
         ch.endElement(NAMESPACE_URI, "", TAG_ENTITY);
@@ -438,4 +526,52 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
         }
     }
 
+    public static void xmlPersistBlob(Map<String, Dao> daoMap, String blobUrl) throws ParserConfigurationException, SAXException, IOException {
+        final SAXParserFactory factory = SAXParserFactory.newInstance();
+        final SAXParser parser = factory.newSAXParser();
+        final XMLReader xmlReader = parser.getXMLReader();
+        MardaoContentHandler handler = new MardaoContentHandler(daoMap, blobUrl);
+        xmlReader.setContentHandler(handler);
+        xmlReader.parse(blobUrl);
+    }
+    
+    public static void xmlPersistBlobs(String baseUrl, Collection<String> blobKeys, Dao... daos) throws ParserConfigurationException, SAXException, IOException {
+        
+        // map the daos
+        final Map<String, Dao> daoMap = new HashMap<String, Dao>();
+        for (Dao d : daos) {
+            daoMap.put(d.getTableName(), d);
+        }
+        
+        // parse the XML files one by one
+        for (String blobKeyString : blobKeys) {
+            
+            // 
+            xmlPersistBlob(daoMap, baseUrl + blobKeyString);
+        }
+    }
+    
+    protected abstract T xmlCreateDomain(Properties properties);
+    
+    public T xmlPersistEntity(Properties properties) {
+        final T domain = xmlCreateDomain(properties);
+
+        final String nameCreated = domain._getNameCreatedDate();
+        if (null != nameCreated) {
+            final String created = properties.getProperty(nameCreated);
+            if (null != created) {
+                domain._setCreatedDate(new Date(Long.parseLong(created)));
+            }
+        }
+
+        final String nameUpdated = domain._getNameUpdatedDate();
+        if (null != nameUpdated) {
+            final String updated = properties.getProperty(nameUpdated);
+            if (null != updated) {
+                domain._setUpdatedDate(new Date(Long.parseLong(updated)));
+            }
+        }
+        
+        return domain;
+    }
 }

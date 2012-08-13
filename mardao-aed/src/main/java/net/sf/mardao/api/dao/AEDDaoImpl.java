@@ -5,14 +5,15 @@ import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.TreeMap;
 
 import net.sf.mardao.api.domain.AEDPrimaryKeyEntity;
-import net.sf.mardao.api.domain.CreatedUpdatedEntity;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -34,12 +35,25 @@ import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.files.FileWriteChannel;
 import com.google.apphosting.api.ApiProxy.ApiDeadlineExceededException;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.channels.Channels;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
+import net.sf.jsr107cache.Cache;
+import net.sf.jsr107cache.CacheException;
+import net.sf.jsr107cache.CacheFactory;
+import net.sf.jsr107cache.CacheManager;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -52,6 +66,14 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
 
     /** Will be populated by the all children in afterPropertiesSet */
     private static final Collection<AEDDaoImpl> applicationDaos = new ArrayList<AEDDaoImpl>();
+    
+    /** Set this to true in subclass (TypeDaoBean) to enable the MemCache primaryKey - Entity */
+    protected boolean memCacheEntity = false;
+
+    /** Set this to true in subclass (TypeDaoBean) to enable the MemCache for findAll */
+    protected boolean memCacheAll = false;
+    
+    protected Cache memCache = null;
 
     private AEDDaoImpl mardaoParentDao;
     
@@ -65,12 +87,26 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         if (null != mardaoParentDao) {
             mardaoParentDao.registerChildDao(this);
         }
+        
+        // initialize MemCache?
+        if (memCacheAll || memCacheEntity) {
+            LOG.debug("initializing memCache for {}.", getTableName());
+            try {
+                CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
+                memCache = cacheFactory.createCache(Collections.emptyMap());
+            } catch (CacheException e) {
+                LOG.error("Cannot initialize MemCache", e);
+                memCacheAll = false;
+                memCacheEntity = false;
+            }            
+        }
     }
     
     protected final void registerChildDao(AEDDaoImpl childDao) {
         childDaos.add(childDao);
     }
 
+    /** This method is called from (generated) createDomain(E entity) */
     @SuppressWarnings("rawtypes")
     protected static final void convertCreatedUpdatedDates(Entity from, AEDPrimaryKeyEntity domain) {
         if (null != domain._getNameCreatedDate()) {
@@ -112,8 +148,15 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         return new FilterEqual(fieldName, param);
     }
 
-    protected static void populate(Entity entity, String name, Object value) {
-        if (null != value) {
+    /**
+     * This method is called from (generated) createEntity(T domain)
+     * @param entity
+     * @param name
+     * @param value 
+     */
+    @Override
+    protected final void populate(Entity entity, String name, Object value) {
+        if (null != name && null != value) {
             // String properties must be 500 characters or less.
             // Instead, use com.google.appengine.api.datastore.Text, which can store strings of any length.
             if (value instanceof String) {
@@ -122,8 +165,8 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
                     value = new Text(s);
                 }
             }
+            entity.setProperty(name, value);
         }
-        entity.setProperty(name, value);
     }
 
     protected static DatastoreService getDatastoreService() {
@@ -330,12 +373,24 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     public final T findByPrimaryKey(Key parentKey, ID primaryKey) {
         T domain = null;
         final Key key = createKey((Key) parentKey, primaryKey);
-        final DatastoreService datastore = getDatastoreService();
-        try {
-            final Entity entity = datastore.get(key);
-            domain = createDomain(entity);
+        
+        // check cache first
+        if (memCacheEntity) {
+            domain = (T) memCache.get(key);
         }
-        catch (EntityNotFoundException ignore) {
+        
+        if (null == domain) {
+            try {
+                final DatastoreService datastore = getDatastoreService();
+                final Entity entity = datastore.get(key);
+                domain = createDomain(entity);
+                
+                if (memCacheEntity) {
+                    memCache.put(key, domain);
+                }
+            }
+            catch (EntityNotFoundException ignore) {
+            }
         }
         LOG.debug("{} -> {}", key.toString(), domain);
 
@@ -343,76 +398,142 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     }
 
     public final Map<ID, T> findByPrimaryKeys(Key parentKey, Iterable<ID> primaryKeys) {
+        int entitiesCached = 0, entitiesQueried = 0;
         final Map<ID, T> returnValue = new TreeMap<ID, T>();
+        
+        // convert to Keys
         final List<Key> keys = new ArrayList<Key>();
         Key key;
         for(ID id : primaryKeys) {
             key = createKey((Key) parentKey, id);
             keys.add(key);
         }
-        final DatastoreService datastore = getDatastoreService();
-        final Map<Key, Entity> entities = datastore.get(keys);
-        T domain;
+        
         ID id;
-        for(Entry<Key, Entity> entry : entities.entrySet()) {
-            id = convert(entry.getKey());
-            domain = createDomain(entry.getValue());
-            returnValue.put(id, domain);
+        // check cache first
+        Map cached = null;
+        if (memCacheEntity) {
+            try {
+                cached = memCache.getAll(keys);
+                
+                // found entities should not be queried
+                keys.removeAll(cached.keySet());
+                
+                // add to returnValue
+                Set<Entry<Key, T>> cachedEntries = cached.entrySet();
+                for (Entry<Key, T> entry : cachedEntries) {
+                    id = convert(entry.getKey());
+                    returnValue.put(id, entry.getValue());
+                }
+                entitiesCached = cached.size();
+            } catch (CacheException ignore) {
+            }
         }
+        
+        // cache miss?
+        if (!keys.isEmpty()) {
+            final DatastoreService datastore = getDatastoreService();
+            final Map<Key, Entity> entities = datastore.get(keys);
+            T domain;
+            for(Entry<Key, Entity> entry : entities.entrySet()) {
+                id = convert(entry.getKey());
+                domain = createDomain(entry.getValue());
+                returnValue.put(id, domain);
+            }
+            entitiesQueried = entities.size();
+        }
+        
+        LOG.debug("cached:{}, queried:{}", entitiesCached, entitiesQueried);
         return returnValue;
     }
 
+    protected final String memCacheAllKey() {
+        return String.format("%s.findAll()", getTableName());
+    }
+    
+    /**
+     * Overrides to implement MemCache
+     * @return 
+     */
+    @Override
+    public List<T> findAll() {
+        if (memCacheAll) {
+            final String memCacheKey = memCacheAllKey();
+            List<T> returnValue = (List<T>) memCache.get(memCacheKey);
+            LOG.debug("{} cached is {}", memCacheKey, null != returnValue);
+            if (null == returnValue) {
+                returnValue = super.findAll();
+                memCache.put(memCacheKey, returnValue);
+            }
+            return returnValue;
+        }
+        return super.findAll();
+    }
+    
     public List<ID> findAllKeys() {
         PreparedQuery pq = prepare(true, Entity.KEY_RESERVED_PROPERTY, true);
         return asKeys(pq, -1, 0);
     }
 
-    @Override
-    protected final Key persistEntity(Entity entity) {
-        final DatastoreService datastore = getDatastoreService();
+    protected final void updateCache(Map<Key, T> domains) {
+        LOG.debug("updating cache for {} {}", domains.size(), getTableName());
+        if (!domains.isEmpty()) {
+            // invalidate cache
+            if (memCacheAll) {
+                memCache.remove(memCacheAllKey());
+            }
 
-        return datastore.put(entity);
-    }
-
-    public List<ID> persist(Iterable<T> domains) {
-        final List<ID> ids = update(domains);
-        return ids;
-    }
-
-    @Override
-    protected final void persistUpdateDates(CreatedUpdatedEntity domain, Entity entity, Date date) {
-
-        // populate createdDate
-        String propertyName = domain._getNameCreatedDate();
-        if (null != propertyName) {
-
-            // only if not previously created
-            if (null == entity.getProperty(propertyName)) {
-                entity.setProperty(propertyName, date);
-                domain._setCreatedDate(date);
+            if (memCacheEntity) {
+                memCache.putAll(domains);
             }
         }
-
-        // update updatedDate
-        propertyName = domain._getNameUpdatedDate();
-        if (null != propertyName) {
-
-            // always update the date
-            entity.setProperty(propertyName, date);
-            domain._setUpdatedDate(date);
+    }
+    
+    protected final void updateCache(Collection<Key> keys, Iterable<T> domains) {
+        final Map<Key, T> cacheMap = new HashMap<Key, T>();
+        
+        if (memCacheEntity) {
+            // update domains in cache
+            final Iterator<Key> i = keys.iterator();
+            Key key;
+            for (T domain : domains) {
+                key = i.next();
+                cacheMap.put(key, domain);
+            }
         }
+        
+        updateCache(cacheMap);
     }
 
-    protected static final List<Key> persistByCore(Iterable<Entity> entities) {
-        final DatastoreService datastore = getDatastoreService();
+    @Override
+    protected List<Key> persistStep1(Iterable<T> domains) {
+        final List<Key> keys = super.persistStep1(domains);
+        
+        updateCache(keys, domains);
+        
+        return keys;
+    }
 
+    @Override
+    protected List<Key> updateStep1(Iterable<T> domains) {
+        final List<Key> keys = super.updateStep1(domains);
+        
+        updateCache(keys, domains);
+        
+        return keys;
+    }
+    
+    @Override
+    protected final List<Key> persistByCore(Iterable<Entity> entities) {
+        final DatastoreService datastore = getDatastoreService();
+        List<Key> keys;
         try {
-            return datastore.put(entities);
+            keys = datastore.put(entities);
         }
         catch (DatastoreFailureException ex) {
             LoggerFactory.getLogger(AEDDaoImpl.class).warn("Re-trying with allocated ids: {}", ex.getMessage());
             // the id allocated for a new entity was already in use, please try again
-            ArrayList<Key> keys = new ArrayList<Key>();
+            keys = new ArrayList<Key>();
             for (Entity entity : entities) {
                 KeyRange range = datastore.allocateIds(entity.getParent(), entity.getKind(), 1);
                 Entity clone = new Entity(range.getStart());
@@ -425,8 +546,8 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
                     throw inner;
                 }
             }
-            return keys;
         }
+        return keys;
     }
 
     protected final List<Key> updateByCore(Iterable<Entity> entities) {
@@ -438,11 +559,23 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         // trivial optimization
         final DatastoreService datastore = getDatastoreService();
         datastore.delete(primaryKey);
+        if (memCacheEntity) {
+            memCache.remove(primaryKey);
+        }
+        if (memCacheAll) {
+            memCache.remove(memCacheAllKey());
+        }
     }
 
     public final void deleteByCore(Iterable<Key> primaryKeys) {
         final DatastoreService datastore = getDatastoreService();
         datastore.delete(primaryKeys);
+        if (memCacheEntity) {
+            memCache.remove(primaryKeys);
+        }
+        if (memCacheAll) {
+            memCache.remove(memCacheAllKey());
+        }
     }
 
     protected List<T> findByKey(String fieldName, Class<?> foreignClass, Object key) {
@@ -565,30 +698,6 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         protected final Collection<String> blobUrls = new ArrayList<String>();
     }
     
-    public static BlobKey xmlWriteToBlob(Dao... daos) throws IOException, SAXException, TransformerConfigurationException {
-        final XmlArg arg = new XmlArg();
-        
-        // setup XML transformer, then for each dao invoke xmlGenerateEntities
-        xmlGenerateEntityDaos(arg.writer, arg, daos);
-        
-        FileService fileService = FileServiceFactory.getFileService();
-        arg.file = fileService.createNewBlobFile("text/plain", "DaoEntities.txt");
-        arg.channel = fileService.openWriteChannel(arg.file, true);
-        arg.writer = Channels.newWriter(arg.channel, "UTF-8");
-        final PrintWriter pw = new PrintWriter(arg.writer);
-        
-        for (String blobUrl : arg.blobUrls) {
-            pw.println(blobUrl);
-        }
-        
-        pw.flush();
-        pw.close();
-        arg.channel.closeFinally();
-        final BlobKey blobKey = fileService.getBlobKey(arg.file);
-        
-        return blobKey;
-    }
-    
     @Override
     public void xmlGenerateEntities(Writer willBeNull, Object appArg0, Iterable<T> cursor) throws SAXException, IOException, TransformerConfigurationException {
         final XmlArg arg = (XmlArg) appArg0;
@@ -656,6 +765,85 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         }
     }
     
+    protected abstract Key xmlCreateKey(String id, Key parentKey);
+    
+    protected void xmlPopulateProperty(Entity entity, String name, String value, Class clazz) {
+        if (null != value) {
+            if (Long.class.equals(clazz)) {
+                entity.setProperty(name, Long.parseLong(value));
+            }
+            else if (Key.class.equals(clazz)) {
+                entity.setProperty(name, KeyFactory.stringToKey(value));
+            }
+            else if (BlobKey.class.equals(clazz)) {
+                entity.setProperty(name, new BlobKey(value));
+            }
+            else {
+                // default for Strings, converts to Text if length>500
+                populate(entity, name, value);
+            }
+        }
+    }
+    
+    protected abstract void xmlPopulateProperties(Entity entity, Properties properties);
+
+    @Override
+    protected T xmlCreateDomain(Properties properties) {
+        final String id = properties.getProperty(ATTR_ID);
+        final String parentKeyString = properties.getProperty(FIELD_NAME_PARENT);
+        final Key parentKey = null != parentKeyString ? KeyFactory.stringToKey(parentKeyString) : null;
+        final Key primaryKey = xmlCreateKey(id, parentKey);
+
+        final Entity entity = new Entity(primaryKey);
+        
+        xmlPopulateProperties(entity, properties);
+        
+        final T domain = createDomain(entity);
+        return domain;
+    }
+    
+    public static BlobKey xmlWriteToBlobs(Dao... daos) throws IOException, SAXException, TransformerConfigurationException {
+        final XmlArg arg = new XmlArg();
+        
+        // setup XML transformer, then for each dao invoke xmlGenerateEntities
+        xmlGenerateEntityDaos(arg.writer, arg, daos);
+        
+        // now, write the master file of blobKeys
+        FileService fileService = FileServiceFactory.getFileService();
+        arg.file = fileService.createNewBlobFile("text/plain", "DaoEntities.txt");
+        arg.channel = fileService.openWriteChannel(arg.file, true);
+        arg.writer = Channels.newWriter(arg.channel, "UTF-8");
+        final PrintWriter pw = new PrintWriter(arg.writer);
+        
+        for (String blobUrl : arg.blobUrls) {
+            pw.println(blobUrl);
+        }
+        
+        pw.flush();
+        pw.close();
+        arg.channel.closeFinally();
+        final BlobKey blobKey = fileService.getBlobKey(arg.file);
+        
+        return blobKey;
+    }
+    
+    public static void xmlParseFromBlobs(String baseUrl, String masterBlobKey, Dao... daos) throws MalformedURLException, IOException, ParserConfigurationException, SAXException {
+        
+        // first, read the master file of blobKeys
+        final URL url = new URL(baseUrl + masterBlobKey);
+        final InputStream in = url.openStream();
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        final Collection<String> blobKeys = new ArrayList<String>();
+        String s;
+        while (null != (s = reader.readLine())) {
+            blobKeys.add(s);
+        }
+        reader.close();
+        
+        // now, for each dao / XML file, parse and persist
+        xmlPersistBlobs(baseUrl, blobKeys, daos);
+    }
+    
     public AEDDaoImpl getMardaoParentDao() {
         return mardaoParentDao;
     }
@@ -674,6 +862,14 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
 
     public static void setBlobKeyFormat(String format) {
         blobKeyFormat = format;
+    }
+
+    public void setMemCacheEntity(boolean memCacheEntity) {
+        this.memCacheEntity = memCacheEntity;
+    }
+
+    public void setMemCacheAll(boolean memCacheAll) {
+        this.memCacheAll = memCacheAll;
     }
 
 }

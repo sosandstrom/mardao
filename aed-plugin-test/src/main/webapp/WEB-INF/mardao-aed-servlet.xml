@@ -21,6 +21,7 @@
 		<property name="pageDao" ref="pageDao" />
 		<property name="footnoteDao" ref="footnoteDao" />
 		<property name="appendixDao" ref="appendixDao" />
+                <property name="categoryDao" ref="dCategoryDao" />
 	</bean>
 
 

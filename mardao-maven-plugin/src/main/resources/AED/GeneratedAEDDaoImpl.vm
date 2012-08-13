@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -135,6 +136,10 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
    protected Entity createEntity(${entity.simpleName} domain) {
         final Entity entity = domain._createEntity();
 
+                // createdDate, updatedDate
+		populate(entity, domain._getNameCreatedDate(), domain.getCreatedDate());
+                populate(entity, domain._getNameUpdatedDate(), domain.getUpdatedDate());
+		
 		// properties
 #foreach( $field in $entity.fields )
 		populate(entity, COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
@@ -546,6 +551,40 @@ ${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #e
         // many-to-ones
 #foreach( $field in $entity.manyToOnes )	 
         xmlGenerateField(ch, COLUMN_NAME_${field.name.toUpperCase()}, domain.get${helper.firstToUpper($field.name)}());
+#end
+
+    }
+
+    @Override
+    protected Key xmlCreateKey(String id, Key parentKey) {
+#if( ${entity.pk.type} == "java.lang.String" )
+        return KeyFactory.createKey(parentKey, getTableName(), id);
+#elseif( ${entity.pk.type} == "java.lang.Long" )
+        return KeyFactory.createKey(parentKey, getTableName(), Long.parseLong(id));
+#else
+	return KeyFactory.stringToKey(id);
+#end
+    }
+
+    @Override
+    protected void xmlPopulateProperties(Entity entity, Properties properties) {
+        // basic fields
+#foreach( $field in $entity.fields )
+        xmlPopulateProperty(entity, COLUMN_NAME_${field.name.toUpperCase()},
+            properties.getProperty(COLUMN_NAME_${field.name.toUpperCase()}), 
+            ${field.type}.class);
+#end
+        // one-to-ones
+#foreach( $field in $entity.oneToOnes )	 
+        xmlPopulateProperty(entity, COLUMN_NAME_${field.name.toUpperCase()},
+            properties.getProperty(COLUMN_NAME_${field.name.toUpperCase()}), 
+            ${field.type}.class);
+#end
+        // many-to-ones
+#foreach( $field in $entity.manyToOnes )	 
+        xmlPopulateProperty(entity, COLUMN_NAME_${field.name.toUpperCase()},
+            properties.getProperty(COLUMN_NAME_${field.name.toUpperCase()}), 
+            ${field.type}.class);
 #end
 
     }

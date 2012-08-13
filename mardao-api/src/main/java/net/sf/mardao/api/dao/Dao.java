@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import javax.xml.transform.TransformerConfigurationException;
 
 import net.sf.mardao.api.domain.PrimaryKeyEntity;
@@ -87,4 +88,6 @@ public interface Dao<T extends PrimaryKeyEntity, ID extends Serializable, P exte
     void xmlGenerateEntities(Writer writer, Object appArg0, Iterable<T> cursor) throws SAXException, IOException, TransformerConfigurationException;
     
     Iterable<T> xmlFindAll();
+    
+    T xmlPersistEntity(Properties properties);
 }

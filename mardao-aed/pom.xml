@@ -58,6 +58,18 @@
 			<version>${gae.version}</version>
 			<scope>provided</scope>
 		</dependency>
+                
+		<dependency>
+			<groupId>net.sf.jsr107cache</groupId>
+			<artifactId>jsr107cache</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-jsr107cache</artifactId>
+			<version>${gae.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 
 		<!-- Test scope dependencies: -->
 		<dependency>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns="http://mardao.sf.net/xml1">
+  <entity id="1" class="net.sf.mardao.api.domain.Trans">
+    <field name="_parent" value="agtyaWNvdHRhLW9zdHI6CxIEUHJvaiIMcmljb3R0YV9ob21lDAsSBkJyYW5jaCIFdHJ1bmsMCxIIUHJvakxhbmciBWVuX0dCDA"/>
+    <field name="local" value="Home"/>
+  </entity>
+  <entity id="1001" class="net.sf.mardao.api.domain.Trans">
+    <field name="_parent" value="agtyaWNvdHRhLW9zdHI6CxIEUHJvaiIMcmljb3R0YV9ob21lDAsSBkJyYW5jaCIFdHJ1bmsMCxIIUHJvakxhbmciBWVuX0dCDA"/>
+    <field name="local" value="Login"/>
+  </entity>
+  <entity id="2001" class="net.sf.mardao.api.domain.Trans">
+    <field name="_parent" value="agtyaWNvdHRhLW9zdHI6CxIEUHJvaiIMcmljb3R0YV9ob21lDAsSBkJyYW5jaCIFdHJ1bmsMCxIIUHJvakxhbmciBWVuX0dCDA"/>
+    <field name="local" value="Logout"/>
+  </entity>
+  <entity id="1" class="net.sf.mardao.api.domain.Trans">
+    <field name="_parent" value="agtyaWNvdHRhLW9zdHI3CxIEUHJvaiIMcmljb3R0YV9ob21lDAsSBkJyYW5jaCIFdHJ1bmsMCxIIUHJvakxhbmciAmtoDA"/>
+    <field name="local" value="គេហ:ទំព័រ"/>
+  </entity>
+  <entity id="1001" class="net.sf.mardao.api.domain.Trans">
+    <field name="_parent" value="agtyaWNvdHRhLW9zdHI3CxIEUHJvaiIMcmljb3R0YV9ob21lDAsSBkJyYW5jaCIFdHJ1bmsMCxIIUHJvakxhbmciAmtoDA"/>
+    <field name="local" value="ឡកអីន"/>
+  </entity>
+  <entity id="2001" class="net.sf.mardao.api.domain.Trans">
+    <field name="_parent" value="agtyaWNvdHRhLW9zdHI3CxIEUHJvaiIMcmljb3R0YV9ob21lDAsSBkJyYW5jaCIFdHJ1bmsMCxIIUHJvakxhbmciAmtoDA"/>
+    <field name="local" value="ឡកអៅ"/>
+  </entity>
+</entities>

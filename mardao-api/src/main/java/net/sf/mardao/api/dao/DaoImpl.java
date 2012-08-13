@@ -373,7 +373,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity, ID extends Seriali
     }
 
     protected List<ID> updateStep2(Iterable<T> domains) {
-        final List<C> keys = persistStep1(domains);
+        final List<C> keys = updateStep1(domains);
         return convert(keys);
     }
 

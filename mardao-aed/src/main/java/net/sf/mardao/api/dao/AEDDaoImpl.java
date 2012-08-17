@@ -156,7 +156,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
      */
     @Override
     protected final void populate(Entity entity, String name, Object value) {
-        if (null != name && null != value) {
+        if (null != name) {
             // String properties must be 500 characters or less.
             // Instead, use com.google.appengine.api.datastore.Text, which can store strings of any length.
             if (value instanceof String) {
@@ -165,6 +165,8 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
                     value = new Text(s);
                 }
             }
+            
+            // also null values must be set, to enable queries for name=NULL
             entity.setProperty(name, value);
         }
     }

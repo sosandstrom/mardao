@@ -385,7 +385,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
                 final Entity entity = datastore.get(key);
                 domain = createDomain(entity);
                 
-                if (memCacheEntity) {
+                if (memCacheEntity && null != domain) {
                     memCache.put(key, domain);
                 }
             }
@@ -435,10 +435,16 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
             final DatastoreService datastore = getDatastoreService();
             final Map<Key, Entity> entities = datastore.get(keys);
             T domain;
+            final Map<Key, T> toCache = new HashMap<Key, T>(entities.size());
             for(Entry<Key, Entity> entry : entities.entrySet()) {
                 id = convert(entry.getKey());
                 domain = createDomain(entry.getValue());
                 returnValue.put(id, domain);
+                toCache.put(entry.getKey(), domain);
+            }
+
+            if (memCacheEntity) {
+                memCache.putAll(toCache);
             }
             entitiesQueried = entities.size();
         }

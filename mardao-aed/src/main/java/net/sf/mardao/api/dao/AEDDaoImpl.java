@@ -500,7 +500,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     protected final void updateCache(Collection<Key> keys, Iterable<T> domains) {
         final Map<Key, T> cacheMap = new HashMap<Key, T>();
         
-        if (memCacheEntity) {
+        if (memCacheEntity || memCacheAll) {
             // update domains in cache
             final Iterator<Key> i = keys.iterator();
             Key key;

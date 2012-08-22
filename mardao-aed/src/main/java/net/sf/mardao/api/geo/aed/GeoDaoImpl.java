@@ -1,6 +1,7 @@
 package net.sf.mardao.api.geo.aed;
 
 import com.google.appengine.api.datastore.GeoPt;
+import java.io.Serializable;
 import java.util.*;
 import net.sf.mardao.api.dao.Expression;
 import net.sf.mardao.api.dao.FilterEqual;
@@ -8,26 +9,18 @@ import net.sf.mardao.api.domain.AEDPrimaryKeyEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GeoDaoImpl<T extends AEDPrimaryKeyEntity<Long>, G extends GeoModel> implements GeoDao<G> {
+public class GeoDaoImpl<ID extends Serializable, T extends AEDPrimaryKeyEntity<ID>, G extends GeoModel> implements GeoDao<G, ID> {
     static final Logger LOG = LoggerFactory.getLogger(GeoDaoImpl.class);
 
-    // geobox configs are: resolution, slice, use set (1 = true)
-    private final static int[][] GEOBOX_CONFIGS = 
-        { { 4, 5, 1 },
-          { 3, 2, 1 },
-          { 3, 8, 0 },
-          { 3, 16, 0 },
-          { 2, 5, 0 } };
-    
     private static List<Integer> boxBits = Arrays.asList(
         Geobox.BITS_12_10km, Geobox.BITS_15_1224m, Geobox.BITS_18_154m
     );
 
     private static final int RADIUS = 6378135;
     
-    private final GeoDao<G> dao;
+    private final GeoDao<G,ID> dao;
 
-    public GeoDaoImpl(GeoDao<G> dao) {
+    public GeoDaoImpl(GeoDao<G,ID> dao) {
         this.dao = dao;
     }
 
@@ -43,21 +36,6 @@ public class GeoDaoImpl<T extends AEDPrimaryKeyEntity<Long>, G extends GeoModel>
         return findGeoBase(orderBy, ascending, limit, offset, geoFilters);
     }
 
-//    public Collection<G> findInGeobox(float lat, float lng, int resolution, int slice, String orderBy, boolean ascending, int offset, int limit, Expression... filters) {
-//        // FIXME: fishy lat/long order
-//        final String box = Geobox.compute(lng, lat, resolution, slice);
-//        
-//        final Expression geoFilters[] = Arrays.copyOf(filters, filters != null ? filters.length + 1 : 1, Expression[].class);
-//        geoFilters[geoFilters.length-1] = new FilterEqual(dao.getGeoboxesColumnName(), box);
-////        if (filter == null) {
-////            filter = "";
-////        } else {
-////            filter += " && ";
-////        }
-////        filter += dao.getGeoboxesColumnName() + "=='" + box + "'";        
-//        return findGeoBase(orderBy, ascending, limit, offset, geoFilters);
-//    }
-//
     public Collection<G> findNearest(final float lat, final float lng, String orderBy, boolean ascending, int offset, int limit, Expression... filters) {
         final GeoPt p = new GeoPt(lat, lng);
         int size = offset + (0 < limit ? limit : 10000);
@@ -96,7 +74,7 @@ public class GeoDaoImpl<T extends AEDPrimaryKeyEntity<Long>, G extends GeoModel>
     
     
     @Override
-    public Long save(G model) {
+    public ID save(G model) {
         preStore(model);
         return dao.save(model);
     }
@@ -106,13 +84,14 @@ public class GeoDaoImpl<T extends AEDPrimaryKeyEntity<Long>, G extends GeoModel>
      * @param model 
      */
     protected static void preStore(GeoModel model) {
-        
-        // geoboxes are needed to findGeo the nearest entities and sort them by distance
-        Collection<Long> geoboxes = new ArrayList<Long>();
-        for (int bits : boxBits) {
-            geoboxes.addAll(Geobox.getTuple(model.getLatitude(), model.getLongitude(), bits));
+        if (null != model.getLocation()) {
+            // geoboxes are needed to findGeo the nearest entities and sort them by distance
+            Collection<Long> geoboxes = new ArrayList<Long>();
+            for (int bits : boxBits) {
+                geoboxes.addAll(Geobox.getTuple(model.getLatitude(), model.getLongitude(), bits));
+            }
+            model.setGeoboxes(geoboxes);
         }
-        model.setGeoboxes(geoboxes);
     }
 
     @Override

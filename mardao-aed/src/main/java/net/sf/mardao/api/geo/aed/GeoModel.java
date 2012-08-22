@@ -8,7 +8,6 @@ import java.util.Collection;
  * @author os
  */
 public interface GeoModel {
-    Long getId();
     GeoPt getLocation();
     float getLatitude();
     float getLongitude();

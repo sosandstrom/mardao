@@ -54,12 +54,15 @@ import net.sf.jsr107cache.Cache;
 import net.sf.jsr107cache.CacheException;
 import net.sf.jsr107cache.CacheFactory;
 import net.sf.jsr107cache.CacheManager;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends Serializable> extends
         DaoImpl<T, ID, Key, Entity, Key> implements Dao<T, ID, Key, Key> {
+    
+    static final Logger cLOG = LoggerFactory.getLogger(AEDDaoImpl.class);
     
     /** Will be populated by the children in afterPropertiesSet */
     protected final Collection<AEDDaoImpl> childDaos = new ArrayList<AEDDaoImpl>();
@@ -73,12 +76,27 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     /** Set this to true in subclass (TypeDaoBean) to enable the MemCache for findAll */
     protected boolean memCacheAll = false;
     
-    protected Cache memCache = null;
+    protected static Cache _memCache = null;
 
     private AEDDaoImpl mardaoParentDao;
     
     protected AEDDaoImpl(Class<T> type) {
         super(type);
+    }
+    
+    protected static Cache getMemCache() {
+        if (null == _memCache) {
+            cLOG.debug("initializing memCache.");
+            try {
+                CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
+                _memCache = cacheFactory.createCache(Collections.emptyMap());
+            } catch (CacheException e) {
+                cLOG.error("Cannot initialize MemCache", e);
+//                memCacheAll = false;
+//                memCacheEntity = false;
+            }            
+        }
+        return _memCache;
     }
 
     /** Registers at applicationDaos and optionally at parentDao */
@@ -90,15 +108,6 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         
         // initialize MemCache?
         if (memCacheAll || memCacheEntity) {
-            LOG.debug("initializing memCache for {}.", getTableName());
-            try {
-                CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
-                memCache = cacheFactory.createCache(Collections.emptyMap());
-            } catch (CacheException e) {
-                LOG.error("Cannot initialize MemCache", e);
-                memCacheAll = false;
-                memCacheEntity = false;
-            }            
         }
     }
     
@@ -378,7 +387,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         
         // check cache first
         if (memCacheEntity) {
-            domain = (T) memCache.get(key);
+            domain = (T) getMemCache().get(key);
         }
         
         if (null == domain) {
@@ -388,7 +397,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
                 domain = createDomain(entity);
                 
                 if (memCacheEntity && null != domain) {
-                    memCache.put(key, domain);
+                    getMemCache().put(key, domain);
                 }
             }
             catch (EntityNotFoundException ignore) {
@@ -416,7 +425,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         Map cached = null;
         if (memCacheEntity) {
             try {
-                cached = memCache.getAll(keys);
+                cached = getMemCache().getAll(keys);
                 
                 // found entities should not be queried
                 keys.removeAll(cached.keySet());
@@ -446,7 +455,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
             }
 
             if (memCacheEntity) {
-                memCache.putAll(toCache);
+                getMemCache().putAll(toCache);
             }
             entitiesQueried = entities.size();
         }
@@ -467,11 +476,11 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     public List<T> findAll() {
         if (memCacheAll) {
             final String memCacheKey = memCacheAllKey();
-            List<T> returnValue = (List<T>) memCache.get(memCacheKey);
+            List<T> returnValue = (List<T>) getMemCache().get(memCacheKey);
             LOG.debug("{} cached is {}", memCacheKey, null != returnValue);
             if (null == returnValue) {
                 returnValue = super.findAll();
-                memCache.put(memCacheKey, returnValue);
+                getMemCache().put(memCacheKey, returnValue);
             }
             return returnValue;
         }
@@ -488,11 +497,11 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         if (!domains.isEmpty()) {
             // invalidate cache
             if (memCacheAll) {
-                memCache.remove(memCacheAllKey());
+                getMemCache().remove(memCacheAllKey());
             }
 
             if (memCacheEntity) {
-                memCache.putAll(domains);
+                getMemCache().putAll(domains);
             }
         }
     }
@@ -568,10 +577,10 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         final DatastoreService datastore = getDatastoreService();
         datastore.delete(primaryKey);
         if (memCacheEntity) {
-            memCache.remove(primaryKey);
+            getMemCache().remove(primaryKey);
         }
         if (memCacheAll) {
-            memCache.remove(memCacheAllKey());
+            getMemCache().remove(memCacheAllKey());
         }
     }
 
@@ -579,10 +588,10 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         final DatastoreService datastore = getDatastoreService();
         datastore.delete(primaryKeys);
         if (memCacheEntity) {
-            memCache.remove(primaryKeys);
+            getMemCache().remove(primaryKeys);
         }
         if (memCacheAll) {
-            memCache.remove(memCacheAllKey());
+            getMemCache().remove(memCacheAllKey());
         }
     }
 

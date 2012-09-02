@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 
 import net.sf.mardao.api.Filter;
 import net.sf.mardao.api.domain.CreatedUpdatedEntity;
@@ -56,8 +57,10 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
 
     // --- BEGIN persistence-type beans must implement these ---
     
-    public abstract Collection<ID> persist(Iterable<T> domains);
+    /** Implemented in TypeDaoImpl */
+    protected abstract Collection<C> persistCore(Iterable<E> itrbl);
     
+    /** Implemented in TypeDaoImpl */
     protected abstract CursorPage queryPage(boolean keysOnly, int pageSize,
             C ancestorKey, C simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
@@ -67,6 +70,8 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
 
     /** Implemented in TypeDaoImpl */
     protected abstract ID coreToSimpleKey(E core);
+    /** Implemented in TypeDaoImpl */
+    protected abstract ID coreKeyToSimpleKey(C core);
     /** Implemented in TypeDaoImpl */
     protected abstract P coreToParentKey(E core);
     
@@ -218,7 +223,42 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     public static String getPrincipalName() {
         return principalName.get();
     }
+
+    // --- BEGIN Dao methods ---
     
+    public Collection<ID> persist(Iterable<T> domains) {
+        final Date currentDate = new Date();
+        
+        // convert to Core Entity:
+        final Collection<E> itrbl = new ArrayList<E>();
+        E core;
+        for (T d : domains) {
+            core = domainToCore(d, currentDate);
+            itrbl.add(core);
+        }
+        
+        // batch-persist:
+        final Collection<C> keys = persistCore(itrbl);
+        
+        // collect IDs to return:
+        final Collection<ID> ids = new ArrayList<ID>(itrbl.size());
+        Iterator<T> ds = domains.iterator();
+        T d;
+        ID simpleKey;
+        for (C c : keys) {
+            simpleKey = coreKeyToSimpleKey(c);
+            ids.add(simpleKey);
+            
+            // update domain with generated key?
+            d = ds.next();
+            if (null == d.getSimpleKey()) {
+                d.setSimpleKey(simpleKey);
+            }
+        }
+        
+        return ids;
+    }
+
     public ID persist(T domain) {
         final Iterable<ID> ids = persist(Arrays.asList(domain));
         final ID id = ids.iterator().hasNext() ? ids.iterator().next() : null;
@@ -230,6 +270,8 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
                 null, false, null, false,
                 cursorString);
     }
+
+    // --- END Dao methods ---
     
     /** Override in GeneratedDaoImpl */
     protected void setDomainProperty(final T domain, final String name, final Object value) {

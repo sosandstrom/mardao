@@ -24,8 +24,6 @@ import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Text;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
 import net.sf.jsr107cache.Cache;
 import net.sf.jsr107cache.CacheException;
 import net.sf.jsr107cache.CacheFactory;
@@ -52,15 +50,20 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
 
     @Override
     protected ID coreToSimpleKey(Entity core) {
-        if (null == core.getKey()) {
+        return coreKeyToSimpleKey(core.getKey());
+    }
+
+    @Override
+    protected ID coreKeyToSimpleKey(Key key) {
+        if (null == key) {
             return null;
         }
         
         if (AEDLongEntity.class.isAssignableFrom(persistentClass)) {
-            return (ID) Long.valueOf(core.getKey().getId());
+            return (ID) Long.valueOf(key.getId());
         }
         
-        return (ID) core.getKey().getName();
+        return (ID) key.getName();
     }
 
     @Override
@@ -92,39 +95,11 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     }
     
     @Override
-    public Collection<ID> persist(Iterable<T> domains) {
-        final Date currentDate = new Date();
-        
-        // convert to Core Entity:
-        final Collection<Entity> itrbl = new ArrayList<Entity>();
-        Entity core;
-        for (T d : domains) {
-            core = domainToCore(d, currentDate);
-            itrbl.add(core);
-        }
-        
-        // batch-persist:
-        getDatastoreService().put(itrbl);
-        
-        // collect IDs to return:
-        final Collection<ID> ids = new ArrayList<ID>(itrbl.size());
-        Iterator<T> ds = domains.iterator();
-        T d;
-        ID simpleKey;
-        for (Entity c : itrbl) {
-            simpleKey = coreToSimpleKey(c);
-            ids.add(simpleKey);
-            
-            // update domain with generated key?
-            d = ds.next();
-            if (null == d.getSimpleKey()) {
-                d.setSimpleKey(simpleKey);
-            }
-        }
-        
-        return ids;
+    protected Collection<Key> persistCore(Iterable<Entity> itrbl) {
+        final List<Key> returnValue = getDatastoreService().put(itrbl);
+        return returnValue;
     }
-
+    
     @Override
     protected CursorPage queryPage(boolean keysOnly, int pageSize,
             Key ancestorKey, Key simpleKey,

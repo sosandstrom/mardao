@@ -3,7 +3,6 @@ package net.sf.mardao.api.domain;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.google.appengine.api.datastore.Entity;
 
 /**
  * 
@@ -14,13 +13,22 @@ public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends A
     /**      */
     private static final long  serialVersionUID  = 6731780654367241162L;
 
+    public static final String NAME_CREATED_BY = "_creator";
     public static final String NAME_CREATED_DATE = "_created";
+    public static final String NAME_UPDATED_BY = "_updator";
     public static final String NAME_UPDATED_DATE = "_updated";
 
     public static final Date   DATE_FLAG         = new Date(0);
 
+    private String createdBy;
+    private String updatedBy;
+    
     private Date               createdDate;
     private Date               updatedDate;
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
 
     /**
      * Returns when this Entity was created, i.e. first persisted
@@ -29,6 +37,10 @@ public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends A
      */
     public final Date getCreatedDate() {
         return createdDate;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
     }
 
     /**
@@ -41,10 +53,19 @@ public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends A
     }
 
     @Override
+    public final void _setCreatedBy(String name) {
+        this.createdBy = name;
+    }
+
+    @Override
     public final void _setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
 
+    public void _setUpdatedBy(String name) {
+        this.updatedBy = name;
+    }
+    
     @Override
     public final void _setUpdatedDate(Date updatedDate) {
         this.updatedDate = updatedDate;
@@ -68,16 +89,12 @@ public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends A
         return NAME_UPDATED_DATE;
     }
 
-    /**
-     * Also converts createdDate and updatedDate
-     */
-    @Override
-    public Entity _createEntity() {
-        final Entity entity = super._createEntity();
-
-        populate(entity, _getNameCreatedDate(), createdDate);
-        populate(entity, _getNameUpdatedDate(), updatedDate);
-
-        return entity;
+    public String _getNameCreatedBy() {
+        return NAME_CREATED_BY;
     }
+
+    public String _getNameUpdatedBy() {
+        return NAME_UPDATED_BY;
+    }
+
 }

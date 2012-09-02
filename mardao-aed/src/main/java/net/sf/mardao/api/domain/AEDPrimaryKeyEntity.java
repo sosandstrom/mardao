@@ -10,11 +10,9 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
-import net.sf.mardao.api.domain.CreatedUpdatedEntity;
-import net.sf.mardao.api.domain.PrimaryKeyEntity;
 
 @SuppressWarnings("serial")
-public abstract class AEDPrimaryKeyEntity<ID extends Serializable> implements PrimaryKeyEntity, CreatedUpdatedEntity {
+public abstract class AEDPrimaryKeyEntity<ID extends Serializable> implements CreatedUpdatedEntity<ID> {
 
     /** Using slf4j logging */
     protected static final Logger LOG = LoggerFactory.getLogger(AEDPrimaryKeyEntity.class);
@@ -41,12 +39,13 @@ public abstract class AEDPrimaryKeyEntity<ID extends Serializable> implements Pr
         return getClass().getSimpleName();
     }
 
-    public abstract ID getSimpleKey();
-
     public abstract Class<ID> getIdClass();
 
     public Key getParentKey() {
         return null;
+    }
+
+    public void setParentKey(Object parentKey) {
     }
 
     /**
@@ -97,7 +96,13 @@ public abstract class AEDPrimaryKeyEntity<ID extends Serializable> implements Pr
         return null;
     }
 
+    public void _setCreatedBy(String name) {
+    }
+
     public void _setCreatedDate(Date createdDate) {
+    }
+
+    public void _setUpdatedBy(String name) {
     }
 
     public void _setUpdatedDate(Date updatedDate) {
@@ -119,15 +124,4 @@ public abstract class AEDPrimaryKeyEntity<ID extends Serializable> implements Pr
         }
     }
 
-    public Entity _createEntity() {
-        final ID sk = getSimpleKey();
-        if (null == sk) {
-            final Key pk = (Key) getParentKey();
-            if (null == pk) {
-                return new Entity(getKind());
-            }
-            return new Entity(getKind(), pk);
-        }
-        return new Entity(getPrimaryKey());
-    }
 }

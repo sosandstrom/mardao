@@ -1,5 +1,6 @@
 package net.sf.mardao.api.geo.aed;
 
+import com.google.appengine.api.datastore.GeoPt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 public class Geobox {
     static final Logger LOG = LoggerFactory.getLogger(Geobox.class);
+
+    public static final int RADIUS = 6378135;
     
     static final float[] D_MAJOR = new float[58];
     
@@ -255,5 +258,39 @@ public class Geobox {
         }
         return set;
     }
+
+   /**
+     * Calculates the great circle distance between two points (law of cosines).
+     *
+     * @param p1: indicating the first point.
+     * @param p2: indicating the second point.
+     * @return The 2D great-circle distance between the two given points, in meters.
+     */
+	public static double distance(GeoPt p1, GeoPt p2) {
+		double p1lat = Math.toRadians(p1.getLatitude());
+		double p1lon = Math.toRadians(p1.getLongitude());
+		double p2lat = Math.toRadians(p2.getLatitude());
+		double p2lon = Math.toRadians(p2.getLongitude());
+		return RADIUS
+				* Math.acos(makeDoubleInRange(Math.sin(p1lat) * Math.sin(p2lat)
+						+ Math.cos(p1lat) * Math.cos(p2lat)
+						* Math.cos(p2lon - p1lon)));
+	}
+        
+	/**
+	 * This function is used to fix issue 10:
+	 * GeocellUtils.distance(...) uses Math.acos(arg) method. In some cases arg > 1 (i.e 1.0000000002), so acos cannot be calculated and the method returns NaN.
+	 * @param d
+	 * @return a double between -1 and 1
+	 */
+	public static double makeDoubleInRange(double d) {
+		double result = d;
+		if (d > 1) {
+			result = 1;
+		} else if (d < -1) {
+			result = -1;
+		}
+		return result;
+	}
 
 }

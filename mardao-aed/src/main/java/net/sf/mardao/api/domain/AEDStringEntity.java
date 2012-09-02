@@ -4,6 +4,8 @@
  */
 package net.sf.mardao.api.domain;
 
+import java.io.Serializable;
+
 /**
  * 
  * @author os

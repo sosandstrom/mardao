@@ -2,12 +2,15 @@ package net.sf.mardao.api.domain;
 
 import java.io.Serializable;
 
-public interface PrimaryKeyEntity extends Serializable {
+public interface PrimaryKeyEntity<ID extends Serializable> {
+
     Serializable getParentKey();
     
     Serializable getPrimaryKey();
     
-    Serializable getSimpleKey();
+    ID getSimpleKey();
 
-    Object _createEntity();
+    void setParentKey(Object parentKey);
+    
+    void setSimpleKey(ID simpleKey);
 }

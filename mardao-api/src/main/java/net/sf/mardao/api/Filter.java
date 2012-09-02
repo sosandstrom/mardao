@@ -1,15 +1,16 @@
-package net.sf.mardao.api.dao;
+package net.sf.mardao.api;
 
 import java.io.Serializable;
+import net.sf.mardao.api.dao.Dao;
 
 import net.sf.mardao.api.domain.PrimaryKeyEntity;
 
-public class Expression {
+public class Filter {
     private final String column;
     private final Object operation;
     private final Object operand;
 
-    public Expression(String column, Object operation, Object operand) {
+    public Filter(String column, Object operation, Object operand) {
         this.column = column;
         this.operation = operation;
         this.operand = operand;
@@ -35,7 +36,7 @@ public class Expression {
         return ":" + key;
     }
 
-    public static class IN extends Expression {
+    public static class IN extends Filter {
         public IN(String column, Object operand) {
             super(column, " IN ", operand);
         }
@@ -46,22 +47,22 @@ public class Expression {
     }
 
     public static class Foreign<T extends PrimaryKeyEntity, ID extends Serializable, P extends Serializable, C extends Serializable>
-            extends Expression {
+            extends Filter {
 
-        private final Dao<T, ID, P, C> foreignDao;
-        private final Expression       foreignExpression;
+        private final Dao<T, ID, P> foreignDao;
+        private final Filter       foreignExpression;
 
-        public Foreign(String column, String operation, Dao<T, ID, P, C> foreignDao, Expression foreignExpression) {
+        public Foreign(String column, String operation, Dao<T, ID, P> foreignDao, Filter foreignExpression) {
             super(column, operation, foreignExpression);
             this.foreignExpression = foreignExpression;
             this.foreignDao = foreignDao;
         }
 
-        public Dao<T, ID, P, C> getForeignDao() {
+        public Dao<T, ID, P> getForeignDao() {
             return foreignDao;
         }
 
-        public Expression getForeignExpression() {
+        public Filter getForeignExpression() {
             return foreignExpression;
         }
 

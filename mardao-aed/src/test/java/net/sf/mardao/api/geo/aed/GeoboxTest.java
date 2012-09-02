@@ -73,10 +73,10 @@ public class GeoboxTest extends TestCase {
         final GeoPt P2 = new GeoPt(56.3445f, 15.05f);
         final GeoPt P3 = new GeoPt(56.34043f, 15.05f);
         final GeoPt P4 = new GeoPt(56.34001f, 15.05f);
-        LOG.info("0.047 = {}m", GeoDaoImpl.distance(P0, P1));
-        LOG.info("0.0045 = {}m", GeoDaoImpl.distance(P0, P2));
-        LOG.info("0.00043 = {}m", GeoDaoImpl.distance(P0, P3));
-        LOG.info("56.34000..56.34001 (0.00001) = {}", GeoDaoImpl.distance(P0, P4));
+        LOG.info("0.047 = {}m", Geobox.distance(P0, P1));
+        LOG.info("0.0045 = {}m", Geobox.distance(P0, P2));
+        LOG.info("0.00043 = {}m", Geobox.distance(P0, P3));
+        LOG.info("56.34000..56.34001 (0.00001) = {}", Geobox.distance(P0, P4));
     }
 
 //    public void testBits() {
@@ -113,7 +113,7 @@ public class GeoboxTest extends TestCase {
 
             GeoPt pMin = new GeoPt(latMin, lat);
             GeoPt pMax = new GeoPt(latMax, lat);
-            LOG.info("lat distance for {} bits is {}m", bits, GeoDaoImpl.distance(pMin, pMax));
+            LOG.info("lat distance for {} bits is {}m", bits, Geobox.distance(pMin, pMax));
 
             pMin = new GeoPt(lat, latMin);
             pMax = new GeoPt(lat, latMax);

@@ -1,5 +1,6 @@
-package net.sf.mardao.api.dao;
+package net.sf.mardao.api;
 
+import java.io.Serializable;
 import java.util.Collection;
 import net.sf.mardao.api.domain.CreatedUpdatedEntity;
 
@@ -8,14 +9,14 @@ import net.sf.mardao.api.domain.CreatedUpdatedEntity;
  * @author os
  */
 public class CursorPage<T extends CreatedUpdatedEntity> {
-    private String cursorKey;
+    private Serializable cursorKey;
     private Collection<T> items;
 
-    public String getCursorKey() {
+    public Serializable getCursorKey() {
         return cursorKey;
     }
 
-    public void setCursorKey(String cursorKey) {
+    public void setCursorKey(Serializable cursorKey) {
         this.cursorKey = cursorKey;
     }
 

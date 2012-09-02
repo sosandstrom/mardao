@@ -28,6 +28,7 @@ import net.sf.jsr107cache.Cache;
 import net.sf.jsr107cache.CacheException;
 import net.sf.jsr107cache.CacheFactory;
 import net.sf.jsr107cache.CacheManager;
+import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.Filter;
 import net.sf.mardao.api.domain.AEDLongEntity;
 
@@ -105,14 +106,14 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
             Key ancestorKey, Key simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
-            String cursorString,
+            Serializable cursorString,
             Filter... filters) {
         
         final PreparedQuery pq = prepare(keysOnly, ancestorKey, simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
                               secondaryOrderBy, secondaryIsAscending, filters);
         
-        final QueryResultList<Entity> iterable = asQueryResultList(pq, pageSize, cursorString);
+        final QueryResultList<Entity> iterable = asQueryResultList(pq, pageSize, (String) cursorString);
         
         final CursorPage cursorPage = new CursorPage();
         final Collection<T> domains = new ArrayList<T>();

@@ -6,7 +6,11 @@ package net.sf.mardao.api.dao;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import junit.framework.TestCase;
+import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.domain.Book;
 
 /**
@@ -24,6 +28,7 @@ public class AEDDaoTest extends TestCase {
         super.setUp();
         helper.setUp();
         dao = new BookDaoImpl();
+        System.out.println("--- setUp() " + getName() + " ---");
     }
     
     @Override
@@ -86,4 +91,30 @@ public class AEDDaoTest extends TestCase {
         assertEquals(DaoImpl.PRINCIPAL_NAME_ANONYMOUS, actual.getCreatedBy());
         assertEquals(DaoImpl.PRINCIPAL_NAME_ANONYMOUS, actual.getUpdatedBy());
     }
+
+    public void testQueryTenPages() {
+        final String NAME = "John Doe";
+        List<Book> batch = new ArrayList<Book>(100);
+        DaoImpl.setPrincipalName(NAME);
+        for (int i = 0; i < 100; i++) {
+            Book expected = new Book();
+            expected.setId(1000L+i);
+            expected.setTitle("Hex: 0x" + Integer.toHexString(i));
+            batch.add(expected);
+        }
+        dao.persist(batch);
+        DaoImpl.setPrincipalName(null);
+        
+        Serializable cursorString = null;
+        CursorPage<Book> page;
+        for (int p = 0; p < 11; p++) {
+            page = dao.queryPage(10, cursorString);
+            System.out.println(String.format("queried page %d with cursor %s, got %d items", p, cursorString, page.getItems().size()));
+            assertEquals(10 == p ? 0 : 10, page.getItems().size());
+            
+            cursorString = page.getCursorKey();
+        }
+
+    }
+
 }

@@ -1,5 +1,6 @@
 package net.sf.mardao.api.dao;
 
+import net.sf.mardao.api.CursorPage;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,7 +66,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
             C ancestorKey, C simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
-            String cursorString,
+            Serializable cursorString,
             Filter... filters);
 
     /** Implemented in TypeDaoImpl */
@@ -265,7 +266,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
         return id;
     }
     
-    public CursorPage<T> queryPage(int pageSize, String cursorString) {
+    public CursorPage<T> queryPage(int pageSize, Serializable cursorString) {
         return queryPage(false, pageSize, null, null,
                 null, false, null, false,
                 cursorString);

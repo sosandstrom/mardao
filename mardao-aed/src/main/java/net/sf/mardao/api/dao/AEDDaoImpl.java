@@ -22,7 +22,10 @@ import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Text;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
 import net.sf.jsr107cache.Cache;
 import net.sf.jsr107cache.CacheException;
 import net.sf.jsr107cache.CacheFactory;
@@ -30,7 +33,7 @@ import net.sf.jsr107cache.CacheManager;
 import net.sf.mardao.api.Filter;
 import net.sf.mardao.api.domain.AEDLongEntity;
 
-public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity, ID extends Serializable> extends
+public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID, Key> {
     
     /** Set this to true in subclass (TypeDaoBean) to enable the MemCache primaryKey - Entity */
@@ -46,27 +49,6 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity, ID extends Seria
     }
     
     // --- BEGIN persistence-type beans must implement these ---
-    
-    @Override
-    protected CursorPage queryPage(boolean keysOnly, int pageSize,
-            Key ancestorKey, Key simpleKey,
-            String primaryOrderBy, boolean primaryIsAscending,
-            String secondaryOrderBy, boolean secondaryIsAscending,
-            String cursorString,
-            Filter... filters) {
-        
-        final PreparedQuery pq = prepare(keysOnly, ancestorKey, simpleKey, 
-                              primaryOrderBy, primaryIsAscending, 
-                              secondaryOrderBy, secondaryIsAscending, filters);
-        
-        final QueryResultList iterable = asQueryResultList(pq, pageSize, cursorString);
-        
-        final CursorPage cursorPage = new CursorPage();
-        cursorPage.setItems(iterable);
-        cursorPage.setCursorKey(iterable.getCursor().toWebSafeString());
-        
-        return cursorPage;
-    }
 
     @Override
     protected ID coreToSimpleKey(Entity core) {
@@ -87,22 +69,93 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity, ID extends Seria
     }
 
     @Override
+    public Entity createCore(Object parentKey, ID simpleKey) {
+        final Key pk = (Key) parentKey;
+        Entity entity;
+        if (null == simpleKey) {
+            entity = new Entity(getTableName(), pk);
+        }
+        else {
+            if (AEDLongEntity.class.isAssignableFrom(persistentClass)) {
+                entity = new Entity(getTableName(), ((Long)simpleKey).longValue(), pk);
+            }
+            else {
+                entity = new Entity(getTableName(), (String)simpleKey, pk);
+            }
+        }        
+        return entity;
+    }
+    
+    @Override
     protected Object getCoreProperty(Entity core, String name) {
         return core.getProperty(name);
     }
-
-//    public Entity createEntity() {
-//        final ID sk = getSimpleKey();
-//        if (null == sk) {
-//            final Key pk = (Key) getParentKey();
-//            if (null == pk) {
-//                return new Entity(getKind());
-//            }
-//            return new Entity(getKind(), pk);
-//        }
-//        return new Entity(getPrimaryKey());
-//    }
     
+    @Override
+    public Collection<ID> persist(Iterable<T> domains) {
+        final Date currentDate = new Date();
+        
+        // convert to Core Entity:
+        final Collection<Entity> itrbl = new ArrayList<Entity>();
+        Entity core;
+        for (T d : domains) {
+            core = domainToCore(d, currentDate);
+            itrbl.add(core);
+        }
+        
+        // batch-persist:
+        getDatastoreService().put(itrbl);
+        
+        // collect IDs to return:
+        final Collection<ID> ids = new ArrayList<ID>(itrbl.size());
+        Iterator<T> ds = domains.iterator();
+        T d;
+        ID simpleKey;
+        for (Entity c : itrbl) {
+            simpleKey = coreToSimpleKey(c);
+            ids.add(simpleKey);
+            
+            // update domain with generated key?
+            d = ds.next();
+            if (null == d.getSimpleKey()) {
+                d.setSimpleKey(simpleKey);
+            }
+        }
+        
+        return ids;
+    }
+
+    @Override
+    protected CursorPage queryPage(boolean keysOnly, int pageSize,
+            Key ancestorKey, Key simpleKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending,
+            String cursorString,
+            Filter... filters) {
+        
+        final PreparedQuery pq = prepare(keysOnly, ancestorKey, simpleKey, 
+                              primaryOrderBy, primaryIsAscending, 
+                              secondaryOrderBy, secondaryIsAscending, filters);
+        
+        final QueryResultList<Entity> iterable = asQueryResultList(pq, pageSize, cursorString);
+        
+        final CursorPage cursorPage = new CursorPage();
+        final Collection<T> domains = new ArrayList<T>();
+        for (Entity core : iterable) {
+            domains.add(coreToDomain(core));
+        }
+        cursorPage.setItems(domains);
+        cursorPage.setCursorKey(iterable.getCursor().toWebSafeString());
+        
+        return cursorPage;
+    }
+
+    @Override
+    protected void setCoreProperty(Entity core, String name, Object value) {
+        if (null != name) {
+            core.setProperty(name, value);
+        }
+    }
     
     // --- END persistence-type beans must implement these ---
     

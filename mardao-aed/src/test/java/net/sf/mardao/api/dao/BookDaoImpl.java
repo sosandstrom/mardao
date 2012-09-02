@@ -19,11 +19,31 @@ public class BookDaoImpl extends AEDDaoImpl<Book, Long> {
     public BookDaoImpl() {
         super(Book.class);
     }
+
+    @Override
+    protected Object getDomainProperty(Book domain, String name) {
+        Object value = null;
+        if (COLUMN_NAME_TITLE.equals(name)) {
+            value = domain.getTitle();
+        }
+        else {
+            try {
+                value = super.getDomainProperty(domain, name);
+            }
+            catch (IllegalArgumentException e) {
+                throw e;
+            }
+        }
+        return value;
+    }
     
     @Override
     protected void setDomainProperty(Book domain, String name, Object value) {
         if (COLUMN_NAME_TITLE.equals(name)) {
             domain.setTitle(convertText(value));
+        }
+        else {
+            super.setDomainProperty(domain, name, value);
         }
     }
 

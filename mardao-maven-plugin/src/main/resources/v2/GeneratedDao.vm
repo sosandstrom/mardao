@@ -4,9 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
+import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.dao.Dao;
-
 import ${entity.className};
 
 /**
@@ -15,14 +14,21 @@ import ${entity.className};
  * Generated on ${currentDate}.
  * @author mardao DAO generator (${helper.class.name})
  */
-public interface Generated${entity.simpleName}Dao<P extends Serializable, C extends Serializable> extends Dao<${entity.simpleName}, ${entity.pk.type}, P, C> {
+public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleName}, ${entity.pk.type}> {
 
 	/** Column name for primary key attribute is "${entity.pk.columnName}" */
 	static final String COLUMN_NAME_${entity.pk.name.toUpperCase()} = "${entity.pk.columnName}";
 
+#if( $entity.parent )
+#set( $field = $entity.parent )
+	/** Column name for parent ${field.name} is "${field.columnName}" */
+	static final String COLUMN_NAME_${field.name.toUpperCase()} = "${field.columnName}";
+
+#end
+
 #set( $allFields = $entity.allFields )
 #foreach( $field in $allFields )
-	/** Column name for attribute ${field.name} is "${field.columnName}" */
+	/** Column name for field ${field.name} is "${field.columnName}" */
 	static final String COLUMN_NAME_${field.name.toUpperCase()} = "${field.columnName}";
 #end
 
@@ -38,38 +44,90 @@ public interface Generated${entity.simpleName}Dao<P extends Serializable, C exte
 	/**
 	 * find-by method for parent field ${field.name}
 	 * @param ${field.name} the specified attribute
-	 * @return a List of ${entity.simpleName}s with the specified parent
+	 * @return a Collection of ${entity.simpleName}s with the specified parent
 	 */
-	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(P ${field.name});
+	Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(Object ${field.name});
 		
-    List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(Object ${field.name});		
-   
-	List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(P ${field.name});
+	/**
+	 * find-keys-by method for parent field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return a Collection of ${entity.simpleName}s with the specified parent
+	 */
+	Collection<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(Object ${field.name});
+
+	/**
+	 * query-by method for parent field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return an Iterable of ${entity.simpleName}s with the specified parent
+	 */
+	Iterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}(Object ${field.name});
+		
+	/**
+	 * query-keys-by method for parent field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return an Iterable of ${entity.simpleName}s with the specified parent
+	 */
+	Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}(Object ${field.name});
+
+	/**
+	 * query-page-by method for parent field ${field.name}
+	 * @param ${field.name} the specified attribute
+         * @param pageSize the number of domain entities in the page
+         * @param cursorString non-null if get next page
+	 * @return a Page of ${entity.simpleName}s for the specified ${field.name} (parent)
+	 */
+	CursorPage<${entity.simpleName}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
+            int pageSize, Serializable cursorString);
 
 #end   
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
 #if( $entity.isUnique($field.name) )
 	/**
-	 * find-by method for unique attribute field ${field.name}
+	 * find-by method for unique field ${field.name}
 	 * @param ${field.name} the unique attribute
-	 * @return the unique ${entity.simpleName} for the specified attribute
+	 * @return the unique ${entity.simpleName} for the specified ${field.name}
 	 */
 	${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
 #else
+##	/**
+##	 * find-by method for field ${field.name}
+##	 * @param ${field.name} the specified attribute
+##	 * @return a Collection of ${entity.simpleName}s with the specified ${field.name}
+##	 */
+##	Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+##	
+##	/**
+##	 * find-primary-key-by method for field ${field.name}
+##	 * @param ${field.name} the specified attribute
+##	 * @return a Collection of keys to the ${entity.simpleName}s with the specified attribute
+##	 */
+##	Collection<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+##
 	/**
-	 * find-by method for attribute field ${field.name}
+	 * query-by method for field ${field.name}
 	 * @param ${field.name} the specified attribute
-	 * @return a List of ${entity.simpleName}s with the specified attribute
+	 * @return an Iterable of ${entity.simpleName}s for the specified ${field.name}
 	 */
-	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
-	
+	Iterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+		
 	/**
-	 * find-primary-key-by method for attribute field ${field.name}
+	 * query-keys-by method for field ${field.name}
 	 * @param ${field.name} the specified attribute
-	 * @return a List of keys to the ${entity.simpleName}s with the specified attribute
+	 * @return an Iterable of ${entity.simpleName}s for the specified ${field.name}
 	 */
-	List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+	Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+
+	/**
+	 * query-page-by method for field ${field.name}
+	 * @param ${field.name} the specified attribute
+         * @param pageSize the number of domain entities in the page
+         * @param cursorString non-null if get next page
+	 * @return a Page of ${entity.simpleName}s for the specified ${field.name}
+	 */
+	CursorPage<${entity.simpleName}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
+            int pageSize, Serializable cursorString);
+
 #end	
 
 #end	
@@ -160,7 +218,7 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	 * Persist an entity given all attributes
 	 */
 	${entity.simpleName} persist(#if( $entity.parent )
-P ${entity.parent.name},  	
+Object ${entity.parent.name},  	
 #end		${entity.pk.type} ${entity.pk.name}#foreach( $field in $entity.fields )
 , 
 		${field.type} ${field.name}#end

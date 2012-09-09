@@ -71,14 +71,49 @@
                 </executions>
                 <configuration>
                     <basePackage>net.sf.mardao.api</basePackage>
-                    <containerManagedEntityManager>false</containerManagedEntityManager>
-                    <containerManagedTransactionManager>false</containerManagedTransactionManager>
                     <sourceVersion>1.6</sourceVersion>
+                    <classpathElement>${project.basedir}/target/test-classes</classpathElement>
                     <sourceFolder>${project.basedir}/src/test/java</sourceFolder>
                     <resourceFolder>${project.basedir}/src/test/resources</resourceFolder>
+                    <targetFolder>${project.basedir}/target/generated-test-sources/dao</targetFolder>
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>
+                                    ${project.basedir}/target/generated-sources/dao
+                                </source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/target/generated-test-sources/dao
+                                </source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>

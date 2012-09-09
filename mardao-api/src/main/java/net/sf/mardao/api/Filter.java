@@ -2,7 +2,6 @@ package net.sf.mardao.api;
 
 import java.io.Serializable;
 import net.sf.mardao.api.dao.Dao;
-
 import net.sf.mardao.api.domain.PrimaryKeyEntity;
 
 public class Filter {
@@ -46,19 +45,19 @@ public class Filter {
         }
     }
 
-    public static class Foreign<T extends PrimaryKeyEntity, ID extends Serializable, P extends Serializable, C extends Serializable>
+    public static class Foreign<T extends PrimaryKeyEntity<ID>, ID extends Serializable>
             extends Filter {
 
-        private final Dao<T, ID, P> foreignDao;
+        private final Dao<T, ID> foreignDao;
         private final Filter       foreignExpression;
 
-        public Foreign(String column, String operation, Dao<T, ID, P> foreignDao, Filter foreignExpression) {
+        public Foreign(String column, String operation, Dao<T, ID> foreignDao, Filter foreignExpression) {
             super(column, operation, foreignExpression);
             this.foreignExpression = foreignExpression;
             this.foreignDao = foreignDao;
         }
 
-        public Dao<T, ID, P> getForeignDao() {
+        public Dao<T, ID> getForeignDao() {
             return foreignDao;
         }
 

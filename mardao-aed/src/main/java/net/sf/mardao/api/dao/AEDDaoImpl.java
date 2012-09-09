@@ -12,6 +12,7 @@ import net.sf.mardao.api.domain.DPrimaryKeyEntity;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -34,7 +35,7 @@ import net.sf.mardao.api.Filter;
 import net.sf.mardao.api.domain.DLongEntity;
 
 public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Serializable> extends
-        DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID, Key> {
+        DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID> {
     
     /** Set this to true in subclass (TypeDaoBean) to enable the MemCache primaryKey - Entity */
     protected boolean memCacheEntity = false;
@@ -91,20 +92,31 @@ public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Ser
         return entity;
     }
 
-    protected Collection<Key> createCoreKeys(Object parentKey, Iterable<ID> simpleKeys) {
+    protected Key createCoreKey(Object parentKey, ID simpleKey) {
         final Key pk = (Key) parentKey;
+        Key core;
+        if (DLongEntity.class.isAssignableFrom(persistentClass)) {
+            core = KeyFactory.createKey(pk, getTableName(), ((Long)simpleKey).longValue());
+        }
+        else {
+            core = KeyFactory.createKey(pk, getTableName(), (String)simpleKey);
+        }
+        return core;
+    }
+    
+    protected Collection<Key> createCoreKeys(Object parentKey, Iterable<ID> simpleKeys) {
         final ArrayList<Key> coreKeys = new ArrayList<Key>();
         Key core;
         for (ID simpleKey : simpleKeys) {
-            if (DLongEntity.class.isAssignableFrom(persistentClass)) {
-                core = KeyFactory.createKey(pk, getTableName(), ((Long)simpleKey).longValue());
-            }
-            else {
-                core = KeyFactory.createKey(pk, getTableName(), (String)simpleKey);
-            }
+            core = createCoreKey(parentKey, simpleKey);
             coreKeys.add(core);
         }
         return coreKeys;
+    }
+    
+    @Override
+    protected final Filter createEqualsFilter(String fieldName, Object param) {
+        return new FilterEqual(fieldName, param);
     }
 
     @Override
@@ -112,6 +124,43 @@ public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Ser
         final Collection<Key> coreKeys = createCoreKeys(parentKey, simpleKeys);
         getDatastoreService().delete(coreKeys);
         return -1;
+    }
+
+    @Override
+    protected T doFindByPrimaryKey(Object parentKey, ID simpleKey) {
+        final Key coreKey = createCoreKey(parentKey, simpleKey);
+        try {
+            final Entity entity = getDatastoreService().get(coreKey);
+            final T domain = coreToDomain(entity);
+            return domain;
+        } catch (EntityNotFoundException expected) {
+            return null;
+        }
+    }
+
+    @Override
+    protected Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys) {
+        // TODO: get batch with batch size
+        final Collection<Key> coreKeys = createCoreKeys(parentKey, simpleKeys);
+        final Map<Key, Entity> entities = getDatastoreService().get(coreKeys);
+        
+        final Collection<T> domains = new ArrayList<T>();
+        T domain;
+        for (Entity entity : entities.values()) {
+            domain = coreToDomain(entity);
+            domains.add(domain);
+        }
+        return domains;
+    }
+    
+    @Override
+    protected T findUniqueBy(Filter... filters) {
+        final PreparedQuery pq = prepare(false, null, null,
+                null, false, null, false,
+                filters);
+        final Entity entity = pq.asSingleEntity();
+        final T domain = coreToDomain(entity);
+        return domain;
     }
     
     @Override
@@ -221,10 +270,6 @@ public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Ser
             return text.getValue();
         }
         return (String) value;
-    }
-
-    protected final Filter createEqualsFilter(String fieldName, Object param) {
-        return new FilterEqual(fieldName, param);
     }
 
     protected static DatastoreService getDatastoreService() {

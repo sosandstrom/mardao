@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Serializable, 
         P extends Serializable, CT extends Object,
         E extends Serializable, C extends Serializable>
-        implements Dao<T, ID, P> {
+        implements Dao<T, ID> {
     
     public static final String PRINCIPAL_NAME_ANONYMOUS = "[ANONYMOUS]";
 
@@ -66,6 +66,11 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
      * @return number of rows deleted (optional)
      */
     protected abstract int doDelete(Object parentKey, Iterable<ID> simpleKeys);
+    
+    protected abstract T doFindByPrimaryKey(Object parentKey, ID simpleKeys);
+    protected abstract Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys);
+
+    protected abstract T findUniqueBy(Filter... filters);
     
     /** Implemented in TypeDaoImpl */
     protected abstract Collection<C> persistCore(Iterable<E> itrbl);
@@ -102,11 +107,13 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     
     
     protected abstract E createCore(Object parentKey, ID simpleKey);
-    
+
     /** Implemented in TypeDaoImpl */
     protected abstract Object getCoreProperty(E core, String name);
     /** Implemented in TypeDaoImpl */
     protected abstract void setCoreProperty(E core, String name, Object value);
+    
+    protected abstract Filter createEqualsFilter(String columnName, Object value);
     
     // --- END persistence-type beans must implement these ---
     
@@ -244,6 +251,11 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
         
         return value;
     }
+
+    /** Default implementation returns null, override for your hierarchy */
+    public String getParentKeyColumnName() {
+        return null;
+    }
     
     public static String getPrincipalName() {
         return principalName.get();
@@ -267,6 +279,16 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     public boolean delete(ID simpleKey) {
         final int count = delete(null, Arrays.asList(simpleKey));
         return 1 == count;
+    }
+    
+    public T findByPrimaryKey(Object parentKey, ID simpleKey) {
+        // TODO: find in cache
+        
+        return doFindByPrimaryKey(parentKey, simpleKey);
+    }
+    
+    public T findByPrimaryKey(ID simpleKey) {
+        return findByPrimaryKey(null, simpleKey);
     }
     
     public Collection<ID> persist(Iterable<T> domains) {
@@ -322,6 +344,12 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     
     public Iterable<ID> queryAllKeys(Object parentKey) {
         return queryIterableKeys(0, -1, (P) parentKey, null, null, false, null, false);
+    }
+    
+    public Iterable<T> queryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys) {
+        // TODO: find in cache
+        
+        return doQueryByPrimaryKeys(parentKey, simpleKeys);
     }
     
     public CursorPage<T> queryPage(int pageSize, Serializable cursorString) {

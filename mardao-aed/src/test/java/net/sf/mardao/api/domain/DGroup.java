@@ -1,6 +1,7 @@
 package net.sf.mardao.api.domain;
 
 import java.util.Collection;
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
@@ -8,6 +9,7 @@ import javax.persistence.ManyToMany;
  *
  * @author os
  */
+@Entity
 public class DGroup extends DStringEntity {
     @Id
     private String name;

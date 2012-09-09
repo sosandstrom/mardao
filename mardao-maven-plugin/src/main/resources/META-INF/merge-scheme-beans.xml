@@ -459,12 +459,22 @@
 			<list>
 				<!-- GeneratedEntityDao (interface) -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
-					<property name="templatePrefix" value="Generated" />
+					<property name="templatePrefix" value="v2/Generated" />
 					<property name="templateMiddle" value="Dao" />
 					<property name="templateSuffix" value=".vm" />
 					<property name="destFolder" value="targetDao" />
 					<property name="filePrefix" value="Generated" />
 					<property name="fileMiddle" value="Dao" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+				<!-- GeneratedEntityImpl (DAO Impl) -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="v2/Generated" />
+					<property name="templateMiddle" value="DaoImpl" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="targetDao" />
+					<property name="filePrefix" value="Generated" />
+					<property name="fileMiddle" value="DaoImpl" />
 					<property name="fileSuffix" value=".java" />
 				</bean>
 			</list>

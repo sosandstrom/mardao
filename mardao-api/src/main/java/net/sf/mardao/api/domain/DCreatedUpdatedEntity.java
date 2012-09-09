@@ -9,7 +9,7 @@ import java.util.Date;
  * @author os
  * 
  */
-public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends AEDPrimaryKeyEntity<ID> {
+public abstract class DCreatedUpdatedEntity<ID extends Serializable> extends DPrimaryKeyEntity<ID> {
     /**      */
     private static final long  serialVersionUID  = 6731780654367241162L;
 
@@ -35,6 +35,7 @@ public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends A
      * 
      * @return when this Entity was created, i.e. first persisted
      */
+    @Override
     public final Date getCreatedDate() {
         return createdDate;
     }
@@ -48,6 +49,7 @@ public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends A
      * 
      * @return when this Entity was last updated
      */
+    @Override
     public final Date getUpdatedDate() {
         return updatedDate;
     }
@@ -62,6 +64,7 @@ public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends A
         this.createdDate = createdDate;
     }
 
+    @Override
     public void _setUpdatedBy(String name) {
         this.updatedBy = name;
     }
@@ -76,6 +79,7 @@ public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends A
      * 
      * @return the name under which the created date is stored
      */
+    @Override
     public String _getNameCreatedDate() {
         return NAME_CREATED_DATE;
     }
@@ -85,6 +89,7 @@ public abstract class AEDCreatedUpdatedEntity<ID extends Serializable> extends A
      * 
      * @return the name under which the updated date is stored
      */
+    @Override
     public String _getNameUpdatedDate() {
         return NAME_UPDATED_DATE;
     }

@@ -1,16 +1,17 @@
-package net.sf.mardao.api.domain;
+package net.sf.mardao.api.test;
 
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import net.sf.mardao.api.domain.DLongEntity;
 
 /**
  *
  * @author os
  */
 @Entity
-public class Book extends AEDLongEntity {
+public class Book extends DLongEntity {
     @Id
     private Long id;
     

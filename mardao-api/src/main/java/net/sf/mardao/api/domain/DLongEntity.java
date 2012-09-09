@@ -4,13 +4,11 @@
  */
 package net.sf.mardao.api.domain;
 
-import java.io.Serializable;
-
 /**
  * 
  * @author os
  */
-public abstract class AEDLongEntity extends AEDCreatedUpdatedEntity<Long> {
+public abstract class DLongEntity extends DCreatedUpdatedEntity<Long> {
 
     /**
      * 

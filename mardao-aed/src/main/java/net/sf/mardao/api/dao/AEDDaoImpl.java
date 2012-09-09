@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.sf.mardao.api.domain.AEDPrimaryKeyEntity;
+import net.sf.mardao.api.domain.DPrimaryKeyEntity;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -31,9 +31,9 @@ import net.sf.jsr107cache.CacheFactory;
 import net.sf.jsr107cache.CacheManager;
 import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.Filter;
-import net.sf.mardao.api.domain.AEDLongEntity;
+import net.sf.mardao.api.domain.DLongEntity;
 
-public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends Serializable> extends
+public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID, Key> {
     
     /** Set this to true in subclass (TypeDaoBean) to enable the MemCache primaryKey - Entity */
@@ -61,7 +61,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
             return null;
         }
         
-        if (AEDLongEntity.class.isAssignableFrom(persistentClass)) {
+        if (DLongEntity.class.isAssignableFrom(persistentClass)) {
             return (ID) Long.valueOf(key.getId());
         }
         
@@ -81,7 +81,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
             entity = new Entity(getTableName(), pk);
         }
         else {
-            if (AEDLongEntity.class.isAssignableFrom(persistentClass)) {
+            if (DLongEntity.class.isAssignableFrom(persistentClass)) {
                 entity = new Entity(getTableName(), ((Long)simpleKey).longValue(), pk);
             }
             else {
@@ -96,7 +96,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         final ArrayList<Key> coreKeys = new ArrayList<Key>();
         Key core;
         for (ID simpleKey : simpleKeys) {
-            if (AEDLongEntity.class.isAssignableFrom(persistentClass)) {
+            if (DLongEntity.class.isAssignableFrom(persistentClass)) {
                 core = KeyFactory.createKey(pk, getTableName(), ((Long)simpleKey).longValue());
             }
             else {

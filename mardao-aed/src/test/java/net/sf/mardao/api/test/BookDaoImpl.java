@@ -1,8 +1,9 @@
-package net.sf.mardao.api.dao;
+package net.sf.mardao.api.test;
 
 import java.util.Arrays;
 import java.util.Collection;
-import net.sf.mardao.api.domain.Book;
+import net.sf.mardao.api.dao.AEDDaoImpl;
+import net.sf.mardao.api.test.Book;
 
 /**
  *

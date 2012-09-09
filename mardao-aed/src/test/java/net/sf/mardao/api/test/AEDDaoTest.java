@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.sf.mardao.api.dao;
+package net.sf.mardao.api.test;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
 import net.sf.mardao.api.CursorPage;
-import net.sf.mardao.api.domain.Book;
+import net.sf.mardao.api.dao.AEDDaoImpl;
+import net.sf.mardao.api.dao.DaoImpl;
+import net.sf.mardao.api.test.Book;
 
 /**
  *

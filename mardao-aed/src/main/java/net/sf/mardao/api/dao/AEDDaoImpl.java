@@ -14,6 +14,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -89,6 +90,29 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         }        
         return entity;
     }
+
+    protected Collection<Key> createCoreKeys(Object parentKey, Iterable<ID> simpleKeys) {
+        final Key pk = (Key) parentKey;
+        final ArrayList<Key> coreKeys = new ArrayList<Key>();
+        Key core;
+        for (ID simpleKey : simpleKeys) {
+            if (AEDLongEntity.class.isAssignableFrom(persistentClass)) {
+                core = KeyFactory.createKey(pk, getTableName(), ((Long)simpleKey).longValue());
+            }
+            else {
+                core = KeyFactory.createKey(pk, getTableName(), (String)simpleKey);
+            }
+            coreKeys.add(core);
+        }
+        return coreKeys;
+    }
+
+    @Override
+    protected int doDelete(Object parentKey, Iterable<ID> simpleKeys) {
+        final Collection<Key> coreKeys = createCoreKeys(parentKey, simpleKeys);
+        getDatastoreService().delete(coreKeys);
+        return -1;
+    }
     
     @Override
     protected Object getCoreProperty(Entity core, String name) {
@@ -102,7 +126,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
     }
     
     @Override
-    protected CursorPage queryPage(boolean keysOnly, int pageSize,
+    protected CursorPage<T> queryPage(boolean keysOnly, int pageSize,
             Key ancestorKey, Key simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
@@ -115,7 +139,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         
         final QueryResultList<Entity> iterable = asQueryResultList(pq, pageSize, (String) cursorString);
         
-        final CursorPage cursorPage = new CursorPage();
+        final CursorPage<T> cursorPage = new CursorPage<T>();
         final Collection<T> domains = new ArrayList<T>();
         for (Entity core : iterable) {
             domains.add(coreToDomain(core));
@@ -124,6 +148,42 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         cursorPage.setCursorKey(iterable.getCursor().toWebSafeString());
         
         return cursorPage;
+    }
+
+    @Override
+    protected QueryResultIterable<T> queryIterable(boolean keysOnly, 
+            int offset, int limit,
+            Key ancestorKey, Key simpleKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending,
+            Filter... filters) {
+        
+        final PreparedQuery pq = prepare(keysOnly, ancestorKey, simpleKey, 
+                              primaryOrderBy, primaryIsAscending, 
+                              secondaryOrderBy, secondaryIsAscending, filters);
+        
+        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, 100);
+        final CursorIterable<T> returnValue = new CursorIterable<T>(_iterable);
+        
+        return returnValue;
+    }
+
+    @Override
+    protected QueryResultIterable<ID> queryIterableKeys(
+            int offset, int limit,
+            Key ancestorKey, Key simpleKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending,
+            Filter... filters) {
+        
+        final PreparedQuery pq = prepare(true, ancestorKey, simpleKey, 
+                              primaryOrderBy, primaryIsAscending, 
+                              secondaryOrderBy, secondaryIsAscending, filters);
+        
+        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, 100);
+        final KeysIterable<ID> returnValue = new KeysIterable<ID>(_iterable);
+        
+        return returnValue;
     }
 
     @Override
@@ -171,7 +231,7 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         return DatastoreServiceFactory.getDatastoreService();
     }
 
-    protected QueryResultIterable asQueryResultIterable(PreparedQuery pq, int chunkSize) {
+    protected QueryResultIterable<Entity> asQueryResultIterable(PreparedQuery pq, int chunkSize) {
         FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
         fetchOptions.chunkSize(chunkSize);
         
@@ -322,8 +382,44 @@ public abstract class AEDDaoImpl<T extends AEDPrimaryKeyEntity<ID>, ID extends S
         }
 
         public T next() {
-//            return (T) createDomain(_iterator.next());
-            return null;
+            return (T) coreToDomain(_iterator.next());
+        }
+
+        public void remove() {
+            _iterator.remove();
+        }
+
+        public Cursor getCursor() {
+            return _iterator.getCursor();
+        }
+    }
+    
+    public class KeysIterable<ID> implements QueryResultIterable<ID> {
+        final private QueryResultIterable<Entity> _iterable;
+
+        public KeysIterable(QueryResultIterable<Entity> _iterable) {
+            this._iterable = _iterable;
+        }
+        
+        
+        public QueryResultIterator<ID> iterator() {
+            return new KeysIterator<ID>(_iterable.iterator());
+        }
+    }
+
+    class KeysIterator<ID> implements QueryResultIterator<ID> {
+        private final QueryResultIterator<Entity> _iterator;
+
+        protected KeysIterator(QueryResultIterator<Entity> _iterator) {
+            this._iterator = _iterator;
+        }
+
+        public boolean hasNext() {
+            return _iterator.hasNext();
+        }
+
+        public ID next() {
+            return (ID) coreToSimpleKey(_iterator.next());
         }
 
         public void remove() {

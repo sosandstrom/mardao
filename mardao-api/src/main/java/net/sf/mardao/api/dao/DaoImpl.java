@@ -58,15 +58,39 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
 
     // --- BEGIN persistence-type beans must implement these ---
     
+    /**
+     * Implement / Override this in TypeDaoImpl. This method does not have to
+     * worry about invalidating the cache, that is done in delete(parentKey, simpleKeys)
+     * @param parentKey
+     * @param simpleKeys
+     * @return number of rows deleted (optional)
+     */
+    protected abstract int doDelete(Object parentKey, Iterable<ID> simpleKeys);
+    
     /** Implemented in TypeDaoImpl */
     protected abstract Collection<C> persistCore(Iterable<E> itrbl);
     
     /** Implemented in TypeDaoImpl */
-    protected abstract CursorPage queryPage(boolean keysOnly, int pageSize,
+    protected abstract CursorPage<T> queryPage(boolean keysOnly, int pageSize,
             C ancestorKey, C simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
             Serializable cursorString,
+            Filter... filters);
+
+    /** Implemented in TypeDaoImpl */
+    protected abstract Iterable<T> queryIterable(boolean keysOnly, 
+            int offset, int limit,
+            P ancestorKey, C simpleKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending,
+            Filter... filters);
+
+    /** Implemented in TypeDaoImpl */
+    protected abstract Iterable<ID> queryIterableKeys(int offset, int limit,
+            P ancestorKey, C simpleKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending,
             Filter... filters);
 
     /** Implemented in TypeDaoImpl */
@@ -227,6 +251,24 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
 
     // --- BEGIN Dao methods ---
     
+    public int delete(Object parentKey, Iterable<ID> simpleKeys) {
+        final int count = doDelete(parentKey, simpleKeys);
+        
+        // TODO: invalidate cache
+        
+        return count;
+    }
+    
+    public boolean delete(Object parentKey, ID simpleKey) {
+        final int count = delete(parentKey, Arrays.asList(simpleKey));
+        return 1 == count;
+    }
+    
+    public boolean delete(ID simpleKey) {
+        final int count = delete(null, Arrays.asList(simpleKey));
+        return 1 == count;
+    }
+    
     public Collection<ID> persist(Iterable<T> domains) {
         final Date currentDate = new Date();
         
@@ -266,12 +308,45 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
         return id;
     }
     
+    public Iterable<T> queryAll() {
+        return queryIterable(false, 0, -1, null, null, null, false, null, false);
+    }
+    
+    public Iterable<T> queryAll(Object parentKey) {
+        return queryIterable(false, 0, -1, (P) parentKey, null, null, false, null, false);
+    }
+    
+    public Iterable<ID> queryAllKeys() {
+        return queryIterableKeys(0, -1, null, null, null, false, null, false);
+    }
+    
+    public Iterable<ID> queryAllKeys(Object parentKey) {
+        return queryIterableKeys(0, -1, (P) parentKey, null, null, false, null, false);
+    }
+    
     public CursorPage<T> queryPage(int pageSize, Serializable cursorString) {
         return queryPage(false, pageSize, null, null,
                 null, false, null, false,
                 cursorString);
     }
 
+    /**
+     * Implemented with a call to persist(domains). Feel free to override.
+     * @param domains 
+     */
+    public void update(Iterable<T> domains) {
+        // for this implementation, same as persist
+        persist(domains);
+    }
+
+    /**
+     * Implemented with a call to persist(domains). Feel free to override.
+     * @param domain
+     */
+    public void update(T domain) {
+        persist(Arrays.asList(domain));
+    }
+    
     // --- END Dao methods ---
     
     /** Override in GeneratedDaoImpl */

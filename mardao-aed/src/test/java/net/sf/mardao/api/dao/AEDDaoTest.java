@@ -21,7 +21,7 @@ public class AEDDaoTest extends TestCase {
     final LocalServiceTestHelper helper = new LocalServiceTestHelper(
             new LocalDatastoreServiceTestConfig());
     
-    AEDDaoImpl dao;
+    AEDDaoImpl<Book, Long> dao;
     
     @Override
     protected void setUp() throws Exception {
@@ -114,7 +114,49 @@ public class AEDDaoTest extends TestCase {
             
             cursorString = page.getCursorKey();
         }
+        
+    }
 
+    public void testQueryAll() {
+        final String NAME = "John Doe";
+        List<Book> batch = new ArrayList<Book>(115);
+        DaoImpl.setPrincipalName(NAME);
+        for (int i = 0; i < 115; i++) {
+            Book expected = new Book();
+            expected.setId(1000L+i);
+            expected.setTitle("Hex: 0x" + Integer.toHexString(i));
+            batch.add(expected);
+        }
+        dao.persist(batch);
+        DaoImpl.setPrincipalName(null);
+
+        int count = 0;
+        for (Book book : dao.queryAll()) {
+            assertNotNull(book);
+            count++;
+        }
+        assertEquals(115, count);
+    }
+
+    public void testQueryAllKeys() {
+        final String NAME = "John Doe";
+        List<Book> batch = new ArrayList<Book>(115);
+        DaoImpl.setPrincipalName(NAME);
+        for (int i = 0; i < 115; i++) {
+            Book expected = new Book();
+            expected.setId(1000L+i);
+            expected.setTitle("Hex: 0x" + Integer.toHexString(i));
+            batch.add(expected);
+        }
+        dao.persist(batch);
+        DaoImpl.setPrincipalName(null);
+
+        int count = 0;
+        for (Long id : dao.queryAllKeys()) {
+            assertNotNull(id);
+            count++;
+        }
+        assertEquals(115, count);
     }
 
 }

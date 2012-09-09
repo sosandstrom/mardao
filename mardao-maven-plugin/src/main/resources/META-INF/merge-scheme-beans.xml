@@ -452,4 +452,23 @@
 		</property>
 	</bean>
 
+	<!-- The common 2.x templates for AED -->
+	<bean id="mergeSchemev2" class="net.sf.mardao.domain.MergeScheme">
+		<constructor-arg name="parent" ref="mergeSchemeRoot" />
+		<property name="templates">
+			<list>
+				<!-- GeneratedEntityDao (interface) -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="Generated" />
+					<property name="templateMiddle" value="Dao" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="targetDao" />
+					<property name="filePrefix" value="Generated" />
+					<property name="fileMiddle" value="Dao" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
 </beans>

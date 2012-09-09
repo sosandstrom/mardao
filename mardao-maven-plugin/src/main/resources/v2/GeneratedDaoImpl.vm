@@ -64,21 +64,6 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
 
 	// ----------------------- parent finders -------------------------------
 
-	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(Object ${field.name}) {
-            throw new UnsupportedOperationException("Not supported yet.");
-//		return findByParent((${field.type}) ${field.name});
-	}
-	
-	/**
-	 * find-by method for parent field ${field.name}
-	 * @param ${field.name} the specified attribute
-	 * @return a List of ${entity.simpleName}s with the specified parent
-	 */
-	public final List<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(Object ${field.name}) {
-            throw new UnsupportedOperationException("Not supported yet.");
-//		return findKeysByParent(${field.name});
-	}
-
 	/**
 	 * query-by method for parent field ${field.name}
 	 * @param ${field.name} the specified attribute

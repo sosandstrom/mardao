@@ -47,6 +47,18 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     
     /** set this, to have createdBy and updatedBy set */
     private static final ThreadLocal<String> principalName = new ThreadLocal<String>();
+    
+    /** 
+     * Set this to true in DaoBean constructor, to enable
+     * the all-domains memCache
+     */
+    protected boolean memCacheAll = false;
+
+    /** 
+     * Set this to true in DaoBean constructor, to enable
+     * the primaryKey-to-domain memCache
+     */
+    protected boolean memCacheEntities = false;
 
     protected DaoImpl(Class<T> type) {
         this.persistentClass = type;

@@ -41,20 +41,20 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 #if( $entity.parent )
 #set( $field = $entity.parent )
 	// ----------------------- parent finder -------------------------------
-	/**
-	 * find-by method for parent field ${field.name}
-	 * @param ${field.name} the specified attribute
-	 * @return a Collection of ${entity.simpleName}s with the specified parent
-	 */
-	Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(Object ${field.name});
-		
-	/**
-	 * find-keys-by method for parent field ${field.name}
-	 * @param ${field.name} the specified attribute
-	 * @return a Collection of ${entity.simpleName}s with the specified parent
-	 */
-	Collection<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(Object ${field.name});
-
+##	/**
+##	 * find-by method for parent field ${field.name}
+##	 * @param ${field.name} the specified attribute
+##	 * @return a Collection of ${entity.simpleName}s with the specified parent
+##	 */
+##	Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(Object ${field.name});
+##		
+##	/**
+##	 * find-keys-by method for parent field ${field.name}
+##	 * @param ${field.name} the specified attribute
+##	 * @return a Collection of ${entity.simpleName}s with the specified parent
+##	 */
+##	Collection<${entity.pk.type}> findKeysBy${helper.firstToUpper($field.name)}(Object ${field.name});
+##
 	/**
 	 * query-by method for parent field ${field.name}
 	 * @param ${field.name} the specified attribute

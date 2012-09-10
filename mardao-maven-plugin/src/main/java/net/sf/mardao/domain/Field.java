@@ -1,5 +1,7 @@
 package net.sf.mardao.domain;
 
+import net.sf.mardao.plugin.ProcessDomainMojo;
+
 
 /**
  * The domain object for fields in the class graph.
@@ -18,11 +20,17 @@ public class Field implements Comparable<Field> {
 		this.name = name;
 	}
 
-
 	public String getName() {
 		return name;
 	}
+        
+        public String getNameUpper() {
+            return null != name ? name.toUpperCase() : null;
+        }
 
+        public String getNameFirst() {
+            return ProcessDomainMojo.firstToUpper(name);
+        }
 
 	public void setType(String type) {
 		this.type = type;

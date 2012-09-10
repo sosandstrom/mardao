@@ -226,7 +226,8 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
 
         // Domain Entity-specific properties
         for (String name : getColumnNames()) {
-            copyCorePropertyToDomain(name, core, domain);
+            copyDomainPropertyToCore(name, domain, core);
+//            copyCorePropertyToDomain(name, core, domain);
         }
 
         return core;

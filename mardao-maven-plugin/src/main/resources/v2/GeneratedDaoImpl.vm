@@ -18,6 +18,10 @@ import ${field.entity.className};
 #foreach( $field in $entity.manyToOnes )
 import ${field.entity.className};
 #end
+#foreach( $field in $entity.manyToManys )	 
+import ${field.entity.className};
+#end
+import net.sf.mardao.api.domain.PrimaryKeyEntity;
 
 /**
  * The ${entity.simpleName} domain-object specific finders and methods go in this POJO.
@@ -52,15 +56,69 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
         return COLUMN_NAMES;
    }
    
-   // ------ END DaoImpl overrides -----------------------------
+    @Override
+    protected Object getDomainProperty(${entity.simpleName} domain, String name) {
+        Object value;
+#set( $field = $entity.pk )
+        // simple key?
+        if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            value = domain.get${field.nameFirst}();
+        }
+#if( $entity.parent )
+#set( $field = $entity.parent )
+        // parent key?
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            value = domain.get${field.nameFirst}();
+        }
+#end			
+        // fields
+#foreach( $field in $entity.fields )
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            value = domain.get${field.nameFirst}();
+        }
+#end
+        // one-to-ones
+#foreach( $field in $entity.oneToOnes )	 
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            value = domain.get${field.nameFirst}();
+        }
+#end
+        // many-to-ones
+#foreach( $field in $entity.manyToOnes )	 
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            final PrimaryKeyEntity foreign = domain.get${field.nameFirst}();
+            value = null != foreign ? foreign.getSimpleKey() : null;
+        }
+#end
+        // many-to-manys
+#foreach( $field in $entity.manyToManys )	 
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            Collection<Object> ids = null;
+            final Collection<${field.entity.simpleName}> foreigns = domain.get${field.nameFirst}();
+            if (null != foreigns) {
+                ids = new ArrayList<Object>();
+                for (${field.entity.simpleName} f : foreigns) {
+                    ids.add(f.getSimpleKey());
+                }
+            }
+            value = ids;
+        }
+#end
+        else {
+            value = super.getDomainProperty(domain, name);
+        }
+
+        return value;
+    }
       
 #if( $entity.parent )
 #set( $field = $entity.parent )
     /** Default implementation returns null, overrides for ${field.name} parent */
     public String getParentKeyColumnName() {
-        return COLUMN_NAME_${field.name.toUpperCase()};
+        return COLUMN_NAME_${field.nameUpper};
     }
     
+   // ------ END DaoImpl overrides -----------------------------
 
 	// ----------------------- parent finders -------------------------------
 
@@ -98,6 +156,8 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
         }
 
 #else
+   // ------ END DaoImpl overrides -----------------------------
+
         // ${entity.simpleName} has no parent
 #end
 

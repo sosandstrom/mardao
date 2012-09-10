@@ -29,6 +29,7 @@
                     <source>1.6</source>
                     <target>1.6</target>
                     <encoding>UTF-8</encoding>
+                    <verbose>true</verbose>
                 </configuration>
                 <executions>
                     <!-- extra compile step of domain classes before generator processing -->
@@ -39,11 +40,10 @@
                             <goal>testCompile</goal>
                         </goals>
                         <configuration>
-                            <verbose>false</verbose>
-                            <fork>true</fork>
-                            <includes>
+<!--                            <fork>true</fork>-->
+                            <testIncludes>
                                 <include>**/domain/*.java</include>
-                            </includes>
+                            </testIncludes>
                         </configuration>
                     </execution>
                 </executions>
@@ -53,6 +53,14 @@
                 <groupId>net.sf.mardao</groupId>
                 <artifactId>mardao-maven-plugin</artifactId>
                 <version>${project.version}</version>
+                <configuration>
+                    <basePackage>net.sf.mardao.api</basePackage>
+                    <sourceVersion>1.6</sourceVersion>
+                    <classpathElement>${project.basedir}/target/test-classes</classpathElement>
+                    <sourceFolder>${project.basedir}/src/test/java</sourceFolder>
+                    <resourceFolder>${project.basedir}/src/test/resources</resourceFolder>
+                    <targetFolder>${project.basedir}/target/generated-test-sources/dao</targetFolder>
+                </configuration>
                 <executions>
                     <execution>
                         <id>generate-generics</id>
@@ -63,20 +71,13 @@
                     </execution>
                     <execution>
                         <id>generate-daos</id>
-                        <phase>process-test-sources</phase>
+                        <phase>generate-test-sources</phase>
+                        <!--<phase>process-test-sources</phase>-->
                         <goals>
                             <goal>process-classes</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <basePackage>net.sf.mardao.api</basePackage>
-                    <sourceVersion>1.6</sourceVersion>
-                    <classpathElement>${project.basedir}/target/test-classes</classpathElement>
-                    <sourceFolder>${project.basedir}/src/test/java</sourceFolder>
-                    <resourceFolder>${project.basedir}/src/test/resources</resourceFolder>
-                    <targetFolder>${project.basedir}/target/generated-test-sources/dao</targetFolder>
-                </configuration>
             </plugin>
 
             <plugin>
@@ -84,7 +85,7 @@
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>1.5</version>
                 <executions>
-                    <execution>
+<!--                    <execution>
                         <id>add-source</id>
                         <phase>generate-sources</phase>
                         <goals>
@@ -97,10 +98,10 @@
                                 </source>
                             </sources>
                         </configuration>
-                    </execution>
+                    </execution>-->
                     <execution>
                         <id>add-test-source</id>
-                        <phase>generate-sources</phase>
+                        <phase>generate-test-sources</phase>
                         <goals>
                             <goal>add-test-source</goal>
                         </goals>

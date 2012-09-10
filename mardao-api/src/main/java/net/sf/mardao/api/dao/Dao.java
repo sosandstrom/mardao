@@ -17,10 +17,13 @@ public interface Dao<T extends PrimaryKeyEntity<ID>, ID extends Serializable> {
     
     Collection<String> getColumnNames();
 
-    String getTableName();
-
     String getParentKeyColumnName();
 
     String getPrimaryKeyColumnName();
 
+    String getTableName();
+
+    ID persist(T domain);
+
+    Collection<ID> persist(Iterable<T> domains);
 }

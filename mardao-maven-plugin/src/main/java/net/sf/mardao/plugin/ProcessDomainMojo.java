@@ -59,7 +59,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
     }
 
     public static String firstToUpper(final String name) {
-        return name.substring(0, 1).toUpperCase() + name.substring(1);
+        return null != name ? name.substring(0, 1).toUpperCase() + name.substring(1) : null;
     }
 
     public List<Entity> getEntitiesResolved(Map<String, Entity> entities) {

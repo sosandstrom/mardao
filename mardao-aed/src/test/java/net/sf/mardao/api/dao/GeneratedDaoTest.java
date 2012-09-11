@@ -57,6 +57,10 @@ public class GeneratedDaoTest extends TestCase {
         super.tearDown();
     }
     
-    public void testHello() {}
+    public void testQueryAll() {
+        for (DEmployee empl : employeeDao.queryAll()) {
+            
+        }
+    }
     
 }

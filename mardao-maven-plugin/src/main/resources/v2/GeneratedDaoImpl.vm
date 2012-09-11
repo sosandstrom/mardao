@@ -111,6 +111,64 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
         return value;
     }
       
+    @Override
+    protected void setDomainProperty(final ${entity.simpleName} domain, final String name, final Object value) {
+#set( $field = $entity.pk )
+        // simple key?
+        if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            domain.set${field.nameFirst}((${field.type}) value);
+        }
+#if( $entity.parent )
+#set( $field = $entity.parent )
+        // parent key?
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            domain.set${field.nameFirst}((${field.type}) value);
+        }
+#end			
+        // fields
+#foreach( $field in $entity.fields )
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            domain.set${field.nameFirst}((${field.type}) value);
+        }
+#end
+        // one-to-ones
+#foreach( $field in $entity.oneToOnes )	 
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            domain.set${field.nameFirst}((${field.type}) value);
+        }
+#end
+        // many-to-ones
+#foreach( $field in $entity.manyToOnes )	 
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            ${field.entity.simpleName} foreign = null;
+            if (null != value) {
+                foreign = new ${field.entity.simpleName}();
+                foreign.setSimpleKey((${field.entity.pk.type}) value);
+            }
+            domain.set${field.nameFirst}(foreign);
+        }
+#end
+        // many-to-manys
+#foreach( $field in $entity.manyToManys )	 
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            final Collection<${field.entity.simpleName}> foreigns = new ArrayList<${field.entity.simpleName}>();
+            if (null != value) {
+                ${field.entity.simpleName} foreign;
+                Collection<${field.entity.pk.type}> ids = (Collection<${field.entity.pk.type}>) value;
+                for (${field.entity.pk.type} id : ids) {
+                    foreign = new ${field.entity.simpleName}();
+                    foreign.setSimpleKey(id);
+                    foreigns.add(foreign);
+                }
+            }
+            domain.set${field.nameFirst}(foreigns);
+        }
+#end
+        else {
+            super.setDomainProperty(domain, name, value);
+        }
+    }
+
 #if( $entity.parent )
 #set( $field = $entity.parent )
     /** Default implementation returns null, overrides for ${field.name} parent */
@@ -149,7 +207,7 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
          * @param cursorString non-null if get next page
 	 * @return a Page of ${entity.simpleName}s for the specified ${field.name}
 	 */
-	public final CursorPage<${entity.simpleName}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
+	public final CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
             int pageSize, Serializable cursorString) {
             final Filter filter = createEqualsFilter(getParentKeyColumnName(), ${field.name});
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
@@ -201,7 +259,7 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
          * @param cursorString non-null if get next page
 	 * @return a Page of ${entity.simpleName}s for the specified ${field.name}
 	 */
-	public final CursorPage<${entity.simpleName}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
+	public final CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
             int pageSize, Serializable cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);

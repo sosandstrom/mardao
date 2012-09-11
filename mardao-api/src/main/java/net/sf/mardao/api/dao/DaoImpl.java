@@ -88,7 +88,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     protected abstract Collection<C> persistCore(Iterable<E> itrbl);
     
     /** Implemented in TypeDaoImpl */
-    protected abstract CursorPage<T> queryPage(boolean keysOnly, int pageSize,
+    protected abstract CursorPage<T, ID> queryPage(boolean keysOnly, int pageSize,
             C ancestorKey, C simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
@@ -365,7 +365,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
         return doQueryByPrimaryKeys(parentKey, simpleKeys);
     }
     
-    public CursorPage<T> queryPage(int pageSize, Serializable cursorString) {
+    public CursorPage<T, ID> queryPage(int pageSize, Serializable cursorString) {
         return queryPage(false, pageSize, null, null,
                 null, false, null, false,
                 cursorString);

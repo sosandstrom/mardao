@@ -2,6 +2,7 @@ package net.sf.mardao.api.dao;
 
 import java.io.Serializable;
 import java.util.Collection;
+import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.domain.PrimaryKeyEntity;
 
 /**
@@ -26,4 +27,20 @@ public interface Dao<T extends PrimaryKeyEntity<ID>, ID extends Serializable> {
     ID persist(T domain);
 
     Collection<ID> persist(Iterable<T> domains);
+    
+    Iterable<T> queryAll();
+    
+    Iterable<T> queryAll(Object parentKey);
+    
+    Iterable<ID> queryAllKeys();
+    
+    Iterable<ID> queryAllKeys(Object parentKey);
+    
+    Iterable<T> queryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys);
+    
+    CursorPage<T, ID> queryPage(int pageSize, Serializable cursorString);
+    
+    void update(Iterable<T> domains);
+    
+    void update(T domain);
 }

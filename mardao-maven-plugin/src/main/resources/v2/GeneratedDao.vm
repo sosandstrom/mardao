@@ -33,8 +33,7 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 #end
 
 	/** The list of attribute names */
-	static final List<String> COLUMN_NAMES = Arrays.asList(
-		COLUMN_NAME_${entity.pk.name.toUpperCase()}#foreach( $field in $allFields ), 
+	static final List<String> COLUMN_NAMES = Arrays.asList(#foreach( $field in $allFields )#if ($velocityCount > 1),#end
 		COLUMN_NAME_${field.name.toUpperCase()}#end);
 
 
@@ -76,7 +75,7 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
          * @param cursorString non-null if get next page
 	 * @return a Page of ${entity.simpleName}s for the specified ${field.name} (parent)
 	 */
-	CursorPage<${entity.simpleName}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
+	CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
             int pageSize, Serializable cursorString);
 
 #end   
@@ -125,7 +124,7 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
          * @param cursorString non-null if get next page
 	 * @return a Page of ${entity.simpleName}s for the specified ${field.name}
 	 */
-	CursorPage<${entity.simpleName}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
+	CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
             int pageSize, Serializable cursorString);
 
 #end	

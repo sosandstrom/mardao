@@ -60,7 +60,7 @@ public class AEDDaoTest extends TestCase {
         assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
         DaoImpl.setPrincipalName(null);
         
-        final CursorPage<Book> page = dao.queryPage(10, null);
+        final CursorPage<Book, Long> page = dao.queryPage(10, null);
         assertNotNull(page);
         assertNotNull(page.getItems());
         assertFalse(page.getItems().isEmpty());
@@ -81,7 +81,7 @@ public class AEDDaoTest extends TestCase {
         assertNotNull(expected.getId());
         assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
         
-        final CursorPage<Book> page = dao.queryPage(10, null);
+        final CursorPage<Book, Long> page = dao.queryPage(10, null);
         assertNotNull(page);
         assertNotNull(page.getItems());
         assertFalse(page.getItems().isEmpty());
@@ -108,7 +108,7 @@ public class AEDDaoTest extends TestCase {
         DaoImpl.setPrincipalName(null);
         
         Serializable cursorString = null;
-        CursorPage<Book> page;
+        CursorPage<Book, Long> page;
         for (int p = 0; p < 11; p++) {
             page = dao.queryPage(10, cursorString);
             System.out.println(String.format("queried page %d with cursor %s, got %d items", p, cursorString, page.getItems().size()));

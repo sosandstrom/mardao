@@ -175,7 +175,7 @@ public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Ser
     }
     
     @Override
-    protected CursorPage<T> queryPage(boolean keysOnly, int pageSize,
+    protected CursorPage<T, ID> queryPage(boolean keysOnly, int pageSize,
             Key ancestorKey, Key simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
@@ -188,7 +188,7 @@ public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Ser
         
         final QueryResultList<Entity> iterable = asQueryResultList(pq, pageSize, (String) cursorString);
         
-        final CursorPage<T> cursorPage = new CursorPage<T>();
+        final CursorPage<T, ID> cursorPage = new CursorPage<T, ID>();
         final Collection<T> domains = new ArrayList<T>();
         for (Entity core : iterable) {
             domains.add(coreToDomain(core));

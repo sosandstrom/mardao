@@ -55,6 +55,11 @@ public class DEmployee extends DLongEntity {
     public void setParentKey(Object parentKey) {
         this.organizationKey = (Serializable) parentKey;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s,fingerprint:%s}", super.toString(), fingerprint);
+    }
     
     public Long getId() {
         return id;

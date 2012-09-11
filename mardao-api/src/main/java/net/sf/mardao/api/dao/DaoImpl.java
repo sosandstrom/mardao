@@ -130,6 +130,10 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     // --- END persistence-type beans must implement these ---
     
     public T coreToDomain(E core) {
+        if (null == core) {
+            return null;
+        }
+        
         final ID simpleKey = coreToSimpleKey(core);
         final P parentKey = coreToParentKey(core);
         
@@ -194,6 +198,10 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     }
     
     public E domainToCore(T domain, final Date currentDate) {
+        if (null == domain) {
+            return null;
+        }
+        
         E core = createCore(domain.getParentKey(), domain.getSimpleKey());
         
         // created, updated

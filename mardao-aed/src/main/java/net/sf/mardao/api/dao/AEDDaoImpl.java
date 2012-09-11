@@ -53,7 +53,7 @@ public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Ser
 
     @Override
     protected ID coreToSimpleKey(Entity core) {
-        return coreKeyToSimpleKey(core.getKey());
+        return null != core ? coreKeyToSimpleKey(core.getKey()) : null;
     }
 
     @Override
@@ -71,7 +71,7 @@ public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Ser
 
     @Override
     protected Key coreToParentKey(Entity core) {
-        return core.getParent();
+        return null != core ? core.getParent() : null;
     }
 
     @Override
@@ -165,7 +165,7 @@ public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Ser
     
     @Override
     protected Object getCoreProperty(Entity core, String name) {
-        return core.getProperty(name);
+        return null != core ? core.getProperty(name) : null;
     }
     
     @Override

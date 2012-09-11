@@ -31,7 +31,7 @@ public abstract class DPrimaryKeyEntity<ID extends Serializable> implements Crea
     private Serializable parentKey;
 
     public String toString() {
-        return getClass().getSimpleName() + ',' + getPrimaryKey();
+        return String.format("%s{simpleKey:%s", getClass().getSimpleName(), getSimpleKey());
     }
 
     public String getKind() {

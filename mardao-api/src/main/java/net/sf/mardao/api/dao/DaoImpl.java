@@ -7,9 +7,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 import net.sf.mardao.api.Filter;
 import net.sf.mardao.api.domain.CreatedUpdatedEntity;
+import net.sf.mardao.api.geo.DLocation;
+import net.sf.mardao.api.geo.GeoModel;
+import net.sf.mardao.api.geo.Geobox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +43,22 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
         implements Dao<T, ID> {
     
     public static final String PRINCIPAL_NAME_ANONYMOUS = "[ANONYMOUS]";
+    
+    /** Default name of the geoboxes column is "_geoboxes" */
+    public static final String COLUMN_NAME_GEOBOXES_DEFAULT = "_geoboxes";
 
     /** Using slf4j logging */
     protected static final Logger   LOG = LoggerFactory.getLogger(DaoImpl.class);
     
-    /** mostly for logging */
-    protected final Class<T> persistentClass;
-    
+    private Collection<Integer> boxBits = Arrays.asList(
+        Geobox.BITS_12_10km, Geobox.BITS_15_1224m, Geobox.BITS_18_154m
+    );
+
     /** set this, to have createdBy and updatedBy set */
     private static final ThreadLocal<String> principalName = new ThreadLocal<String>();
+    
+    /** mostly for logging */
+    protected final Class<T> persistentClass;
     
     /** 
      * Set this to true in DaoBean constructor, to enable
@@ -231,11 +243,16 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
         
         domain._setUpdatedDate(currentDate);
         setCoreProperty(core, domain._getNameUpdatedDate(), currentDate);
-
+        
         // Domain Entity-specific properties
         for (String name : getColumnNames()) {
             copyDomainPropertyToCore(name, domain, core);
 //            copyCorePropertyToDomain(name, core, domain);
+        }
+
+        // geoboxes
+        if (null != getLocationColumnName()) {
+            updateGeoModel(domain);
         }
 
         return core;
@@ -280,6 +297,35 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     
     public static String getPrincipalName() {
         return principalName.get();
+    }
+    
+    /**
+     * Override to return your desired column name
+     * @return COLUMN_NAME_GEOBOXES_DEFAULT, i.e. "_geoboxes"
+     */
+    public String getGeoboxesColumnName() {
+        return COLUMN_NAME_GEOBOXES_DEFAULT;
+    }
+    
+    /** Override in GeneratedEntityDaoImpl */
+    protected String getLocationColumnName() {
+        return null;
+    }
+
+    protected void updateGeoModel(T domain) throws IllegalArgumentException {
+        if (domain instanceof GeoModel) {
+            final GeoModel geoDomain = (GeoModel) domain;
+            final DLocation location = geoDomain.getLocation();
+            // geoboxes are needed to findGeo the nearest entities and sort them by distance
+            final Collection<Long> geoboxes = new ArrayList<Long>();
+            for (int bits : boxBits) {
+                geoboxes.addAll(Geobox.getTuple(location.getLatitude(), location.getLongitude(), bits));
+            }
+            geoDomain.setGeoboxes(geoboxes);
+        }
+        else {
+            throw new IllegalArgumentException(getTableName() + " not instance of GeoModel");
+        }
     }
 
     // --- BEGIN Dao methods ---
@@ -379,6 +425,49 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
                 cursorString);
     }
 
+    public CursorPage<T, ID> queryInGeobox(float lat, float lng, int bits, int pageSize, 
+            String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
+            Serializable cursorString, Filter... filters) {
+        if (!boxBits.contains(bits)) {
+            throw new IllegalArgumentException("Unboxed resolution, hashed are " + boxBits);
+        }
+        
+        final long box = Geobox.getHash(lat, lng, bits);
+        
+        final Filter geoFilters[] = Arrays.copyOf(filters, filters != null ? filters.length + 1 : 1, Filter[].class);
+        geoFilters[geoFilters.length-1] = createEqualsFilter(getGeoboxesColumnName(), box);
+        return queryPage(false, pageSize, null, null, primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending, 
+                cursorString, geoFilters);
+    }
+
+    public Collection<T> findNearest(final float lat, final float lng, 
+            String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
+            int offset, int limit, Filter... filters) {
+        final DLocation p = new DLocation(lat, lng);
+        int size = offset + (0 < limit ? limit : 10000);
+        
+        // sorting on distance has to be done outside datastore, i.e. here in application:
+        Map<Double, T> orderedMap = new TreeMap<Double, T>();
+        for (int bits : boxBits) {       
+            final CursorPage<T, ID> subList = queryInGeobox(lat, lng, bits, limit,
+                    primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
+                    null, filters);
+            for (T model : subList.getItems()) {
+                double d = Geobox.distance(((GeoModel)model).getLocation(), p);
+                orderedMap.put(d, model);
+            }
+            
+            if (size <= orderedMap.size()) {
+                break;
+            }
+        }
+        // return with specified offset and limit
+        final Collection<T> values = orderedMap.values();
+        T[] page = (T[]) Arrays.copyOfRange(values.toArray(), 
+                Math.min(offset, values.size()), Math.min(size, values.size()));
+        return Arrays.asList(page);
+    }
+
     /**
      * Implemented with a call to persist(domains). Feel free to override.
      * @param domains 
@@ -417,6 +506,10 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
         }
     }
     
+    public void setBoxBits(Collection<Integer> boxBits) {
+        this.boxBits = boxBits;
+    }
+
     public static void setPrincipalName(String name) {
         principalName.set(name);
     }

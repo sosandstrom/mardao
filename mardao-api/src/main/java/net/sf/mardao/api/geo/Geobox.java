@@ -1,6 +1,5 @@
-package net.sf.mardao.api.geo.aed;
+package net.sf.mardao.api.geo;
 
-import com.google.appengine.api.datastore.GeoPt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -266,7 +265,7 @@ public class Geobox {
      * @param p2: indicating the second point.
      * @return The 2D great-circle distance between the two given points, in meters.
      */
-	public static double distance(GeoPt p1, GeoPt p2) {
+	public static double distance(DLocation p1, DLocation p2) {
 		double p1lat = Math.toRadians(p1.getLatitude());
 		double p1lon = Math.toRadians(p1.getLongitude());
 		double p2lat = Math.toRadians(p2.getLatitude());

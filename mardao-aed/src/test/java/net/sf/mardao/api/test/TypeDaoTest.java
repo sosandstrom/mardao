@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
 import net.sf.mardao.api.CursorPage;
-import net.sf.mardao.api.dao.AEDDaoImpl;
+import net.sf.mardao.api.dao.TypeDaoImpl;
 import net.sf.mardao.api.dao.DaoImpl;
 import net.sf.mardao.api.test.Book;
 
@@ -19,11 +19,11 @@ import net.sf.mardao.api.test.Book;
  *
  * @author os
  */
-public class AEDDaoTest extends TestCase {
+public class TypeDaoTest extends TestCase {
     final LocalServiceTestHelper helper = new LocalServiceTestHelper(
             new LocalDatastoreServiceTestConfig());
     
-    AEDDaoImpl<Book, Long> dao;
+    TypeDaoImpl<Book, Long> dao;
     
     @Override
     protected void setUp() throws Exception {

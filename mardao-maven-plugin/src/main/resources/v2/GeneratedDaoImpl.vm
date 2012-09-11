@@ -10,7 +10,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.Filter;
-import net.sf.mardao.api.dao.AEDDaoImpl;
+import net.sf.mardao.api.dao.TypeDaoImpl;
 import ${entity.className};
 #foreach( $field in $entity.oneToOnes )
 import ${field.entity.className};
@@ -29,7 +29,7 @@ import net.sf.mardao.api.domain.PrimaryKeyEntity;
  * Generated on ${currentDate}.
  * @author mardao DAO generator (${helper.class.name})
  */
-public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.simpleName}, ${entity.pk.type}> 
+public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.simpleName}, ${entity.pk.type}> 
 	implements Generated${entity.simpleName}Dao {
 
 #foreach( $field in $entity.manyToOnes )
@@ -55,7 +55,16 @@ public class Generated${entity.simpleName}DaoImpl extends AEDDaoImpl<${entity.si
    public List<String> getColumnNames() {
         return COLUMN_NAMES;
    }
-   
+
+#foreach( $field in $entity.fields )
+#if( $field.type == "net.sf.mardao.api.geo.DLocation" )
+    @Override
+    protected String getLocationColumnName() {
+        return COLUMN_NAME_${field.nameUpper};
+    }
+
+#end
+#end
     @Override
     protected Object getDomainProperty(${entity.simpleName} domain, String name) {
         Object value;

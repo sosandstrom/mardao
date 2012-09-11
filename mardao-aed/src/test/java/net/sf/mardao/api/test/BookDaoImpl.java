@@ -3,13 +3,13 @@ package net.sf.mardao.api.test;
 import java.util.Arrays;
 import java.util.Collection;
 import net.sf.mardao.api.Filter;
-import net.sf.mardao.api.dao.AEDDaoImpl;
+import net.sf.mardao.api.dao.TypeDaoImpl;
 
 /**
  *
  * @author os
  */
-public class BookDaoImpl extends AEDDaoImpl<Book, Long> {
+public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
     public static final String COLUMN_NAME_ID = "id";
     public static final String COLUMN_NAME_TITLE = "title";
     

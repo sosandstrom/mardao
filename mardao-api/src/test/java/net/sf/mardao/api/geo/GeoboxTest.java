@@ -2,9 +2,8 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.sf.mardao.api.geo.aed;
+package net.sf.mardao.api.geo;
 
-import com.google.appengine.api.datastore.GeoPt;
 import java.util.Set;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
@@ -68,11 +67,11 @@ public class GeoboxTest extends TestCase {
     }
     
     public void testGetDistance() {
-        final GeoPt P0 = new GeoPt(56.34f, 15.05f);
-        final GeoPt P1 = new GeoPt(56.387f, 15.05f);
-        final GeoPt P2 = new GeoPt(56.3445f, 15.05f);
-        final GeoPt P3 = new GeoPt(56.34043f, 15.05f);
-        final GeoPt P4 = new GeoPt(56.34001f, 15.05f);
+        final DLocation P0 = new DLocation(56.34f, 15.05f);
+        final DLocation P1 = new DLocation(56.387f, 15.05f);
+        final DLocation P2 = new DLocation(56.3445f, 15.05f);
+        final DLocation P3 = new DLocation(56.34043f, 15.05f);
+        final DLocation P4 = new DLocation(56.34001f, 15.05f);
         LOG.info("0.047 = {}m", Geobox.distance(P0, P1));
         LOG.info("0.0045 = {}m", Geobox.distance(P0, P2));
         LOG.info("0.00043 = {}m", Geobox.distance(P0, P3));
@@ -111,12 +110,12 @@ public class GeoboxTest extends TestCase {
             }
 //            LOG.info("latMax = {}", latMax);
 
-            GeoPt pMin = new GeoPt(latMin, lat);
-            GeoPt pMax = new GeoPt(latMax, lat);
+            DLocation pMin = new DLocation(latMin, lat);
+            DLocation pMax = new DLocation(latMax, lat);
             LOG.info("lat distance for {} bits is {}m", bits, Geobox.distance(pMin, pMax));
 
-            pMin = new GeoPt(lat, latMin);
-            pMax = new GeoPt(lat, latMax);
+            pMin = new DLocation(lat, latMin);
+            pMax = new DLocation(lat, latMax);
 //            LOG.info("long distance at N{} is {}m", lat, GeoDaoImpl.distance(pMin, pMax));
         }
     }

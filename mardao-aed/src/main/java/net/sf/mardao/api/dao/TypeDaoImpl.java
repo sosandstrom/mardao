@@ -14,6 +14,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -33,8 +34,9 @@ import net.sf.jsr107cache.CacheManager;
 import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.Filter;
 import net.sf.mardao.api.domain.DLongEntity;
+import net.sf.mardao.api.geo.DLocation;
 
-public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Serializable> extends
+public abstract class TypeDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID> {
     
     /** Set this to true in subclass (TypeDaoBean) to enable the MemCache primaryKey - Entity */
@@ -45,7 +47,7 @@ public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Ser
     
     protected static Cache _memCache = null;
 
-    protected AEDDaoImpl(Class<T> type) {
+    protected TypeDaoImpl(Class<T> type) {
         super(type);
     }
     
@@ -165,7 +167,15 @@ public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Ser
     
     @Override
     protected Object getCoreProperty(Entity core, String name) {
-        return null != core ? core.getProperty(name) : null;
+        Object value = null;
+        if (null != core && null != name) {
+            value = core.getProperty(name);
+            if (value instanceof GeoPt) {
+                final GeoPt geoPt = (GeoPt) value;
+                value = new DLocation(geoPt.getLatitude(), geoPt.getLongitude());
+            }
+        }
+        return value;
     }
     
     @Override
@@ -238,6 +248,10 @@ public abstract class AEDDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Ser
     @Override
     protected void setCoreProperty(Entity core, String name, Object value) {
         if (null != name) {
+            if (value instanceof DLocation) {
+                final DLocation location = (DLocation) value;
+                value = new GeoPt(location.getLatitude(), location.getLongitude());
+            }
             core.setProperty(name, value);
         }
     }

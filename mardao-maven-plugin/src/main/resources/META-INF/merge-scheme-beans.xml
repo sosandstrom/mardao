@@ -477,6 +477,35 @@
 					<property name="fileMiddle" value="DaoImpl" />
 					<property name="fileSuffix" value=".java" />
 				</bean>
+				<!-- {Entity}Dao.java (interface) -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="v2/" />
+					<property name="templateMiddle" value="Dao" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="srcDao" />
+					<property name="fileMiddle" value="Dao" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+				<!-- {Entity}DaoBean.java (the Spring Bean injected into controllers) -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="v2/" />
+					<property name="templateMiddle" value="DaoBean" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="srcDao" />
+					<property name="fileMiddle" value="DaoBean" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+
+				<!-- spring-dao.xml bean context -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+					<property name="templatePrefix" value="v2/spring-dao" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="resources" />
+					<property name="entity" value="false" />
+					<property name="listingEntities" value="true" />
+					<property name="filePrefix" value="spring-dao" />
+					<property name="fileSuffix" value=".xml" />
+				</bean>
 			</list>
 		</property>
 	</bean>

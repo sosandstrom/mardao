@@ -40,6 +40,7 @@ public class GeoDaoTest extends TestCase {
         
         populate();
         LOG.info("--- setUp() " + getName() + " ---");
+        System.out.println("--- setUp() " + getName() + " ---");
     }
     
     protected void populate() {
@@ -51,8 +52,8 @@ public class GeoDaoTest extends TestCase {
             employee.setId(Long.valueOf(i));
             employee.setFingerprint(String.format("%dfingerprint%d", i, i));
             employee.setOfficeLocation(0 == i % 9 ? null : 
-                    new DLocation(20.0f + 0.0001f * ((i%20) - 10),
-                        110.0f + 0.0001f * ((i%13)-6)));
+                    new DLocation(20.0f + 0.00029f * ((i%20) - 10),
+                        110.0f + 0.00028f * ((i%13)-6)));
             employeeDao.persist(employee);
             employees.put(Long.valueOf(i), employee);
         }
@@ -65,11 +66,27 @@ public class GeoDaoTest extends TestCase {
         super.tearDown();
     }
     
-    public void testQuery() {
+    public void testQueryInGeobox() {
         Serializable cursorString = null;
         
-        CursorPage<DEmployee, Long> page = employeeDao.queryInGeobox(20f, 110f, Geobox.BITS_15_1224m, 60,
+        CursorPage<DEmployee, Long> page = employeeDao.queryInGeobox(20f, 110f, Geobox.BITS_18_154m, 60,
                 null, false, null, false, cursorString);
+        assertEquals(60, page.getItems().size());
+        final DLocation centre = new DLocation(20f, 110f);
+        for (DEmployee actual : page.getItems()) {
+            double distance = Geobox.distance(centre, actual.getLocation());
+            System.out.println("   distance=" + distance);
+            assertTrue("distance", distance < 308);
+        }
+        
+        page = employeeDao.queryInGeobox(20f, 110f, Geobox.BITS_18_154m, 60,
+                null, false, null, false, page.getCursorKey());
+        assertEquals(23, page.getItems().size());
+        for (DEmployee actual : page.getItems()) {
+            double distance = Geobox.distance(centre, actual.getLocation());
+            System.out.println("   distance=" + distance);
+            assertTrue("distance", distance < 308);
+        }
     }
     
 }

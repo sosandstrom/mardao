@@ -10,6 +10,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import net.sf.mardao.api.Parent;
+import net.sf.mardao.api.geo.DLocation;
+import net.sf.mardao.api.geo.GeoModel;
 
 /**
  *
@@ -17,7 +19,7 @@ import net.sf.mardao.api.Parent;
  */
 @Entity
 @Table(uniqueConstraints=@UniqueConstraint(columnNames={"fingerprint"}))
-public class DEmployee extends DLongEntity {
+public class DEmployee extends DLongEntity implements GeoModel {
     @Id
     private Long id;
 
@@ -30,6 +32,12 @@ public class DEmployee extends DLongEntity {
     @Basic
     private String nickname;
     
+    @Basic
+    private DLocation officeLocation;
+    
+    @Basic
+    private Collection<Long> geoboxes;
+
     @ManyToOne
     private DEmployee manager;
     
@@ -56,6 +64,16 @@ public class DEmployee extends DLongEntity {
         this.organizationKey = (Serializable) parentKey;
     }
 
+    @Override
+    public DLocation getLocation() {
+        return officeLocation;
+    }
+
+    @Override
+    public void setGeoboxes(Collection<Long> geoboxes) {
+        this.geoboxes = geoboxes;
+    }
+    
     @Override
     public String toString() {
         return String.format("%s,fingerprint:%s}", super.toString(), fingerprint);
@@ -108,6 +126,17 @@ public class DEmployee extends DLongEntity {
     public void setGroups(Collection<DGroup> groups) {
         this.groups = groups;
     }
-    
-    
+
+    public DLocation getOfficeLocation() {
+        return officeLocation;
+    }
+
+    public void setOfficeLocation(DLocation officeLocation) {
+        this.officeLocation = officeLocation;
+    }
+
+    public Collection<Long> getGeoboxes() {
+        return geoboxes;
+    }
+
 }

@@ -44,8 +44,8 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     
     public static final String PRINCIPAL_NAME_ANONYMOUS = "[ANONYMOUS]";
     
-    /** Default name of the geoboxes column is "_geoboxes" */
-    public static final String COLUMN_NAME_GEOBOXES_DEFAULT = "_geoboxes";
+    /** Default name of the geoboxes column is "geoboxes" */
+    public static final String COLUMN_NAME_GEOBOXES_DEFAULT = "geoboxes";
 
     /** Using slf4j logging */
     protected static final Logger   LOG = LoggerFactory.getLogger(DaoImpl.class);
@@ -252,7 +252,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
 
         // geoboxes
         if (null != getLocationColumnName()) {
-            updateGeoModel(domain);
+            updateGeoModel(domain, core);
         }
 
         return core;
@@ -301,7 +301,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     
     /**
      * Override to return your desired column name
-     * @return COLUMN_NAME_GEOBOXES_DEFAULT, i.e. "_geoboxes"
+     * @return COLUMN_NAME_GEOBOXES_DEFAULT, i.e. "geoboxes"
      */
     public String getGeoboxesColumnName() {
         return COLUMN_NAME_GEOBOXES_DEFAULT;
@@ -312,15 +312,21 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
         return null;
     }
 
-    protected void updateGeoModel(T domain) throws IllegalArgumentException {
+    /** geoboxes are needed to findGeo the nearest entities before sorting them by distance */
+    protected void updateGeoModel(T domain, E core) throws IllegalArgumentException {
         if (domain instanceof GeoModel) {
             final GeoModel geoDomain = (GeoModel) domain;
             final DLocation location = geoDomain.getLocation();
-            // geoboxes are needed to findGeo the nearest entities and sort them by distance
             final Collection<Long> geoboxes = new ArrayList<Long>();
-            for (int bits : boxBits) {
-                geoboxes.addAll(Geobox.getTuple(location.getLatitude(), location.getLongitude(), bits));
+            
+            // if entity has no location, simply set the domain field to empty collection
+            if (null != location) {
+                for (int bits : boxBits) {
+                    geoboxes.addAll(Geobox.getTuple(location.getLatitude(), location.getLongitude(), bits));
+                }
+                setCoreProperty(core, getGeoboxesColumnName(), geoboxes);
             }
+            
             geoDomain.setGeoboxes(geoboxes);
         }
         else {

@@ -7,6 +7,7 @@ import java.util.List;
 import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.dao.Dao;
 import ${entity.className};
+import net.sf.mardao.api.geo.DLocation;
 
 /**
  * DAO interface with finder methods for ${entity.simpleName} entities.

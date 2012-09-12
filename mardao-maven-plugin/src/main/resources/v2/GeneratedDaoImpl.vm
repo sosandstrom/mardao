@@ -22,6 +22,7 @@ import ${field.entity.className};
 import ${field.entity.className};
 #end
 import net.sf.mardao.api.domain.PrimaryKeyEntity;
+import net.sf.mardao.api.geo.DLocation;
 
 /**
  * The ${entity.simpleName} domain-object specific finders and methods go in this POJO.

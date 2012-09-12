@@ -1,12 +1,10 @@
 package net.sf.mardao.api.dao;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collection;
 import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.Filter;
 import net.sf.mardao.api.domain.PrimaryKeyEntity;
-import net.sf.mardao.api.geo.Geobox;
 
 /**
  * 
@@ -26,6 +24,20 @@ public interface Dao<T extends PrimaryKeyEntity<ID>, ID extends Serializable> {
     String getPrimaryKeyColumnName();
 
     String getTableName();
+    
+    // --- Generic Dao methods ---
+    
+    int delete(Object parentKey, Iterable<ID> simpleKeys);
+    
+    boolean delete(Object parentKey, ID simpleKey);
+    
+    boolean delete(ID simpleKey);
+    
+    boolean delete(T domain);
+    
+    T findByPrimaryKey(Object parentKey, ID simpleKey);
+    
+    T findByPrimaryKey(ID simpleKey);
 
     ID persist(T domain);
 
@@ -41,6 +53,12 @@ public interface Dao<T extends PrimaryKeyEntity<ID>, ID extends Serializable> {
     
     Iterable<T> queryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys);
     
+    void update(Iterable<T> domains);
+    
+    void update(T domain);
+
+    // --- GeoDao methods ---
+    
     CursorPage<T, ID> queryInGeobox(float lat, float lng, int bits, int pageSize, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             Serializable cursorString, Filter... filters);
@@ -48,8 +66,4 @@ public interface Dao<T extends PrimaryKeyEntity<ID>, ID extends Serializable> {
     Collection<T> findNearest(final float lat, final float lng, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             int offset, int limit, Filter... filters);
-    
-    void update(Iterable<T> domains);
-    
-    void update(T domain);
 }

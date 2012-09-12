@@ -90,6 +90,13 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
      * @return number of rows deleted (optional)
      */
     protected abstract int doDelete(Object parentKey, Iterable<ID> simpleKeys);
+    /**
+     * Implement / Override this in TypeDaoImpl. This method does not have to
+     * worry about invalidating the cache, that is done in delete(domains)
+     * @param domains
+     * @return number of rows deleted (optional)
+     */
+    protected abstract int doDelete(Iterable<T> domains);
     
     protected abstract T doFindByPrimaryKey(Object parentKey, ID simpleKeys);
     protected abstract Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys);
@@ -258,6 +265,16 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
         return core;
     }
     
+    public Collection<Serializable> domainsToPrimaryKeys(Iterable<T> domains) {
+        final Collection<Serializable> keys = new ArrayList<Serializable>();
+        Serializable pk;
+        for (T d : domains) {
+            pk = d.getPrimaryKey();
+            keys.add(pk);
+        }
+        return keys;
+    }
+
     public Collection<ID> coresToSimpleKeys(Iterable<E> cores) {
         final Collection<ID> ids = new ArrayList<ID>();
         ID id;
@@ -343,7 +360,15 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
         
         return count;
     }
-    
+
+    public int delete(Iterable<T> domains) {
+        final int count = doDelete(domains);
+        
+        // TODO: invalidate cache
+        
+        return count;
+    }
+
     public boolean delete(Object parentKey, ID simpleKey) {
         final int count = delete(parentKey, Arrays.asList(simpleKey));
         return 1 == count;
@@ -351,6 +376,11 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     
     public boolean delete(ID simpleKey) {
         final int count = delete(null, Arrays.asList(simpleKey));
+        return 1 == count;
+    }
+    
+    public boolean delete(T domain) {
+        final int count = delete(domain.getParentKey(), Arrays.asList(domain.getSimpleKey()));
         return 1 == count;
     }
     

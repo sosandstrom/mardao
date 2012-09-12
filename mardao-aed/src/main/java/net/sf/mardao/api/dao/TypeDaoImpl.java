@@ -129,6 +129,13 @@ public abstract class TypeDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Se
     }
 
     @Override
+    protected int doDelete(Iterable<T> domains) {
+        final Iterable<Key> keys = (Iterable) domainsToPrimaryKeys(domains);
+        getDatastoreService().delete(keys);
+        return -1;
+    }
+    
+    @Override
     protected T doFindByPrimaryKey(Object parentKey, ID simpleKey) {
         final Key coreKey = createCoreKey(parentKey, simpleKey);
         try {

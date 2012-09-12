@@ -400,11 +400,12 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 ${helper.firstToUpper($field.name)}#end(#foreach( $field in $uniqueFields )
 ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #end) {
-		final java.util.Map<String,Object> args = new java.util.HashMap<String,Object>($uniqueFields.size());
+		final Filter[] filters = new Filter[$uniqueFields.size()];
+                int i = 0;
 #foreach( $field in $uniqueFields )
-		args.put(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
+                filters[i++] = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
 #end
-		return findBy(args);
+		return findUniqueBy(filters);
 	}
 #end
 
@@ -435,11 +436,11 @@ ${entity.parent.name}, #end${entity.pk.name});
 #set( $uniqueFields = $entity.uniqueFieldsSets.get(0) )
 		// use find-by unique column set
 		if (null == domain) {
-			final java.util.Map<String,Object> args = new java.util.HashMap<String,Object>($uniqueFields.size());
-#foreach( $field in $uniqueFields )
-			args.put(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
-#end
-			domain = findBy(args);
+			domain = findBy#foreach( $field in $uniqueFields )
+${field.nameFirst}#end(
+                            #foreach( $field in $uniqueFields )
+${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
+#end);
 		}
 #end		
 		// create new?

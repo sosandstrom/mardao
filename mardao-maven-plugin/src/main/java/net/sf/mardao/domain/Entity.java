@@ -16,8 +16,7 @@ import java.util.TreeSet;
  * 
  */
 public class Entity implements Comparable<Entity> {
-    private String                   className;
-    private String                   simpleName;
+    private Class clazz;
     private String                   tableName;
     private Field                    parent;
     private Field                    pk;
@@ -36,20 +35,20 @@ public class Entity implements Comparable<Entity> {
     private Field                    updatedDate;
     private Field                    updatedBy;
 
-    public void setClassName(String className) {
-        this.className = className;
+    public Class getClazz() {
+        return clazz;
     }
 
+    public void setClazz(Class clazz) {
+        this.clazz = clazz;
+    }
+    
     public String getClassName() {
-        return className;
-    }
-
-    public void setSimpleName(String simpleName) {
-        this.simpleName = simpleName;
+        return clazz.getName();
     }
 
     public String getSimpleName() {
-        return simpleName;
+        return clazz.getSimpleName();
     }
 
     public Field getPk() {
@@ -160,7 +159,7 @@ public class Entity implements Comparable<Entity> {
      */
     public String getTableName() {
         if (null == tableName) {
-            return simpleName;
+            return getSimpleName();
         }
         return tableName;
     }
@@ -175,7 +174,7 @@ public class Entity implements Comparable<Entity> {
 
     @Override
     public int compareTo(Entity other) {
-        return this.className.compareTo(other.className);
+        return this.getClassName().compareTo(other.getClassName());
     }
 
     public void setParent(Field parent) {

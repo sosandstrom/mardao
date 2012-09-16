@@ -16,6 +16,8 @@ import org.objectweb.asm.Type;
  * @author f94os
  */
 public class FirstPassClassVisitor extends EmptyClassVisitor {
+    public static final int ACCESS_ABSTRACT = 0x400;
+    
     private final Log                 LOG;
     private final Map<String, Group>  packages;
     private final Map<String, Entity> entities;
@@ -24,6 +26,7 @@ public class FirstPassClassVisitor extends EmptyClassVisitor {
     private String                    simpleName;
     private String                    packageName;
     private String                    className;
+    private int access;
 
     public FirstPassClassVisitor(Log log, File file, Map<String, Group> packages, Map<String, Entity> entities,
             Map<File, Entity> entityFiles) {
@@ -37,6 +40,7 @@ public class FirstPassClassVisitor extends EmptyClassVisitor {
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        this.access = access;
         className = name.replace('/', '.');
         int index = className.lastIndexOf('.');
         simpleName = className.substring(index + 1);
@@ -50,11 +54,13 @@ public class FirstPassClassVisitor extends EmptyClassVisitor {
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         final String internal = Type.getType(desc).getInternalName();
         LOG.debug("@" + internal + " visible=" + visible);
-        if (DESC_ENTITY.equals(internal)) {
-            LOG.info("@Entity " + packageName + "." + simpleName);
+        
+        // non-abstract @Entity only
+        if (0 == (access & ACCESS_ABSTRACT) && DESC_ENTITY.equals(internal)) {
+            LOG.info(String.format("@Entity %s.%s", packageName, simpleName));
             Entity entity = new Entity();
-            entity.setClassName(className);
-            entity.setSimpleName(simpleName);
+//            entity.setClassName(className);
+//            entity.setSimpleName(simpleName);
 
             Group group = packages.get(packageName);
             if (null == group) {

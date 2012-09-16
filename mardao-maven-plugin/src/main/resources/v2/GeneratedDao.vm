@@ -176,7 +176,7 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	
 	// ----------------------- many-to-many finders -------------------------
 #foreach( $field in $entity.manyToManys )
-#set( $foreign = $entities.get($field.type))
+#set( $foreign = $field.entity )
 	/**
 	 * find-by method for many-to-many field ${field.name}
 	 * @param ${field.name} the related ${field.type} entity
@@ -236,7 +236,7 @@ Object ${entity.parent.name},
 	 * Persists an entity unless it already exists
 	 */
 	 ${entity.simpleName} persist(#foreach( $field in $entity.fields )
-${field.simpleType} ${field.name}#if( 0 < $entity.oneToOnes.size() || 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end
+${field.type} ${field.name}#if( 0 < $entity.oneToOnes.size() || 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end
 #end
 #foreach( $field in $entity.oneToOnes )	 
 ${field.type} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.manyToOnes.size() ), #end

@@ -14,7 +14,7 @@ public class DGroup extends DStringEntity {
     @Id
     private String name;
     
-    @ManyToMany
+    @ManyToMany(targetEntity=DEmployee.class)
     private Collection<DEmployee> members;
 
     @Override

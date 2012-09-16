@@ -2,6 +2,7 @@ package net.sf.mardao.api.dao;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.Filter;
 import net.sf.mardao.api.domain.PrimaryKeyEntity;
@@ -22,8 +23,34 @@ public interface Dao<T extends PrimaryKeyEntity<ID>, ID extends Serializable> {
     String getParentKeyColumnName();
 
     String getPrimaryKeyColumnName();
-
+    
+    ID getSimpleKey(T domain);
+    
+    Serializable getParentKey(T domain);
+    
+    Serializable getPrimaryKey(T domain);
+    
     String getTableName();
+    
+    void setSimpleKey(T domain, ID simpleKey);
+    
+    void setParentKey(T domain, Object parentKey);
+    
+    String getCreatedByColumnName();
+    
+    String getCreatedDateColumnName();
+    
+    String getUpdatedByColumnName();
+    
+    String getUpdatedDateColumnName();
+    
+    String getCreatedBy(T domain);
+    
+    Date getCreatedDate(T domain);
+    
+    String getUpdatedBy(T domain);
+    
+    Date getUpdatedDate(T domain);
     
     // --- Generic Dao methods ---
     

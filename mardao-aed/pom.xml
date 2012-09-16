@@ -40,7 +40,7 @@
                             <goal>testCompile</goal>
                         </goals>
                         <configuration>
-<!--                            <fork>true</fork>-->
+                            <!--                            <fork>true</fork>-->
                             <testIncludes>
                                 <include>**/domain/*.java</include>
                             </testIncludes>
@@ -60,6 +60,7 @@
                     <sourceFolder>${project.basedir}/src/test/java</sourceFolder>
                     <resourceFolder>${project.basedir}/src/test/resources</resourceFolder>
                     <targetFolder>${project.basedir}/target/generated-test-sources/dao</targetFolder>
+                    <mardaoApiPath>${maven.dependency.net.sf.mardao.mardao-api.jar.path}</mardaoApiPath>
                 </configuration>
                 <executions>
                     <execution>
@@ -71,13 +72,21 @@
                     </execution>
                     <execution>
                         <id>generate-daos</id>
-                        <phase>generate-test-sources</phase>
-                        <!--<phase>process-test-sources</phase>-->
+                        <!--<phase>generate-test-sources</phase>-->
+                        <phase>process-test-sources</phase>
                         <goals>
                             <goal>process-classes</goal>
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>mardao-api</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    
+                </dependencies>
             </plugin>
 
             <plugin>
@@ -85,20 +94,22 @@
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>1.5</version>
                 <executions>
-<!--                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
+                    <!-- add the pre-compiled Entity classes to test classpath -->
+                    <!--                    <execution>
+                        <id>add-domain-classes</id>
+                        <phase>generate-test-sources</phase>
                         <goals>
-                            <goal>add-source</goal>
+                            <goal>add-test-resource</goal>
                         </goals>
                         <configuration>
-                            <sources>
-                                <source>
-                                    ${project.basedir}/target/generated-sources/dao
-                                </source>
-                            </sources>
+                            <resources>
+                                <resource>
+                                    ${project.basedir}/target/test-classes
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>-->
+                    <!-- add the generated sources to test source path -->
                     <execution>
                         <id>add-test-source</id>
                         <phase>generate-test-sources</phase>
@@ -180,7 +191,7 @@
             <version>${gae.version}</version>
             <scope>test</scope>
         </dependency>
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j13</artifactId>
             <version>1.6.1</version>

@@ -15,6 +15,7 @@ import net.sf.mardao.domain.MergeTemplate;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -125,10 +126,27 @@ public class AbstractMardaoMojo extends AbstractMojo {
     protected String                         persistenceType;
 
     /**
+     * @parameter expression="${project}"
+     * @required
+     * @readonly
+     */
+    protected MavenProject project;
+
+    /**
      * @parameter expression="${generate.sourceVersion}" default-value="${maven.compiler.source}"
      */
     protected String                         sourceVersion;
-
+    
+    /**
+     * @parameter expression="${generate.mardaoApiPath}" default-value="${user.home}/.m2/repository/net/sf/mardao/mardao-api/${project.version}/mardao-api-${project.version}.jar"
+     */
+    protected File                         mardaoApiPath;
+    
+    /**
+     * @parameter expression="${generate.jpaApiPath}" default-value="${user.home}/.m2/repository/org/apache/geronimo/specs/geronimo-jpa_3.0_spec/1.1.1/geronimo-jpa_3.0_spec-1.1.1.jar"
+     */
+    protected File                         jpaApiPath;
+    
     public static final java.text.DateFormat DATEFORMAT   = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     protected String                         daoBasePackage;
@@ -207,6 +225,8 @@ public class AbstractMardaoMojo extends AbstractMojo {
         destFolders.put("webapp", webappFolder);
         destFolders.put("resources", resourceFolder);
     }
+    
+    
 
     /**
      * Creates and populates the velocity context, then calls mkdirs to create output directories.

@@ -2,41 +2,53 @@ package net.sf.mardao.plugin;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.sf.mardao.api.Parent;
 
 import net.sf.mardao.domain.Entity;
 import net.sf.mardao.domain.Field;
 import net.sf.mardao.domain.Group;
 import net.sf.mardao.domain.MergeTemplate;
-import net.sf.mardao.plugin.visitor.EntityClassVisitor;
-import net.sf.mardao.plugin.visitor.FirstPassClassVisitor;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
-import org.objectweb.asm.ClassReader;
 
 /**
- * This is the Mojo that scans the domain classes and builds a graph; then, it traverses the graph and generates DAO source files
- * by merging templates.
- * 
+ * This is the Mojo that scans the domain classes and builds a graph; then, it
+ * traverses the graph and generates DAO source files by merging templates.
+ *
+ * @requiresDependencyResolution test
  * @goal process-classes
  * @author f94os
- * 
+ *
  */
 public class ProcessDomainMojo extends AbstractMardaoMojo {
-    private final Map<String, Group>  packages    = new HashMap<String, Group>();
-    private final Map<String, Entity> entities    = new HashMap<String, Entity>();
-    private final Map<File, Entity>   entityFiles = new TreeMap<File, Entity>();
+    
+    /**
+     * The plugin descriptor
+     * 
+     * @parameter default-value="${descriptor}"
+     */
+    private PluginDescriptor descriptor;    
+    
+    protected URLClassLoader loader;
+
+    private final Map<String, Group> packages = new HashMap<String, Group>();
+    private final Map<String, Entity> entities = new HashMap<String, Entity>();
+    private final Map<File, Entity> entityFiles = new TreeMap<File, Entity>();
     private final Map<String, Field> inverseFields = new HashMap<String, Field>();
 
     /**
@@ -48,8 +60,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
         // scan classes and build graph
         try {
             processClasspaths();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new MojoExecutionException("Error processing entity classes", e);
         }
     }
@@ -65,7 +76,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
     public List<Entity> getEntitiesResolved(Map<String, Entity> entities) {
         List<Entity> resolved = new ArrayList<Entity>();
         List<Entity> remaining = new ArrayList<Entity>(entities.values());
-        for(Entity e : entities.values()) {
+        for (Entity e : entities.values()) {
             resolveEntity(resolved, e, remaining);
         }
 
@@ -80,18 +91,18 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
             // remove this entity from remaining to avoid circular recursion:
             remaining.remove(e);
 
-            for(Field f : e.getFields()) {
+            for (Field f : e.getFields()) {
                 if (null != f.getEntity() && !e.getClassName().equals(f.getEntity().getClassName())) {
                     resolveEntity(resolved, f.getEntity(), remaining);
                 }
             }
-            for(Field f : e.getOneToOnes()) {
+            for (Field f : e.getOneToOnes()) {
                 if (null != f.getEntity() && !e.getClassName().equals(f.getEntity().getClassName())) {
                     e.getDependsOn().add(f.getEntity());
                     resolveEntity(resolved, f.getEntity(), remaining);
                 }
             }
-            for(Field f : e.getManyToOnes()) {
+            for (Field f : e.getManyToOnes()) {
                 if (null != f.getEntity() && !e.getClassName().equals(f.getEntity().getClassName())) {
                     e.getDependsOn().add(f.getEntity());
                     resolveEntity(resolved, f.getEntity(), remaining);
@@ -108,7 +119,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
             Field f = e.getParent();
             Entity p = null;
             boolean direct = true;
-            
+
             // break if self is parent
             while (null != f && p != f.getEntity()) {
                 p = f.getEntity();
@@ -159,7 +170,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
         vc.put("parents", en.getParents());
         vc.put("children", en.getChildren());
 
-        for(MergeTemplate mt : mergeScheme.getTemplates()) {
+        for (MergeTemplate mt : mergeScheme.getTemplates()) {
             if (mt.isEntity()) {
                 mergeTemplate(mt, en.getSimpleName());
             }
@@ -171,27 +182,26 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
         vc.put("entities", entities);
         vc.put("inverseFields", inverseFields);
 
-        for(Group p : packages.values()) {
+        for (Group p : packages.values()) {
 
             // calculate daoPackage from daoBasePackage
             if (p.getName().startsWith(domainBasePackage)) {
                 p.setDaoPackageName(daoBasePackage + p.getName().substring(domainBasePackage.length()));
                 vc.put("controllerPackage", controllerBasePackage + p.getName().substring(domainBasePackage.length()));
-            }
-            else {
+            } else {
                 p.setDaoPackageName(daoBasePackage);
                 vc.put("controllerPackage", controllerBasePackage);
             }
 
             vc.put("domainPackage", p);
             vc.put("daoPackage", p.getDaoPackageName());
-            for(Entity e : getEntitiesResolved(p.getEntities())) {
+            for (Entity e : getEntitiesResolved(p.getEntities())) {
                 mergeEntity(e);
             }
         }
 
         // merge non-entity-specific templates
-        for(MergeTemplate mt : mergeScheme.getTemplates()) {
+        for (MergeTemplate mt : mergeScheme.getTemplates()) {
             if (mt.isListingEntities()) {
                 mergeTemplate(mt, null);
             }
@@ -199,39 +209,55 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
     }
 
     /**
-     * Processes the default classpath (classpathElement), then any additional elements (additionalClasspathElements).
-     * 
+     * Processes the default classpath (classpathElement), then any additional
+     * elements (additionalClasspathElements).
+     *
      * @return
      * @throws Exception
      */
     protected Map<String, Group> processClasspaths() throws Exception {
+//            final ClassRealm realm = descriptor.getClassRealm();
+            List<String> testClasspathElements = project.getTestClasspathElements();
+            final URL[] testClasspathURLs = new URL[testClasspathElements.size()];
+            int i = 0;
+            for (String element : testClasspathElements) {
+                File elementFile = new File(element);
+                URL u = elementFile.toURI().toURL();
+                getLog().info("Classpath component: " + u);
+//                realm.addURL(u);
+                testClasspathURLs[i++] = u;
+            }
+            loader = new URLClassLoader(testClasspathURLs, 
+                    Thread.currentThread().getContextClassLoader());
 
         // default classpath element
         processClasspath(classpathElement);
 
         // and any additional elements:
-        for(String s : additionalClasspathElements) {
+        for (String s : additionalClasspathElements) {
             processClasspath(s);
         }
 
-        // second pass ClassVisitor:
-        for(Entry<File, Entity> entry : entityFiles.entrySet()) {
-            File f = entry.getKey();
-            getLog().debug("--- file: " + f);
-            try {
-                final FileInputStream fis = new FileInputStream(f);
-                final ClassReader cr = new ClassReader(fis);
-                EntityClassVisitor fpcv = new EntityClassVisitor(getLog(), entities, entry.getValue());
-                cr.accept(fpcv, 0);
-            }
-            catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-
+        // second pass, reflect classes fully:
+        for (Entity e : entities.values()) {
+            reflectSecond(e, e.getClazz());
         }
+        
+//        for (Entry<File, Entity> entry : entityFiles.entrySet()) {
+//            File f = entry.getKey();
+//            getLog().debug("--- file: " + f);
+//            try {
+//                final FileInputStream fis = new FileInputStream(f);
+//                final ClassReader cr = new ClassReader(fis);
+//                EntityClassVisitor fpcv = new EntityClassVisitor(getLog(), entities, entry.getValue());
+//                cr.accept(fpcv, 0);
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
 
         mergePackages();
 
@@ -240,36 +266,71 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
 
     /**
      * Process the classes for a specified package
-     * 
+     *
      * @param classpathElement
      * @throws ResourceNotFoundException
      * @throws ParseErrorException
      * @throws Exception
      */
     private void processClasspath(String classpathElement) throws ResourceNotFoundException, ParseErrorException, Exception {
+//        getLog().info("Classpath is " + classpathElement);
         if (classpathElement.endsWith(".jar")) {
             // TODO: implement JAR scanning
-        }
-        else {
+        } else {
             final File dir = new File(classpathElement);
-            getLog().info("Classpath: " + dir.getAbsolutePath());
+            final URL url = new URL("file://" + classpathElement + "/");
+            final URL mardaoApiUrl = new URL("file://" + mardaoApiPath.getAbsolutePath());
+            final URL jpaApiUrl = new URL("file://" + jpaApiPath.getAbsolutePath());
+//            getLog().info("Classpath: " + url + ", " + mardaoApiUrl + ", " + jpaApiUrl);
+//            ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+//            if (loader instanceof URLClassLoader) {
+//                ((URLClassLoader)loader).add
+//            }
+//            final URL urls[] = {url, mardaoApiUrl, jpaApiUrl};
+            //            URLClassLoader loader = new URLClassLoader(urls, systemLoader);
+
+//            DependencyResolutionRequiredException e;
+            
             processPackage(dir, dir);
         }
     }
+    
+    protected Class getAnnotation(java.lang.reflect.Field field, Class annotationClass) {
+        for (Annotation a : field.getDeclaredAnnotations()) {
+            getLog().debug(String.format("      --- annotation @%s", a.annotationType().getName()));
+            if (annotationClass.getName().equals(a.annotationType().getName())) {
+                return a.annotationType();
+            }
+        }
+        return null;
+    }
+    
+    protected boolean isField(java.lang.reflect.Field field, Class annotationClass) {
+        return null != field.getAnnotation(annotationClass);
+//        return null != getAnnotation(field, annotationClass);
+    }
+    
+    protected static boolean isEntity(Class clazz) {
+        for (Annotation a : clazz.getDeclaredAnnotations()) {
+            if (javax.persistence.Entity.class.getName().equals(a.annotationType().getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
-     * Recursive method to process a folder or file; if a folder, call recursively for each file. If for a file, process the file
-     * using the classVisitor.
-     * 
-     * @param root
-     *            base folder
-     * @param dir
-     *            this (sub-)packages folder
+     * Recursive method to process a folder or file; if a folder, call
+     * recursively for each file. If for a file, process the file using the
+     * classVisitor.
+     *
+     * @param root base folder
+     * @param dir this (sub-)packages folder
      */
     private void processPackage(File root, File dir) {
         getLog().debug("- package: " + dir);
         if (null != dir && dir.isDirectory()) {
-            for(File f : dir.listFiles(new FileFilter() {
+            for (File f : dir.listFiles(new FileFilter() {
                 @Override
                 public boolean accept(File pathname) {
                     return pathname.isDirectory() || pathname.getName().endsWith(".class");
@@ -277,24 +338,115 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
             })) {
                 if (f.isDirectory()) {
                     processPackage(root, f);
-                }
-                else if (f.getParentFile().getAbsolutePath().replace('/', '.').endsWith(basePackage + '.' + domainPackageName)) {
-                    getLog().debug("--- file: " + f);
+                } else if (f.getParentFile().getAbsolutePath().replace('/', '.').endsWith(basePackage + '.' + domainPackageName)) {
+                    final String simpleName = f.getName().substring(0, f.getName().lastIndexOf(".class"));
+                    final String className = String.format("%s.%s.%s", basePackage, domainPackageName, simpleName);
+                    getLog().debug(String.format("--- class %s", className));
                     try {
-                        final FileInputStream fis = new FileInputStream(f);
-                        final ClassReader cr = new ClassReader(fis);
-                        FirstPassClassVisitor fpcv = new FirstPassClassVisitor(getLog(), f, packages, entities, entityFiles);
-                        cr.accept(fpcv, 0);
+                        Class clazz = loader.loadClass(className);
+                        if (!Modifier.isAbstract(clazz.getModifiers()) && isEntity(clazz)) {
+                            getLog().debug("@Entity " + clazz.getName());
+                            final Entity entity = new Entity();
+                            entity.setClazz(clazz);
+
+                            final String packageName = clazz.getPackage().getName();
+                            Group group = packages.get(packageName);
+                            if (null == group) {
+                                group = new Group();
+                                group.setName(packageName);
+                                packages.put(packageName, group);
+                            }
+
+                            group.getEntities().put(simpleName, entity);
+                            entities.put(entity.getClassName(), entity);
+                        }
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ProcessDomainMojo.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    catch (IOException e) {
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        final FileInputStream fis = new FileInputStream(f);
+//                        final ClassReader cr = new ClassReader(fis);
+//                        FirstPassClassVisitor fpcv = new FirstPassClassVisitor(getLog(), f, packages, entities, entityFiles);
+//                        cr.accept(fpcv, 0);
+//                    }
+//                    catch (FileNotFoundException e) {
+//                        e.printStackTrace();
+//                    }
+//                    catch (IOException e) {
+//                    }
+//                    }
                 }
             }
         }
     }
-
+    
+    protected void reflectSecond(Entity e, Class clazz) throws ClassNotFoundException {
+        if (clazz.equals(e.getClazz())) {
+            getLog().info("@Entity " + clazz.getName());
+        }
+        else {
+            getLog().info("      extends " + clazz.getName());
+        }
+        // if superclass extends @Entity, reflect superclass first
+        if (isEntity(clazz.getSuperclass())) {
+            reflectSecond(e, clazz.getSuperclass());
+        }
+        
+        // reflect all fields
+        for (java.lang.reflect.Field f : clazz.getDeclaredFields()) {
+            reflectField(e, clazz, f);
+        }
+    }
+    
+    protected void reflectField(Entity e, Class clazz, java.lang.reflect.Field field) throws ClassNotFoundException {
+        
+        Field f = new Field();
+        f.setName(field.getName());
+        f.setType(field.getType().getName());
+        Entity foreign = entities.get(f.getType());
+        f.setEntity(foreign);
+        getLog().debug(String.format("   --- field %s %s;", f.getSimpleType(), f.getName()));
+        Class pClass = loader.loadClass("net.sf.mardao.api.Parent");
+        getLog().debug("@Parent.class=" + pClass);
+        
+        // is this the @Id
+        if (isField(field, javax.persistence.Id.class)) {
+            e.setPk(f);
+            getLog().info(String.format("   @Id %s %s;", f.getSimpleType(), f.getName()));
+        }
+        // @Parent?
+//        else if (isField(field, pClass)) {
+        else if (isField(field, Parent.class)) { //pClass)) {
+            e.setParent(f);
+            getLog().info(String.format("   @Parent %s %s;", f.getSimpleType(), f.getName()));
+        }
+        // @Basic?
+        else if (isField(field, javax.persistence.Basic.class)) {
+            e.getFields().add(f);
+            getLog().info(String.format("   @Basic %s %s;", f.getSimpleType(), f.getName()));
+            
+            // check @UpdatedBy, @Location etc
+        }
+        // @OneToOne?
+        else if (isField(field, javax.persistence.OneToOne.class)) {
+            e.getOneToOnes().add(f);
+            getLog().info(String.format("   @OneToOne %s %s;", f.getSimpleType(), f.getName()));
+        }
+        // @ManyToOne?
+        else if (isField(field, javax.persistence.ManyToOne.class)) {
+            e.getManyToOnes().add(f);
+            getLog().info(String.format("   @ManyToOne %s %s;", f.getSimpleType(), f.getName()));
+        }
+        // @ManyToMany?
+        else if (isField(field, javax.persistence.ManyToMany.class)) {
+            for (Annotation a : field.getDeclaredAnnotations()) {
+                if (a instanceof javax.persistence.ManyToMany) {
+                    e.getManyToManys().add(f);
+                    javax.persistence.ManyToMany m2m = (javax.persistence.ManyToMany) a;
+                    f.setEntity(entities.get(m2m.targetEntity().getName()));
+                    getLog().info(String.format("   @ManyToMany %s<%s> %s;", f.getSimpleType(), f.getEntity().getSimpleName(), f.getName()));
+                }
+            }
+        }
+    }
 }

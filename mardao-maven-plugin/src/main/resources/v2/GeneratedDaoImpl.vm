@@ -188,6 +188,14 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
     
    // ------ END DaoImpl overrides -----------------------------
 
+        public Serializable getParentKey(${entity.simpleName} domain) {
+            return domain.get${field.nameFirst}();
+        }
+
+        public void setParentKey(${entity.simpleName} domain, Object ${field.name}) {
+            domain.set${field.nameFirst}((Serializable) ${field.name});
+        }
+
 	// ----------------------- parent finders -------------------------------
 
 	/**
@@ -228,6 +236,24 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 
         // ${entity.simpleName} has no parent
 #end
+
+#set( $field = $entity.pk )
+        /**
+         * @return the simple key for specified ${entity.simpleName} domain object
+         */
+        public ${field.simpleType} getSimpleKey(${entity.simpleName} domain) {
+            if (null == domain) {
+                return null;
+            }
+            return domain.get${field.nameFirst}();
+        }
+
+        /**
+         * @return the simple key for specified ${entity.simpleName} domain object
+         */
+        public void setSimpleKey(${entity.simpleName} domain, ${field.simpleType} ${field.name}) {
+            domain.set${field.nameFirst}(${field.name});
+        }
 
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
@@ -480,7 +506,7 @@ ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	 * Persists an entity unless it already exists
 	 */
 	public ${entity.simpleName} persist(#foreach( $field in $entity.fields )
-${field.simpleType} ${field.name}#if( 0 < $entity.oneToOnes.size() || 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end
+${field.type} ${field.name}#if( 0 < $entity.oneToOnes.size() || 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end
 #end
 #foreach( $field in $entity.oneToOnes )	 
 ${field.type} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.manyToOnes.size() ), #end

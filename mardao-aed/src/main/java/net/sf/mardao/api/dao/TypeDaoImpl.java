@@ -1,14 +1,13 @@
 package net.sf.mardao.api.dao;
 
-import com.google.appengine.api.datastore.Cursor;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import net.sf.mardao.api.domain.DPrimaryKeyEntity;
-
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -25,18 +24,15 @@ import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Text;
-import java.util.Collection;
-import java.util.Collections;
 import net.sf.jsr107cache.Cache;
 import net.sf.jsr107cache.CacheException;
 import net.sf.jsr107cache.CacheFactory;
 import net.sf.jsr107cache.CacheManager;
 import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.Filter;
-import net.sf.mardao.api.domain.DLongEntity;
 import net.sf.mardao.api.geo.DLocation;
 
-public abstract class TypeDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Serializable> extends
+public abstract class TypeDaoImpl<T extends Object/*DPrimaryKeyEntity<ID>*/, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID> {
     
     /** Set this to true in subclass (TypeDaoBean) to enable the MemCache primaryKey - Entity */
@@ -47,8 +43,8 @@ public abstract class TypeDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Se
     
     protected static Cache _memCache = null;
 
-    protected TypeDaoImpl(Class<T> type) {
-        super(type);
+    protected TypeDaoImpl(Class<T> type, Class<ID> idType) {
+        super(type, idType);
     }
     
     // --- BEGIN persistence-type beans must implement these ---
@@ -64,7 +60,7 @@ public abstract class TypeDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Se
             return null;
         }
         
-        if (DLongEntity.class.isAssignableFrom(persistentClass)) {
+        if (Long.class.isAssignableFrom(simpleIdClass)) {
             return (ID) Long.valueOf(key.getId());
         }
         
@@ -84,7 +80,7 @@ public abstract class TypeDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Se
             entity = new Entity(getTableName(), pk);
         }
         else {
-            if (DLongEntity.class.isAssignableFrom(persistentClass)) {
+            if (Long.class.isAssignableFrom(simpleIdClass)) {
                 entity = new Entity(getTableName(), ((Long)simpleKey).longValue(), pk);
             }
             else {
@@ -97,7 +93,7 @@ public abstract class TypeDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Se
     protected Key createCoreKey(Object parentKey, ID simpleKey) {
         final Key pk = (Key) parentKey;
         Key core;
-        if (DLongEntity.class.isAssignableFrom(persistentClass)) {
+        if (Long.class.isAssignableFrom(simpleIdClass)) {
             core = KeyFactory.createKey(pk, getTableName(), ((Long)simpleKey).longValue());
         }
         else {
@@ -184,7 +180,23 @@ public abstract class TypeDaoImpl<T extends DPrimaryKeyEntity<ID>, ID extends Se
         }
         return value;
     }
+
+    @Override
+    public Object getParentKey(T domain) {
+        return null;
+    }
     
+    @Override
+    public Object getPrimaryKey(T domain) {
+        if (null == domain) {
+            return null;
+        }
+        if (Long.class.isAssignableFrom(simpleIdClass)) {
+            return KeyFactory.createKey((Key) getParentKey(domain), getTableName(), (Long) getSimpleKey(domain));
+        }
+        return KeyFactory.createKey((Key) getParentKey(domain), getTableName(), (String) getSimpleKey(domain));
+    }
+
     @Override
     protected Collection<Key> persistCore(Iterable<Entity> itrbl) {
         final List<Key> returnValue = getDatastoreService().put(itrbl);

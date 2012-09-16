@@ -2,6 +2,7 @@ package net.sf.mardao.api.test;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import net.sf.mardao.api.Filter;
 import net.sf.mardao.api.dao.TypeDaoImpl;
 
@@ -18,7 +19,7 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
             );
 
     public BookDaoImpl() {
-        super(Book.class);
+        super(Book.class, Long.class);
     }
 
     @Override
@@ -62,4 +63,63 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         return COLUMN_NAME_ID;
     }
 
+    @Override
+    public Long getSimpleKey(Book domain) {
+        return domain.getId();
+    }
+
+    @Override
+    public void setSimpleKey(Book domain, Long simpleKey) {
+        domain.setId(simpleKey);
+    }
+
+    @Override
+    public String getCreatedDateColumnName() {
+        return "createdDate";
+    }
+
+    @Override
+    public String getUpdatedDateColumnName() {
+        return "updatedDate";
+    }
+
+    @Override
+    public void _setCreatedDate(Book domain, Date date) {
+        domain.setCreatedDate(date);
+    }
+
+    @Override
+    public void _setUpdatedDate(Book domain, Date date) {
+        domain.setUpdatedDate(date);
+    }
+
+    @Override
+    public String getCreatedByColumnName() {
+        return "createdBy";
+    }
+
+    @Override
+    public String getCreatedBy(Book domain) {
+        return domain.getCreatedBy();
+    }
+
+    @Override
+    public void _setCreatedBy(Book domain, String creator) {
+        domain.setCreatedBy(creator);
+    }
+
+    @Override
+    public String getUpdatedBy(Book domain) {
+        return domain.getUpdatedBy();
+    }
+
+    @Override
+    public String getUpdatedByColumnName() {
+        return "updatedBy";
+    }
+
+    @Override
+    public void _setUpdatedBy(Book domain, String updator) {
+        domain.setUpdatedBy(updator);
+    }
 }

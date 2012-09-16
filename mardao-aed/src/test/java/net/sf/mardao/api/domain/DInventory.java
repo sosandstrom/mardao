@@ -10,7 +10,7 @@ import net.sf.mardao.api.Parent;
  * @author os
  */
 @Entity
-public class DInventory extends DAbstract {
+public class DInventory extends AbstractLongEntity {
     
     @Parent(kind="DOrganization")
     private Serializable organisationKey;

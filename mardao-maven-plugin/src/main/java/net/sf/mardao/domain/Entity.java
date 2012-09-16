@@ -30,6 +30,7 @@ public class Entity implements Comparable<Entity> {
     private List<Entity>             ancestors         = new ArrayList<Entity>();
     private List<Entity>             parents           = new ArrayList<Entity>();
     private final Set<Entity>        children          = new TreeSet<Entity>();
+    private Field                    geoLocation;
     private Field                    createdDate;
     private Field                    createdBy;
     private Field                    updatedDate;
@@ -235,5 +236,13 @@ public class Entity implements Comparable<Entity> {
 
     public final void setUpdatedBy(Field updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public Field getGeoLocation() {
+        return geoLocation;
+    }
+
+    public void setGeoLocation(Field geoLocation) {
+        this.geoLocation = geoLocation;
     }
 }

@@ -9,6 +9,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import net.sf.mardao.api.GeoLocation;
 import net.sf.mardao.api.Parent;
 import net.sf.mardao.api.geo.DLocation;
 import net.sf.mardao.api.geo.GeoModel;
@@ -33,6 +34,7 @@ public class DEmployee extends DLongEntity implements GeoModel {
     private String nickname;
     
     @Basic
+    @GeoLocation
     private DLocation officeLocation;
     
     @Basic

@@ -1,6 +1,5 @@
 package net.sf.mardao.api.dao;
 
-import net.sf.mardao.api.CursorPage;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,9 +8,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-
+import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.Filter;
-import net.sf.mardao.api.domain.CreatedUpdatedEntity;
 import net.sf.mardao.api.geo.DLocation;
 import net.sf.mardao.api.geo.GeoModel;
 import net.sf.mardao.api.geo.Geobox;
@@ -37,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @param <C>
  *            database core key type
  */
-public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Serializable, 
+public abstract class DaoImpl<T extends Object, ID extends Serializable, 
         P extends Serializable, CT extends Object,
         E extends Serializable, C extends Serializable>
         implements Dao<T, ID> {
@@ -60,6 +58,9 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     /** mostly for logging */
     protected final Class<T> persistentClass;
     
+    /** To help converting keys */
+    protected final Class<ID> simpleIdClass;
+    
     /** 
      * Set this to true in DaoBean constructor, to enable
      * the all-domains memCache
@@ -72,8 +73,9 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
      */
     protected boolean memCacheEntities = false;
 
-    protected DaoImpl(Class<T> type) {
-        this.persistentClass = type;
+    protected DaoImpl(Class<T> domainType, Class<ID> simpleIdType) {
+        this.persistentClass = domainType;
+        this.simpleIdClass = simpleIdType;
     }
 
     public String getTableName() {
@@ -160,10 +162,10 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
             final T domain = createDomain(parentKey, simpleKey);
 
             // created, updated
-            copyCorePropertyToDomain(domain._getNameCreatedBy(), core, domain);
-            copyCorePropertyToDomain(domain._getNameCreatedDate(), core, domain);
-            copyCorePropertyToDomain(domain._getNameUpdatedBy(), core, domain);
-            copyCorePropertyToDomain(domain._getNameUpdatedDate(), core, domain);
+            copyCorePropertyToDomain(getCreatedByColumnName(), core, domain);
+            copyCorePropertyToDomain(getCreatedDateColumnName(), core, domain);
+            copyCorePropertyToDomain(getUpdatedByColumnName(), core, domain);
+            copyCorePropertyToDomain(getUpdatedDateColumnName(), core, domain);
 
             // Domain Entity-specific properties
             for (String name : getColumnNames()) {
@@ -210,8 +212,8 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     protected T createDomain(Object parentKey, ID simpleKey) throws InstantiationException, IllegalAccessException {
         final T domain = persistentClass.newInstance();
         
-        domain.setParentKey(parentKey);
-        domain.setSimpleKey(simpleKey);
+        setParentKey(domain, parentKey);
+        setSimpleKey(domain, simpleKey);
         
         return domain;
     }
@@ -221,44 +223,43 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
             return null;
         }
         
-        E core = createCore(domain.getParentKey(), domain.getSimpleKey());
+        E core = createCore(getParentKey(domain), getSimpleKey(domain));
         
         // created, updated
-        String principalName = domain.getCreatedBy();
-        if (null == principalName) {
-            principalName = getPrincipalName();
-            if (null == principalName) {
-                principalName = PRINCIPAL_NAME_ANONYMOUS;
+        String principal = getCreatedBy(domain);
+        if (null == principal) {
+            principal = getPrincipalName();
+            if (null == principal) {
+                principal = PRINCIPAL_NAME_ANONYMOUS;
             }
-            domain._setCreatedBy(principalName);
+            _setCreatedBy(domain, principal);
         }
-        setCoreProperty(core, domain._getNameCreatedBy(), principalName);
+        setCoreProperty(core, getCreatedByColumnName(), principal);
         
-        Date date = domain.getCreatedDate();
+        Date date = getCreatedDate(domain);
         if (null == date) {
             date = currentDate;
-            domain._setCreatedDate(currentDate);
+            _setCreatedDate(domain, currentDate);
         }
-        setCoreProperty(core, domain._getNameCreatedDate(), date);
+        setCoreProperty(core, getCreatedDateColumnName(), date);
         
-        principalName = getPrincipalName();
-        if (null == principalName) {
-            principalName = PRINCIPAL_NAME_ANONYMOUS;
+        principal = getPrincipalName();
+        if (null == principal) {
+            principal = PRINCIPAL_NAME_ANONYMOUS;
         }
-        domain._setUpdatedBy(principalName);
-        setCoreProperty(core, domain._getNameUpdatedBy(), principalName);
+        _setUpdatedBy(domain, principal);
+        setCoreProperty(core, getUpdatedByColumnName(), principal);
         
-        domain._setUpdatedDate(currentDate);
-        setCoreProperty(core, domain._getNameUpdatedDate(), currentDate);
+        _setUpdatedDate(domain, currentDate);
+        setCoreProperty(core, getUpdatedDateColumnName(), currentDate);
         
         // Domain Entity-specific properties
         for (String name : getColumnNames()) {
             copyDomainPropertyToCore(name, domain, core);
-//            copyCorePropertyToDomain(name, core, domain);
         }
 
         // geoboxes
-        if (null != getLocationColumnName()) {
+        if (null != getGeoLocationColumnName()) {
             updateGeoModel(domain, core);
         }
 
@@ -269,7 +270,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
         final Collection<Serializable> keys = new ArrayList<Serializable>();
         Serializable pk;
         for (T d : domains) {
-            pk = d.getPrimaryKey();
+            pk = (Serializable) getPrimaryKey(d);
             keys.add(pk);
         }
         return keys;
@@ -288,17 +289,17 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     /** Override in GeneratedDaoImpl */
     protected Object getDomainProperty(T domain, String name) {
         Object value;
-        if (name.equals(domain._getNameCreatedBy())) {
-            value = domain.getCreatedBy();
+        if (name.equals(getCreatedByColumnName())) {
+            value = getCreatedBy(domain);
         }
-        else if (name.equals(domain._getNameCreatedDate())) {
-            value = domain.getCreatedDate();
+        else if (name.equals(getCreatedDateColumnName())) {
+            value = getCreatedDate(domain);
         }
-        else if (name.equals(domain._getNameUpdatedBy())) {
-            value = domain.getUpdatedBy();
+        else if (name.equals(getUpdatedByColumnName())) {
+            value = getUpdatedBy(domain);
         }
-        else if (name.equals(domain._getNameUpdatedDate())) {
-            value = domain.getUpdatedDate();
+        else if (name.equals(getUpdatedDateColumnName())) {
+            value = getUpdatedDate(domain);
         }
         else {
             throw new IllegalArgumentException(String.format("No such property %s for %s", name, getTableName()));
@@ -315,20 +316,84 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     public static String getPrincipalName() {
         return principalName.get();
     }
+
+    /** Default implementation is void, override for your parent field */
+    public void setParentKey(T domain, Object parentKey) {
+    }
+    
+    /** Default implementation returns null, override for your creator field */
+    public String getCreatedBy(T domain) {
+        return null;
+    }
+
+    /** Default implementation returns null, override for your creator field */
+    public String getCreatedByColumnName() {
+        return null;
+    }
+
+    /** Default implementation is void, override for your creator field */
+    public void _setCreatedBy(T domain, String creator) {
+    }
+    
+    /** Default implementation returns null, override for your updator field */
+    public String getUpdatedBy(T domain) {
+        return null;
+    }
+
+    /** Default implementation returns null, override for your updator field */
+    public String getUpdatedByColumnName() {
+        return null;
+    }
+
+    /** Default implementation is void, override for your updator field */
+    public void _setUpdatedBy(T domain, String updator) {
+    }
+    
+    /** Default implementation returns null, override for your created field */
+    public Date getCreatedDate(T domain) {
+        return null;
+    }
+
+    /** Default implementation returns null, override for your created field */
+    public String getCreatedDateColumnName() {
+        return null;
+    }
+
+    /** Default implementation is void, override for your creator field */
+    public void _setCreatedDate(T domain, Date date) {
+    }
+    
+    /** Default implementation returns null, override for your updated field */
+    public Date getUpdatedDate(T domain) {
+        return null;
+    }
+
+    /** Default implementation returns null, override for your updated field */
+    public String getUpdatedDateColumnName() {
+        return null;
+    }
+
+    /** Default implementation is void, override for your updated field */
+    public void _setUpdatedDate(T domain, Date date) {
+    }
     
     /**
      * Override to return your desired column name
      * @return COLUMN_NAME_GEOBOXES_DEFAULT, i.e. "geoboxes"
      */
-    public String getGeoboxesColumnName() {
+    protected String getGeoboxesColumnName() {
         return COLUMN_NAME_GEOBOXES_DEFAULT;
     }
     
     /** Override in GeneratedEntityDaoImpl */
-    protected String getLocationColumnName() {
+    public String getGeoLocationColumnName() {
         return null;
     }
 
+    public DLocation getGeoLocation(T domain) {
+        return null;
+    }
+    
     /** geoboxes are needed to findGeo the nearest entities before sorting them by distance */
     protected void updateGeoModel(T domain, E core) throws IllegalArgumentException {
         if (domain instanceof GeoModel) {
@@ -380,7 +445,7 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     }
     
     public boolean delete(T domain) {
-        final int count = delete(domain.getParentKey(), Arrays.asList(domain.getSimpleKey()));
+        final int count = delete(getParentKey(domain), Arrays.asList(getSimpleKey(domain)));
         return 1 == count;
     }
     
@@ -419,8 +484,8 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
             
             // update domain with generated key?
             d = ds.next();
-            if (null == d.getSimpleKey()) {
-                d.setSimpleKey(simpleKey);
+            if (null == getSimpleKey(d)) {
+                setSimpleKey(d, simpleKey);
             }
         }
         
@@ -525,17 +590,17 @@ public abstract class DaoImpl<T extends CreatedUpdatedEntity<ID>, ID extends Ser
     
     /** Override in GeneratedDaoImpl */
     protected void setDomainProperty(final T domain, final String name, final Object value) {
-        if (name.equals(domain._getNameCreatedBy())) {
-            domain._setCreatedBy((String) value);
+        if (name.equals(getCreatedByColumnName())) {
+            _setCreatedBy(domain, (String) value);
         }
-        else if (name.equals(domain._getNameCreatedDate())) {
-            domain._setCreatedDate((Date) value);
+        else if (name.equals(getCreatedDateColumnName())) {
+            _setCreatedDate(domain, (Date) value);
         }
-        else if (name.equals(domain._getNameUpdatedBy())) {
-            domain._setUpdatedBy((String) value);
+        else if (name.equals(getUpdatedByColumnName())) {
+            _setUpdatedBy(domain, (String) value);
         }
-        else if (name.equals(domain._getNameUpdatedDate())) {
-            domain._setUpdatedDate((Date) value);
+        else if (name.equals(getUpdatedDateColumnName())) {
+            _setUpdatedDate(domain, (Date) value);
         }
         else {
             throw new IllegalArgumentException(String.format("No such property %s for %s", name, getTableName()));

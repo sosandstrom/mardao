@@ -8,18 +8,25 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.UniqueConstraint;
+import net.sf.mardao.api.CreatedBy;
+import net.sf.mardao.api.CreatedDate;
+import net.sf.mardao.api.GeoLocation;
 import net.sf.mardao.api.Parent;
-
+import net.sf.mardao.api.UpdatedBy;
+import net.sf.mardao.api.UpdatedDate;
 import net.sf.mardao.domain.Entity;
 import net.sf.mardao.domain.Field;
 import net.sf.mardao.domain.Group;
 import net.sf.mardao.domain.MergeTemplate;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
@@ -54,6 +61,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
     /**
      * Calls super.execute(), then process the configured classpaths
      */
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         super.execute();
 
@@ -151,21 +159,6 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
     private void mergeEntity(Entity en) {
         vc.put("entity", en);
 
-        // // create ancestor and parents lists
-        // System.out.println("+ resolving parents for " + en.getSimpleName());
-        // final List<Entity> ancestors = new ArrayList<Entity>();
-        // final List<Entity> parents = new ArrayList<Entity>();
-        // Field f = en.getParent();
-        // Entity p;
-        // while (null != f) {
-        // p = f.getEntity();
-        // System.out.println(" - parent is " + p.getSimpleName());
-        // parents.add(p);
-        // ancestors.add(0, p);
-        // f = p.getParent();
-        // }
-        // en.setAncestors(ancestors);
-        // en.setParents(parents);
         vc.put("ancestors", en.getAncestors());
         vc.put("parents", en.getParents());
         vc.put("children", en.getChildren());
@@ -243,22 +236,6 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
             reflectSecond(e, e.getClazz());
         }
         
-//        for (Entry<File, Entity> entry : entityFiles.entrySet()) {
-//            File f = entry.getKey();
-//            getLog().debug("--- file: " + f);
-//            try {
-//                final FileInputStream fis = new FileInputStream(f);
-//                final ClassReader cr = new ClassReader(fis);
-//                EntityClassVisitor fpcv = new EntityClassVisitor(getLog(), entities, entry.getValue());
-//                cr.accept(fpcv, 0);
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//        }
-
         mergePackages();
 
         return packages;
@@ -278,19 +255,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
             // TODO: implement JAR scanning
         } else {
             final File dir = new File(classpathElement);
-            final URL url = new URL("file://" + classpathElement + "/");
-            final URL mardaoApiUrl = new URL("file://" + mardaoApiPath.getAbsolutePath());
-            final URL jpaApiUrl = new URL("file://" + jpaApiPath.getAbsolutePath());
-//            getLog().info("Classpath: " + url + ", " + mardaoApiUrl + ", " + jpaApiUrl);
-//            ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
-//            if (loader instanceof URLClassLoader) {
-//                ((URLClassLoader)loader).add
-//            }
-//            final URL urls[] = {url, mardaoApiUrl, jpaApiUrl};
-            //            URLClassLoader loader = new URLClassLoader(urls, systemLoader);
 
-//            DependencyResolutionRequiredException e;
-            
             processPackage(dir, dir);
         }
     }
@@ -363,18 +328,6 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
                     } catch (ClassNotFoundException ex) {
                         Logger.getLogger(ProcessDomainMojo.class.getName()).log(Level.SEVERE, null, ex);
                     }
-//                    try {
-//                        final FileInputStream fis = new FileInputStream(f);
-//                        final ClassReader cr = new ClassReader(fis);
-//                        FirstPassClassVisitor fpcv = new FirstPassClassVisitor(getLog(), f, packages, entities, entityFiles);
-//                        cr.accept(fpcv, 0);
-//                    }
-//                    catch (FileNotFoundException e) {
-//                        e.printStackTrace();
-//                    }
-//                    catch (IOException e) {
-//                    }
-//                    }
                 }
             }
         }
@@ -396,6 +349,22 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
         for (java.lang.reflect.Field f : clazz.getDeclaredFields()) {
             reflectField(e, clazz, f);
         }
+        
+        // build uniqueConstraints
+        final javax.persistence.Table table = (javax.persistence.Table) clazz.getAnnotation(javax.persistence.Table.class);
+        if (null != table) {
+            for (UniqueConstraint uc : table.uniqueConstraints()) {
+                final Set<Field> uniqueFieldsSet = new TreeSet<Field>();
+                e.getUniqueFieldsSets().add(uniqueFieldsSet);
+                final Set<String> uniqueNamesSet = new TreeSet<String>();
+                e.getUniqueConstraints().add(uniqueNamesSet);
+                for (String columnName : uc.columnNames()) {
+                    uniqueFieldsSet.add(e.getAllFields().get(columnName));
+                    uniqueNamesSet.add(columnName);
+                }
+                getLog().info("         @Table( @UniqueConstraint( " + uniqueFieldsSet);
+            }
+        }
     }
     
     protected void reflectField(Entity e, Class clazz, java.lang.reflect.Field field) throws ClassNotFoundException {
@@ -408,6 +377,9 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
         getLog().debug(String.format("   --- field %s %s;", f.getSimpleType(), f.getName()));
         Class pClass = loader.loadClass("net.sf.mardao.api.Parent");
         getLog().debug("@Parent.class=" + pClass);
+        
+        // map it
+        e.getAllFields().put(f.getName(), f);
         
         // is this the @Id
         if (isField(field, javax.persistence.Id.class)) {
@@ -426,6 +398,21 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
             getLog().info(String.format("   @Basic %s %s;", f.getSimpleType(), f.getName()));
             
             // check @UpdatedBy, @Location etc
+            if (isField(field, CreatedBy.class)) {
+                e.setCreatedBy(f);
+            }
+            if (isField(field, CreatedDate.class)) {
+                e.setCreatedDate(f);
+            }
+            if (isField(field, UpdatedBy.class)) {
+                e.setUpdatedBy(f);
+            }
+            if (isField(field, UpdatedDate.class)) {
+                e.setUpdatedDate(f);
+            }
+            if (isField(field, GeoLocation.class)) {
+                e.setGeoLocation(f);
+            }
         }
         // @OneToOne?
         else if (isField(field, javax.persistence.OneToOne.class)) {
@@ -439,14 +426,16 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
         }
         // @ManyToMany?
         else if (isField(field, javax.persistence.ManyToMany.class)) {
-            for (Annotation a : field.getDeclaredAnnotations()) {
-                if (a instanceof javax.persistence.ManyToMany) {
+            javax.persistence.ManyToMany m2m = (javax.persistence.ManyToMany) field.getAnnotation(javax.persistence.ManyToMany.class);
+//            for (Annotation a : field.getDeclaredAnnotations()) {
+//                if (a instanceof javax.persistence.ManyToMany) {
                     e.getManyToManys().add(f);
-                    javax.persistence.ManyToMany m2m = (javax.persistence.ManyToMany) a;
+//                    javax.persistence.ManyToMany m2m = (javax.persistence.ManyToMany) a;
                     f.setEntity(entities.get(m2m.targetEntity().getName()));
+                    f.setMappedBy(m2m.mappedBy());
                     getLog().info(String.format("   @ManyToMany %s<%s> %s;", f.getSimpleType(), f.getEntity().getSimpleName(), f.getName()));
-                }
-            }
+//                }
+//            }
         }
     }
 }

@@ -137,16 +137,6 @@ public class AbstractMardaoMojo extends AbstractMojo {
      */
     protected String                         sourceVersion;
     
-    /**
-     * @parameter expression="${generate.mardaoApiPath}" default-value="${user.home}/.m2/repository/net/sf/mardao/mardao-api/${project.version}/mardao-api-${project.version}.jar"
-     */
-    protected File                         mardaoApiPath;
-    
-    /**
-     * @parameter expression="${generate.jpaApiPath}" default-value="${user.home}/.m2/repository/org/apache/geronimo/specs/geronimo-jpa_3.0_spec/1.1.1/geronimo-jpa_3.0_spec-1.1.1.jar"
-     */
-    protected File                         jpaApiPath;
-    
     public static final java.text.DateFormat DATEFORMAT   = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     protected String                         daoBasePackage;

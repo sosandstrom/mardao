@@ -2,7 +2,6 @@ package net.sf.mardao.api;
 
 import java.io.Serializable;
 import net.sf.mardao.api.dao.Dao;
-import net.sf.mardao.api.domain.PrimaryKeyEntity;
 
 public class Filter {
     private final String column;
@@ -45,7 +44,7 @@ public class Filter {
         }
     }
 
-    public static class Foreign<T extends PrimaryKeyEntity<ID>, ID extends Serializable>
+    public static class Foreign<T extends Object, ID extends Serializable>
             extends Filter {
 
         private final Dao<T, ID> foreignDao;

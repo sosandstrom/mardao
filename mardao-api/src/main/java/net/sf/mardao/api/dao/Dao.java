@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import net.sf.mardao.api.CursorPage;
 import net.sf.mardao.api.Filter;
-import net.sf.mardao.api.domain.PrimaryKeyEntity;
+import net.sf.mardao.api.geo.DLocation;
 
 /**
  * 
@@ -16,7 +16,7 @@ import net.sf.mardao.api.domain.PrimaryKeyEntity;
  * @param <ID>
  *            The domain object's simple key type
  */
-public interface Dao<T extends PrimaryKeyEntity<ID>, ID extends Serializable> {
+public interface Dao<T extends Object, ID extends Serializable> {
     
     Collection<String> getColumnNames();
 
@@ -26,9 +26,9 @@ public interface Dao<T extends PrimaryKeyEntity<ID>, ID extends Serializable> {
     
     ID getSimpleKey(T domain);
     
-    Serializable getParentKey(T domain);
+    Object getParentKey(T domain);
     
-    Serializable getPrimaryKey(T domain);
+    Object getPrimaryKey(T domain);
     
     String getTableName();
     
@@ -43,6 +43,8 @@ public interface Dao<T extends PrimaryKeyEntity<ID>, ID extends Serializable> {
     String getUpdatedByColumnName();
     
     String getUpdatedDateColumnName();
+
+    String getGeoLocationColumnName();
     
     String getCreatedBy(T domain);
     
@@ -51,6 +53,16 @@ public interface Dao<T extends PrimaryKeyEntity<ID>, ID extends Serializable> {
     String getUpdatedBy(T domain);
     
     Date getUpdatedDate(T domain);
+
+    DLocation getGeoLocation(T domain);
+    
+    void _setCreatedBy(T domain, String creator);
+    
+    void _setCreatedDate(T domain, Date date);
+    
+    void _setUpdatedBy(T domain, String updator);
+    
+    void _setUpdatedDate(T domain, Date date);
     
     // --- Generic Dao methods ---
     

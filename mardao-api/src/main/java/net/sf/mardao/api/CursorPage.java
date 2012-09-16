@@ -2,13 +2,12 @@ package net.sf.mardao.api;
 
 import java.io.Serializable;
 import java.util.Collection;
-import net.sf.mardao.api.domain.PrimaryKeyEntity;
 
 /**
  *
  * @author os
  */
-public class CursorPage<T extends PrimaryKeyEntity<ID>, ID extends Serializable> {
+public class CursorPage<T extends Object, ID extends Serializable> {
     private Serializable cursorKey;
     private Collection<T> items;
 

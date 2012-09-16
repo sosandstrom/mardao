@@ -3,6 +3,7 @@ package ${daoBasePackage};
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -44,7 +45,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 	
     /** Default constructor */
    public Generated${entity.simpleName}DaoImpl() {
-      super(${entity.simpleName}.class);
+      super(${entity.simpleName}.class, ${entity.pk.type}.class);
    }
 
    // ------ BEGIN DaoImpl overrides -----------------------------
@@ -57,15 +58,6 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
         return COLUMN_NAMES;
    }
 
-#foreach( $field in $entity.fields )
-#if( $field.type == "net.sf.mardao.api.geo.DLocation" )
-    @Override
-    protected String getLocationColumnName() {
-        return COLUMN_NAME_${field.nameUpper};
-    }
-
-#end
-#end
     @Override
     protected Object getDomainProperty(${entity.simpleName} domain, String name) {
         Object value;
@@ -188,7 +180,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
     
    // ------ END DaoImpl overrides -----------------------------
 
-        public Serializable getParentKey(${entity.simpleName} domain) {
+        public Object getParentKey(${entity.simpleName} domain) {
             return domain.get${field.nameFirst}();
         }
 
@@ -254,6 +246,96 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
         public void setSimpleKey(${entity.simpleName} domain, ${field.simpleType} ${field.name}) {
             domain.set${field.nameFirst}(${field.name});
         }
+#if( $entity.createdBy )
+#set( $field = $entity.createdBy )
+
+        public String getCreatedByColumnName() {
+            return COLUMN_NAME_${field.nameUpper};
+        }
+
+        public String getCreatedBy(${entity.simpleName} domain) {
+            if (null == domain) {
+                return null;
+            }
+            return domain.get${field.nameFirst}();
+        }
+
+        public void _setCreatedBy(${entity.simpleName} domain, String creator) {
+            domain.set${field.nameFirst}(creator);
+        }
+#end
+#if( $entity.updatedBy )
+#set( $field = $entity.updatedBy )
+
+        public String getUpdatedByColumnName() {
+            return COLUMN_NAME_${field.nameUpper};
+        }
+
+        public String getUpdatedBy(${entity.simpleName} domain) {
+            if (null == domain) {
+                return null;
+            }
+            return domain.get${field.nameFirst}();
+        }
+
+        public void _setUpdatedBy(${entity.simpleName} domain, String updator) {
+            domain.set${field.nameFirst}(updator);
+        }
+#end
+#if( $entity.createdDate )
+#set( $field = $entity.createdDate )
+
+        public String getCreatedDateColumnName() {
+            return COLUMN_NAME_${field.nameUpper};
+        }
+
+        public Date getCreatedDate(${entity.simpleName} domain) {
+            if (null == domain) {
+                return null;
+            }
+            return domain.get${field.nameFirst}();
+        }
+
+        public void _setCreatedDate(${entity.simpleName} domain, Date date) {
+            domain.set${field.nameFirst}(date);
+        }
+#end
+#if( $entity.updatedDate )
+#set( $field = $entity.updatedDate )
+
+        public String getUpdatedDateColumnName() {
+            return COLUMN_NAME_${field.nameUpper};
+        }
+
+        public Date getUpdatedDate(${entity.simpleName} domain) {
+            if (null == domain) {
+                return null;
+            }
+            return domain.get${field.nameFirst}();
+        }
+
+        public void _setUpdatedDate(${entity.simpleName} domain, Date date) {
+            domain.set${field.nameFirst}(date);
+        }
+#end
+#if( $entity.geoLocation )
+#set( $field = $entity.geoLocation )
+
+        public String getGeoLocationColumnName() {
+            return COLUMN_NAME_${field.nameUpper};
+        }
+
+        public DLocation getGeoLocation(${entity.simpleName} domain) {
+            if (null == domain) {
+                return null;
+            }
+            return domain.get${field.nameFirst}();
+        }
+##
+##        public void _setGeoLocation(${entity.simpleName} domain, DLocation geoLocation) {
+##            domain.set${field.nameFirst}(geoLocation);
+##        }
+#end
 
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
@@ -366,35 +448,22 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 
 	// ----------------------- many-to-many finders -------------------------
 #foreach( $field in $entity.manyToManys )
-#if( $entities.get($field.type) )  
-#set( $foreign = $entities.get($field.type))
+#set( $foreign = $field.entity )
 	/**
 	 * find-by method for many-to-many field ${field.name}
 	 * @param ${field.name} the related ${field.type} entity
-	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
+	 * @return an Iterable of ${entity.simpleName}s belonging to the many-to-many relation
 	 */
-	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-#if( $persistenceType == "JPA" )
-      return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
-#else
-		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($foreign.pk.name)}());
-#end
+	public final Iterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}(${foreign.className} foreign) {
+		return queryBy${field.nameFirst}${foreign.pk.nameFirst}(foreign.get${foreign.pk.nameFirst}());
 	}
 	
 	/**
 	 * find-by method for many-to-many field ${field.name}
 	 * @param ${foreign.pk.type} the related ${field.type} entity's primary key
-	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
+	 * @return an Iterable of ${entity.simpleName}s belonging to the many-to-many relation
 	 */
-	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
-#if( $persistenceType == "JPA" )
-
-      return findByManyToMany("${entity.pk.name}",
-                                         "${field.name}_${foreign.pk.name}",
-                                         "${field.simpleType}",
-                                         "${field.mappedBy}_${entity.pk.name}",
-                                         ${foreign.pk.name});
-#else
+	public final Iterable<${entity.simpleName}> queryBy${field.nameFirst}${foreign.pk.nameFirst}(${foreign.pk.type} ${foreign.pk.name}) {
 		// FIXME: implement properly
             throw new UnsupportedOperationException("Not supported yet.");
 //		return findByManyToMany("${entity.pk.name}", // primaryKeyName
@@ -407,9 +476,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 //			"${field.simpleType}", // related entity class simple name
 //			"${field.name}_${foreign.pk.name}", // the related side's column in the join table
 //			${foreign.pk.name}); 			 
-#end
 	}
-#end	
 	
 #end
 

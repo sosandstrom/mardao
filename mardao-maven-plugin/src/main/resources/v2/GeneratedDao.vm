@@ -180,17 +180,17 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	/**
 	 * find-by method for many-to-many field ${field.name}
 	 * @param ${field.name} the related ${field.type} entity
-	 * @return a List of ${entity.simpleName}s belonging to the many-to-many relation
+	 * @return an Iterable of ${entity.simpleName}s belonging to the many-to-many relation
 	 */
-	Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+	Iterable<${entity.simpleName}> queryBy${field.nameFirst}(${foreign.className} foreign);
 	
 #if( $foreign )  
 	/**
 	 * find-by method for many-to-many field ${field.name}
 	 * @param ${foreign.pk.type} the related ${field.type} entity's primary key
-	 * @return a Collection of ${entity.simpleName}s belonging to the many-to-many relation
+	 * @return an Iterable of ${entity.simpleName}s belonging to the many-to-many relation
 	 */
-	Collection<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
+	Iterable<${entity.simpleName}> queryBy${field.nameFirst}${foreign.pk.nameFirst}(${foreign.pk.type} ${foreign.pk.name});
 #end	
 	
 #end	

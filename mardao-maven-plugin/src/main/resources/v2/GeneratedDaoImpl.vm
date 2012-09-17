@@ -9,9 +9,10 @@ import java.util.Map;
 import java.util.Properties;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-import net.sf.mardao.api.CursorPage;
-import net.sf.mardao.api.Filter;
-import net.sf.mardao.api.dao.TypeDaoImpl;
+import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.Filter;
+import net.sf.mardao.core.dao.TypeDaoImpl;
+import net.sf.mardao.core.geo.DLocation;
 import ${entity.className};
 #foreach( $field in $entity.oneToOnes )
 import ${field.entity.className};
@@ -22,8 +23,7 @@ import ${field.entity.className};
 #foreach( $field in $entity.manyToManys )	 
 import ${field.entity.className};
 #end
-import net.sf.mardao.api.domain.PrimaryKeyEntity;
-import net.sf.mardao.api.geo.DLocation;
+##import net.sf.mardao.api.domain.PrimaryKeyEntity;
 
 /**
  * The ${entity.simpleName} domain-object specific finders and methods go in this POJO.
@@ -88,8 +88,8 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
         // many-to-ones
 #foreach( $field in $entity.manyToOnes )	 
         else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
-            final PrimaryKeyEntity foreign = domain.get${field.nameFirst}();
-            value = null != foreign ? foreign.getSimpleKey() : null;
+            final ${field.entity.className} foreign = domain.get${field.nameFirst}();
+            value = null != foreign ? foreign.get${field.entity.pk.nameFirst}() : null;
         }
 #end
         // many-to-manys
@@ -100,7 +100,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
             if (null != foreigns) {
                 ids = new ArrayList<Object>();
                 for (${field.entity.simpleName} f : foreigns) {
-                    ids.add(f.getSimpleKey());
+                    ids.add(f.get${field.entity.pk.nameFirst}());
                 }
             }
             value = ids;
@@ -145,7 +145,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
             ${field.entity.simpleName} foreign = null;
             if (null != value) {
                 foreign = new ${field.entity.simpleName}();
-                foreign.setSimpleKey((${field.entity.pk.type}) value);
+                foreign.set${field.entity.pk.nameFirst}((${field.entity.pk.type}) value);
             }
             domain.set${field.nameFirst}(foreign);
         }
@@ -159,7 +159,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
                 Collection<${field.entity.pk.type}> ids = (Collection<${field.entity.pk.type}>) value;
                 for (${field.entity.pk.type} id : ids) {
                     foreign = new ${field.entity.simpleName}();
-                    foreign.setSimpleKey(id);
+                    foreign.set${field.entity.pk.nameFirst}(id);
                     foreigns.add(foreign);
                 }
             }

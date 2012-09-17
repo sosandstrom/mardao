@@ -17,12 +17,12 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.UniqueConstraint;
-import net.sf.mardao.api.CreatedBy;
-import net.sf.mardao.api.CreatedDate;
-import net.sf.mardao.api.GeoLocation;
-import net.sf.mardao.api.Parent;
-import net.sf.mardao.api.UpdatedBy;
-import net.sf.mardao.api.UpdatedDate;
+import net.sf.mardao.core.CreatedBy;
+import net.sf.mardao.core.CreatedDate;
+import net.sf.mardao.core.GeoLocation;
+import net.sf.mardao.core.Parent;
+import net.sf.mardao.core.UpdatedBy;
+import net.sf.mardao.core.UpdatedDate;
 import net.sf.mardao.domain.Entity;
 import net.sf.mardao.domain.Field;
 import net.sf.mardao.domain.Group;
@@ -359,7 +359,13 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
                 final Set<String> uniqueNamesSet = new TreeSet<String>();
                 e.getUniqueConstraints().add(uniqueNamesSet);
                 for (String columnName : uc.columnNames()) {
-                    uniqueFieldsSet.add(e.getAllFields().get(columnName));
+                    final Field f = e.getAllFields().get(columnName);
+                    if (null != f) {
+                        uniqueFieldsSet.add(f);
+                    }
+                    else {
+                        getLog().warn("Cannot find unique column field for " + columnName);
+                    }
                     uniqueNamesSet.add(columnName);
                 }
                 getLog().info("         @Table( @UniqueConstraint( " + uniqueFieldsSet);

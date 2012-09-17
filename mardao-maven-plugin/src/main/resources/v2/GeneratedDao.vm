@@ -4,10 +4,10 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import net.sf.mardao.api.CursorPage;
-import net.sf.mardao.api.dao.Dao;
+import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.dao.Dao;
 import ${entity.className};
-import net.sf.mardao.api.geo.DLocation;
+import net.sf.mardao.core.geo.DLocation;
 
 /**
  * DAO interface with finder methods for ${entity.simpleName} entities.

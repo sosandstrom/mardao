@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>net.sf.mardao</groupId>
-	<artifactId>parent</artifactId>
+	<artifactId>mardao-parent</artifactId>
 	<version>2.0-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
@@ -13,23 +13,13 @@
 
 	<modules>
 		<module>mardao-maven-plugin</module>
-		<module>mardao-api</module>
-		<module>mardao-aed</module>
+		<module>mardao-core</module>
+		<module>mardao-gae</module>
 <!--		<module>mardao-android</module>
 		<module>mardao-jdbc</module>-->
 	</modules>
 
 	<profiles>
-		<profile>
-			<id>mysql</id>
-			<modules>
-				<module>basic-plugin-test</module>
-				<module>aed-plugin-test</module>
-				<module>jdbc-plugin-test</module>
-				<module>jpa-plugin-test</module>
-				<module>gae-plugin-test</module>
-			</modules>
-		</profile>
 	</profiles>
 
 	<properties>

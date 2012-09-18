@@ -120,6 +120,12 @@ public abstract class TypeDaoImpl<T extends Object/*DPrimaryKeyEntity<ID>*/, ID 
     }
 
     @Override
+    protected String createMemCacheKey(Object parentKey, ID simpleKey) {
+        final Key key = createCoreKey(parentKey, simpleKey);
+        return null != key ? KeyFactory.keyToString(key) : null;
+    }
+    
+    @Override
     protected int doDelete(Object parentKey, Iterable<ID> simpleKeys) {
         final Collection<Key> coreKeys = createCoreKeys(parentKey, simpleKeys);
         getDatastoreService().delete(coreKeys);

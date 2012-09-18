@@ -4,10 +4,18 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import net.sf.jsr107cache.Cache;
+import net.sf.jsr107cache.CacheException;
+import net.sf.jsr107cache.CacheFactory;
+import net.sf.jsr107cache.CacheManager;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.geo.DLocation;
@@ -72,6 +80,11 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
      * the primaryKey-to-domain memCache
      */
     protected boolean memCacheEntities = false;
+    
+    private static Cache memCache = null;
+    
+    /** inject to get different behavior */
+    private static Map memCacheConfig = Collections.EMPTY_MAP;
 
     protected DaoImpl(Class<T> domainType, Class<ID> simpleIdType) {
         this.persistentClass = domainType;
@@ -140,6 +153,8 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     
     
     protected abstract E createCore(Object parentKey, ID simpleKey);
+    
+    protected abstract String createMemCacheKey(Object parentKey, ID simpleKey);
 
     /** Implemented in TypeDaoImpl */
     protected abstract Object getCoreProperty(E core, String name);
@@ -285,6 +300,20 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
         }
         return ids;
     }
+    
+    protected final String createMemCacheKeyAll() {
+        return String.format("%s.all()", getTableName());
+    }
+    
+    protected final Collection<String> createMemCacheKeys(Object parentKey, Iterable<ID> simpleKeys) {
+        Collection<String> returnValue = new ArrayList<String>();
+        
+        for (ID id : simpleKeys) {
+            returnValue.add(createMemCacheKey(parentKey, id));
+        }
+        
+        return returnValue;
+    }
 
     /** Override in GeneratedDaoImpl */
     protected Object getDomainProperty(T domain, String name) {
@@ -307,6 +336,71 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
         
         return value;
     }
+    
+    protected static Cache getMemCache() {
+        if (null == memCache) {
+            try {
+                final CacheFactory factory = CacheManager.getInstance().getCacheFactory();
+                memCache = factory.createCache(memCacheConfig);
+            }
+            catch (CacheException ce) {
+                LOG.error("Could not create memCache", ce);
+            }
+        }
+        return memCache;
+    }
+    
+    protected final void updateMemCache(Collection<String> memCacheKeys) {
+        LOG.debug("removing cache for {} {}", memCacheKeys.size(), getTableName());
+        if (!memCacheKeys.isEmpty()) {
+            // invalidate cache
+            if (memCacheAll) {
+                getMemCache().remove(createMemCacheKeyAll());
+            }
+
+            if (memCacheEntities) {
+                for (String memCacheKey : memCacheKeys) {
+                    getMemCache().remove(memCacheKey);
+                }
+            }
+        }
+    }
+    
+    protected final void updateMemCache(boolean remove, Map<String, T> domains) {
+        if (remove) {
+            updateMemCache(domains.keySet());
+        }
+        else {
+            LOG.debug("updating cache for {} {}", domains.size(), getTableName());
+            if (!domains.isEmpty()) {
+                // invalidate cache
+                if (memCacheAll) {
+                    getMemCache().remove(createMemCacheKeyAll());
+                }
+
+                if (memCacheEntities) {
+                    getMemCache().putAll(domains);
+                }
+            }
+        }
+    }
+    
+    protected final void updateMemCache(boolean remove, Iterable<T> domains) {
+        if (memCacheEntities || memCacheAll) {
+            Object parentKey;
+            String memCacheKey;
+            ID simpleKey;
+            final Map<String, T> toCache = new HashMap<String, T>();
+            for (T domain : domains) {
+                simpleKey = getSimpleKey(domain);
+                parentKey = getParentKey(domain);
+                memCacheKey = createMemCacheKey(parentKey, simpleKey);
+                toCache.put(memCacheKey, domain);
+            }
+            updateMemCache(remove, toCache);
+        }
+    }
+
 
     /** Default implementation returns null, override for your hierarchy */
     public String getParentKeyColumnName() {
@@ -413,7 +507,9 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     public int delete(Object parentKey, Iterable<ID> simpleKeys) {
         final int count = doDelete(parentKey, simpleKeys);
         
-        // TODO: invalidate cache
+        // invalidate cache
+        final Collection<String> memCacheKeys = createMemCacheKeys(parentKey, simpleKeys);
+        updateMemCache(memCacheKeys);
         
         return count;
     }
@@ -421,7 +517,8 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     public int delete(Iterable<T> domains) {
         final int count = doDelete(domains);
         
-        // TODO: invalidate cache
+        // invalidate cache (remove)
+        updateMemCache(true, domains);
         
         return count;
     }
@@ -481,6 +578,9 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
             }
         }
         
+        // update cache (do not remove)
+        updateMemCache(false, domains);
+        
         return ids;
     }
 
@@ -507,9 +607,68 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     }
     
     public Iterable<T> queryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys) {
-        // TODO: find in cache
+        int entitiesCached = 0, entitiesQueried = 0;
+        final Map<ID, T> entities = new TreeMap<ID, T>();
+        final TreeSet<ID> missing = new TreeSet<ID>();
+        for (ID id : simpleKeys) {
+            missing.add(id);
+        }
+        Collection<String> memCacheKeys = null;
         
-        return doQueryByPrimaryKeys(parentKey, simpleKeys);
+        // find in cache
+        if (memCacheEntities) {
+            
+            memCacheKeys = createMemCacheKeys(parentKey, missing);
+            try {
+                final Map<String,T> cached = getMemCache().getAll(memCacheKeys);
+                
+                // found entities should not be queried
+                ID simpleKey;
+                T domain;
+                for (Entry<String,T> cacheHit : cached.entrySet()) {
+                    domain = cacheHit.getValue();
+                    simpleKey = getSimpleKey(domain);
+                    missing.remove(simpleKey);
+                    
+                    // add to found entities
+                    entities.put(simpleKey, cacheHit.getValue());
+                }
+                entitiesCached = entities.size();
+                
+            } catch (CacheException ex) {
+                LOG.warn(String.format("Error getting cached %ss", getTableName()), ex);
+            }
+            catch (NullPointerException ifNoCache) {
+                memCacheEntities = false;
+                LOG.warn("Disabling non-functional cache for {}.memCacheEntities", getTableName());
+            }
+        }
+         
+        // cache miss?
+        if (!missing.isEmpty()) {
+            final Iterable<T> queried = doQueryByPrimaryKeys(parentKey, missing);
+            final Map<String, T> toCache = new HashMap<String, T>(missing.size());
+            
+            ID simpleKey;
+            String memCacheKey;
+            for (T domain : queried) {
+                
+                // add to returnValue
+                simpleKey = getSimpleKey(domain);
+                entities.put(simpleKey, domain);
+                
+                // add to toCache map
+                memCacheKey = createMemCacheKey(parentKey, simpleKey);
+                toCache.put(memCacheKey, domain);
+            }
+
+            // update cache (batch style)
+            updateMemCache(false, toCache);
+            entitiesQueried = entities.size();
+        }
+        
+        LOG.debug("cached:{}, queried:{}", entitiesCached, entitiesQueried);
+        return entities.values();
     }
     
     public CursorPage<T, ID> queryPage(int pageSize, Serializable cursorString) {
@@ -606,62 +765,9 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     public static void setPrincipalName(String name) {
         principalName.set(name);
     }
-    
-//    public final Map<ID, T> findByPrimaryKeys(Key parentKey, Iterable<ID> primaryKeys) {
-//        int entitiesCached = 0, entitiesQueried = 0;
-//        final Map<ID, T> returnValue = new TreeMap<ID, T>();
-//        
-//        // convert to Keys
-//        final List<Key> keys = new ArrayList<Key>();
-//        Key key;
-//        for(ID id : primaryKeys) {
-//            key = createKey((Key) parentKey, id);
-//            keys.add(key);
-//        }
-//        
-//        ID id;
-//        // check cache first
-//        Map cached = null;
-//        if (memCacheEntity) {
-//            try {
-//                cached = getMemCache().getAll(keys);
-//                
-//                // found entities should not be queried
-//                keys.removeAll(cached.keySet());
-//                
-//                // add to returnValue
-//                Set<Map.Entry<Key, T>> cachedEntries = cached.entrySet();
-//                for (Map.Entry<Key, T> entry : cachedEntries) {
-//                    id = convert(entry.getKey());
-//                    returnValue.put(id, entry.getValue());
-//                }
-//                entitiesCached = cached.size();
-//            } catch (CacheException ignore) {
-//            }
-//        }
-//        
-//        // cache miss?
-//        if (!keys.isEmpty()) {
-//            final DatastoreService datastore = getDatastoreService();
-//            final Map<Key, Entity> entities = datastore.get(keys);
-//            T domain;
-//            final Map<Key, T> toCache = new HashMap<Key, T>(entities.size());
-//            for(Map.Entry<Key, Entity> entry : entities.entrySet()) {
-//                id = convert(entry.getKey());
-//                domain = createDomain(entry.getValue());
-//                returnValue.put(id, domain);
-//                toCache.put(entry.getKey(), domain);
-//            }
-//
-//            if (memCacheEntity) {
-//                getMemCache().putAll(toCache);
-//            }
-//            entitiesQueried = entities.size();
-//        }
-//        
-//        LOG.debug("cached:{}, queried:{}", entitiesCached, entitiesQueried);
-//        return returnValue;
-//    }
-//
+
+    public static void setMemCacheConfig(Map memCacheConfig) {
+        DaoImpl.memCacheConfig = memCacheConfig;
+    }
 
 }

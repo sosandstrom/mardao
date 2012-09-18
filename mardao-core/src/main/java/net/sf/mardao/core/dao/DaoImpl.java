@@ -396,23 +396,15 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     
     /** geoboxes are needed to findGeo the nearest entities before sorting them by distance */
     protected void updateGeoModel(T domain, E core) throws IllegalArgumentException {
-        if (domain instanceof GeoModel) {
-            final GeoModel geoDomain = (GeoModel) domain;
-            final DLocation location = geoDomain.getLocation();
-            final Collection<Long> geoboxes = new ArrayList<Long>();
-            
-            // if entity has no location, simply set the domain field to empty collection
-            if (null != location) {
-                for (int bits : boxBits) {
-                    geoboxes.addAll(Geobox.getTuple(location.getLatitude(), location.getLongitude(), bits));
-                }
-                setCoreProperty(core, getGeoboxesColumnName(), geoboxes);
+        final DLocation location = getGeoLocation(domain);
+        final Collection<Long> geoboxes = new ArrayList<Long>();
+
+        // if entity has no location, simply set the domain field to empty collection
+        if (null != location) {
+            for (int bits : boxBits) {
+                geoboxes.addAll(Geobox.getTuple(location.getLatitude(), location.getLongitude(), bits));
             }
-            
-            geoDomain.setGeoboxes(geoboxes);
-        }
-        else {
-            throw new IllegalArgumentException(getTableName() + " not instance of GeoModel");
+            setCoreProperty(core, getGeoboxesColumnName(), geoboxes);
         }
     }
 

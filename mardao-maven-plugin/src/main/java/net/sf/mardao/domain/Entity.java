@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import net.sf.mardao.plugin.ProcessDomainMojo;
 
 /**
  * The domain object for Entities in the class graph.
@@ -50,6 +51,10 @@ public class Entity implements Comparable<Entity> {
 
     public String getSimpleName() {
         return clazz.getSimpleName();
+    }
+
+    public String getSimpleLower() {
+        return ProcessDomainMojo.firstToLower(clazz.getSimpleName());
     }
 
     public Field getPk() {

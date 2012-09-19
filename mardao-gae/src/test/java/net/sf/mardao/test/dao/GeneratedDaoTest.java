@@ -34,6 +34,7 @@ public class GeneratedDaoTest extends TestCase {
         helper.setUp();
         
         final GeneratedDEmployeeDaoImpl employeeImpl = new GeneratedDEmployeeDaoImpl();
+        employeeImpl.setManagerDao(employeeImpl);
         this.employeeDao = employeeImpl;
         
         populate();
@@ -106,7 +107,14 @@ public class GeneratedDaoTest extends TestCase {
         }        
     }
     
-    public void testQueryByManager() {
-        
+    public void testQueryByManyToOne() {
+        final DEmployee manager = employeeDao.findByPrimaryKey(1L);
+        assertNotNull("ManyToOne manager", manager);
+        final Iterable<DEmployee> i = employeeDao.queryByManager(manager);
+        final Map<Long, DEmployee> actual = new HashMap<Long, DEmployee>();
+        for (DEmployee e : i) {
+            actual.put(e.getId(), e);
+        }
+        assertEquals("ManyToOne employees", 8, actual.size());
     }
 }

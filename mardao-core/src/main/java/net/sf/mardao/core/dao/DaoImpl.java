@@ -159,7 +159,7 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     /** Implemented in TypeDaoImpl */
     protected abstract Object getCoreProperty(E core, String name);
     /** Implemented in TypeDaoImpl */
-    protected abstract void setCoreProperty(E core, String name, Object value);
+    protected abstract void setCoreProperty(Serializable core, String name, Object value);
     
     protected abstract Filter createEqualsFilter(String columnName, Object value);
     

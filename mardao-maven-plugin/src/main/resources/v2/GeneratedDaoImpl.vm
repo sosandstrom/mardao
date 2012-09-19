@@ -171,13 +171,34 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
         }
     }
 
+    /**
+     * Overrides to substitute Entity properties with foreign keys
+     */
+    @Override
+    protected void setCoreProperty(Serializable core, String name, Object value) {
+        if (null == core || null == name) {
+            return;
+        }
+        else if (null == value) {
+            // do nothing in particular, will call super at end
+        }
+###foreach( $field in $entity.manyToOnes )	 
+##        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+##            // many-to-one: replace foreign entity with its primary key
+##            ${field.entity.simpleName} foreign = (${field.entity.simpleName}) value;
+##            value = ${field.nameLower}Dao.getPrimaryKey(foreign);
+##        }
+###end
+        super.setCoreProperty(core, name, value);
+    }
+
 #if( $entity.parent )
 #set( $field = $entity.parent )
     /** Default implementation returns null, overrides for ${field.name} parent */
     public String getParentKeyColumnName() {
         return COLUMN_NAME_${field.nameUpper};
     }
-    
+
    // ------ END DaoImpl overrides -----------------------------
 
         public Object getParentKey(${entity.simpleName} domain) {
@@ -415,14 +436,31 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 #foreach( $field in $entity.manyToOnes )
 #set( $foreign = $entities.get($field.type))
 	/**
-	 * find-by method for many-to-one field ${field.name}
-	 * @param ${field.name} the related ${field.type} entity
-	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
+	 * query-by method for many-to-one field ${field.name}
+	 * @param ${field.name} the id of the related ${field.type} entity
+	 * @return an Iterable of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
-	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
-		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}());
+	public final Iterable<${entity.simpleName}> queryBy${field.nameFirst}(${field.type} ${field.name}) {
+##		return findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${field.name}.get${helper.firstToUpper($field.entity.pk.name)}());
+            final Object foreignKey = ${field.name}Dao.getPrimaryKey(${field.name});
+            final Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, foreignKey);
+            return queryIterable(false, 0, -1, null, null, null, false, null, false, filter);
 	}
-	
+
+	/**
+	 * query-page-by method for many-to-one field ${field.name}
+	 * @param ${field.name} the related ${field.type} entity
+         * @param pageSize the number of domain entities in the page
+         * @param cursorString non-null if get next page
+	 * @return a CursorPage of ${entity.simpleName}s belonging to the many-to-one relation
+	 */
+	public final CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${field.nameFirst}(${field.type} ${field.name},
+                int pageSize, Serializable cursorString) {
+            final Object foreignKey = ${field.name}Dao.getPrimaryKey(${field.name});
+            final Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, foreignKey);
+            return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
+        }
+
 #if( $foreign )  
 ##	/**
 ##	 * find-by method for many-to-one field ${field.name}

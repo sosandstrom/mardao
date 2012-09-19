@@ -58,7 +58,8 @@
                     <sourceVersion>1.6</sourceVersion>
                     <classpathElement>${project.basedir}/target/test-classes</classpathElement>
                     <sourceFolder>${project.basedir}/src/test/java</sourceFolder>
-                    <resourceFolder>${project.basedir}/src/test/resources</resourceFolder>
+<!--                    <resourceFolder>${project.basedir}/src/test/resources</resourceFolder>-->
+                    <resourceFolder>${project.basedir}/target/test-classes</resourceFolder>
                     <targetFolder>${project.basedir}/target/generated-test-sources/dao</targetFolder>
                 </configuration>
                 <executions>
@@ -127,6 +128,17 @@
             
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <forkMode>pertest</forkMode>
+                    <argLine>-Xms256m -Xmx512m -Djava.util.logging.config.file=${project.basedir}/src/test/resources/logging.properties</argLine>
+                    <testFailureIgnore>false</testFailureIgnore>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>2.1.2</version>
                 <executions>
@@ -190,11 +202,11 @@
             <version>${gae.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--        <dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j13</artifactId>
+            <artifactId>slf4j-jdk14</artifactId>
             <version>1.6.1</version>
             <scope>test</scope>
-        </dependency>-->
+        </dependency>
     </dependencies>
 </project>

@@ -34,7 +34,8 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 #end
 
 	/** The list of attribute names */
-	static final List<String> COLUMN_NAMES = Arrays.asList(#foreach( $field in $allFields )#if ($velocityCount > 1),#end
+	static final List<String> COLUMN_NAMES = Arrays.asList(#foreach( $field in $allFields )#if ($velocityCount > 1),
+#end
 		COLUMN_NAME_${field.name.toUpperCase()}#end);
 
 
@@ -157,11 +158,21 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 #foreach( $field in $entity.manyToOnes )
 #set( $foreign = $entities.get($field.type)) 
 	/**
-	 * find-by method for many-to-one field ${field.name}
-	 * @param ${field.name} the related ${field.type} entity
-	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
+	 * query-by method for many-to-one field ${field.name}
+	 * @param ${field.name} the id of the related ${field.type} entity
+	 * @return an Iterable of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
-	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+	Iterable<${entity.simpleName}> queryBy${field.nameFirst}(${field.type} ${field.name});
+
+	/**
+	 * query-page-by method for many-to-one field ${field.name}
+	 * @param ${field.name} the related ${field.type} entity
+         * @param pageSize the number of domain entities in the page
+         * @param cursorString non-null if get next page
+	 * @return a CursorPage of ${entity.simpleName}s belonging to the many-to-one relation
+	 */
+	CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${field.nameFirst}(${field.type} ${field.name},
+            int pageSize, Serializable cursorString);
 
 #if( $foreign )	
 	/**

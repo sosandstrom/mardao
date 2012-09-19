@@ -32,6 +32,10 @@ public class Field implements Comparable<Field> {
             return ProcessDomainMojo.firstToUpper(name);
         }
 
+        public String getNameLower() {
+            return ProcessDomainMojo.firstToLower(name);
+        }
+
 	public void setType(String type) {
 		this.type = type;
 	}

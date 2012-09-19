@@ -273,13 +273,13 @@ public abstract class TypeDaoImpl<T extends Object/*DPrimaryKeyEntity<ID>*/, ID 
     }
 
     @Override
-    protected void setCoreProperty(Entity core, String name, Object value) {
+    protected void setCoreProperty(Serializable core, String name, Object value) {
         if (null != name) {
             if (value instanceof DLocation) {
                 final DLocation location = (DLocation) value;
                 value = new GeoPt(location.getLatitude(), location.getLongitude());
             }
-            core.setProperty(name, value);
+            ((Entity) core).setProperty(name, value);
         }
     }
     

@@ -13,21 +13,21 @@
 	">
 
 #foreach( $group in $packages.values() )
-	<!-- ============== DaoBeans for entities in package ${group.name} ============ -->
+    <!-- ============== DaoBeans for entities in package ${group.name} BEGIN ============ -->
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
-	<bean id="${helper.firstToLower($entity.simpleName)}Dao" 
+	<bean id="${entity.simpleLower}Dao" 
 		class="${daoPackage}.${entity.simpleName}DaoBean"
                 >
 ###if( $entity.parent )
 ##                <property name="mardaoParentDao" ref="${helper.firstToLower($entity.parent.entity.simpleName)}Dao" />
 ###end
-###foreach( $field in $entity.manyToOnes )
-##                <!-- for ${field.name} Many-To-One relation -->
-##		<property name="${field.name}Dao" ref="${field.name}Dao" />
-###end	
+#foreach( $field in $entity.manyToOnes )
+            <!-- for ${field.name} Many-To-One relation -->
+            <property name="${field.name}Dao" ref="${field.entity.simpleLower}Dao" />
+#end	
 	</bean>
 #end
+    <!-- ============== DaoBeans for entities in package ${group.name} END ============ -->
 	
 #end
-
 </beans>

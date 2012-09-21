@@ -36,6 +36,7 @@ public class GeoDaoTest extends TestCase {
         helper.setUp();
         
         final GeneratedDEmployeeDaoImpl employeeImpl = new GeneratedDEmployeeDaoImpl();
+        employeeImpl.setManagerDao(employeeImpl);
         this.employeeDao = employeeImpl;
         
         populate();

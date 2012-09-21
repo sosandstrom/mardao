@@ -75,6 +75,19 @@ public abstract class TypeDaoImpl<T extends Object/*DPrimaryKeyEntity<ID>*/, ID 
     }
 
     @Override
+    protected Key coreKeyToParentKey(Key core) {
+        return null != core ? core.getParent() : null;
+    }
+    
+    @Override
+    public Entity createCore(Object primaryKey) {
+        Key pk = (Key) primaryKey;
+        Object parentKey = pk.getParent();
+        ID simpleKey = coreKeyToSimpleKey(pk);
+        return createCore(parentKey, simpleKey);
+    }    
+    
+    @Override
     public Entity createCore(Object parentKey, ID simpleKey) {
         final Key pk = (Key) parentKey;
         Entity entity;
@@ -212,7 +225,7 @@ public abstract class TypeDaoImpl<T extends Object/*DPrimaryKeyEntity<ID>*/, ID 
     }
     
     @Override
-    protected CursorPage<T, ID> queryPage(boolean keysOnly, int pageSize,
+    protected CursorPage<T, ID> queryPage(boolean keysOnly, int requestedPageSize,
             Key ancestorKey, Key simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
@@ -223,15 +236,21 @@ public abstract class TypeDaoImpl<T extends Object/*DPrimaryKeyEntity<ID>*/, ID 
                               primaryOrderBy, primaryIsAscending, 
                               secondaryOrderBy, secondaryIsAscending, filters);
         
-        final QueryResultList<Entity> iterable = asQueryResultList(pq, pageSize, (String) cursorString);
+        final QueryResultList<Entity> iterable = asQueryResultList(pq, requestedPageSize, (String) cursorString);
         
         final CursorPage<T, ID> cursorPage = new CursorPage<T, ID>();
+        cursorPage.setRequestedPageSize(requestedPageSize);
+        
         final Collection<T> domains = new ArrayList<T>();
         for (Entity core : iterable) {
             domains.add(coreToDomain(core));
         }
         cursorPage.setItems(domains);
-        cursorPage.setCursorKey(iterable.getCursor().toWebSafeString());
+        
+        // only if next is available
+        if (domains.size() == requestedPageSize) {
+            cursorPage.setCursorKey(iterable.getCursor().toWebSafeString());
+        }
         
         return cursorPage;
     }
@@ -248,7 +267,7 @@ public abstract class TypeDaoImpl<T extends Object/*DPrimaryKeyEntity<ID>*/, ID 
                               primaryOrderBy, primaryIsAscending, 
                               secondaryOrderBy, secondaryIsAscending, filters);
         
-        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, 100);
+        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, 100, null);
         final CursorIterable<T> returnValue = new CursorIterable<T>(_iterable);
         
         return returnValue;
@@ -266,7 +285,7 @@ public abstract class TypeDaoImpl<T extends Object/*DPrimaryKeyEntity<ID>*/, ID 
                               primaryOrderBy, primaryIsAscending, 
                               secondaryOrderBy, secondaryIsAscending, filters);
         
-        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, 100);
+        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, 100, null);
         final KeysIterable<ID> returnValue = new KeysIterable<ID>(_iterable);
         
         return returnValue;
@@ -317,9 +336,13 @@ public abstract class TypeDaoImpl<T extends Object/*DPrimaryKeyEntity<ID>*/, ID 
         return DatastoreServiceFactory.getDatastoreService();
     }
 
-    protected QueryResultIterable<Entity> asQueryResultIterable(PreparedQuery pq, int chunkSize) {
+    protected QueryResultIterable<Entity> asQueryResultIterable(PreparedQuery pq, int chunkSize, String cursorString) {
         FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
         fetchOptions.chunkSize(chunkSize);
+
+        if (null != cursorString) {
+            fetchOptions.startCursor(Cursor.fromWebSafeString(cursorString));
+        }
         
         return pq.asQueryResultIterable(fetchOptions);
     }

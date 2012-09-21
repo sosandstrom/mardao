@@ -150,8 +150,10 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     protected abstract ID coreKeyToSimpleKey(C core);
     /** Implemented in TypeDaoImpl */
     protected abstract P coreToParentKey(E core);
+    /** Implemented in TypeDaoImpl */
+    protected abstract P coreKeyToParentKey(C core);
     
-    
+    protected abstract E createCore(Object primaryKey);
     protected abstract E createCore(Object parentKey, ID simpleKey);
     
     protected abstract String createMemCacheKey(Object parentKey, ID simpleKey);
@@ -221,6 +223,13 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     }
     
     protected T createDomain() throws InstantiationException, IllegalAccessException {
+        return createDomain(null, null);
+    }
+
+    protected T createDomain(Object primaryKey) throws InstantiationException, IllegalAccessException {
+        C pk = (C) primaryKey;
+        Object parentKey = coreKeyToParentKey(pk);
+        ID simpleKey = coreKeyToSimpleKey(pk);
         return createDomain(null, null);
     }
 
@@ -674,6 +683,14 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     public CursorPage<T, ID> queryPage(int pageSize, Serializable cursorString) {
         return queryPage(false, pageSize, null, null,
                 null, false, null, false,
+                cursorString);
+    }
+
+    public CursorPage<T, ID> queryPage(int pageSize, 
+            String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
+            Serializable cursorString) {
+        return queryPage(false, pageSize, null, null,
+                primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
                 cursorString);
     }
 

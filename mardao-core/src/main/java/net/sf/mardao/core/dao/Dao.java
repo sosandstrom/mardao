@@ -92,6 +92,12 @@ public interface Dao<T extends Object, ID extends Serializable> {
     
     Iterable<T> queryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys);
     
+    CursorPage<T, ID> queryPage(int pageSize, Serializable cursorString);
+
+    CursorPage<T, ID> queryPage(int pageSize, 
+            String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
+            Serializable cursorString);
+    
     void update(Iterable<T> domains);
     
     void update(T domain);

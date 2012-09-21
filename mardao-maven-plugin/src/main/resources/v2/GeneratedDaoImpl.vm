@@ -89,7 +89,8 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 #foreach( $field in $entity.manyToOnes )	 
         else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
             final ${field.entity.className} foreign = domain.get${field.nameFirst}();
-            value = null != foreign ? foreign.get${field.entity.pk.nameFirst}() : null;
+            final Object foreignKey = ${field.name}Dao.getPrimaryKey(foreign);
+            value = foreignKey;
         }
 #end
         // many-to-manys
@@ -144,8 +145,13 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
         else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
             ${field.entity.simpleName} foreign = null;
             if (null != value) {
-                foreign = new ${field.entity.simpleName}();
-                foreign.set${field.entity.pk.nameFirst}((${field.entity.pk.type}) value);
+                try {
+                    foreign = ${field.name}Dao.createDomain(value);
+                } catch (InstantiationException ex) {
+                    LOG.error("Creating foreign domain", ex);
+                } catch (IllegalAccessException ex) {
+                    LOG.error("Creating foreign domain", ex);
+                }
             }
             domain.set${field.nameFirst}(foreign);
         }

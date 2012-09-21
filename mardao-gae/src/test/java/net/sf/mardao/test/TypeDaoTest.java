@@ -44,7 +44,7 @@ public class TypeDaoTest extends TestCase {
     public void testQueryEmptyPage() {
         CursorPage actual = dao.queryPage(10, null);
         assertNotNull(actual);
-        assertNotNull(actual.getCursorKey());
+        assertNull(actual.getCursorKey());
         assertNotNull(actual.getItems());
         assertTrue(actual.getItems().isEmpty());
     }
@@ -112,7 +112,7 @@ public class TypeDaoTest extends TestCase {
         for (int p = 0; p < 11; p++) {
             page = dao.queryPage(10, cursorString);
             System.out.println(String.format("queried page %d with cursor %s, got %d items", p, cursorString, page.getItems().size()));
-            assertEquals(10 == p ? 0 : 10, page.getItems().size());
+            assertEquals("For page " + p, 10 == p ? 0 : 10, page.getItems().size());
             
             cursorString = page.getCursorKey();
         }

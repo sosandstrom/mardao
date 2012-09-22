@@ -1,169 +1,189 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>net.sf.mardao</groupId>
-	<artifactId>mardao-parent</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
+    <groupId>net.sf.mardao</groupId>
+    <artifactId>mardao-parent</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
 
-	<packaging>pom</packaging>
+    <packaging>pom</packaging>
 
-	<name>${project.groupId}:${project.artifactId}</name>
-	<url>http://mardao.sourceforge.net</url>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <url>http://mardao.sourceforge.net</url>
 
-	<modules>
-		<module>mardao-maven-plugin</module>
-		<module>mardao-core</module>
-		<module>mardao-gae</module>
-<!--		<module>mardao-android</module>
-		<module>mardao-jdbc</module>-->
-	</modules>
+    <modules>
+        <module>mardao-maven-plugin</module>
+        <module>mardao-core</module>
+        <module>mardao-gae</module>
+        <!--		<module>mardao-android</module>
+      		<module>mardao-jdbc</module>-->
+    </modules>
 
-	<profiles>
-	</profiles>
+    <profiles>
+    </profiles>
 
-	<properties>
-		<spring.version>3.0.2.RELEASE</spring.version>
-		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-		<scm.user>goldengekko</scm.user>
-	</properties>
+    <properties>
+        <spring.version>3.0.2.RELEASE</spring.version>
+        <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+        <scm.user>goldengekko</scm.user>
+    </properties>
+        
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>3.8.1</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.easymock</groupId>
+                <artifactId>easymock</artifactId>
+                <version>3.1</version>
+                <scope>test</scope>
+            </dependency>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>3.8.1</version>
-				<scope>test</scope>
-			</dependency>
-                        <dependency>
-                            <groupId>org.easymock</groupId>
-                            <artifactId>easymock</artifactId>
-                            <version>3.1</version>
-                            <scope>test</scope>
-                        </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.6.1</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jdk14</artifactId>
+                <version>1.6.1</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>1.6.1</version>
-				<scope>compile</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-jdk14</artifactId>
-				<version>1.6.1</version>
-				<scope>test</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.2.2</version>
+                <configuration>
+                    <preparationGoals>clean install</preparationGoals>
+                </configuration>
+            </plugin>
+        </plugins>
+        <!--
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.scm</groupId>
+                <artifactId>maven-scm-provider-gitexe</artifactId>
+                <version>1.3</version>
+            </extension>
+            <extension>
+                <groupId>org.apache.maven.scm</groupId>
+                <artifactId>maven-scm-manager-plexus</artifactId>
+                <version>1.3</version>
+            </extension>
+            <extension>
+                <groupId>org.kathrynhuxtable.maven.wagon</groupId>
+                <artifactId>wagon-gitsite</artifactId>
+                <version>0.4-SNAPSHOT</version>
+            </extension>
+        </extensions>
+        -->        
+    </build>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.2.2</version>
-				<configuration>
-					<preparationGoals>clean install</preparationGoals>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <distributionManagement>
+        <repository>
+            <id>sourceforge-releases</id>
+            <name>Sourceforge Release Repository</name>
+            <url>http://oss.sonatype.org/content/repositories/sourceforge-releases</url>
+        </repository>
+        <!-- use the following for OSS Sonatype snapshot uploads <snapshotRepository> 
+     			<id>sourceforge-snapshots</id> <name>Sourceforge Snapshot Repository</name> 
+     			<url>http://oss.sonatype.org/content/repositories/sourceforge-with-staging</url> 
+     			</snapshotRepository> -->
+        <!-- use the following if you ARE using a snapshot version -->
+        <snapshotRepository>
+            <id>ppSnapshots</id>
+            <name>Snapshots Repository</name>
+            <url>http://maven.goldengekko.com:8001/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
 
-	<distributionManagement>
-		<repository>
-			<id>sourceforge-releases</id>
-			<name>Sourceforge Release Repository</name>
-			<url>http://oss.sonatype.org/content/repositories/sourceforge-releases</url>
-		</repository>
-		<!-- use the following for OSS Sonatype snapshot uploads <snapshotRepository> 
-			<id>sourceforge-snapshots</id> <name>Sourceforge Snapshot Repository</name> 
-			<url>http://oss.sonatype.org/content/repositories/sourceforge-with-staging</url> 
-			</snapshotRepository> -->
-		<!-- use the following if you ARE using a snapshot version -->
-		<snapshotRepository>
-			<id>ppSnapshots</id>
-			<name>Snapshots Repository</name>
-			<url>http://192.168.1.97:8180/nexus/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<site>
-			<id>sourceforge.net</id>
-			<url>scp://web.sourceforge.net/home/groups/m/ma/mardao/htdocs</url>
-		</site>
-	</distributionManagement>
+        <site>
+            <id>github-project-site</id>
+            <url>gitsite:git@github.com/sosandstrom/mardao.git</url>
+        </site>        
+    </distributionManagement>
 
-	<scm>
-		<connection>scm:git:git://mardao.git.sourceforge.net/gitroot/mardao/mardao</connection>
-		<developerConnection>scm:git:ssh://${scm.user}@mardao.git.sourceforge.net/gitroot/mardao/mardao</developerConnection>
-		<url>http://mardao.git.sourceforge.net/git/gitweb-index.cgi</url>
-	</scm>
+    <scm>
+        <connection>scm:git:git://mardao.git.sourceforge.net/gitroot/mardao/mardao</connection>
+        <developerConnection>scm:git:ssh://${scm.user}@mardao.git.sourceforge.net/gitroot/mardao/mardao</developerConnection>
+        <url>http://mardao.git.sourceforge.net/git/gitweb-index.cgi</url>
+    </scm>
 
-	<developers>
-		<developer>
-			<id>f94os</id>
-			<email>s.o.sandstrom@gmail.com</email>
-			<url>http://www.linkedin.com/in/sosandstrom</url>
-			<organization>Golden Gekko</organization>
-			<organizationUrl>http://www.goldengekko.com</organizationUrl>
-			<timezone>7</timezone>
-		</developer>
+    <developers>
+        <developer>
+            <id>f94os</id>
+            <email>s.o.sandstrom@gmail.com</email>
+            <url>http://www.linkedin.com/in/sosandstrom</url>
+            <organization>Golden Gekko</organization>
+            <organizationUrl>http://www.goldengekko.com</organizationUrl>
+            <timezone>7</timezone>
+        </developer>
 
-		<developer>
-			<id>ivargrimstad</id>
-			<email>ivar.grimstad@gmail.com</email>
-			<timezone>1</timezone>
-		</developer>
+        <developer>
+            <id>ivargrimstad</id>
+            <email>ivar.grimstad@gmail.com</email>
+            <timezone>1</timezone>
+        </developer>
 
-		<developer>
-			<id>alex-richards</id>
-			<timezone>7</timezone>
-		</developer>
-	</developers>
+        <developer>
+            <id>alex-richards</id>
+            <timezone>7</timezone>
+        </developer>
+    </developers>
 
-        <licenses>
-            <license>
-                <name>GNU Lesser General Public License</name>
-                <url>http://www.gnu.org/licenses/lgpl.html</url>
-                <distribution>repo</distribution>
-                <comments>A business-friendly OSS license</comments>
-            </license>
-        </licenses>
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License</name>
+            <url>http://www.gnu.org/licenses/lgpl.html</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
 
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-changes-plugin</artifactId>
-				<version>2.3</version>
-				<inherited>false</inherited>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>changes-report</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-				<configuration>
-					<issueLinkTemplate>http://sourceforge.net/support/tracker.php?aid=%ISSUE%</issueLinkTemplate>
-				</configuration>
-			</plugin>
-		</plugins>
-	</reporting>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-changes-plugin</artifactId>
+                <version>2.3</version>
+                <inherited>false</inherited>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>changes-report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+                <configuration>
+                    <issueLinkTemplate>http://sourceforge.net/support/tracker.php?aid=%ISSUE%</issueLinkTemplate>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 
-	<mailingLists>
-		<mailingList>
-			<name>Mardao User Mailing list</name>
-			<subscribe>https://lists.sourceforge.net/lists/listinfo/mardao-usage</subscribe>
-			<unsubscribe>https://lists.sourceforge.net/lists/listinfo/mardao-usage</unsubscribe>
-			<archive>https://sourceforge.net/mailarchive/forum.php?forum_name=mardao-usage</archive>
-			<post>mardao-usage@lists.sourceforge.net</post>
-		</mailingList>
-	</mailingLists>
+    <mailingLists>
+        <mailingList>
+            <name>Mardao User Mailing list</name>
+            <subscribe>https://lists.sourceforge.net/lists/listinfo/mardao-usage</subscribe>
+            <unsubscribe>https://lists.sourceforge.net/lists/listinfo/mardao-usage</unsubscribe>
+            <archive>https://sourceforge.net/mailarchive/forum.php?forum_name=mardao-usage</archive>
+            <post>mardao-usage@lists.sourceforge.net</post>
+        </mailingList>
+    </mailingLists>
 
-	<issueManagement>
-		<system>sourceforge</system>
-		<!--don't care -->
-		<url>http://sourceforge.net/tracker/?group_id=324173</url>
-	</issueManagement>
+    <issueManagement>
+        <system>sourceforge</system>
+        <!--don't care -->
+        <url>http://sourceforge.net/tracker/?group_id=324173</url>
+    </issueManagement>
 </project>

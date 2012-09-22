@@ -82,10 +82,9 @@
                 <dependencies>
                     <dependency>
                         <groupId>${project.groupId}</groupId>
-                        <artifactId>mardao-api</artifactId>
+                        <artifactId>mardao-core</artifactId>
                         <version>${project.version}</version>
                     </dependency>
-                    
                 </dependencies>
             </plugin>
 

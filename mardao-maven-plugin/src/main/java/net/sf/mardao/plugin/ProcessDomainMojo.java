@@ -381,8 +381,6 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
         Entity foreign = entities.get(f.getType());
         f.setEntity(foreign);
         getLog().debug(String.format("   --- field %s %s;", f.getSimpleType(), f.getName()));
-        Class pClass = loader.loadClass("net.sf.mardao.api.Parent");
-        getLog().debug("@Parent.class=" + pClass);
         
         // map it
         e.getAllFields().put(f.getName(), f);

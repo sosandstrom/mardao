@@ -13,13 +13,17 @@ import junit.framework.TestCase;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.dao.TypeDaoImpl;
 import net.sf.mardao.core.dao.DaoImpl;
-import net.sf.mardao.test.Book;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author os
  */
 public class TypeDaoTest extends TestCase {
+    
+    static final Logger LOG = LoggerFactory.getLogger(TypeDaoTest.class);
+    
     final LocalServiceTestHelper helper = new LocalServiceTestHelper(
             new LocalDatastoreServiceTestConfig());
     
@@ -30,7 +34,7 @@ public class TypeDaoTest extends TestCase {
         super.setUp();
         helper.setUp();
         dao = new BookDaoImpl();
-        System.out.println("--- setUp() " + getName() + " ---");
+        LOG.info("--- setUp() {} ---", getName());
     }
     
     @Override
@@ -111,7 +115,7 @@ public class TypeDaoTest extends TestCase {
         CursorPage<Book, Long> page;
         for (int p = 0; p < 11; p++) {
             page = dao.queryPage(10, cursorString);
-            System.out.println(String.format("queried page %d with cursor %s, got %d items", p, cursorString, page.getItems().size()));
+            LOG.info(String.format("queried page %d with cursor %s, got %d items", p, cursorString, page.getItems().size()));
             assertEquals("For page " + p, 10 == p ? 0 : 10, page.getItems().size());
             
             cursorString = page.getCursorKey();
@@ -134,6 +138,35 @@ public class TypeDaoTest extends TestCase {
 
         int count = 0;
         for (Book book : dao.queryAll()) {
+            assertNotNull(book);
+            count++;
+        }
+        assertEquals(115, count);
+    }
+
+    public void testFindAll() {
+        final String NAME = "John Doe";
+        List<Book> batch = new ArrayList<Book>(115);
+        DaoImpl.setPrincipalName(NAME);
+        for (int i = 0; i < 115; i++) {
+            Book expected = new Book();
+            expected.setId(1000L+i);
+            expected.setTitle("Hex: 0x" + Integer.toHexString(i));
+            batch.add(expected);
+        }
+        dao.persist(batch);
+        DaoImpl.setPrincipalName(null);
+
+        int count = 0;
+        for (Book book : dao.findAll()) {
+            assertNotNull(book);
+            count++;
+        }
+        assertEquals(115, count);
+        
+        // and with memCache
+        count = 0;
+        for (Book book : dao.findAll()) {
             assertNotNull(book);
             count++;
         }

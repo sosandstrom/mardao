@@ -3,7 +3,6 @@ package net.sf.mardao.core.dao;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,27 +23,13 @@ import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Text;
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheException;
-import net.sf.jsr107cache.CacheFactory;
-import net.sf.jsr107cache.CacheManager;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
-import net.sf.mardao.core.dao.Dao;
-import net.sf.mardao.core.dao.DaoImpl;
 import net.sf.mardao.core.geo.DLocation;
 
-public abstract class TypeDaoImpl<T extends Object/*DPrimaryKeyEntity<ID>*/, ID extends Serializable> extends
+public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID> {
     
-    /** Set this to true in subclass (TypeDaoBean) to enable the MemCache primaryKey - Entity */
-    protected boolean memCacheEntity = false;
-
-    /** Set this to true in subclass (TypeDaoBean) to enable the MemCache for findAll */
-    protected boolean memCacheAll = false;
-    
-    protected static Cache _memCache = null;
-
     protected TypeDaoImpl(Class<T> type, Class<ID> idType) {
         super(type, idType);
     }
@@ -304,23 +289,6 @@ public abstract class TypeDaoImpl<T extends Object/*DPrimaryKeyEntity<ID>*/, ID 
     
     // --- END persistence-type beans must implement these ---
     
-    
-    
-    protected static Cache getMemCache() {
-        if (null == _memCache) {
-            LOG.debug("initializing memCache.");
-            try {
-                CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
-                _memCache = cacheFactory.createCache(Collections.emptyMap());
-            } catch (CacheException e) {
-                LOG.error("Cannot initialize MemCache", e);
-//                memCacheAll = false;
-//                memCacheEntity = false;
-            }            
-        }
-        return _memCache;
-    }
-
     protected static final String convertText(Object value) {
         if (null == value) {
             return null;

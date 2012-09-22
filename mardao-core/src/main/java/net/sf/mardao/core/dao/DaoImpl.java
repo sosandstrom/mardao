@@ -394,22 +394,38 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
         }
     }
     
-    protected final void updateMemCache(boolean remove, Iterable<T> domains) {
+    protected final Collection<T> updateMemCache(boolean remove, Iterable<T> domains) {
         if (memCacheEntities || memCacheAll) {
             Object parentKey;
             String memCacheKey;
             ID simpleKey;
-            final Map<String, T> toCache = new HashMap<String, T>();
+            
+            // the returnValue is only to populate memCacheAll
+            final Collection<T> returnValue = memCacheAll ? new ArrayList<T>() : null;
+            
+            final Map<String, T> toCache = new TreeMap<String, T>();
             for (T domain : domains) {
                 simpleKey = getSimpleKey(domain);
                 parentKey = getParentKey(domain);
                 memCacheKey = createMemCacheKey(parentKey, simpleKey);
                 toCache.put(memCacheKey, domain);
+                if (memCacheAll) {
+                    returnValue.add(domain);
+                }
             }
             updateMemCache(remove, toCache);
+            return returnValue;
         }
+        return null;
     }
 
+    protected final Collection<T> updateMemCacheAll(Iterable<T> domains) {
+        final Collection<T> returnValue = updateMemCache(false, domains);
+        if (memCacheAll && null != returnValue) {
+            getMemCache().put(createMemCacheKeyAll(), returnValue);
+        }
+        return returnValue;
+    }
 
     /** Default implementation returns null, override for your hierarchy */
     public String getParentKeyColumnName() {
@@ -545,6 +561,25 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     public boolean delete(T domain) {
         final int count = delete(getParentKey(domain), Arrays.asList(getSimpleKey(domain)));
         return 1 == count;
+    }
+    
+    public Collection<T> findAll() {
+        
+        // try cache first
+        Collection<T> returnValue = (Collection<T>) getMemCache().get(createMemCacheKeyAll());
+        
+        // if missing, query
+        if (null == returnValue) {
+            final Iterable<T> i = queryIterable(false, 0, -1, null, null, null, false, null, false);
+            
+            // populate memCache, and get the Collection
+            returnValue = updateMemCacheAll(i);
+            LOG.debug("Queried {} entities for {}.findAll()", returnValue.size(), getTableName());
+        }
+        else {
+            LOG.debug("Fetched {} entities from memCache {}.findAll()", returnValue.size(), getTableName());
+        }
+        return returnValue;
     }
     
     public T findByPrimaryKey(Object parentKey, ID simpleKey) {

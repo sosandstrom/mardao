@@ -20,6 +20,8 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
 
     public BookDaoImpl() {
         super(Book.class, Long.class);
+        this.memCacheAll = true;
+        this.memCacheEntities = true;
     }
 
     @Override

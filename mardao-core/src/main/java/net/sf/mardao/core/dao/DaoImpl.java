@@ -300,6 +300,16 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
         return keys;
     }
 
+    public Collection<ID> domainsToSimpleKeys(Iterable<T> domains) {
+        final Collection<ID> keys = new ArrayList<ID>();
+        ID simpleKey;
+        for (T d : domains) {
+            simpleKey = getSimpleKey(d);
+            keys.add(simpleKey);
+        }
+        return keys;
+    }
+
     public Collection<ID> coresToSimpleKeys(Iterable<E> cores) {
         final Collection<ID> ids = new ArrayList<ID>();
         ID id;
@@ -563,25 +573,6 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
         return 1 == count;
     }
     
-    public Collection<T> findAll() {
-        
-        // try cache first
-        Collection<T> returnValue = (Collection<T>) getMemCache().get(createMemCacheKeyAll());
-        
-        // if missing, query
-        if (null == returnValue) {
-            final Iterable<T> i = queryIterable(false, 0, -1, null, null, null, false, null, false);
-            
-            // populate memCache, and get the Collection
-            returnValue = updateMemCacheAll(i);
-            LOG.debug("Queried {} entities for {}.findAll()", returnValue.size(), getTableName());
-        }
-        else {
-            LOG.debug("Fetched {} entities from memCache {}.findAll()", returnValue.size(), getTableName());
-        }
-        return returnValue;
-    }
-    
     public T findByPrimaryKey(Object parentKey, ID simpleKey) {
         // TODO: find in cache
         
@@ -635,19 +626,102 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     }
     
     public Iterable<T> queryAll() {
-        return queryIterable(false, 0, -1, null, null, null, false, null, false);
+        Iterable<T> returnValue = null;
+
+        // try cache first
+        if (memCacheAll) {
+           returnValue = (Collection<T>) getMemCache().get(createMemCacheKeyAll());
+        }
+        
+        // if no cache or missing, query
+        if (null == returnValue) {
+            returnValue = queryIterable(false, 0, -1, null, null, null, false, null, false);
+            
+            // populate memCache, and get the Collection
+            if (memCacheAll) {
+                returnValue = updateMemCacheAll(returnValue);
+                LOG.debug("Queried {} entities for {}.queryAll()", ((Collection)returnValue).size(), getTableName());
+            }
+            else {
+                LOG.debug("Queried entities for {}.queryAll()", getTableName());
+            }
+        }
+        else {
+            LOG.debug("Fetched {} entities from memCache {}.queryAll()", ((Collection)returnValue).size(), getTableName());
+        }
+        return returnValue;
     }
     
     public Iterable<T> queryAll(Object parentKey) {
-        return queryIterable(false, 0, -1, (P) parentKey, null, null, false, null, false);
+        Iterable<T> returnValue = null;
+        
+        // try cache first
+        if (memCacheAll) {
+            final Collection<T> ts = (Collection<T>) getMemCache().get(createMemCacheKeyAll());
+            if (null != ts) {
+                
+                // filter mem cache by parent key
+                final ArrayList<T> domains = new ArrayList<T>();
+                returnValue = domains;
+                for (T t : ts) {
+                    if (null == parentKey || parentKey.equals(getParentKey(t))) {
+                        domains.add(t);
+                    }
+                }
+            }
+        }
+
+        if (null == returnValue) {
+            returnValue = queryIterable(false, 0, -1, (P) parentKey, null, null, false, null, false);
+        }
+        
+        return returnValue;
     }
     
     public Iterable<ID> queryAllKeys() {
-        return queryIterableKeys(0, -1, null, null, null, false, null, false);
+        Iterable<ID> returnValue = null;
+        
+        // try cache first
+        if (memCacheAll) {
+            final Collection<T> ts = (Collection<T>) getMemCache().get(createMemCacheKeyAll());
+            if (null != ts) {
+                returnValue = domainsToSimpleKeys(ts);
+            }
+        }
+
+        if (null == returnValue) {
+            returnValue = queryIterableKeys(0, -1, null, null, null, false, null, false);
+        }
+        
+        return returnValue;
     }
     
     public Iterable<ID> queryAllKeys(Object parentKey) {
-        return queryIterableKeys(0, -1, (P) parentKey, null, null, false, null, false);
+        Iterable<ID> returnValue = null;
+        
+        // try cache first
+        if (memCacheAll) {
+            final Collection<T> ts = (Collection<T>) getMemCache().get(createMemCacheKeyAll());
+            if (null != ts) {
+                
+                // filter mem cache by parent key
+                final ArrayList<ID> keys = new ArrayList<ID>();
+                returnValue = keys;
+                ID simpleKey;
+                for (T t : ts) {
+                    if (null == parentKey || parentKey.equals(getParentKey(t))) {
+                        simpleKey = getSimpleKey(t);
+                        keys.add(simpleKey);
+                    }
+                }
+            }
+        }
+
+        if (null == returnValue) {
+            returnValue = queryIterableKeys(0, -1, (P) parentKey, null, null, false, null, false);
+        }
+        
+        return returnValue;
     }
     
     public Iterable<T> queryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys) {

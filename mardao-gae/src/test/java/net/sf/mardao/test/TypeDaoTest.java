@@ -8,6 +8,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import junit.framework.TestCase;
 import net.sf.mardao.core.CursorPage;
@@ -144,7 +145,7 @@ public class TypeDaoTest extends TestCase {
         assertEquals(115, count);
     }
 
-    public void testFindAll() {
+    public void testQueryAllMemCache() {
         final String NAME = "John Doe";
         List<Book> batch = new ArrayList<Book>(115);
         DaoImpl.setPrincipalName(NAME);
@@ -158,7 +159,7 @@ public class TypeDaoTest extends TestCase {
         DaoImpl.setPrincipalName(null);
 
         int count = 0;
-        for (Book book : dao.findAll()) {
+        for (Book book : dao.queryAll()) {
             assertNotNull(book);
             count++;
         }
@@ -166,7 +167,7 @@ public class TypeDaoTest extends TestCase {
         
         // and with memCache
         count = 0;
-        for (Book book : dao.findAll()) {
+        for (Book book : dao.queryAll()) {
             assertNotNull(book);
             count++;
         }
@@ -194,4 +195,28 @@ public class TypeDaoTest extends TestCase {
         assertEquals(115, count);
     }
 
+    public void testFindByPrimaryKeys() {
+        final String NAME = "John Doe";
+        List<Book> batch = new ArrayList<Book>(115);
+        DaoImpl.setPrincipalName(NAME);
+        final Collection<Long> subset = new ArrayList<Long>();
+        for (int i = 0; i < 115; i++) {
+            Book expected = new Book();
+            expected.setId(1000L+i);
+            expected.setTitle("Hex: 0x" + Integer.toHexString(i));
+            batch.add(expected);
+            if (i < 51) {
+                subset.add(expected.getId());
+            }
+        }
+        dao.persist(batch);
+        DaoImpl.setPrincipalName(null);
+
+        int count = 0;
+        for (Book b : dao.queryByPrimaryKeys(null, subset)) {
+            assertNotNull(b);
+            count++;
+        }
+        assertEquals(51, count);
+    }
 }

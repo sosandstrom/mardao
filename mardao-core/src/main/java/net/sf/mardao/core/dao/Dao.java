@@ -74,8 +74,8 @@ public interface Dao<T extends Object, ID extends Serializable> {
     
     boolean delete(T domain);
     
-    /** memCached queryAll */
-    Collection<T> findAll();
+//    /** memCached queryAll */
+//    Collection<T> findAll();
     
     T findByPrimaryKey(Object parentKey, ID simpleKey);
     
@@ -85,7 +85,6 @@ public interface Dao<T extends Object, ID extends Serializable> {
 
     Collection<ID> persist(Iterable<T> domains);
     
-    /** no memCache */
     Iterable<T> queryAll();
     
     Iterable<T> queryAll(Object parentKey);

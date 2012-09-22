@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import net.sf.mardao.core.GeoLocation;
 import net.sf.mardao.core.Parent;
+import net.sf.mardao.core.domain.AbstractLongEntity;
 import net.sf.mardao.core.geo.DLocation;
 
 /**
@@ -19,9 +20,7 @@ import net.sf.mardao.core.geo.DLocation;
  */
 @Entity
 @Table(uniqueConstraints=@UniqueConstraint(columnNames={"fingerprint"}))
-public class DEmployee {
-    @Id
-    private Long id;
+public class DEmployee extends AbstractLongEntity {
 
     @Parent(kind="DOrganization")
     private Serializable organizationKey;
@@ -47,14 +46,6 @@ public class DEmployee {
         return String.format("%s,fingerprint:%s}", super.toString(), fingerprint);
     }
     
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Object getOrganizationKey() {
         return organizationKey;
     }

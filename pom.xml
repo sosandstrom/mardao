@@ -114,9 +114,9 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:git://mardao.git.sourceforge.net/gitroot/mardao/mardao</connection>
-        <developerConnection>scm:git:ssh://${scm.user}@mardao.git.sourceforge.net/gitroot/mardao/mardao</developerConnection>
-        <url>http://mardao.git.sourceforge.net/git/gitweb-index.cgi</url>
+        <url>https://github.com/sosandstrom/mardao</url>
+        <connection>scm:git:git://github.com/sosandstrom/mardao.git</connection>
+        <developerConnection>scm:git:git@github.com:sosandstrom/mardao.git</developerConnection>
     </scm>
 
     <developers>

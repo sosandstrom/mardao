@@ -1,4 +1,4 @@
-()[https://github.com/sosandstrom/mardao/tree/dev-2.x/images/Mardao-Logo-aqua.png "Mardao logo aqua"]
+!(Mardao logo aqua)[https://github.com/sosandstrom/mardao/tree/dev-2.x/images/Mardao-Logo-aqua.png "Mardao logo aqua"]
 
 Mardao Architect's Java DAO generator
 

@@ -14,7 +14,7 @@ import net.sf.mardao.core.UpdatedDate;
  * @author os
  */
 @Entity
-public abstract class AbstractCreatedUpdatedEntity implements Serializable {
+public abstract class AbstractCreatedUpdatedEntity implements CreatedUpdatedEntity {
     
     @Basic
     @CreatedBy

@@ -3,7 +3,7 @@ package net.sf.mardao.core.domain;
 import java.io.Serializable;
 import java.util.Date;
 
-public interface CreatedUpdatedEntity<ID extends Serializable> extends PrimaryKeyEntity<ID> {
+public interface CreatedUpdatedEntity extends Serializable {
 
     String getCreatedBy();
     
@@ -13,19 +13,4 @@ public interface CreatedUpdatedEntity<ID extends Serializable> extends PrimaryKe
     
     Date getUpdatedDate();
 
-    String _getNameCreatedBy();
-
-    String _getNameCreatedDate();
-
-    void _setCreatedBy(String name);
-
-    void _setCreatedDate(Date date);
-
-    String _getNameUpdatedBy();
-
-    String _getNameUpdatedDate();
-
-    void _setUpdatedBy(String name);
-
-    void _setUpdatedDate(Date date);
 }

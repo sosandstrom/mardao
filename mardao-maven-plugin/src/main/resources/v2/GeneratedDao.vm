@@ -231,8 +231,9 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	${entity.simpleName} persist(#if( $entity.parent )
 Object ${entity.parent.name},  	
 #end		${entity.pk.type} ${entity.pk.name}#foreach( $field in $entity.fields )
+#if( $field != $entity.createdBy && $field != $entity.createdDate && $field != $entity.updatedBy && $field != $entity.updatedDate )
 , 
-		${field.type} ${field.name}#end
+		${field.type} ${field.name}#end#end
 #foreach( $field in $entity.oneToOnes )	 
 , 
 		${field.type} ${field.name}#end
@@ -246,15 +247,15 @@ Object ${entity.parent.name},
 	/**
 	 * Persists an entity unless it already exists
 	 */
-	 ${entity.simpleName} persist(#foreach( $field in $entity.fields )
-${field.type} ${field.name}#if( 0 < $entity.oneToOnes.size() || 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end
-#end
-#foreach( $field in $entity.oneToOnes )	 
-${field.type} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.manyToOnes.size() ), #end
-#end
-#foreach( $field in $entity.manyToOnes )	 
-${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #end
-#end);
+	 ${entity.simpleName} persist(${uniqueField.type} ${uniqueField.name}#foreach( $field in $entity.fields )
+#if( $field != $uniqueField && $field != $entity.createdBy && $field != $entity.createdDate && $field != $entity.updatedBy && $field != $entity.updatedDate ), 
+                ${field.type} ${field.name}#end#end
+#foreach( $field in $entity.oneToOnes )
+#if( $field != $uniqueField),
+                ${field.type} ${field.name}#end#end
+#foreach( $field in $entity.manyToOnes )
+#if( $field != $uniqueField),	 
+                ${field.type} ${field.name}#end#end);
 
 #end
 #end

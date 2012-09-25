@@ -4,29 +4,18 @@ import java.util.Collection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import net.sf.mardao.core.domain.DStringEntity;
 
 /**
  *
  * @author os
  */
 @Entity
-public class DGroup extends DStringEntity {
+public class DGroup {
     @Id
     private String name;
     
     @ManyToMany(targetEntity=DEmployee.class)
     private Collection<DEmployee> members;
-
-    @Override
-    public String getSimpleKey() {
-        return name;
-    }
-
-    @Override
-    public void setSimpleKey(String simpleKey) {
-        this.name = simpleKey;
-    }
 
     public String getName() {
         return name;
@@ -43,6 +32,4 @@ public class DGroup extends DStringEntity {
     public void setMembers(Collection<DEmployee> members) {
         this.members = members;
     }
-    
-    
 }

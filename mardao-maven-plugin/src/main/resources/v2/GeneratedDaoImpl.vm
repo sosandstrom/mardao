@@ -553,60 +553,60 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	 */
 	public ${entity.simpleName} persist(#if( $entity.parent )
 Object ${entity.parent.name},  	
-#end		${entity.pk.type} ${entity.pk.name}#foreach( $field in $entity.fields )
-, 
+#end		${entity.pk.type} ${entity.pk.name}#foreach( $field in $entity.fields )	 
+#if( $field != $entity.createdBy && $field != $entity.createdDate && $field != $entity.updatedBy && $field != $entity.updatedDate ), 
+		${field.type} ${field.name}#end#end
+#foreach( $field in $entity.oneToOnes ), 
 		${field.type} ${field.name}#end
-#foreach( $field in $entity.oneToOnes )	 
-, 
-		${field.type} ${field.name}#end
-#foreach( $field in $entity.manyToOnes )	 
-, 
+#foreach( $field in $entity.manyToOnes ), 
 		${field.type} ${field.name}#end) {
-		${entity.simpleName} domain = null;
-		// if primaryKey specified, use it
-		if (null != ${entity.pk.name}) {
-			domain = findByPrimaryKey(#if( $entity.parent )
+
+            ${entity.simpleName} domain = null;
+            // if primaryKey specified, use it
+            if (null != ${entity.pk.name}) {
+                    domain = findByPrimaryKey(#if( $entity.parent )
 ${entity.parent.name}, #end${entity.pk.name});
-		}
+            }
 		
 #if( 0 < $entity.uniqueFieldsSets.size() )
 #set( $uniqueFields = $entity.uniqueFieldsSets.get(0) )
-		// use find-by unique column set
-		if (null == domain) {
-			domain = findBy#foreach( $field in $uniqueFields )
-${field.nameFirst}#end(
-                            #foreach( $field in $uniqueFields )
-${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
+            // use find-by unique column set
+            if (null == domain) {
+                domain = findBy#foreach( $field in $uniqueFields )${field.nameFirst}#end(
+#foreach( $field in $uniqueFields )
+                    ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 #end);
-		}
+            }
 #end		
-		// create new?
-		if (null == domain) {
-			domain = new ${entity.simpleName}();
+            // create new?
+            if (null == domain) {
+                    domain = new ${entity.simpleName}();
 #if( $entity.parent )
-			// set parent
-			domain.set${helper.firstToUpper($entity.parent.name)}((${entity.parent.type}) ${entity.parent.name});
+                    // set parent
+                    domain.set${helper.firstToUpper($entity.parent.name)}((${entity.parent.type}) ${entity.parent.name});
 #end			
-			// generate Id?
-			if (null != ${entity.pk.name}) {
-				domain.set${helper.firstToUpper($entity.pk.name)}(${entity.pk.name});
-			}
-			// fields
+                    // generate Id?
+                    if (null != ${entity.pk.name}) {
+                            domain.set${helper.firstToUpper($entity.pk.name)}(${entity.pk.name});
+                    }
+                    // fields
 #foreach( $field in $entity.fields )
-			domain.set${helper.firstToUpper($field.name)}(${field.name});
+#if( $field != $entity.createdBy && $field != $entity.createdDate && $field != $entity.updatedBy && $field != $entity.updatedDate )
+                    domain.set${helper.firstToUpper($field.name)}(${field.name});
 #end
-			// one-to-ones
+#end
+                    // one-to-ones
 #foreach( $field in $entity.oneToOnes )	 
-			domain.set${helper.firstToUpper($field.name)}(${field.name});
+                    domain.set${helper.firstToUpper($field.name)}(${field.name});
 #end
-			// many-to-ones
+                    // many-to-ones
 #foreach( $field in $entity.manyToOnes )	 
-			domain.set${helper.firstToUpper($field.name)}(${field.name});
+                    domain.set${helper.firstToUpper($field.name)}(${field.name});
 #end
 			
-			persist(domain);
-		}
-		return domain;
+                    persist(domain);
+            }
+            return domain;
 	}
 
 
@@ -616,30 +616,31 @@ ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 	/**
 	 * Persists an entity unless it already exists
 	 */
-	public ${entity.simpleName} persist(#foreach( $field in $entity.fields )
-${field.type} ${field.name}#if( 0 < $entity.oneToOnes.size() || 0 < $entity.manyToOnes.size() || $velocityCount < $entity.fields.size() ), #end
-#end
-#foreach( $field in $entity.oneToOnes )	 
-${field.type} ${field.name}#if( 0 < $entity.manyToOnes.size() || $velocityCount < $entity.manyToOnes.size() ), #end
-#end
-#foreach( $field in $entity.manyToOnes )	 
-${field.type} ${field.name}#if( $velocityCount < $entity.manyToOnes.size() ), #end
-#end) {
-		${entity.simpleName} domain = findBy${helper.firstToUpper($uniqueField.name)}(${uniqueField.name});
-		if (null == domain) {
-			domain = new ${entity.simpleName}();
+	public ${entity.simpleName} persist(${uniqueField.type} ${uniqueField.name}#foreach( $field in $entity.fields )
+#if( $field != $uniqueField && $field != $entity.createdBy && $field != $entity.createdDate && $field != $entity.updatedBy && $field != $entity.updatedDate ), 
+                ${field.type} ${field.name}#end#end
+#foreach( $field in $entity.oneToOnes )
+#if( $field != $uniqueField),	 
+                ${field.type} ${field.name}#end#end
+#foreach( $field in $entity.manyToOnes )
+#if( $field != $uniqueField),	 
+                ${field.type} ${field.name}#end#end) {
+            ${entity.simpleName} domain = findBy${helper.firstToUpper($uniqueField.name)}(${uniqueField.name});
+            if (null == domain) {
+                domain = new ${entity.simpleName}();
 #foreach( $field in $entity.fields )
-			domain.set${helper.firstToUpper($field.name)}(${field.name});
-#end
+#if( $field != $entity.createdBy && $field != $entity.createdDate && $field != $entity.updatedBy && $field != $entity.updatedDate )
+                domain.set${helper.firstToUpper($field.name)}(${field.name});
+#end#end
 #foreach( $field in $entity.oneToOnes )	 
-			domain.set${helper.firstToUpper($field.name)}(${field.name});
+                domain.set${helper.firstToUpper($field.name)}(${field.name});
 #end
 #foreach( $field in $entity.manyToOnes )	 
-			domain.set${helper.firstToUpper($field.name)}(${field.name});
+                domain.set${helper.firstToUpper($field.name)}(${field.name});
 #end
-			persist(domain);
-		}
-		return domain;
+                persist(domain);
+            }
+            return domain;
 	}
 
 #end

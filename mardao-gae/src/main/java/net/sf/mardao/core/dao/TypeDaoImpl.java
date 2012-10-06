@@ -118,6 +118,11 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
     }
 
     @Override
+    protected final Filter createInFilter(String fieldName, Object... param) {
+        return new Filter(fieldName, FilterOperator.IN, param);
+    }
+
+    @Override
     protected String createMemCacheKey(Object parentKey, ID simpleKey) {
         final Key key = createCoreKey(parentKey, simpleKey);
         return null != key ? KeyFactory.keyToString(key) : null;
@@ -179,7 +184,7 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
         Object value = null;
         if (null != core && null != name) {
             value = core.getProperty(name);
-            if (value instanceof GeoPt) {
+            if (value instanceof GeoPt && name.equals(getGeoLocationColumnName())) {
                 final GeoPt geoPt = (GeoPt) value;
                 value = new DLocation(geoPt.getLatitude(), geoPt.getLongitude());
             }
@@ -190,6 +195,11 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
     @Override
     public Object getParentKey(T domain) {
         return null;
+    }
+    
+    @Override
+    public Object getParentKeyByPrimaryKey(Object primaryKey) {
+        return null != primaryKey ? ((Key) primaryKey).getParent() : null;
     }
     
     @Override

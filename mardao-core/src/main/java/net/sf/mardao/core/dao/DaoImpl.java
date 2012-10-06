@@ -155,6 +155,7 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     
     protected abstract E createCore(Object primaryKey);
     protected abstract E createCore(Object parentKey, ID simpleKey);
+    protected abstract C createCoreKey(Object parentKey, ID simpleKey);    
     
     protected abstract String createMemCacheKey(Object parentKey, ID simpleKey);
 
@@ -164,6 +165,7 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     protected abstract void setCoreProperty(Serializable core, String name, Object value);
     
     protected abstract Filter createEqualsFilter(String columnName, Object value);
+    protected abstract Filter createInFilter(String fieldName, Object... param);
     
     // --- END persistence-type beans must implement these ---
     
@@ -318,6 +320,11 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
             ids.add(id);
         }
         return ids;
+    }
+
+    @Override
+    public ID getSimpleKeyByPrimaryKey(Object primaryKey) {
+        return coreKeyToSimpleKey((C) primaryKey);
     }
     
     protected final String createMemCacheKeyAll() {
@@ -581,6 +588,16 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     
     public T findByPrimaryKey(ID simpleKey) {
         return findByPrimaryKey(null, simpleKey);
+    }
+
+    public T findByPrimaryKey(Object primaryKey) {
+        final P parentKey = coreKeyToParentKey((C) primaryKey);
+        final ID simpleKey = coreKeyToSimpleKey((C) primaryKey);
+        return findByPrimaryKey(parentKey, simpleKey);
+    }
+
+    public Object getPrimaryKey(Object parentKey, ID simpleKey) {
+        return createCoreKey(parentKey, simpleKey);
     }
     
     public Collection<ID> persist(Iterable<T> domains) {

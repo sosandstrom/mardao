@@ -366,23 +366,29 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 
 	// ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )
+#if( $field.type == 'java.util.Collection' )
+#set( $fieldType = 'java.lang.Object' )
+#else
+#set( $fieldType = $field.type )
+#end
 #if( $entity.isUnique($field.name) )
 	/**
 	 * find-by method for unique attribute field ${field.name}
 	 * @param ${field.name} the unique attribute
 	 * @return the unique ${entity.simpleName} for the specified attribute
 	 */
-	public final ${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+	public final ${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name}) {
                 Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
 		return findUniqueBy(filter);
 	}
 #else
 	/**
-	 * query-by method for attribute field ${field.name}
-	 * @param ${field.name} the specified attribute
-	 * @return an Iterable of ${entity.simpleName}s with the specified attribute
+         * {@inheritDoc}
+##	 * query-by method for attribute field ${field.name}
+##	 * @param ${field.name} the specified attribute
+##	 * @return an Iterable of ${entity.simpleName}s with the specified attribute
 	 */
-	public final Iterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+	public final Iterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name}) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
             return queryIterable(false, 0, -1, null, null, null, false, null, false, filter);
 	}
@@ -392,7 +398,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 	 * @param ${field.name} the specified attribute
 	 * @return an Iterable of keys to the ${entity.simpleName}s with the specified attribute
 	 */
-	public final Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+	public final Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name}) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
             return queryIterableKeys(0, -1, null, null, null, false, null, false, filter);
 	}
@@ -404,7 +410,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
          * @param cursorString non-null if get next page
 	 * @return a Page of ${entity.simpleName}s for the specified ${field.name}
 	 */
-	public final CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
+	public final CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name},
             int pageSize, Serializable cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);

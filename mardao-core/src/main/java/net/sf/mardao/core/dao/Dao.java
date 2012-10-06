@@ -26,9 +26,15 @@ public interface Dao<T extends Object, ID extends Serializable> {
     
     ID getSimpleKey(T domain);
     
+    ID getSimpleKeyByPrimaryKey(Object primaryKey);
+    
     Object getParentKey(T domain);
     
+    Object getParentKeyByPrimaryKey(Object primaryKey);
+    
     Object getPrimaryKey(T domain);
+
+    Object getPrimaryKey(Object parentKey, ID simpleKey);
     
     String getTableName();
     
@@ -81,6 +87,8 @@ public interface Dao<T extends Object, ID extends Serializable> {
     
     T findByPrimaryKey(ID simpleKey);
 
+    T findByPrimaryKey(Object primaryKey);
+    
     ID persist(T domain);
 
     Collection<ID> persist(Iterable<T> domains);

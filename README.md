@@ -2,12 +2,12 @@
 
 Mardao Architect's Java DAO generator
 
-Version: 2.0.0
+Latest Stable Version: 2.0.1
 
 License: http://www.gnu.org/licenses/lgpl.html
 
-Mardao is a maven plugin, which you configure in your project's pom.xml.
-It then generates DAO classes using your annotated domain classes as input.
+Mardao is an ORM and DAO generator, packaged as a maven plugin.
+It generates DAO classes using your annotated domain classes as input.
 
 For more info and support, visit the mardao wiki at
 (Mardao Wiki)[https://github.com/sosandstrom/mardao/wiki]

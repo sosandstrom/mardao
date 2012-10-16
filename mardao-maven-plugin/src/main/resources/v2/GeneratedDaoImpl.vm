@@ -223,8 +223,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 	 * @return an Iterable of ${entity.simpleName}s for the specified parent
 	 */
 	public final Iterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}(Object ${field.name}) {
-            final Filter filter = createEqualsFilter(getParentKeyColumnName(), ${field.name});
-            return queryIterable(false, 0, -1, null, null, null, false, null, false, filter);
+            return queryIterable(false, 0, -1, ${field.name}, null, null, false, null, false);
 	}
 	
 	/**
@@ -233,8 +232,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 	 * @return an Iterable of keys to the ${entity.simpleName}s with the specified parent
 	 */
 	public final Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}(Object ${field.name}) {
-            final Filter filter = createEqualsFilter(getParentKeyColumnName(), ${field.name});
-            return queryIterableKeys(0, -1, null, null, null, false, null, false, filter);
+            return queryIterableKeys(0, -1, ${field.name}, null, null, false, null, false);
 	}
 
 	/**
@@ -246,8 +244,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 	 */
 	public final CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
             int pageSize, Serializable cursorString) {
-            final Filter filter = createEqualsFilter(getParentKeyColumnName(), ${field.name});
-            return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
+            return queryPage(false, pageSize, ${field.name}, null, null, false, null, false, cursorString);
         }
 
 #else

@@ -8,7 +8,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -303,7 +302,7 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
             })) {
                 if (f.isDirectory()) {
                     processPackage(root, f);
-                } else if (f.getParentFile().getAbsolutePath().replace('/', '.').endsWith(basePackage + '.' + domainPackageName)) {
+                } else if (f.getParentFile().getAbsolutePath().replace(File.separatorChar, '.').endsWith(basePackage + '.' + domainPackageName)) {
                     final String simpleName = f.getName().substring(0, f.getName().lastIndexOf(".class"));
                     final String className = String.format("%s.%s.%s", basePackage, domainPackageName, simpleName);
                     getLog().debug(String.format("--- class %s", className));

@@ -123,7 +123,7 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     
     /** Implemented in TypeDaoImpl */
     protected abstract CursorPage<T, ID> queryPage(boolean keysOnly, int pageSize,
-            C ancestorKey, C simpleKey,
+            Object ancestorKey, Object primaryKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
             Serializable cursorString,
@@ -132,14 +132,14 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     /** Implemented in TypeDaoImpl */
     protected abstract Iterable<T> queryIterable(boolean keysOnly, 
             int offset, int limit,
-            P ancestorKey, C simpleKey,
+            Object ancestorKey, Object primaryKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
             Filter... filters);
 
     /** Implemented in TypeDaoImpl */
     protected abstract Iterable<ID> queryIterableKeys(int offset, int limit,
-            P ancestorKey, C simpleKey,
+            Object ancestorKey, Object primaryKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
             Filter... filters);
@@ -224,18 +224,18 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
         return value;
     }
     
-    protected T createDomain() throws InstantiationException, IllegalAccessException {
+    public T createDomain() throws InstantiationException, IllegalAccessException {
         return createDomain(null, null);
     }
 
-    protected T createDomain(Object primaryKey) throws InstantiationException, IllegalAccessException {
+    public T createDomain(Object primaryKey) throws InstantiationException, IllegalAccessException {
         C pk = (C) primaryKey;
         Object parentKey = coreKeyToParentKey(pk);
         ID simpleKey = coreKeyToSimpleKey(pk);
-        return createDomain(null, null);
+        return createDomain(parentKey, simpleKey);
     }
 
-    protected T createDomain(Object parentKey, ID simpleKey) throws InstantiationException, IllegalAccessException {
+    public T createDomain(Object parentKey, ID simpleKey) throws InstantiationException, IllegalAccessException {
         final T domain = persistentClass.newInstance();
         
         setParentKey(domain, parentKey);

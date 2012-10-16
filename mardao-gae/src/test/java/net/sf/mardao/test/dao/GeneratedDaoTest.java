@@ -5,9 +5,8 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.util.HashMap;
 import java.util.Map;
 import junit.framework.TestCase;
-import net.sf.mardao.test.dao.GeneratedDEmployeeDao;
-import net.sf.mardao.test.dao.GeneratedDEmployeeDaoImpl;
 import net.sf.mardao.test.domain.DEmployee;
+import net.sf.mardao.test.domain.DOrganization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +21,7 @@ public class GeneratedDaoTest extends TestCase {
             new LocalDatastoreServiceTestConfig());
     
     GeneratedDEmployeeDao employeeDao;
+    GeneratedDOrganizationDaoImpl organizationDao;
     
     public GeneratedDaoTest(String testName) {
         super(testName);
@@ -37,13 +37,16 @@ public class GeneratedDaoTest extends TestCase {
         employeeImpl.setManagerDao(employeeImpl);
         this.employeeDao = employeeImpl;
         
+        this.organizationDao = new GeneratedDOrganizationDaoImpl();
+        
         populate();
         LOG.info("--- setUp() " + getName() + " ---");
     }
     
     protected void populate() {
         LOG.info("--- populate() " + getName() + " ---");
-        
+        DOrganization org = organizationDao.persist(425L, "org.jUnit");
+        final Object orgKey = organizationDao.getPrimaryKey(org);
         Map<Long, DEmployee> employees = new HashMap<Long, DEmployee>();
         for (int i = 1; i < 132; i++) {
             DEmployee employee = new DEmployee();
@@ -52,6 +55,9 @@ public class GeneratedDaoTest extends TestCase {
             employee.setNickname(String.format("Nick%d", i % 11));
             if (1 < i) {
                 employee.setManager(employees.get(Long.valueOf(i / 10)+1L));
+            }
+            if (0 == (i % 3)) {
+                employee.setOrganizationKey(orgKey);
             }
             employeeDao.persist(employee);
             employees.put(Long.valueOf(i), employee);
@@ -106,7 +112,7 @@ public class GeneratedDaoTest extends TestCase {
             }
         }        
     }
-    
+
     public void testQueryByManyToOne() {
         final DEmployee manager = employeeDao.findByPrimaryKey(1L);
         assertNotNull("ManyToOne manager", manager);
@@ -116,5 +122,16 @@ public class GeneratedDaoTest extends TestCase {
             actual.put(e.getId(), e);
         }
         assertEquals("ManyToOne employees", 8, actual.size());
+    }
+    
+    public void testQueryByParent() {
+        final Object orgKey = organizationDao.getPrimaryKey(null, 425L);
+        assertNotNull("by Parent orgKey", orgKey);
+        final Iterable<DEmployee> i = employeeDao.queryByOrganizationKey(orgKey);
+        final Map<Long, DEmployee> actual = new HashMap<Long, DEmployee>();
+        for (DEmployee e : i) {
+            actual.put(e.getId(), e);
+        }
+        assertEquals("ManyToOne employees", 43, actual.size());
     }
 }

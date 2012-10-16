@@ -221,13 +221,13 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
     
     @Override
     protected CursorPage<T, ID> queryPage(boolean keysOnly, int requestedPageSize,
-            Key ancestorKey, Key simpleKey,
+            Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
             Serializable cursorString,
             Filter... filters) {
         
-        final PreparedQuery pq = prepare(keysOnly, ancestorKey, simpleKey, 
+        final PreparedQuery pq = prepare(keysOnly, (Key)ancestorKey, (Key)simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
                               secondaryOrderBy, secondaryIsAscending, filters);
         
@@ -253,12 +253,12 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
     @Override
     protected QueryResultIterable<T> queryIterable(boolean keysOnly, 
             int offset, int limit,
-            Key ancestorKey, Key simpleKey,
+            Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
             Filter... filters) {
         
-        final PreparedQuery pq = prepare(keysOnly, ancestorKey, simpleKey, 
+        final PreparedQuery pq = prepare(keysOnly, (Key)ancestorKey, (Key)simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
                               secondaryOrderBy, secondaryIsAscending, filters);
         
@@ -271,12 +271,12 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
     @Override
     protected QueryResultIterable<ID> queryIterableKeys(
             int offset, int limit,
-            Key ancestorKey, Key simpleKey,
+            Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
             Filter... filters) {
         
-        final PreparedQuery pq = prepare(true, ancestorKey, simpleKey, 
+        final PreparedQuery pq = prepare(true, (Key)ancestorKey, (Key)simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
                               secondaryOrderBy, secondaryIsAscending, filters);
         

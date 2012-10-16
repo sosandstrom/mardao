@@ -23,7 +23,7 @@ import net.sf.mardao.core.geo.DLocation;
 public class DEmployee extends AbstractLongEntity {
 
     @Parent(kind="DOrganization")
-    private Serializable organizationKey;
+    private Object organizationKey;
     
     @Basic
     private String fingerprint;
@@ -50,7 +50,7 @@ public class DEmployee extends AbstractLongEntity {
         return organizationKey;
     }
 
-    public void setOrganizationKey(Serializable organizationKey) {
+    public void setOrganizationKey(Object organizationKey) {
         this.organizationKey = organizationKey;
     }
 

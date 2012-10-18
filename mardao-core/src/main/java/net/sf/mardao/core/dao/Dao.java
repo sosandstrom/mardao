@@ -19,6 +19,13 @@ import net.sf.mardao.core.geo.DLocation;
 public interface Dao<T extends Object, ID extends Serializable> {
     
     Collection<String> getColumnNames();
+    
+    /**
+     * Returns the class of the domain property for specified column
+     * @param columnName
+     * @return the class of the domain property
+     */
+    Class getColumnClass(String columnName);
 
     String getParentKeyColumnName();
 

@@ -25,6 +25,10 @@ public class DEmployee extends AbstractLongEntity {
     @Parent(kind="DOrganization")
     private Object organizationKey;
     
+    /** To test conversion from Double to Float works */
+    @Basic
+    private Float balance;
+    
     @Basic
     private String fingerprint;
     
@@ -92,6 +96,14 @@ public class DEmployee extends AbstractLongEntity {
 
     public void setOfficeLocation(DLocation officeLocation) {
         this.officeLocation = officeLocation;
+    }
+
+    public Float getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Float balance) {
+        this.balance = balance;
     }
 
 }

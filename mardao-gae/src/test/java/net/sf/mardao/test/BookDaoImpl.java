@@ -61,6 +61,11 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         return COLUMN_NAMES;
     }
 
+    @Override
+    public Class getColumnClass(String columnName) {
+        return Object.class;
+    }
+    
     public String getPrimaryKeyColumnName() {
         return COLUMN_NAME_ID;
     }

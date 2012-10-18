@@ -113,6 +113,56 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 
         return value;
     }
+
+    /**
+     * Returns the class of the domain property for specified column
+     * @param name
+     * @return the class of the domain property
+     */
+    public Class getColumnClass(String name) {
+        Class clazz;
+#set( $field = $entity.pk )
+        // simple key?
+        if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            clazz = ${field.type}.class;
+        }
+#if( $entity.parent )
+#set( $field = $entity.parent )
+        // parent key?
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            clazz = ${field.type}.class;
+        }
+#end			
+        // fields
+#foreach( $field in $entity.fields )
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            clazz = ${field.type}.class;
+        }
+#end
+        // one-to-ones
+#foreach( $field in $entity.oneToOnes )	 
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            clazz = ${field.entity.className}.class;
+        }
+#end
+        // many-to-ones
+#foreach( $field in $entity.manyToOnes )	 
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            clazz = ${field.entity.className}.class;
+        }
+#end
+        // many-to-manys
+#foreach( $field in $entity.manyToManys )	 
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            clazz = ${field.entity.className}.class;
+        }
+#end
+        else {
+            throw new IllegalArgumentException("No such column " + name);
+        }
+
+        return clazz;
+    }
       
     @Override
     protected void setDomainProperty(final ${entity.simpleName} domain, final String name, final Object value) {

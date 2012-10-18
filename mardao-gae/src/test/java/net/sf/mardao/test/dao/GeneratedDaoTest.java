@@ -58,6 +58,7 @@ public class GeneratedDaoTest extends TestCase {
             }
             if (0 == (i % 3)) {
                 employee.setOrganizationKey(orgKey);
+                employee.setBalance(Float.valueOf(i / 7.3f));
             }
             employeeDao.persist(employee);
             employees.put(Long.valueOf(i), employee);
@@ -131,6 +132,7 @@ public class GeneratedDaoTest extends TestCase {
         final Map<Long, DEmployee> actual = new HashMap<Long, DEmployee>();
         for (DEmployee e : i) {
             actual.put(e.getId(), e);
+            assertNotNull(e.getBalance());
         }
         assertEquals("ManyToOne employees", 43, actual.size());
     }

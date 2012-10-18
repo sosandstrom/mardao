@@ -180,13 +180,17 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
     }
     
     @Override
-    protected Object getCoreProperty(Entity core, String name) {
+    protected Object getCoreProperty(Entity core, String name, Class domainPropertyClass) {
         Object value = null;
         if (null != core && null != name) {
             value = core.getProperty(name);
-            if (value instanceof GeoPt && name.equals(getGeoLocationColumnName())) {
+            if (value instanceof GeoPt && DLocation.class.equals(domainPropertyClass)) {
                 final GeoPt geoPt = (GeoPt) value;
                 value = new DLocation(geoPt.getLatitude(), geoPt.getLongitude());
+            }
+            // Floats are persisted as 64-bit doubles in Datastore
+            else if (value instanceof Double && Float.class.equals(domainPropertyClass)) {
+                value = ((Double)value).floatValue();
             }
         }
         return value;

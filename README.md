@@ -2,7 +2,7 @@
 
 Mardao Architect's Java DAO generator
 
-Latest Stable Version: 2.0.1
+Latest Stable Version: 2.0.2
 
 License: http://www.gnu.org/licenses/lgpl.html
 
@@ -13,6 +13,34 @@ For more info and support, visit the mardao wiki at
 (Mardao Wiki)[https://github.com/sosandstrom/mardao/wiki]
 
 # Release History
+
+## Release 2.0.3 Overview:
+
+* Float bugfix
+
+## Release date: 2012-10-
+
+## New features:
+
+## Fixed bugs:
+* Float conversion from Double (GAE)
+
+--------------------------------------------------------------------------------
+
+## Release 2.0.2 Overview:
+
+* queryByParent bugfix
+* Support for Windows backslash
+
+## Release date: 2012-10-16
+
+## New features:
+
+## Fixed bugs:
+* queryByParent bugfix
+* Support for Windows backslash
+
+--------------------------------------------------------------------------------
 
 ## Release 2.0.1 Overview:
 

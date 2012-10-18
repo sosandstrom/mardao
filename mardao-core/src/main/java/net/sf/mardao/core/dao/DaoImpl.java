@@ -160,7 +160,7 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     protected abstract String createMemCacheKey(Object parentKey, ID simpleKey);
 
     /** Implemented in TypeDaoImpl */
-    protected abstract Object getCoreProperty(E core, String name);
+    protected abstract Object getCoreProperty(E core, String name, Class domainPropertyClass);
     /** Implemented in TypeDaoImpl */
     protected abstract void setCoreProperty(Serializable core, String name, Object value);
     
@@ -207,7 +207,7 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
             return null;
         }
         
-        Object value = getCoreProperty(core, name);
+        Object value = getCoreProperty(core, name, getColumnClass(name));
         setDomainProperty(domain, name, value);
         
         return value;

@@ -192,6 +192,17 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
             else if (value instanceof Double && Float.class.equals(domainPropertyClass)) {
                 value = ((Double)value).floatValue();
             }
+            else if (value instanceof Long) {
+                if (Integer.class.equals(domainPropertyClass)) {
+                    value = ((Long)value).intValue();
+                }
+                else if (Short.class.equals(domainPropertyClass)) {
+                    value = ((Long)value).shortValue();
+                }
+                else if (Byte.class.equals(domainPropertyClass)) {
+                    value = ((Long)value).byteValue();
+                }
+            }
         }
         return value;
     }

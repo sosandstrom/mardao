@@ -118,7 +118,7 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
     }
 
     @Override
-    protected final Filter createInFilter(String fieldName, Object... param) {
+    protected final Filter createInFilter(String fieldName, Collection param) {
         return new Filter(fieldName, FilterOperator.IN, param);
     }
 

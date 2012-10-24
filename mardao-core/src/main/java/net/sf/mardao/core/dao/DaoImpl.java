@@ -165,7 +165,7 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     protected abstract void setCoreProperty(Serializable core, String name, Object value);
     
     protected abstract Filter createEqualsFilter(String columnName, Object value);
-    protected abstract Filter createInFilter(String fieldName, Object... param);
+    protected abstract Filter createInFilter(String fieldName, Collection param);
     
     // --- END persistence-type beans must implement these ---
     

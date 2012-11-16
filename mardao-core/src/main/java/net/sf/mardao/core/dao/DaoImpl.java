@@ -19,7 +19,6 @@ import net.sf.jsr107cache.CacheManager;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.geo.DLocation;
-import net.sf.mardao.core.geo.GeoModel;
 import net.sf.mardao.core.geo.Geobox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +56,7 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     protected static final Logger   LOG = LoggerFactory.getLogger(DaoImpl.class);
     
     private Collection<Integer> boxBits = Arrays.asList(
-        Geobox.BITS_12_10km, Geobox.BITS_15_1224m, Geobox.BITS_18_154m
+        Geobox.BITS_18_154m, Geobox.BITS_15_1224m, Geobox.BITS_12_10km
     );
 
     /** set this, to have createdBy and updatedBy set */
@@ -839,7 +838,7 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             int offset, int limit, Filter... filters) {
         final DLocation p = new DLocation(lat, lng);
-        int size = offset + (0 < limit ? limit : 10000);
+        final int size = offset + (0 < limit ? limit : 10000);
         
         // sorting on distance has to be done outside datastore, i.e. here in application:
         Map<Double, T> orderedMap = new TreeMap<Double, T>();
@@ -848,7 +847,7 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
                     primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
                     null, filters);
             for (T model : subList.getItems()) {
-                double d = Geobox.distance(((GeoModel)model).getLocation(), p);
+                double d = Geobox.distance(getGeoLocation(model), p);
                 orderedMap.put(d, model);
             }
             

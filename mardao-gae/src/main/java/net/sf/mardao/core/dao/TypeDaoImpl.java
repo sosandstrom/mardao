@@ -203,6 +203,9 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
                     value = ((Long)value).byteValue();
                 }
             }
+            else if (value instanceof Text) {
+                value = ((Text)value).getValue();
+            }
         }
         return value;
     }
@@ -307,6 +310,9 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
             if (value instanceof DLocation) {
                 final DLocation location = (DLocation) value;
                 value = new GeoPt(location.getLatitude(), location.getLongitude());
+            }
+            if (value instanceof String && 500 < value.toString().length()) {
+                value = new Text(value.toString());
             }
             ((Entity) core).setProperty(name, value);
         }

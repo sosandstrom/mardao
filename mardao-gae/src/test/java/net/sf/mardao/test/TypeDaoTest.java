@@ -56,12 +56,17 @@ public class TypeDaoTest extends TestCase {
     
     public void testQueryOneItem() {
         final String NAME = "John Doe";
+        final StringBuffer name = new StringBuffer();
+        for (int i = 0; i < 500; i++) {
+            name.append(NAME);
+        }
         DaoImpl.setPrincipalName(NAME);
         final Book expected = new Book();
         expected.setId(42L);
-        expected.setTitle("Hello Galaxy");
+        expected.setTitle(name.toString());
         dao.persist(expected);
         assertNotNull(expected.getCreatedDate());
+        assertEquals(NAME, expected.getCreatedBy());
         assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
         DaoImpl.setPrincipalName(null);
         

@@ -125,6 +125,8 @@ public interface Dao<T extends Object, ID extends Serializable> {
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending, 
             Filter... filters);
+    
+    void writeAsCsv(OutputStream out, String[] columns, Iterable<T> qi);
 
     // --- GeoDao methods ---
     

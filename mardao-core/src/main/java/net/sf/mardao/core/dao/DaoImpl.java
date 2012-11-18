@@ -900,7 +900,11 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
         final Iterable<T> qi = queryIterable(false, 0, -1, ancestorKey, null, 
                             primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending, 
                             filters);
+        writeAsCsv(out, columns, qi);
+    }
 
+    public void writeAsCsv(OutputStream out, String[] columns, Iterable<T> qi) {
+        
         final PrintWriter pw = new PrintWriter(out);
         
         // write header row

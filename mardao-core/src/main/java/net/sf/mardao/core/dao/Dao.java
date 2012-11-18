@@ -1,5 +1,6 @@
 package net.sf.mardao.core.dao;
 
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -119,6 +120,11 @@ public interface Dao<T extends Object, ID extends Serializable> {
     void update(Iterable<T> domains);
     
     void update(T domain);
+    
+    void writeAsCsv(OutputStream out, String[] columns, Object ancestorKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending, 
+            Filter... filters);
 
     // --- GeoDao methods ---
     

@@ -1,5 +1,7 @@
 package net.sf.mardao.core.dao;
 
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -877,6 +879,69 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
      */
     public void update(T domain) {
         persist(Arrays.asList(domain));
+    }
+    
+    public static String escapeCsv(Object s) {
+        if (null == s) {
+            return null;
+        }
+        // first, escape all double quotes:
+        final String escaped = s.toString().replaceAll("\\\"", "\"\"");
+        // then, qoute the string:
+        final String quoted = String.format("\"%s\"", escaped);
+        
+        return quoted;
+    }
+    
+    public void writeAsCsv(OutputStream out, String[] columns, Object ancestorKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending, 
+            Filter... filters) {
+        final Iterable<T> qi = queryIterable(false, 0, -1, ancestorKey, null, 
+                            primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending, 
+                            filters);
+
+        final PrintWriter pw = new PrintWriter(out);
+        
+        // write header row
+        boolean isFirst = true;
+        for (String col : columns) {
+            if (getColumnNames().contains(col)) {
+                if (isFirst) {
+                    isFirst = false;
+                }
+                else {
+                    pw.print(',');
+                }
+                pw.print(escapeCsv(col));
+            }
+            else {
+                LOG.warn("No such column {}", col);
+            }
+        }
+        pw.println();
+
+        // now write each row
+        for (T domain : qi) {
+            isFirst = true;
+            for (String col : columns) {
+                if (getColumnNames().contains(col)) {
+                    if (isFirst) {
+                        isFirst = false;
+                    }
+                    else {
+                        pw.print(',');
+                    }
+                    pw.print(escapeCsv(getDomainProperty(domain, col)));
+                }
+                else {
+                    LOG.warn("No such column {}", col);
+                }
+            }
+
+            pw.println();
+        }
+        
     }
     
     // --- END Dao methods ---

@@ -906,46 +906,50 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     public void writeAsCsv(OutputStream out, String[] columns, Iterable<T> qi) {
         
         final PrintWriter pw = new PrintWriter(out);
+        final StringBuffer sb = new StringBuffer();
         
         // write header row
         boolean isFirst = true;
         for (String col : columns) {
-            if (getColumnNames().contains(col)) {
+            // check column is property, primaryKey or parent:
+            if (!getColumnNames().contains(col)) {
+                if (!getPrimaryKeyColumnName().equals(col)) {
+                    if (!getParentKeyColumnName().equals(col)) {
+                        LOG.warn("No such column {}", col);
+                        continue;
+                    }
+                }
+            }
+            
+            if (isFirst) {
+                isFirst = false;
+            }
+            else {
+                sb.append(',');
+            }
+            sb.append(escapeCsv(col));
+        }
+        pw.println(sb.toString());
+        LOG.debug(sb.toString());
+
+        // now write each row
+        for (T domain : qi) {
+            sb.setLength(0);
+            isFirst = true;
+            for (String col : columns) {
                 if (isFirst) {
                     isFirst = false;
                 }
                 else {
-                    pw.print(',');
+                    sb.append(',');
                 }
-                pw.print(escapeCsv(col));
-            }
-            else {
-                LOG.warn("No such column {}", col);
-            }
-        }
-        pw.println();
-
-        // now write each row
-        for (T domain : qi) {
-            isFirst = true;
-            for (String col : columns) {
-                if (getColumnNames().contains(col)) {
-                    if (isFirst) {
-                        isFirst = false;
-                    }
-                    else {
-                        pw.print(',');
-                    }
-                    pw.print(escapeCsv(getDomainProperty(domain, col)));
-                }
-                else {
-                    LOG.warn("No such column {}", col);
-                }
+                sb.append(escapeCsv(getDomainProperty(domain, col)));
             }
 
-            pw.println();
+            pw.println(sb.toString());
+            LOG.debug(sb.toString());
         }
-        
+        pw.flush();
     }
     
     // --- END Dao methods ---

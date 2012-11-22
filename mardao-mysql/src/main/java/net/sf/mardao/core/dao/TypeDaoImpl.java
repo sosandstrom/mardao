@@ -312,9 +312,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
 
     @Override
     protected String createMemCacheKey(Object parentKey, ID simpleKey) {
-        throw new UnsupportedOperationException("Not supported yet.");
-//        final Key key = createCoreKey(parentKey, simpleKey);
-//        return null != key ? KeyFactory.keyToString(key) : null;
+        return String.format("%s:%s", getTableName(), simpleKey);
     }
     
     @Override
@@ -333,17 +331,74 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
 //        return -1;
     }
     
+    protected void appendWherePrimaryKeys(StringBuffer sql, Map<String, Object> params, 
+            CompositeKey parentKey, ID simpleKey) {
+        if (null == parentKey && null == simpleKey) {
+            return;
+        }
+        sql.append(" WHERE ");
+        
+        if (null != simpleKey) {
+            sql.append(':');
+            sql.append(getPrimaryKeyColumnName());
+            sql.append("=:");
+            sql.append(getPrimaryKeyColumnName());
+            params.put(getPrimaryKeyColumnName(), simpleKey);
+            
+            if (null != parentKey) {
+                sql.append(" AND ");
+            }
+        }
+        
+        if (null != parentKey) {
+            sql.append(':');
+            sql.append(getParentKeyColumnName());
+            sql.append("=:");
+            sql.append(getParentKeyColumnName());
+            params.put(getParentKeyColumnName(), parentKey.getId());
+        }
+    }
+
+    protected void appendWhereFilters(StringBuffer sql, Map<String, Object> params, 
+            Filter... filters) {
+        if (null == filters || 0 == filters.length) {
+            return;
+        }
+        
+        sql.append(" WHERE ");
+        int i = 0;
+        String token;
+        for (Filter f : filters) {
+            if (0 < i) {
+                sql.append(" AND ");
+            }
+            sql.append(f.getColumn());
+            sql.append(f.getOperation());
+            token = String.format("%s_%d", f.getColumn(), i);
+            sql.append(f.getToken(token));
+            params.put(token, f.getOperand());
+            i++;
+        }
+    }        
+    
     @Override
     protected T doFindByPrimaryKey(Object parentKey, ID simpleKey) {
-        throw new UnsupportedOperationException("Not supported yet.");
-//        final Key coreKey = createCoreKey(parentKey, simpleKey);
-//        try {
-//            final Entity entity = getDatastoreService().get(coreKey);
-//            final T domain = coreToDomain(entity);
-//            return domain;
-//        } catch (EntityNotFoundException expected) {
-//            return null;
-//        }
+        final StringBuffer sql = new StringBuffer();
+        sql.append("SELECT * FROM ");
+        sql.append(getTableName());
+        
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        
+        appendWherePrimaryKeys(sql, params, (CompositeKey) parentKey, simpleKey);
+        
+        final Map<String, Object> props = jdbcTemplate.queryForMap(sql.toString(), params);
+        
+        final CompositeKey pk = createCoreKey(props);
+        final CoreEntity core = new CoreEntity();
+        core.setPrimaryKey(pk);
+        core.setProperties(props);
+        final T domain = coreToDomain(core);
+        return domain;
     }
 
     @Override
@@ -446,29 +501,16 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             Filter... filters) {
         
         final int offset = null != cursorString ? Integer.parseInt(cursorString.toString()) : 0;
-        final StringBuffer sql = new StringBuffer();
-        sql.append("SELECT * FROM ");
-        sql.append(getTableName());
-        final HashMap<String, Object> params = new HashMap<String, Object>();
         
-        final List<Map<String, Object>> itemsProps = jdbcTemplate.queryForList(sql.toString(), params);
+        // we now this Iterable is backed by a List:
+        final List<T> domains = (List<T>) queryIterable(keysOnly, offset, requestedPageSize, 
+                ancestorKey, simpleKey, 
+                primaryOrderBy, primaryIsAscending, 
+                secondaryOrderBy, secondaryIsAscending, filters);
         
         final CursorPage<T, ID> cursorPage = new CursorPage<T, ID>();
         cursorPage.setRequestedPageSize(requestedPageSize);
-        final Collection<T> domains = new ArrayList<T>();
         cursorPage.setItems(domains);
-        
-        CoreEntity core;
-        CompositeKey pk;
-        T domain;
-        for (Map<String, Object> props : itemsProps) {
-            pk = createCoreKey(props);
-            core = new CoreEntity();
-            core.setPrimaryKey(pk);
-            core.setProperties(props);
-            domain = coreToDomain(core);
-            domains.add(domain);
-        }
         
         // only if next is available
         if (domains.size() == requestedPageSize) {
@@ -485,16 +527,34 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
             Filter... filters) {
-        throw new UnsupportedOperationException("Not supported yet.");
-//        
-//        final PreparedQuery pq = prepare(keysOnly, ancestorKey, simpleKey, 
-//                              primaryOrderBy, primaryIsAscending, 
-//                              secondaryOrderBy, secondaryIsAscending, filters);
-//        
-//        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, 100, null);
-//        final CursorIterable<T> returnValue = new CursorIterable<T>(_iterable);
-//        
-//        return returnValue;
+        if ((/* -1 == limit ||*/ 1000 < limit) && !keysOnly) {
+            throw new UnsupportedOperationException("Not supported for Large Objects yet.");
+        }
+        
+        final StringBuffer sql = new StringBuffer();
+        sql.append("SELECT * FROM ");
+        sql.append(getTableName());
+        
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        appendFilters(sql, params, filters);
+        
+        final List<Map<String, Object>> itemsProps = jdbcTemplate.queryForList(sql.toString(), params);
+        
+        final List<T> domains = new ArrayList<T>();
+        
+        CoreEntity core;
+        CompositeKey pk;
+        T domain;
+        for (Map<String, Object> props : itemsProps) {
+            pk = createCoreKey(props);
+            core = new CoreEntity();
+            core.setPrimaryKey(pk);
+            core.setProperties(props);
+            domain = coreToDomain(core);
+            domains.add(domain);
+        }
+        
+        return domains;
     }
 
     @Override

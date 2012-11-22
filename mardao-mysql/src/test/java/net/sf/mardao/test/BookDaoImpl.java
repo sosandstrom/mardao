@@ -26,7 +26,13 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
     
     @Override
     public Class getColumnClass(String columnName) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (COLUMN_NAME_ID.equals(columnName)) {
+            return Long.class;
+        }
+        if (COLUMN_NAME_TITLE.equals(columnName)) {
+            return String.class;
+        }
+        return null;
     }
     
     @Override

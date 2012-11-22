@@ -4,12 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.sql.DataSource;
 import junit.framework.TestCase;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.dao.TypeDaoImpl;
 import net.sf.mardao.core.dao.DaoImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 /**
  *
@@ -26,6 +28,9 @@ public class TypeDaoTest extends TestCase {
         super.setUp();
 //        helper.setUp();
         dao = new BookDaoImpl();
+        final DataSource dataSource = new SingleConnectionDataSource(
+                "jdbc:h2:mem:typeDaoTest", "mardao", "jUnit", true);
+        dao.setDataSource(dataSource);
         LOG.info("--- setUp() {} ---", getName());
     }
     

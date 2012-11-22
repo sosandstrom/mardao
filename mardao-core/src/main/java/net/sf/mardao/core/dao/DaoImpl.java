@@ -44,9 +44,9 @@ import org.slf4j.LoggerFactory;
  * @param <C>
  *            database core key type
  */
-public abstract class DaoImpl<T extends Object, ID extends Serializable, 
+public abstract class DaoImpl<T, ID extends Serializable, 
         P extends Serializable, CT extends Object,
-        E extends Serializable, C extends Serializable>
+        E, C extends Serializable>
         implements Dao<T, ID> {
     
     public static final String PRINCIPAL_NAME_ANONYMOUS = "[ANONYMOUS]";
@@ -163,7 +163,7 @@ public abstract class DaoImpl<T extends Object, ID extends Serializable,
     /** Implemented in TypeDaoImpl */
     protected abstract Object getCoreProperty(E core, String name, Class domainPropertyClass);
     /** Implemented in TypeDaoImpl */
-    protected abstract void setCoreProperty(Serializable core, String name, Object value);
+    protected abstract void setCoreProperty(Object core, String name, Object value);
     
     protected abstract Filter createEqualsFilter(String columnName, Object value);
     protected abstract Filter createInFilter(String fieldName, Collection param);

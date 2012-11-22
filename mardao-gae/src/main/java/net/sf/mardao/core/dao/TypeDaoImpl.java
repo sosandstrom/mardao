@@ -27,7 +27,7 @@ import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.geo.DLocation;
 
-public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> extends
+public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID> {
     
     protected TypeDaoImpl(Class<T> type, Class<ID> idType) {
@@ -305,7 +305,7 @@ public abstract class TypeDaoImpl<T extends Object, ID extends Serializable> ext
     }
 
     @Override
-    protected void setCoreProperty(Serializable core, String name, Object value) {
+    protected void setCoreProperty(Object core, String name, Object value) {
         if (null != name) {
             if (value instanceof DLocation) {
                 final DLocation location = (DLocation) value;

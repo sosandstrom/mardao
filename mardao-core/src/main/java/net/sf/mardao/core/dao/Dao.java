@@ -17,7 +17,7 @@ import net.sf.mardao.core.geo.DLocation;
  * @param <ID>
  *            The domain object's simple key type
  */
-public interface Dao<T extends Object, ID extends Serializable> {
+public interface Dao<T, ID extends Serializable> {
     
     Collection<String> getColumnNames();
     

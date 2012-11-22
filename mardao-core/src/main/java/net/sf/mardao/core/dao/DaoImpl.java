@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -69,6 +70,19 @@ public abstract class DaoImpl<T, ID extends Serializable,
     
     /** To help converting keys */
     protected final Class<ID> simpleIdClass;
+    
+    /** to list the property names for ManyToOne relations */
+    protected List<String> getBasicColumnNames() {
+        return Collections.EMPTY_LIST;
+    }
+    /** to list the property names for ManyToOne relations */
+    protected List<String> getManyToOneColumnNames() {
+        return Collections.EMPTY_LIST;
+    }
+    /** to map the Daos for ManyToOne relations */
+    protected DaoImpl getManyToOneDao(String columnName) {
+        return null;
+    }
     
     /** 
      * Set this to true in DaoBean constructor, to enable

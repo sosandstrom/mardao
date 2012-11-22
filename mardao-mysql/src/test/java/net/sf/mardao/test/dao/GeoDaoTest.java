@@ -3,6 +3,7 @@ package net.sf.mardao.test.dao;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import javax.sql.DataSource;
 import junit.framework.TestCase;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.geo.DLocation;
@@ -10,6 +11,7 @@ import net.sf.mardao.core.geo.Geobox;
 import net.sf.mardao.test.domain.DEmployee;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 /**
  *
@@ -32,6 +34,11 @@ public class GeoDaoTest extends TestCase {
         
         final GeneratedDEmployeeDaoImpl employeeImpl = new GeneratedDEmployeeDaoImpl();
         employeeImpl.setManagerDao(employeeImpl);
+        
+        final DataSource dataSource = new SingleConnectionDataSource(
+                "jdbc:h2:mem:geoDaoTest", "mardao", "jUnit", true);
+        employeeImpl.setDataSource(dataSource);
+        
         this.employeeDao = employeeImpl;
         
         populate();

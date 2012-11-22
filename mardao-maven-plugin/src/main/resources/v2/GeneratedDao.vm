@@ -37,6 +37,14 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	static final List<String> COLUMN_NAMES = Arrays.asList(#foreach( $field in $allFields )#if ($velocityCount > 1),
 #end
 		COLUMN_NAME_${field.name.toUpperCase()}#end);
+	/** The list of Basic attribute names */
+	static final List<String> BASIC_NAMES = Arrays.asList(#foreach( $field in $entity.fields )#if ($velocityCount > 1),
+#end
+		COLUMN_NAME_${field.name.toUpperCase()}#end);
+	/** The list of attribute names */
+	static final List<String> MANY_TO_ONE_NAMES = Arrays.asList(#foreach( $field in $entity.manyToOnes )#if ($velocityCount > 1),
+#end
+		COLUMN_NAME_${field.name.toUpperCase()}#end);
 
 
 #if( $entity.parent )

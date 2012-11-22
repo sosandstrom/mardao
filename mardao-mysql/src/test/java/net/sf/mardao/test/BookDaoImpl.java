@@ -23,7 +23,7 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         this.memCacheAll = true;
         this.memCacheEntities = true;
     }
-
+    
     @Override
     public Class getColumnClass(String columnName) {
         throw new UnsupportedOperationException("Not supported yet.");

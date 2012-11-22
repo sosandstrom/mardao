@@ -7,10 +7,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
+import net.sf.mardao.core.dao.DaoImpl;
 import net.sf.mardao.core.dao.TypeDaoImpl;
 import net.sf.mardao.core.geo.DLocation;
 import ${entity.className};
@@ -40,9 +42,24 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
     /** Setter for Many-To-One ${field.name} DAO */
     public void set${helper.firstToUpper($field.name)}Dao(Generated${field.entity.simpleName}DaoImpl dao) {
         ${field.name}Dao = dao;
+        MANY_TO_ONE_DAOS.put(COLUMN_NAME_${field.name.toUpperCase()}, dao);
     }
 #end
-	
+
+    /** to list the property names for ManyToOne relations */
+    @Override
+    protected List<String> getBasicColumnNames() {
+        return BASIC_NAMES;
+    }
+
+    /** to list the property names for ManyToOne relations */
+    @Override
+    protected List<String> getManyToOneColumnNames() {
+        return MANY_TO_ONE_NAMES;
+    }
+
+    private final Map<String, DaoImpl> MANY_TO_ONE_DAOS = new TreeMap<String, DaoImpl>();
+
     /** Default constructor */
    public Generated${entity.simpleName}DaoImpl() {
       super(${entity.simpleName}.class, ${entity.pk.type}.class);
@@ -56,6 +73,11 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
    
    public List<String> getColumnNames() {
         return COLUMN_NAMES;
+   }
+
+   @Override
+   protected DaoImpl getManyToOneDao(String columnName) {
+       return MANY_TO_ONE_DAOS.get(columnName);
    }
 
     @Override

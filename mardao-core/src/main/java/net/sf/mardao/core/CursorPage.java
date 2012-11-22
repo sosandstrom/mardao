@@ -26,6 +26,10 @@ public class CursorPage<T extends Object, ID extends Serializable> {
         this.cursorKey = cursorKey;
     }
 
+    public void setCursorKey(String cursorKey) {
+        this.cursorKey = cursorKey;
+    }
+
     public Collection<T> getItems() {
         return items;
     }

@@ -61,7 +61,8 @@ public class GeneratedDaoTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         LOG.info("--- tearDown() " + getName() + " ---");
-//        helper.tearDown();
+        final Iterable<Long> ids = employeeDao.queryAllKeys();
+        employeeDao.delete(null, ids);
         super.tearDown();
     }
     

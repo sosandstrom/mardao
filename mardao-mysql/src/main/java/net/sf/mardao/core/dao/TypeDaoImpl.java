@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -323,6 +324,13 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     
     @Override
     protected final Filter createEqualsFilter(String fieldName, Object param) {
+        final Class columnClass = getColumnClass(fieldName);
+        // is this a Entity reference?
+        if (AbstractCreatedUpdatedEntity.class.isAssignableFrom(columnClass)){
+            if (param instanceof CompositeKey) {
+                param = getSimpleKeyByPrimaryKey(param);
+            }
+        }
         return new FilterEqual(fieldName, param);
     }
     
@@ -339,10 +347,19 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     
     @Override
     protected int doDelete(Object parentKey, Iterable<ID> simpleKeys) {
-        throw new UnsupportedOperationException("Not supported yet.");
-//        final Collection<Key> coreKeys = createCoreKeys(parentKey, simpleKeys);
-//        getDatastoreService().delete(coreKeys);
-//        return -1;
+        final StringBuffer sql = new StringBuffer();
+        sql.append("DELETE FROM ");
+        sql.append(getTableName());
+        sql.append(" WHERE ");
+        sql.append(getPrimaryKeyColumnName());
+        sql.append(" IN (:ids)");
+        
+        // we know simpleKeys is a List:
+        final Map<String, Object> params = new HashMap<String, Object>();
+        params.put("ids", simpleKeys);
+        
+        LOG.debug("{} for {}", sql.toString(), params);
+        return jdbcTemplate.update(sql.toString(), params);
     }
 
     @Override
@@ -383,11 +400,6 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         return params;
     }
     
-    protected void appendSelect(StringBuffer sql) {
-        sql.append("SELECT * FROM ");
-        sql.append(getTableName());
-    }
-    
     protected Map<String, Object> appendSelectFilters(StringBuffer sql, Filter... filters) {
         final Map<String, Object> params = appendWhereFilters(sql, filters);
         
@@ -419,15 +431,18 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         return params;
     }        
 
-    protected StringBuffer createSelect() {
+    protected StringBuffer createSelect(boolean keysOnly) {
         final StringBuffer sql = new StringBuffer();
-        appendSelect(sql);
+        sql.append("SELECT ");
+        sql.append(keysOnly ? getPrimaryKeyColumnName() : "*");
+        sql.append(" FROM ");
+        sql.append(getTableName());
         return sql;
     }
     
     @Override
     protected T doFindByPrimaryKey(Object parentKey, ID simpleKey) {
-        final StringBuffer sql = createSelect();
+        final StringBuffer sql = createSelect(false);
         final Map<String, Object> params = appendWherePrimaryKeys(sql, (CompositeKey) parentKey, simpleKey);
         
         LOG.debug("SQL: {} Params: {}", sql.toString(), params);
@@ -459,7 +474,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     
     @Override
     protected T findUniqueBy(Filter... filters) {
-        StringBuffer sql = createSelect();
+        StringBuffer sql = createSelect(false);
         Map<String, Object> params = appendWhereFilters(sql, filters);
         try {
         final Map<String, Object> props = jdbcTemplate.queryForMap(sql.toString(), params);
@@ -570,7 +585,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             throw new UnsupportedOperationException("Not supported for Large Objects yet.");
         }
         
-        final StringBuffer sql = createSelect();
+        final StringBuffer sql = createSelect(keysOnly);
         
         final Map<String, Object> params = appendWhereFilters(sql, filters);
         
@@ -596,16 +611,16 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
             Filter... filters) {
-        throw new UnsupportedOperationException("Not supported yet.");
-//        
-//        final PreparedQuery pq = prepare(true, ancestorKey, simpleKey, 
-//                              primaryOrderBy, primaryIsAscending, 
-//                              secondaryOrderBy, secondaryIsAscending, filters);
-//        
-//        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, 100, null);
-//        final KeysIterable<ID> returnValue = new KeysIterable<ID>(_iterable);
-//        
-//        return returnValue;
+        
+        final StringBuffer sql = createSelect(true);
+        
+        final Map<String, Object> params = appendWhereFilters(sql, filters);
+        
+        final Class simpleClass = getColumnClass(getPrimaryKeyColumnName());
+        LOG.debug("{}, ID.class is {}", sql.toString(), simpleClass);
+        final List keys = jdbcTemplate.queryForList(sql.toString(), params, simpleClass);
+
+        return keys;
     }
 
     @Override

@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
 import javax.sql.DataSource;
@@ -16,6 +17,7 @@ import net.sf.mardao.core.CompositeKey;
 import net.sf.mardao.core.CoreEntity;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
+import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.geo.DLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -257,6 +259,10 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         CompositeKey parentKey = null != primaryKey ? primaryKey.getParentKey() : null;
         
         return null != parentKey ? parentKey.getId() : null;
+    }
+    
+    protected Long coreKeyToParentKey(Long parentId) {
+        return parentId;
     }
     
     @Override
@@ -609,6 +615,9 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 final DLocation location = (DLocation) value;
                 value = String.format("%f,%f", location.getLatitude(), location.getLongitude());
             }
+            else if (value instanceof CompositeKey) {
+                value = ((CompositeKey) value).getId();
+            }
             ((CoreEntity) core).setProperty(name, value);
         }
     }
@@ -629,9 +638,28 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         pk = createCoreKey(props);
         core = new CoreEntity();
         core.setPrimaryKey(pk);
+        
+        resolveForeignKeys(props);
+        
         core.setProperties(props);
         domain = coreToDomain(core);
         return domain;
+    }
+
+    protected void resolveForeignKeys(Map<String, Object> props) {
+        Class columnClass;
+        for (String columnName : getColumnNames()) {
+            columnClass = getColumnClass(columnName);
+            // is this a Entity reference?
+            if (AbstractCreatedUpdatedEntity.class.isAssignableFrom(columnClass)){
+                Object value = props.get(columnName);
+                if (value instanceof Long || value instanceof String) {
+                    DaoImpl foreignDao = getManyToOneDao(columnName);
+                    Object foreignKey = foreignDao.createCoreKey(null, (Serializable) value);
+                    props.put(columnName, foreignKey);
+                }
+            }
+        }
     }
 
 }

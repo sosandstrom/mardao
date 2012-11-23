@@ -3,6 +3,7 @@ package net.sf.mardao.test;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.dao.TypeDaoImpl;
 
@@ -13,26 +14,60 @@ import net.sf.mardao.core.dao.TypeDaoImpl;
 public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
     public static final String COLUMN_NAME_ID = "id";
     public static final String COLUMN_NAME_TITLE = "title";
+
+	/** Column name for field createdBy is "createdBy" */
+	static final String COLUMN_NAME_CREATEDBY = "createdBy";
+	/** Column name for field createdDate is "createdDate" */
+	static final String COLUMN_NAME_CREATEDDATE = "createdDate";
+	/** Column name for field updatedBy is "updatedBy" */
+	static final String COLUMN_NAME_UPDATEDBY = "updatedBy";
+	/** Column name for field updatedDate is "updatedDate" */
+	static final String COLUMN_NAME_UPDATEDDATE = "updatedDate";
     
-    public static final Collection<String> COLUMN_NAMES = Arrays.asList(
-            COLUMN_NAME_TITLE
+    public static final List<String> COLUMN_NAMES = Arrays.asList(
+            COLUMN_NAME_CREATEDBY,
+            COLUMN_NAME_CREATEDDATE,
+            COLUMN_NAME_TITLE,
+            COLUMN_NAME_UPDATEDBY,
+            COLUMN_NAME_UPDATEDDATE
             );
 
     public BookDaoImpl() {
         super(Book.class, Long.class);
-        this.memCacheAll = true;
-        this.memCacheEntities = true;
+//        this.memCacheAll = true;
+//        this.memCacheEntities = true;
     }
     
     @Override
-    public Class getColumnClass(String columnName) {
-        if (COLUMN_NAME_ID.equals(columnName)) {
-            return Long.class;
+    public Class getColumnClass(String name) {
+        Class clazz = null;
+        if (COLUMN_NAME_ID.equals(name)) {
+            clazz = Long.class;
         }
-        if (COLUMN_NAME_TITLE.equals(columnName)) {
-            return String.class;
+        
+        // fields
+        else if (COLUMN_NAME_CREATEDBY.equals(name)) {
+            clazz = java.lang.String.class;
         }
-        return null;
+        else if (COLUMN_NAME_CREATEDDATE.equals(name)) {
+            clazz = java.util.Date.class;
+        }
+        else if (COLUMN_NAME_TITLE.equals(name)) {
+            clazz = String.class;
+        }
+        else if (COLUMN_NAME_UPDATEDBY.equals(name)) {
+            clazz = java.lang.String.class;
+        }
+        else if (COLUMN_NAME_UPDATEDDATE.equals(name)) {
+            clazz = java.util.Date.class;
+        }
+        
+        return clazz;
+    }
+
+    @Override
+    protected List<String> getBasicColumnNames() {
+        return COLUMN_NAMES;
     }
     
     @Override
@@ -87,6 +122,11 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
     }
 
     @Override
+    public Date getCreatedDate(Book domain) {
+        return null != domain ? domain.getCreatedDate() : null;
+    }
+    
+    @Override
     public String getCreatedDateColumnName() {
         return "createdDate";
     }
@@ -124,6 +164,11 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
     @Override
     public String getUpdatedBy(Book domain) {
         return domain.getUpdatedBy();
+    }
+
+    @Override
+    public Date getUpdatedDate(Book domain) {
+        return null != domain ? domain.getUpdatedDate() : null;
     }
 
     @Override

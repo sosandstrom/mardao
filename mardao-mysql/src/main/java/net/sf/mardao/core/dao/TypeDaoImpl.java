@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.sql.DataSource;
 import net.sf.mardao.core.CompositeKey;
 import net.sf.mardao.core.CoreEntity;
@@ -20,6 +18,8 @@ import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.geo.DLocation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -87,9 +87,17 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     };
     
     protected void checkTable() {
-        // TODO: check if queryable
-        
-        createTable();
+        // check if queryable
+        try {
+        final StringBuffer sql = new StringBuffer();
+        sql.append("SELECT 1 FROM ");
+        sql.append(getTableName());
+        LOG.debug(sql.toString());
+        jdbcTemplate.getJdbcOperations().execute(sql.toString());
+        }
+        catch (BadSqlGrammarException whenCreate) {
+            createTable();
+        }
     }
     
     protected void createTable() {
@@ -165,54 +173,54 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     
     // --- BEGIN DaoImpl overrides ---
 
-    @Override
-    public CoreEntity domainToCore(T domain, Date currentDate) {
-        if (null == domain) {
-            return null;
-        }
-        
-        final CoreEntity core = createCore(getParentKey(domain), getSimpleKey(domain));
-        
-        // created, updated
-        String principal = getCreatedBy(domain);
-        if (null == principal) {
-            principal = getPrincipalName();
-            if (null == principal) {
-                principal = PRINCIPAL_NAME_ANONYMOUS;
-            }
-            _setCreatedBy(domain, principal);
-        }
-        setCoreProperty(core, getCreatedByColumnName(), principal);
-        
-        Date date = getCreatedDate(domain);
-        if (null == date) {
-            date = currentDate;
-            _setCreatedDate(domain, currentDate);
-        }
-        setCoreProperty(core, getCreatedDateColumnName(), date);
-        
-        principal = getPrincipalName();
-        if (null == principal) {
-            principal = PRINCIPAL_NAME_ANONYMOUS;
-        }
-        _setUpdatedBy(domain, principal);
-        setCoreProperty(core, getUpdatedByColumnName(), principal);
-        
-        _setUpdatedDate(domain, currentDate);
-        setCoreProperty(core, getUpdatedDateColumnName(), currentDate);
-        
+//    @Override
+//    public CoreEntity domainToCore(T domain, Date currentDate) {
+//        if (null == domain) {
+//            return null;
+//        }
+//        
+//        final CoreEntity core = createCore(getParentKey(domain), getSimpleKey(domain));
+//        
+//        // created, updated
+//        String principal = getCreatedBy(domain);
+//        if (null == principal) {
+//            principal = getPrincipalName();
+//            if (null == principal) {
+//                principal = PRINCIPAL_NAME_ANONYMOUS;
+//            }
+//            _setCreatedBy(domain, principal);
+//        }
+//        setCoreProperty(core, getCreatedByColumnName(), principal);
+//        
+//        Date date = getCreatedDate(domain);
+//        if (null == date) {
+//            date = currentDate;
+//            _setCreatedDate(domain, currentDate);
+//        }
+//        setCoreProperty(core, getCreatedDateColumnName(), date);
+//        
+//        principal = getPrincipalName();
+//        if (null == principal) {
+//            principal = PRINCIPAL_NAME_ANONYMOUS;
+//        }
+//        _setUpdatedBy(domain, principal);
+//        setCoreProperty(core, getUpdatedByColumnName(), principal);
+//        
+//        _setUpdatedDate(domain, currentDate);
+//        setCoreProperty(core, getUpdatedDateColumnName(), currentDate);
+//        
 //        // Domain Entity-specific properties
 //        for (String name : getColumnNames()) {
 //            copyDomainPropertyToCore(name, domain, core);
 //        }
-
-        // geoboxes
-        if (null != getGeoLocationColumnName()) {
-            updateGeoModel(domain, core);
-        }
-
-        return core;
-    }
+//
+//        // geoboxes
+//        if (null != getGeoLocationColumnName()) {
+//            updateGeoModel(domain, core);
+//        }
+//
+//        return core;
+//    }
     
     // --- END DaoImpl overrides ---
     
@@ -255,7 +263,15 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     public CoreEntity createCore(Object primaryKey) {
         final CoreEntity core = new CoreEntity();
         core.setPrimaryKey((CompositeKey) primaryKey);
-        core.setProperties(new TreeMap<String, Object>());
+        
+        final TreeMap<String, Object> props = new TreeMap<String, Object>();
+        core.setProperties(props);
+        
+        // populate props with parent key
+        setCoreProperty(core, getParentKeyColumnName(), getParentKeyByPrimaryKey(primaryKey));
+        
+        // populate props with simple key
+        setCoreProperty(core, getPrimaryKeyColumnName(), getSimpleKeyByPrimaryKey(primaryKey));
         
         return core;
     }    
@@ -331,15 +347,16 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
 //        return -1;
     }
     
-    protected void appendWherePrimaryKeys(StringBuffer sql, Map<String, Object> params, 
+    protected Map<String, Object>  appendWherePrimaryKeys(StringBuffer sql, 
             CompositeKey parentKey, ID simpleKey) {
+        final Map<String, Object> params = new HashMap<String, Object>();
         if (null == parentKey && null == simpleKey) {
-            return;
+            return params;
         }
+        
         sql.append(" WHERE ");
         
         if (null != simpleKey) {
-            sql.append(':');
             sql.append(getPrimaryKeyColumnName());
             sql.append("=:");
             sql.append(getPrimaryKeyColumnName());
@@ -351,18 +368,32 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         }
         
         if (null != parentKey) {
-            sql.append(':');
             sql.append(getParentKeyColumnName());
             sql.append("=:");
             sql.append(getParentKeyColumnName());
             params.put(getParentKeyColumnName(), parentKey.getId());
         }
+        
+        return params;
+    }
+    
+    protected void appendSelect(StringBuffer sql) {
+        sql.append("SELECT * FROM ");
+        sql.append(getTableName());
+    }
+    
+    protected Map<String, Object> appendSelectFilters(StringBuffer sql, Filter... filters) {
+        final Map<String, Object> params = appendWhereFilters(sql, filters);
+        
+        return params;
     }
 
-    protected void appendWhereFilters(StringBuffer sql, Map<String, Object> params, 
+
+    protected Map<String, Object> appendWhereFilters(StringBuffer sql, 
             Filter... filters) {
+        final Map<String, Object> params = new HashMap<String, Object>();
         if (null == filters || 0 == filters.length) {
-            return;
+            return params;
         }
         
         sql.append(" WHERE ");
@@ -379,18 +410,21 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             params.put(token, f.getOperand());
             i++;
         }
+        return params;
     }        
+
+    protected StringBuffer createSelect() {
+        final StringBuffer sql = new StringBuffer();
+        appendSelect(sql);
+        return sql;
+    }
     
     @Override
     protected T doFindByPrimaryKey(Object parentKey, ID simpleKey) {
-        final StringBuffer sql = new StringBuffer();
-        sql.append("SELECT * FROM ");
-        sql.append(getTableName());
+        final StringBuffer sql = createSelect();
+        final Map<String, Object> params = appendWherePrimaryKeys(sql, (CompositeKey) parentKey, simpleKey);
         
-        final HashMap<String, Object> params = new HashMap<String, Object>();
-        
-        appendWherePrimaryKeys(sql, params, (CompositeKey) parentKey, simpleKey);
-        
+        LOG.debug("SQL: {} Params: {}", sql.toString(), params);
         final Map<String, Object> props = jdbcTemplate.queryForMap(sql.toString(), params);
         
         final CompositeKey pk = createCoreKey(props);
@@ -419,13 +453,16 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     
     @Override
     protected T findUniqueBy(Filter... filters) {
-        throw new UnsupportedOperationException("Not supported yet.");
-//        final PreparedQuery pq = prepare(false, null, null,
-//                null, false, null, false,
-//                filters);
-//        final Entity entity = pq.asSingleEntity();
-//        final T domain = coreToDomain(entity);
-//        return domain;
+        StringBuffer sql = createSelect();
+        Map<String, Object> params = appendWhereFilters(sql, filters);
+        try {
+        final Map<String, Object> props = jdbcTemplate.queryForMap(sql.toString(), params);
+        final T domain = propsToDomain(props);
+        return domain;
+        }
+        catch (EmptyResultDataAccessException notFound) {
+            return null;
+        }
     }
     
     @Override
@@ -450,20 +487,15 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     
     @Override
     public Object getParentKeyByPrimaryKey(Object primaryKey) {
-        throw new UnsupportedOperationException("Not supported yet.");
-//        return null != primaryKey ? ((Key) primaryKey).getParent() : null;
+        return null != primaryKey ? ((CompositeKey) primaryKey).getParentKey() : null;
     }
     
     @Override
     public Object getPrimaryKey(T domain) {
-        throw new UnsupportedOperationException("Not supported yet.");
-//        if (null == domain) {
-//            return null;
-//        }
-//        if (Long.class.isAssignableFrom(simpleIdClass)) {
-//            return KeyFactory.createKey((Key) getParentKey(domain), getTableName(), (Long) getSimpleKey(domain));
-//        }
-//        return KeyFactory.createKey((Key) getParentKey(domain), getTableName(), (String) getSimpleKey(domain));
+        if (null == domain) {
+            return null;
+        }
+        return createCoreKey(getParentKey(domain), getSimpleKey(domain));
     }
 
     @Override
@@ -471,6 +503,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         ArrayList<Map<String, Object>> propsList = new ArrayList<Map<String, Object>>();
         for (CoreEntity core : itrbl) {
             propsList.add(core.getProperties());
+            LOG.debug("persist props={}", core.getProperties());
         }
         final Map[] empty = new Map[propsList.size()];
         final Map<String, Object>[] batch = propsList.toArray(empty);
@@ -531,12 +564,9 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             throw new UnsupportedOperationException("Not supported for Large Objects yet.");
         }
         
-        final StringBuffer sql = new StringBuffer();
-        sql.append("SELECT * FROM ");
-        sql.append(getTableName());
+        final StringBuffer sql = createSelect();
         
-        final HashMap<String, Object> params = new HashMap<String, Object>();
-        appendFilters(sql, params, filters);
+        final Map<String, Object> params = appendWhereFilters(sql, filters);
         
         final List<Map<String, Object>> itemsProps = jdbcTemplate.queryForList(sql.toString(), params);
         
@@ -546,11 +576,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         CompositeKey pk;
         T domain;
         for (Map<String, Object> props : itemsProps) {
-            pk = createCoreKey(props);
-            core = new CoreEntity();
-            core.setPrimaryKey(pk);
-            core.setProperties(props);
-            domain = coreToDomain(core);
+            domain = propsToDomain(props);
             domains.add(domain);
         }
         
@@ -594,6 +620,18 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             return null;
         }
         return (String) value;
+    }
+
+    protected T propsToDomain(Map<String, Object> props) {
+        CompositeKey pk;
+        CoreEntity core;
+        T domain;
+        pk = createCoreKey(props);
+        core = new CoreEntity();
+        core.setPrimaryKey(pk);
+        core.setProperties(props);
+        domain = coreToDomain(core);
+        return domain;
     }
 
 }

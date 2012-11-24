@@ -9,6 +9,7 @@ import junit.framework.TestCase;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.dao.TypeDaoImpl;
 import net.sf.mardao.core.dao.DaoImpl;
+import net.sf.mardao.test.dao.InMemoryDataFieldMaxValueIncrementer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -18,6 +19,10 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
  * @author os
  */
 public class TypeDaoTest extends TestCase {
+    final DataSource dataSource = new SingleConnectionDataSource(
+            "jdbc:h2:mem:typeDaoTest", "mardao", "jUnit", true);
+    final InMemoryDataFieldMaxValueIncrementer incrementer = 
+            new InMemoryDataFieldMaxValueIncrementer();
     
     static final Logger LOG = LoggerFactory.getLogger(TypeDaoTest.class);
     
@@ -26,17 +31,16 @@ public class TypeDaoTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-//        helper.setUp();
         dao = new BookDaoImpl();
-        final DataSource dataSource = new SingleConnectionDataSource(
-                "jdbc:h2:mem:typeDaoTest", "mardao", "jUnit", true);
+        dao.setJdbcIncrementer(incrementer);
         dao.setDataSource(dataSource);
         LOG.info("--- setUp() {} ---", getName());
     }
     
     @Override
     protected void tearDown() throws Exception {
-//        helper.tearDown();
+        final Iterable<Long> ids = dao.queryAllKeys();
+        dao.delete(null, ids);
         super.tearDown();
     }
     // TODO add test methods here. The name must begin with 'test'. For example:

@@ -15,8 +15,8 @@
         <module>mardao-maven-plugin</module>
         <module>mardao-core</module>
         <module>mardao-gae</module>
-        <!--		<module>mardao-android</module>
-      		<module>mardao-jdbc</module>-->
+        <module>mardao-mysql</module>
+<!--        <module>mardao-android</module>-->
     </modules>
 
     <profiles>

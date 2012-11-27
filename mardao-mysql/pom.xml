@@ -189,7 +189,20 @@
             <artifactId>spring-jdbc</artifactId>
             <version>${spring.version}</version>
         </dependency>
-                
+        
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.14</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+                <groupId>commons-dbcp</groupId>
+                <artifactId>commons-dbcp</artifactId>
+                <version>1.2.2</version>
+                <scope>runtime</scope>
+        </dependency>
+                                
         <!-- Test scope dependencies: -->
         <dependency>
             <groupId>junit</groupId>

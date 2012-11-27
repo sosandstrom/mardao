@@ -29,19 +29,25 @@ import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer
 public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         DaoImpl<T, ID, Long, Iterable, CoreEntity, CompositeKey> {
     public static final String DIALECT_DEFAULT = "SQL";
+    public static final String DIALECT_MySQL = "MySQL";
     
     protected static final Properties DATA_TYPES_DEFAULT = new Properties();
+    protected static final Properties DATA_TYPES_MySQL = new Properties(DATA_TYPES_DEFAULT);
     protected static final Map<String, Properties> DATA_DIALECTS = new HashMap<String, Properties>();
     
     static {
         DATA_DIALECTS.put(DIALECT_DEFAULT, DATA_TYPES_DEFAULT);
+        DATA_DIALECTS.put(DIALECT_MySQL, DATA_TYPES_MySQL);
         
         DATA_TYPES_DEFAULT.setProperty(Long.class.getName(), "BIGINT");
         DATA_TYPES_DEFAULT.setProperty(Date.class.getName(), "TIMESTAMP");
         DATA_TYPES_DEFAULT.setProperty(String.class.getName(), "VARCHAR");
         DATA_TYPES_DEFAULT.setProperty(DLocation.class.getName(), "VARCHAR(33)");
-        
         DATA_TYPES_DEFAULT.setProperty("AUTO_INCREMENT", "AUTO_INCREMENT");
+        DATA_TYPES_DEFAULT.setProperty("COLUMN_QUOTE", "");
+
+        DATA_TYPES_MySQL.setProperty(String.class.getName(), "VARCHAR(500)");
+        DATA_TYPES_MySQL.setProperty("COLUMN_QUOTE", "`");
     }
     
     protected NamedParameterJdbcTemplate jdbcTemplate;
@@ -125,29 +131,45 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         for (String columnName : getManyToOneColumnNames()) {
             sql.append(", ");
             appendColumnDefinition(sql, columnName);
-            final DaoImpl foreignDao = getManyToOneDao(columnName);
-            sql.append(" CONSTRAINT ");
-            sql.append(getTableName());
-            sql.append('_');
-            sql.append(columnName);
-//            sql.append(" FOREIGN KEY (");
-//            sql.append(columnName);
-//            sql.append(')');
-            sql.append(" REFERENCES ");
-            sql.append(foreignDao.getTableName());
-            sql.append('(');
-            sql.append(foreignDao.getPrimaryKeyColumnName());
-            sql.append(')');
+            if (DIALECT_MySQL.equals(dialect)) {
+                sql.append(" DEFAULT NULL");
+            }
+            else {
+                final DaoImpl foreignDao = getManyToOneDao(columnName);
+                sql.append(" CONSTRAINT ");
+                sql.append(getTableName());
+                sql.append('_');
+                sql.append(columnName);
+    //            sql.append(" FOREIGN KEY (");
+    //            sql.append(columnName);
+    //            sql.append(')');
+                sql.append(" REFERENCES ");
+                sql.append(foreignDao.getTableName());
+                sql.append('(');
+                sql.append(foreignDao.getPrimaryKeyColumnName());
+                sql.append(')');
+            }
         }
         
-        sql.append(");");
+        if (DIALECT_MySQL.equals(dialect)) {
+            appendConstraints(sql);
+        }
+        
+        if (DIALECT_MySQL.equals(dialect)) {
+            sql.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        }
+        else {
+            sql.append(");");
+        }
         
         LOG.info(sql.toString());
         jdbcTemplate.getJdbcOperations().execute(sql.toString());
     }
     
     protected void appendColumnDefinition(StringBuffer sql, String columnName) {
+        sql.append(getDataType("COLUMN_QUOTE"));
         sql.append(columnName);
+        sql.append(getDataType("COLUMN_QUOTE"));
         sql.append(' ');
         final String className = getColumnClass(columnName).getName();
         String dataType = getDataType(className);
@@ -161,12 +183,51 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         final String columnName = getPrimaryKeyColumnName();
         appendColumnDefinition(sql, columnName);
 
-        final String className = getColumnClass(columnName).getName();
-//        if (Long.class.getName().equals(className)) {
-//            sql.append(' ');
-//            sql.append(getDataType("AUTO_INCREMENT"));
-//        }
-        sql.append(" PRIMARY KEY");
+        if (DIALECT_MySQL.equals(dialect)) {
+            sql.append(" NOT NULL");
+        }
+        else {
+            sql.append(" PRIMARY KEY");
+        }
+    }
+    
+    protected void appendConstraints(StringBuffer sql) {
+        // primary key
+        sql.append(", ");
+        sql.append("PRIMARY KEY (");
+        sql.append(getDataType("COLUMN_QUOTE"));
+        sql.append(getPrimaryKeyColumnName());
+        sql.append(getDataType("COLUMN_QUOTE"));
+        sql.append(")");
+        
+        // ManyToOnes
+        for (String columnName : getManyToOneColumnNames()) {
+            sql.append(", ");
+            if (DIALECT_MySQL.equals(dialect)) {
+                sql.append("CONSTRAINT ");
+                sql.append(getDataType("COLUMN_QUOTE"));
+                sql.append("Fk");
+                sql.append(getTableName());
+                sql.append(columnName);
+                sql.append(getDataType("COLUMN_QUOTE"));
+                sql.append(" FOREIGN KEY (");
+                sql.append(getDataType("COLUMN_QUOTE"));
+                sql.append(columnName);
+                sql.append(getDataType("COLUMN_QUOTE"));
+                sql.append(") REFERENCES ");
+                final DaoImpl foreignDao = getManyToOneDao(columnName);
+                sql.append(getDataType("COLUMN_QUOTE"));
+                sql.append(foreignDao.getTableName());
+                sql.append(getDataType("COLUMN_QUOTE"));
+                sql.append('(');
+                sql.append(getDataType("COLUMN_QUOTE"));
+                sql.append(foreignDao.getPrimaryKeyColumnName());
+                sql.append(getDataType("COLUMN_QUOTE"));
+                sql.append(')');
+            }
+            else {
+            }
+        }
     }
     
     protected String getDataType(String className) {
@@ -714,6 +775,10 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
 
     public void setJdbcIncrementer(DataFieldMaxValueIncrementer jdbcIncrementer) {
         this.jdbcIncrementer = jdbcIncrementer;
+    }
+
+    public void setDialect(String dialect) {
+        this.dialect = dialect;
     }
 
 }

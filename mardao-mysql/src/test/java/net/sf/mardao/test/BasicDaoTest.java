@@ -29,6 +29,7 @@ public class BasicDaoTest extends TestCase {
         dao = new BookDaoImpl();
         dao.setDataSource(dataSource);
         dao.setJdbcIncrementer(incrementer);
+        dao.init();
         LOG.info("--- setUp() {} ---", getName());
     }
     

@@ -20,11 +20,12 @@ import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.geo.DLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
+import org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer;
 
 public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         DaoImpl<T, ID, Long, Iterable, CoreEntity, CompositeKey> {
@@ -53,6 +54,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected NamedParameterJdbcTemplate jdbcTemplate;
     protected SimpleJdbcInsert jdbcInsert;
     private String dialect = DIALECT_DEFAULT;
+    
     /** Used to generate unique ids */
     @Autowired
     protected DataFieldMaxValueIncrementer jdbcIncrementer;
@@ -66,8 +68,6 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         this.jdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName(getTableName());
-//                .usingGeneratedKeyColumns(getPrimaryKeyColumnName());
-        checkTable();
     }
     
     protected final RowMapper<T> jdbcRowMapper = new RowMapper<T>() {
@@ -99,16 +99,25 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         
     };
     
-    protected void checkTable() {
+    /**
+     * Checks that the table exists
+     */
+    public void init() {
+        // when autowired, no setter is invoked:
+        if (jdbcIncrementer instanceof MySQLMaxValueIncrementer) {
+            dialect = DIALECT_MySQL;
+        }
+        
+        LOG.debug("init with dialect {} and incrementer {}", dialect, jdbcIncrementer);
         // check if queryable
         try {
-        final StringBuffer sql = new StringBuffer();
-        sql.append("SELECT 1 FROM ");
-        sql.append(getTableName());
-        LOG.debug(sql.toString());
-        jdbcTemplate.getJdbcOperations().execute(sql.toString());
+            final StringBuffer sql = new StringBuffer();
+            sql.append("SELECT 1 FROM ");
+            sql.append(getTableName());
+            LOG.debug(sql.toString());
+            jdbcTemplate.getJdbcOperations().execute(sql.toString());
         }
-        catch (BadSqlGrammarException whenCreate) {
+        catch (NonTransientDataAccessException whenCreate) {
             createTable();
         }
     }
@@ -162,6 +171,12 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             sql.append(");");
         }
         
+        LOG.info(sql.toString());
+        jdbcTemplate.getJdbcOperations().execute(sql.toString());
+    }
+
+    public void dropTable() {
+        String sql = String.format("DROP TABLE %s;", getTableName());
         LOG.info(sql.toString());
         jdbcTemplate.getJdbcOperations().execute(sql.toString());
     }

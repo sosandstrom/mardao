@@ -37,6 +37,7 @@ public class GeoDaoTest extends TestCase {
         final DataSource dataSource = new SingleConnectionDataSource(
                 "jdbc:h2:mem:geoDaoTest", "mardao", "jUnit", true);
         employeeImpl.setDataSource(dataSource);
+        employeeImpl.init();
         
         this.employeeDao = employeeImpl;
         

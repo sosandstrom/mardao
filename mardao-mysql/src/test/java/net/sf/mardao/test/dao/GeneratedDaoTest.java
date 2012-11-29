@@ -36,6 +36,7 @@ public class GeneratedDaoTest extends TestCase {
         final DataSource dataSource = new SingleConnectionDataSource(
                 "jdbc:h2:mem:typeDaoTest", "mardao", "jUnit", true);
         employeeImpl.setDataSource(dataSource);
+        employeeImpl.init();
         
         populate();
         LOG.info("--- setUp() " + getName() + " ---");

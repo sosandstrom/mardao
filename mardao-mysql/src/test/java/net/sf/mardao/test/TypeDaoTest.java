@@ -34,6 +34,7 @@ public class TypeDaoTest extends TestCase {
         dao = new BookDaoImpl();
         dao.setJdbcIncrementer(incrementer);
         dao.setDataSource(dataSource);
+        dao.init();
         LOG.info("--- setUp() {} ---", getName());
     }
     

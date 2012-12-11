@@ -118,6 +118,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
+    protected Filter createGreaterThanOrEqualFilter(String columnName, Object value) {
+        return new Filter(columnName, FilterOperator.GREATER_THAN_OR_EQUAL, value);
+    }
+    
+    @Override
     protected final Filter createInFilter(String fieldName, Collection param) {
         return new Filter(fieldName, FilterOperator.IN, param);
     }
@@ -167,6 +172,12 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             domains.add(domain);
         }
         return domains;
+    }
+
+    @Override
+    public int deleteAll() {
+        final Iterable<ID> simpleKeys = queryAllKeys();
+        return delete(null, simpleKeys);
     }
     
     @Override

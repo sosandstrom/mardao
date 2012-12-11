@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -44,6 +45,8 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         DATA_TYPES_DEFAULT.setProperty(Date.class.getName(), "TIMESTAMP");
         DATA_TYPES_DEFAULT.setProperty(String.class.getName(), "VARCHAR");
         DATA_TYPES_DEFAULT.setProperty(DLocation.class.getName(), "VARCHAR(33)");
+        DATA_TYPES_DEFAULT.setProperty(getPrimaryKeyClass(Long.class.getName()), "BIGINT");
+        DATA_TYPES_DEFAULT.setProperty(getPrimaryKeyClass(String.class.getName()), "VARCHAR(128)");
         DATA_TYPES_DEFAULT.setProperty("AUTO_INCREMENT", "AUTO_INCREMENT");
         DATA_TYPES_DEFAULT.setProperty("COLUMN_QUOTE", "");
 
@@ -118,7 +121,32 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             jdbcTemplate.getJdbcOperations().execute(sql.toString());
         }
         catch (NonTransientDataAccessException whenCreate) {
+            checkIncrementer();
             createTable();
+        }
+    }
+    
+    protected void checkIncrementer() {
+        final String sql = "SELECT 1 FROM id_sequence;";
+        try {
+            jdbcTemplate.getJdbcOperations().execute(sql);
+        }        
+        catch (NonTransientDataAccessException whenCreate) {
+            createIncrementer();
+        }
+    }
+    
+    protected void createIncrementer() {
+        if (DIALECT_MySQL.equals(dialect)) {
+            final StringBuffer sql = new StringBuffer();
+            sql.append("CREATE TABLE id_sequence");
+            // column definitions
+                sql.append(" (highest INT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+            LOG.info(sql.toString());
+            jdbcTemplate.getJdbcOperations().execute(sql.toString());
+
+            final String sqlInsert = "INSERT INTO id_sequence VALUES(0);";
+            jdbcTemplate.getJdbcOperations().execute(sqlInsert);
         }
     }
     
@@ -175,19 +203,18 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         jdbcTemplate.getJdbcOperations().execute(sql.toString());
     }
 
-    public void dropTable() {
-        String sql = String.format("DROP TABLE %s;", getTableName());
-        LOG.info(sql.toString());
-        jdbcTemplate.getJdbcOperations().execute(sql.toString());
+    protected void appendColumnDefinition(StringBuffer sql, String columnName) {
+        appendColumnDefinition(sql, columnName, false);
     }
     
-    protected void appendColumnDefinition(StringBuffer sql, String columnName) {
+    protected void appendColumnDefinition(StringBuffer sql, String columnName, 
+            boolean isPrimaryKey) {
         sql.append(getDataType("COLUMN_QUOTE"));
         sql.append(columnName);
         sql.append(getDataType("COLUMN_QUOTE"));
         sql.append(' ');
         final String className = getColumnClass(columnName).getName();
-        String dataType = getDataType(className);
+        String dataType = getDataType(className, isPrimaryKey);
         if (null == dataType) {
             dataType = getDataType(Long.class.getName());
         }
@@ -196,7 +223,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     
     protected void appendPrimaryKeyColumnDefinition(StringBuffer sql) {
         final String columnName = getPrimaryKeyColumnName();
-        appendColumnDefinition(sql, columnName);
+        appendColumnDefinition(sql, columnName, true);
 
         if (DIALECT_MySQL.equals(dialect)) {
             sql.append(" NOT NULL");
@@ -246,12 +273,21 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
     
     protected String getDataType(String className) {
+        return getDataType(className, false);
+    }
+    
+    protected String getDataType(String className, boolean isPrimaryKey) {
         final Properties dialectTypes = DATA_DIALECTS.get(dialect);
-        String returnValue = dialectTypes.getProperty(className);
+        String returnValue = dialectTypes.getProperty(
+                isPrimaryKey ? getPrimaryKeyClass(className) :  className);
 //        if (null == returnValue) {
 //            returnValue = dialectTypes.getProperty(Long.class.getName());
 //        }
         return returnValue;
+    }
+    
+    protected static final String getPrimaryKeyClass(String className) {
+        return String.format("pk_%s", className);
     }
     
     // --- BEGIN DaoImpl overrides ---
@@ -416,6 +452,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         }
         return new FilterEqual(fieldName, param);
     }
+
+    @Override
+    protected Filter createGreaterThanOrEqualFilter(String columnName, Object value) {
+        return new Filter(columnName, ">=", value);
+    }
     
     @Override
     protected final Filter createInFilter(String fieldName, Collection param) {
@@ -454,6 +495,21 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
 //        final Iterable<Key> keys = (Iterable) domainsToPrimaryKeys(domains);
 //        getDatastoreService().delete(keys);
 //        return -1;
+    }
+
+    @Override
+    public int deleteAll() {
+        String sql = String.format("DELETE FROM %s;", getTableName());
+        LOG.info(sql.toString());
+        jdbcTemplate.getJdbcOperations().execute(sql.toString());
+        return -1;
+    }
+    
+    @Override
+    public void dropTable() {
+        String sql = String.format("DROP TABLE %s;", getTableName());
+        LOG.info(sql.toString());
+        jdbcTemplate.getJdbcOperations().execute(sql.toString());
     }
     
     protected Map<String, Object>  appendWherePrimaryKeys(StringBuffer sql, 
@@ -508,10 +564,15 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 sql.append(" AND ");
             }
             sql.append(f.getColumn());
-            sql.append(f.getOperation());
-            token = String.format("%s%d", f.getColumn(), i);
-            sql.append(f.getToken(token));
-            params.put(token, f.getOperand());
+            if (null == f.getOperand() && f instanceof FilterEqual) {
+                sql.append(" IS NULL");
+            }
+            else {
+                sql.append(f.getOperation());
+                token = String.format("%s%d", f.getColumn(), i);
+                sql.append(f.getToken(token));
+                params.put(token, f.getOperand());
+            }
             i++;
         }
         return params;
@@ -570,13 +631,15 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected T findUniqueBy(Filter... filters) {
         StringBuffer sql = createSelect(false);
         Map<String, Object> params = appendWhereFilters(sql, filters);
-        LOG.debug("{} with params {}", sql.toString(), params);
+        LOG.info("{} with params {}", sql.toString(), params);
         try {
             final Map<String, Object> props = jdbcTemplate.queryForMap(sql.toString(), params);
             final T domain = propsToDomain(props);
+//            LOG.info("   returns {}", domain);
             return domain;
         }
         catch (EmptyResultDataAccessException notFound) {
+//            LOG.info("   {} NOT FOUND", params);
             return null;
         }
     }
@@ -749,6 +812,64 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
     
     // --- END persistence-type beans must implement these ---
+
+    @Override
+    public void update(T domain) {
+        update(Arrays.asList(domain));
+    }
+
+    @Override
+    public void update(Iterable<T> domains) {
+        // build the SQL
+        final StringBuffer sql = new StringBuffer();
+        sql.append("UPDATE ");
+        sql.append(getTableName());
+        sql.append(" SET ");
+        
+        boolean isFirst = true;
+        // @Basic columns
+        for (String columnName : getBasicColumnNames()) {
+            if (!isFirst) {
+                sql.append(", ");
+            }
+            else {
+                isFirst = false;
+            }
+            sql.append(columnName);
+            sql.append(" = :");
+            sql.append(columnName);
+        }
+        
+        // @ManyToOne columns
+        for (String columnName : getManyToOneColumnNames()) {
+            if (!isFirst) {
+                sql.append(", ");
+            }
+            else {
+                isFirst = false;
+            }
+            sql.append(columnName);
+            sql.append(" = :");
+            sql.append(columnName);
+        }
+        
+        // WHERE primaryKey
+        sql.append(" WHERE ");
+        sql.append(getPrimaryKeyColumnName());
+        sql.append(" = :");
+        sql.append(getPrimaryKeyColumnName());
+        
+        final Date currentDate = new Date();
+        ArrayList<Map<String, Object>> params = new ArrayList<Map<String, Object>>();
+        for (T domain : domains) {
+            final CoreEntity core = domainToCore(domain, currentDate);
+            params.add(core.getProperties());
+        }
+        Map<String, Object>[] batchValues = (Map<String, Object>[]) params.toArray(new Map[params.size()]);
+        jdbcTemplate.batchUpdate(sql.toString(), batchValues);
+    }
+    
+    
     
     protected static final String convertText(Object value) {
         if (null == value) {

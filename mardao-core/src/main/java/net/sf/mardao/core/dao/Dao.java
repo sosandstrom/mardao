@@ -88,6 +88,8 @@ public interface Dao<T, ID extends Serializable> {
     
     boolean delete(T domain);
     
+    int deleteAll();
+    
 //    /** memCached queryAll */
 //    Collection<T> findAll();
     

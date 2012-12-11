@@ -130,7 +130,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
     
     protected abstract T doFindByPrimaryKey(Object parentKey, ID simpleKeys);
     protected abstract Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys);
-
+    
     protected abstract T findUniqueBy(Filter... filters);
     
     /** Implemented in TypeDaoImpl */
@@ -180,6 +180,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
     protected abstract void setCoreProperty(Object core, String name, Object value);
     
     protected abstract Filter createEqualsFilter(String columnName, Object value);
+    protected abstract Filter createGreaterThanOrEqualFilter(String columnName, Object value);
     protected abstract Filter createInFilter(String fieldName, Collection param);
     
     // --- END persistence-type beans must implement these ---
@@ -264,7 +265,8 @@ public abstract class DaoImpl<T, ID extends Serializable,
             return null;
         }
         
-        E core = createCore(getParentKey(domain), getSimpleKey(domain));
+        final ID simpleKey = getSimpleKey(domain);
+        E core = createCore(getParentKey(domain), simpleKey);
         
         // created, updated
         String principal = getCreatedBy(domain);
@@ -277,8 +279,9 @@ public abstract class DaoImpl<T, ID extends Serializable,
         }
         setCoreProperty(core, getCreatedByColumnName(), principal);
         
+        // if generating id, overwrite createdDate
         Date date = getCreatedDate(domain);
-        if (null == date) {
+        if (null == date || null == simpleKey) {
             date = currentDate;
             _setCreatedDate(domain, currentDate);
         }
@@ -325,6 +328,14 @@ public abstract class DaoImpl<T, ID extends Serializable,
             keys.add(simpleKey);
         }
         return keys;
+    }
+    
+    /**
+     * For test purposes.
+     * This implementation does nothing.
+     * Override to implement for persistence type.
+     */
+    public void dropTable() {
     }
 
     public Collection<ID> coresToSimpleKeys(Iterable<E> cores) {

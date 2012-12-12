@@ -80,6 +80,9 @@ public interface Dao<T, ID extends Serializable> {
     
     // --- Generic Dao methods ---
     
+    /** Count all entities of this kind */
+    int count();
+    
     int delete(Object parentKey, Iterable<ID> simpleKeys);
     
     boolean delete(Object parentKey, ID simpleKey);

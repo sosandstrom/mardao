@@ -168,6 +168,9 @@ public abstract class DaoImpl<T, ID extends Serializable,
     /** Implemented in TypeDaoImpl */
     protected abstract P coreKeyToParentKey(C core);
     
+    protected abstract int count(Object ancestorKey, Object simpleKey,
+            Filter... filters);
+    
     protected abstract E createCore(Object primaryKey);
     protected abstract E createCore(Object parentKey, ID simpleKey);
     protected abstract C createCoreKey(Object parentKey, ID simpleKey);    
@@ -571,6 +574,10 @@ public abstract class DaoImpl<T, ID extends Serializable,
     }
 
     // --- BEGIN Dao methods ---
+    
+    public int count() {
+        return count(null, null);
+    }
     
     public int delete(Object parentKey, Iterable<ID> simpleKeys) {
         final int count = doDelete(parentKey, simpleKeys);

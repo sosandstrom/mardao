@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -383,6 +384,20 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     
     protected Long coreKeyToParentKey(Long parentId) {
         return parentId;
+    }
+
+    @Override
+    protected int count(Object ancestorKey, Object simpleKey, Filter... filters) {
+        StringBuffer sql = new StringBuffer();
+        sql.append("SELECT COUNT(");
+        sql.append(getPrimaryKeyColumnName());
+        sql.append(") FROM ");
+        sql.append(getTableName());
+        
+        appendWhereFilters(sql, filters);
+        final int count = jdbcTemplate.queryForInt(sql.toString(), Collections.EMPTY_MAP);
+        LOG.debug("{} returns {}", sql.toString(), count);
+        return count;
     }
     
     @Override

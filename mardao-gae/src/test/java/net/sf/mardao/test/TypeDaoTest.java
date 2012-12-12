@@ -152,6 +152,9 @@ public class TypeDaoTest extends TestCase {
             count++;
         }
         assertEquals(115, count);
+        
+        count = dao.count();
+        assertEquals(115, count);
     }
 
     public void testWriteAsCsv() throws FileNotFoundException, IOException {

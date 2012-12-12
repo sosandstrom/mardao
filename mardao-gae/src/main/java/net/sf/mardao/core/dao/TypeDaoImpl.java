@@ -63,6 +63,12 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected Key coreKeyToParentKey(Key core) {
         return null != core ? core.getParent() : null;
     }
+
+    @Override
+    protected int count(Object ancestorKey, Object simpleKey, Filter... filters) {
+       final PreparedQuery pq = prepare(true, (Key) ancestorKey, (Key) simpleKey, null, false, null, false, filters);
+       return pq.countEntities(FetchOptions.Builder.withDefaults());
+    }
     
     @Override
     public Entity createCore(Object primaryKey) {

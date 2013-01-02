@@ -126,6 +126,8 @@ public interface Dao<T, ID extends Serializable> {
     
     void update(T domain);
     
+    CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey);
+    
     void writeAsCsv(OutputStream out, String[] columns, Object ancestorKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending, 

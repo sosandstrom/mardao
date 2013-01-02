@@ -333,6 +333,14 @@ public abstract class DaoImpl<T, ID extends Serializable,
         return keys;
     }
     
+    public CursorPage<ID, ID> domainPageToSimplePage(CursorPage<T, ID> domainPage) {
+        final CursorPage<ID, ID> idPage = new CursorPage<ID, ID>();
+        idPage.setCursorKey(domainPage.getCursorKey());
+        idPage.setItems(domainsToSimpleKeys(domainPage.getItems()));
+        idPage.setRequestedPageSize(domainPage.getRequestedPageSize());
+        return idPage;
+    }
+    
     /**
      * For test purposes.
      * This implementation does nothing.
@@ -984,6 +992,29 @@ public abstract class DaoImpl<T, ID extends Serializable,
         pw.flush();
     }
     
+    /**
+     * Returns the IDs for the entities with updatedDate >= since, in descending order.
+     * @param since
+     * @return the IDs for the entities with updatedDate >= since, in descending order.
+     */
+    @Override
+    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey) {
+        final String updatedByColumnName = getUpdatedByColumnName();
+        if (null == updatedByColumnName) {
+            throw new UnsupportedOperationException("Not supported without @UpdatedBy");
+        }
+        
+        final Filter hasChangedFilter = createGreaterThanOrEqualFilter(updatedByColumnName, since);
+        final CursorPage<T, ID> entityPage = queryPage(true, pageSize, null, null, 
+                                  updatedByColumnName, false, null, false, 
+                                  cursorKey, hasChangedFilter);
+        
+        // convert entities to IDs only
+        final CursorPage<ID, ID> idPage = domainPageToSimplePage(entityPage);
+        
+        return idPage;
+    }
+
     // --- END Dao methods ---
     
     /** Override in GeneratedDaoImpl */

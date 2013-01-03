@@ -999,14 +999,14 @@ public abstract class DaoImpl<T, ID extends Serializable,
      */
     @Override
     public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey) {
-        final String updatedByColumnName = getUpdatedByColumnName();
-        if (null == updatedByColumnName) {
-            throw new UnsupportedOperationException("Not supported without @UpdatedBy");
+        final String updatedDateColumnName = getUpdatedDateColumnName();
+        if (null == updatedDateColumnName) {
+            throw new UnsupportedOperationException("Not supported without @UpdatedDate");
         }
         
-        final Filter hasChangedFilter = createGreaterThanOrEqualFilter(updatedByColumnName, since);
+        final Filter hasChangedFilter = createGreaterThanOrEqualFilter(updatedDateColumnName, since);
         final CursorPage<T, ID> entityPage = queryPage(true, pageSize, null, null, 
-                                  updatedByColumnName, false, null, false, 
+                                  updatedDateColumnName, false, null, false, 
                                   cursorKey, hasChangedFilter);
         
         // convert entities to IDs only

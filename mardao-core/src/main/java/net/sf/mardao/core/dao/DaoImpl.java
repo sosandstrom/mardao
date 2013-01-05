@@ -1006,7 +1006,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
         
         final Filter hasChangedFilter = createGreaterThanOrEqualFilter(updatedDateColumnName, since);
         final CursorPage<T, ID> entityPage = queryPage(true, pageSize, null, null, 
-                                  updatedDateColumnName, false, null, false, 
+                                  updatedDateColumnName, true, null, false, 
                                   cursorKey, hasChangedFilter);
         
         // convert entities to IDs only

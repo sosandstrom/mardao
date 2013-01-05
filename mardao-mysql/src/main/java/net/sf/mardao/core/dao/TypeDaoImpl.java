@@ -675,6 +675,12 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
+    public String getKeyString(Object key) {
+        LOG.warn("getKeyString() not supported yet.");
+        return null;
+    }
+    
+    @Override
     public Object getParentKey(T domain) {
         return null;
     }
@@ -692,6 +698,12 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         return createCoreKey(getParentKey(domain), getSimpleKey(domain));
     }
 
+    @Override
+    public Object getPrimaryKey(String keyString) {
+        LOG.warn("getPrimaryKey(keyString) not supported yet.");
+        return null;
+    }
+    
     @Override
     protected Collection<CompositeKey> persistCore(Iterable<CoreEntity> itrbl) {
         final Collection<CompositeKey> returnValue = new ArrayList<CompositeKey>();

@@ -20,5 +20,11 @@ public abstract class AbstractLongEntity extends AbstractCreatedUpdatedEntity {
     public void setId(Long id) {
         this.id = id;
     }
+
+    @Override
+    public String subString() {
+        return String.format("id:%d", id);
+    }
+
     
 }

@@ -28,6 +28,8 @@ public interface Dao<T, ID extends Serializable> {
      */
     Class getColumnClass(String columnName);
 
+    String getKeyString(Object key);
+
     String getParentKeyColumnName();
 
     String getPrimaryKeyColumnName();
@@ -40,6 +42,8 @@ public interface Dao<T, ID extends Serializable> {
     
     Object getParentKeyByPrimaryKey(Object primaryKey);
     
+    Object getPrimaryKey(String keyString);
+
     Object getPrimaryKey(T domain);
 
     Object getPrimaryKey(Object parentKey, ID simpleKey);

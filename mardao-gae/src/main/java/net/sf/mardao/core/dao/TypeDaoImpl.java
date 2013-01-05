@@ -40,7 +40,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected ID coreToSimpleKey(Entity core) {
         return null != core ? coreKeyToSimpleKey(core.getKey()) : null;
     }
-
+    
     @Override
     protected ID coreKeyToSimpleKey(Key key) {
         if (null == key) {
@@ -156,6 +156,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     @Override
     protected T doFindByPrimaryKey(Object parentKey, ID simpleKey) {
         final Key coreKey = createCoreKey(parentKey, simpleKey);
+        LOG.debug("findByPrimaryKey {}", coreKey);
         try {
             final Entity entity = getDatastoreService().get(coreKey);
             final T domain = coreToDomain(entity);
@@ -228,6 +229,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
+    public String getKeyString(Object key) {
+        return null != key ? KeyFactory.keyToString((Key) key) : null;
+    }
+
+    @Override
     public Object getParentKey(T domain) {
         return null;
     }
@@ -235,6 +241,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     @Override
     public Object getParentKeyByPrimaryKey(Object primaryKey) {
         return null != primaryKey ? ((Key) primaryKey).getParent() : null;
+    }
+    
+    @Override
+    public Object getPrimaryKey(String keyString) {
+        return null != keyString ? KeyFactory.stringToKey(keyString) : null;
     }
     
     @Override

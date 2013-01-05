@@ -32,6 +32,16 @@ public abstract class AbstractCreatedUpdatedEntity implements CreatedUpdatedEnti
     @UpdatedDate
     private Date updatedDate;
 
+    @Override
+    public String toString() {
+        return String.format("%s{createdBy:%s, createdDate:%s, updatedDate:%s, %s}",
+                getClass().getSimpleName(), createdBy, createdDate, updatedDate, subString());
+    }
+    
+    public String subString() {
+        return "";
+    }
+    
     public String getCreatedBy() {
         return createdBy;
     }

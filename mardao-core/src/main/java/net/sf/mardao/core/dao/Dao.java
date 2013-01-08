@@ -19,6 +19,10 @@ import net.sf.mardao.core.geo.DLocation;
  */
 public interface Dao<T, ID extends Serializable> {
     
+    Filter createEqualsFilter(String columnName, Object value);
+    Filter createGreaterThanOrEqualFilter(String columnName, Object value);
+    Filter createInFilter(String fieldName, Collection param);
+    
     Collection<String> getColumnNames();
     
     /**

@@ -182,10 +182,6 @@ public abstract class DaoImpl<T, ID extends Serializable,
     /** Implemented in TypeDaoImpl */
     protected abstract void setCoreProperty(Object core, String name, Object value);
     
-    protected abstract Filter createEqualsFilter(String columnName, Object value);
-    protected abstract Filter createGreaterThanOrEqualFilter(String columnName, Object value);
-    protected abstract Filter createInFilter(String fieldName, Collection param);
-    
     // --- END persistence-type beans must implement these ---
     
     public T coreToDomain(E core) {

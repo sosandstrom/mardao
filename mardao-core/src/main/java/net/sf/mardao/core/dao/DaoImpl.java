@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 public abstract class DaoImpl<T, ID extends Serializable, 
         P extends Serializable, CT extends Object,
         E, C extends Serializable>
-        implements Dao<T, ID> {
+        implements Dao<T, ID>, CsvConverter<T> {
     
     public static final String PRINCIPAL_NAME_ANONYMOUS = "[ANONYMOUS]";
     
@@ -932,18 +932,31 @@ public abstract class DaoImpl<T, ID extends Serializable,
         
         return quoted;
     }
+
+    public Map<String, Object> getCsvColumnValues(DaoImpl dao, String[] columns, T domain) {
+        final HashMap<String, Object> values = new HashMap<String, Object>();
+        for (String col : columns) {
+            values.put(col, getDomainProperty(domain, col));
+        }
+        return values;
+    }
     
-    public void writeAsCsv(OutputStream out, String[] columns, Object ancestorKey,
+    public void writeAsCsv(OutputStream out, String[] columns, CsvConverter<T> converter,
+            Object ancestorKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending, 
             Filter... filters) {
         final Iterable<T> qi = queryIterable(false, 0, -1, ancestorKey, null, 
                             primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending, 
                             filters);
-        writeAsCsv(out, columns, qi);
+        writeAsCsv(out, columns, converter, qi);
     }
 
     public void writeAsCsv(OutputStream out, String[] columns, Iterable<T> qi) {
+        writeAsCsv(out, columns, this, qi);
+    }
+    
+    public void writeAsCsv(OutputStream out, String[] columns, CsvConverter<T> converter, Iterable<T> qi) {
         
         final PrintWriter pw = new PrintWriter(out);
         final StringBuffer sb = new StringBuffer();

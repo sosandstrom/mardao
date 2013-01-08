@@ -174,7 +174,7 @@ public class TypeDaoTest extends TestCase {
         File f = new File(tmp, "typeDao.csv");
         LOG.info("writing CSV to {}", f.getAbsolutePath());
         FileOutputStream fos = new FileOutputStream(f);
-        dao.writeAsCsv(fos, new String[] {/**"id", */ "title"}, null, null, false, null, false);
+        dao.writeAsCsv(fos, new String[] {/**"id", */ "title"}, dao, null, null, false, null, false);
         fos.close();
     }
     

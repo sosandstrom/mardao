@@ -132,12 +132,14 @@ public interface Dao<T, ID extends Serializable> {
     
     CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey);
     
-    void writeAsCsv(OutputStream out, String[] columns, Object ancestorKey,
+    void writeAsCsv(OutputStream out, String[] columns, CsvConverter<T> converter, Object ancestorKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending, 
             Filter... filters);
     
     void writeAsCsv(OutputStream out, String[] columns, Iterable<T> qi);
+    
+    void writeAsCsv(OutputStream out, String[] columns, CsvConverter<T> converter, Iterable<T> qi);
 
     // --- GeoDao methods ---
     

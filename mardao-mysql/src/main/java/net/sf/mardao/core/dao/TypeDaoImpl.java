@@ -457,7 +457,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
     
     @Override
-    protected final Filter createEqualsFilter(String fieldName, Object param) {
+    public final Filter createEqualsFilter(String fieldName, Object param) {
         final Class columnClass = getColumnClass(fieldName);
         // is this a Entity reference?
         if (AbstractCreatedUpdatedEntity.class.isAssignableFrom(columnClass)){
@@ -465,16 +465,16 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 param = getSimpleKeyByPrimaryKey(param);
             }
         }
-        return new FilterEqual(fieldName, param);
+        return new Filter(fieldName, "=", param);
     }
 
     @Override
-    protected Filter createGreaterThanOrEqualFilter(String columnName, Object value) {
+    public Filter createGreaterThanOrEqualFilter(String columnName, Object value) {
         return new Filter(columnName, ">=", value);
     }
     
     @Override
-    protected final Filter createInFilter(String fieldName, Collection param) {
+    public final Filter createInFilter(String fieldName, Collection param) {
         return new Filter.IN(fieldName, param);
     }
     
@@ -579,7 +579,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 sql.append(" AND ");
             }
             sql.append(f.getColumn());
-            if (null == f.getOperand() && f instanceof FilterEqual) {
+            if (null == f.getOperand() && "=".equals(f.getOperation())) {
                 sql.append(" IS NULL");
             }
             else {

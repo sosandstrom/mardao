@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.geo.DLocation;
@@ -31,6 +32,8 @@ public interface Dao<T, ID extends Serializable> {
      * @return the class of the domain property
      */
     Class getColumnClass(String columnName);
+    
+    Map<String, Object> getDomainProperties(Object domain);
 
     String getKeyString(Object key);
 

@@ -119,17 +119,17 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
     
     @Override
-    protected final Filter createEqualsFilter(String fieldName, Object param) {
-        return new FilterEqual(fieldName, param);
+    public final Filter createEqualsFilter(String fieldName, Object param) {
+        return new Filter(fieldName, FilterOperator.EQUAL, param);
     }
 
     @Override
-    protected Filter createGreaterThanOrEqualFilter(String columnName, Object value) {
+    public Filter createGreaterThanOrEqualFilter(String columnName, Object value) {
         return new Filter(columnName, FilterOperator.GREATER_THAN_OR_EQUAL, value);
     }
     
     @Override
-    protected final Filter createInFilter(String fieldName, Collection param) {
+    public final Filter createInFilter(String fieldName, Collection param) {
         return new Filter(fieldName, FilterOperator.IN, param);
     }
 

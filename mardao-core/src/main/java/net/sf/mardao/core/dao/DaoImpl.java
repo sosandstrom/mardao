@@ -309,6 +309,26 @@ public abstract class DaoImpl<T, ID extends Serializable,
         return core;
     }
     
+    public Map<String, Object> getDomainProperties(Object domainObject) {
+        if (null == domainObject) {
+            return null;
+        }
+        
+        final T domain = (T) domainObject;
+        final Map<String, Object> props = new TreeMap<String, Object>();
+        final ID simpleKey = getSimpleKey(domain);
+        setMapProperty(props, getPrimaryKeyColumnName(), simpleKey);
+        final Object parentKey = getParentKey(domain);
+        setMapProperty(props, getParentKeyColumnName(), parentKey);
+        
+        for (String col : getColumnNames()) {
+            Object value = getDomainProperty(domain, col);
+            setMapProperty(props, col, value);
+        }
+        
+        return props;
+    }
+    
     public Collection<Serializable> domainsToPrimaryKeys(Iterable<T> domains) {
         final Collection<Serializable> keys = new ArrayList<Serializable>();
         Serializable pk;
@@ -1042,6 +1062,12 @@ public abstract class DaoImpl<T, ID extends Serializable,
         }
         else {
             throw new IllegalArgumentException(String.format("No such property %s for %s", name, getTableName()));
+        }
+    }
+    
+    protected void setMapProperty(Map<String, Object> map, final String name, final Object value) {
+        if (null != map && null != name) {
+            map.put(name, value);
         }
     }
     

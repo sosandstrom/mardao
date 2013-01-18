@@ -94,6 +94,13 @@ public class GeneratedDaoTest extends TestCase {
         assertNull(actual);
     }
     
+    public void testFindKeyByFingerprint0() {
+        int i = 0;
+        Long actual = employeeDao.findKeyByFingerprint(String.format("%dfingerprint%d", i, i));
+        LOG.info("actual={}", actual);
+        assertNull(actual);
+    }
+    
     public void testFindByFingerprint() {
         for (int i = 0; i < 132; i++) {
             DEmployee actual = employeeDao.findByFingerprint(String.format("%dfingerprint%d", i, i));
@@ -110,6 +117,18 @@ public class GeneratedDaoTest extends TestCase {
                     assertNull(actual.getManager());
                 }
                 assertNotNull(actual.getNickname());
+            }
+        }        
+    }
+
+    public void testFindKeyByFingerprint() {
+        for (int i = 0; i < 132; i++) {
+            Long actual = employeeDao.findKeyByFingerprint(String.format("%dfingerprint%d", i, i));
+            if (0 == i) {
+                assertNull(actual);
+            }
+            else {
+                assertNotNull(actual);
             }
         }        
     }

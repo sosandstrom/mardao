@@ -132,6 +132,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
     protected abstract Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys);
     
     protected abstract T findUniqueBy(Filter... filters);
+    protected abstract ID findUniqueKeyBy(Filter... filters);
     
     /** Implemented in TypeDaoImpl */
     protected abstract Collection<C> persistCore(Iterable<E> itrbl);
@@ -983,7 +984,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
             // check column is property, primaryKey or parent:
             if (!getColumnNames().contains(col)) {
                 if (!getPrimaryKeyColumnName().equals(col)) {
-                    if (!getParentKeyColumnName().equals(col)) {
+                    if (!col.equals(getParentKeyColumnName())) {
                         LOG.warn("No such column {}", col);
                         continue;
                     }

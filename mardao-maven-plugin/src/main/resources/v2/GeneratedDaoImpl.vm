@@ -450,6 +450,16 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
                 Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
 		return findUniqueBy(filter);
 	}
+
+	/**
+	 * find-key-by method for unique attribute field ${field.name}
+	 * @param ${field.name} the unique attribute
+	 * @return the unique ${entity.simpleName} for the specified attribute
+	 */
+	public final ${entity.pk.type} findKeyBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name}) {
+                Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
+		return findUniqueKeyBy(filter);
+	}
 #else
 	/**
          * {@inheritDoc}

@@ -658,6 +658,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             return null;
         }
     }
+
+    @Override
+    protected ID findUniqueKeyBy(Filter... filters) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
     @Override
     protected Object getCoreProperty(CoreEntity core, String name, Class domainPropertyClass) {

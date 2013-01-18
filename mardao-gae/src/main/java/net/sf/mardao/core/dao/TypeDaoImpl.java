@@ -196,6 +196,16 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         final T domain = coreToDomain(entity);
         return domain;
     }
+
+    @Override
+    protected ID findUniqueKeyBy(Filter... filters) {
+        final PreparedQuery pq = prepare(true, null, null,
+                null, false, null, false,
+                filters);
+        final Entity entity = pq.asSingleEntity();
+        final ID simpleKey = coreToSimpleKey(entity);
+        return simpleKey;
+    }
     
     @Override
     protected Object getCoreProperty(Entity core, String name, Class domainPropertyClass) {

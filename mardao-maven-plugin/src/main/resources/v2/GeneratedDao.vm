@@ -103,6 +103,13 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	 * @return the unique ${entity.simpleName} for the specified ${field.name}
 	 */
 	${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name});
+
+        /**
+	 * find-key-by method for unique attribute field ${field.name}
+	 * @param ${field.name} the unique attribute
+	 * @return the unique ${entity.simpleName} for the specified attribute
+	 */
+	${entity.pk.type} findKeyBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name});
 #else
 	/**
 	 * query-by method for field ${field.name}

@@ -1029,15 +1029,27 @@ public abstract class DaoImpl<T, ID extends Serializable,
      */
     @Override
     public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey) {
+        return whatsChanged(null, since, pageSize, cursorKey);
+    }
+    
+    /**
+     * Returns the IDs for the entities with updatedDate >= since, in descending order.
+     * @param since
+     * @return the IDs for the entities with updatedDate >= since, in descending order.
+     */
+    @Override
+    public CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, 
+            int pageSize, Serializable cursorKey, Filter... filters) {
         final String updatedDateColumnName = getUpdatedDateColumnName();
         if (null == updatedDateColumnName) {
             throw new UnsupportedOperationException("Not supported without @UpdatedDate");
         }
         
-        final Filter hasChangedFilter = createGreaterThanOrEqualFilter(updatedDateColumnName, since);
-        final CursorPage<T, ID> entityPage = queryPage(true, pageSize, null, null, 
+        Filter allFilters[] = Arrays.copyOf(filters, (null != filters ? filters.length : 0) + 1);
+        allFilters[allFilters.length-1] = createGreaterThanOrEqualFilter(updatedDateColumnName, since);
+        final CursorPage<T, ID> entityPage = queryPage(true, pageSize, parentKey, null, 
                                   updatedDateColumnName, true, null, false, 
-                                  cursorKey, hasChangedFilter);
+                                  cursorKey, allFilters);
         
         // convert entities to IDs only
         final CursorPage<ID, ID> idPage = domainPageToSimplePage(entityPage);

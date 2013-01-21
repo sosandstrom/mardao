@@ -139,6 +139,8 @@ public interface Dao<T, ID extends Serializable> {
     
     CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey);
     
+    CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, int pageSize, Serializable cursorKey, Filter... filters);
+    
     void writeAsCsv(OutputStream out, String[] columns, CsvConverter<T> converter, Object ancestorKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending, 

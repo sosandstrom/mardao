@@ -681,8 +681,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
 
     @Override
     public String getKeyString(Object key) {
-        LOG.warn("getKeyString() not supported yet.");
-        return null;
+        return CompositeKey.keyToString((CompositeKey) key);
     }
     
     @Override
@@ -705,8 +704,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
 
     @Override
     public Object getPrimaryKey(String keyString) {
-        LOG.warn("getPrimaryKey(keyString) not supported yet.");
-        return null;
+        return CompositeKey.stringToKey(keyString);
     }
     
     @Override

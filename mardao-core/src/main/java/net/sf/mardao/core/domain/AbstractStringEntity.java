@@ -13,6 +13,13 @@ public abstract class AbstractStringEntity extends AbstractCreatedUpdatedEntity 
     @Id
     private String id;
 
+    public AbstractStringEntity() {
+    }
+    
+    public AbstractStringEntity(String id) {
+        this.id = id;
+    }
+
     public String getId() {
         return id;
     }

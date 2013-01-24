@@ -12,6 +12,13 @@ public abstract class AbstractLongEntity extends AbstractCreatedUpdatedEntity {
     
     @Id
     private Long id;
+    
+    public AbstractLongEntity() {
+    }
+
+    public AbstractLongEntity(Long id) {
+        this.id = id;
+    }
 
     public Long getId() {
         return id;

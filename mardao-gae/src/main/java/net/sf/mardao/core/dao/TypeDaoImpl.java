@@ -307,7 +307,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
-    protected QueryResultIterable<T> queryIterable(boolean keysOnly, 
+    protected Iterable<T> queryIterable(boolean keysOnly, 
             int offset, int limit,
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
@@ -325,7 +325,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
-    protected QueryResultIterable<ID> queryIterableKeys(
+    protected Iterable<ID> queryIterableKeys(
             int offset, int limit,
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,

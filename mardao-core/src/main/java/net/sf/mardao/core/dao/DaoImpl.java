@@ -71,6 +71,8 @@ public abstract class DaoImpl<T, ID extends Serializable,
     /** To help converting keys */
     protected final Class<ID> simpleIdClass;
     
+    protected DaoImpl mardaoParentDao;
+    
     /** to list the property names for ManyToOne relations */
     protected List<String> getBasicColumnNames() {
         return Collections.EMPTY_LIST;
@@ -1082,6 +1084,10 @@ public abstract class DaoImpl<T, ID extends Serializable,
         if (null != map && null != name) {
             map.put(name, value);
         }
+    }
+
+    public void setMardaoParentDao(DaoImpl mardaoParentDao) {
+        this.mardaoParentDao = mardaoParentDao;
     }
     
     public void setBoxBits(Collection<Integer> boxBits) {

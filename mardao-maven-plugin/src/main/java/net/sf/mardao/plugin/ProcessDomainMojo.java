@@ -392,8 +392,12 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
         // @Parent?
 //        else if (isField(field, pClass)) {
         else if (isField(field, Parent.class)) { //pClass)) {
+            Parent p = (Parent) field.getAnnotation(Parent.class);
             e.setParent(f);
-            getLog().info(String.format("   @Parent %s %s;", f.getSimpleType(), f.getName()));
+            String parentClass = String.format("%s.%s", e.getClazz().getPackage().getName(), p.kind());
+            Entity parentEntity = entities.get(parentClass);
+            f.setEntity(parentEntity);
+            getLog().info(String.format("   @Parent %s %s; kind=%s %s", f.getSimpleType(), f.getName(), parentClass, parentEntity));
         }
         // @Basic?
         else if (isField(field, javax.persistence.Basic.class)) {

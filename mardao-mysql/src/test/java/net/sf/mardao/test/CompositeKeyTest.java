@@ -33,6 +33,7 @@ public class CompositeKeyTest extends TestCase {
         final CompositeKey e3 = new CompositeKey(e2, null, null);
         
         final String keyString = CompositeKey.keyToString(e3);
+        System.out.println("keyString=" + keyString);
         
         final CompositeKey a3 = CompositeKey.stringToKey(keyString);
         assertNull(a3.getId());

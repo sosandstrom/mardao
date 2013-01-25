@@ -18,9 +18,11 @@
 	<bean id="${entity.simpleLower}Dao" 
 		class="${daoPackage}.${entity.simpleName}DaoBean"
                 >
-###if( $entity.parent )
-##                <property name="mardaoParentDao" ref="${helper.firstToLower($entity.parent.entity.simpleName)}Dao" />
-###end
+#if( $entity.parent )
+            <!-- ${entity.parent.entity} -->
+            <!-- ${entity.parent.entity.simpleName} -->
+            <property name="mardaoParentDao" ref="${entity.parent.entity.simpleLower}Dao" />
+#end
 #foreach( $field in $entity.manyToOnes )
             <!-- for ${field.name} Many-To-One relation -->
             <property name="${field.name}Dao" ref="${field.entity.simpleLower}Dao" />

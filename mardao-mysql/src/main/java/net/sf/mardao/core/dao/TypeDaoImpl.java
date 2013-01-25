@@ -159,6 +159,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         sql.append(" (");
 
         appendPrimaryKeyColumnDefinition(sql);
+        appendParentKeyColumnDefinition(sql);
         
         for (String columnName : getBasicColumnNames()) {
             sql.append(", ");
@@ -234,6 +235,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         }
     }
     
+    protected void appendParentKeyColumnDefinition(StringBuffer sql) {
+        final String columnName = getParentKeyColumnName();
+        if (null != columnName) {
+            sql.append(", ");
+            appendColumnDefinition(sql, columnName, true);
+        }
+    }
+    
     protected void appendConstraints(StringBuffer sql) {
         // primary key
         sql.append(", ");
@@ -243,33 +252,41 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         sql.append(getDataType("COLUMN_QUOTE"));
         sql.append(")");
         
+        // parent key
+        if (null != getParentKeyColumnName()) {
+            appendConstraint(sql, getParentKeyColumnName(), mardaoParentDao);
+        }
+        
         // ManyToOnes
         for (String columnName : getManyToOneColumnNames()) {
-            sql.append(", ");
-            if (DIALECT_MySQL.equals(dialect)) {
-                sql.append("CONSTRAINT ");
-                sql.append(getDataType("COLUMN_QUOTE"));
-                sql.append("Fk");
-                sql.append(getTableName());
-                sql.append(columnName);
-                sql.append(getDataType("COLUMN_QUOTE"));
-                sql.append(" FOREIGN KEY (");
-                sql.append(getDataType("COLUMN_QUOTE"));
-                sql.append(columnName);
-                sql.append(getDataType("COLUMN_QUOTE"));
-                sql.append(") REFERENCES ");
-                final DaoImpl foreignDao = getManyToOneDao(columnName);
-                sql.append(getDataType("COLUMN_QUOTE"));
-                sql.append(foreignDao.getTableName());
-                sql.append(getDataType("COLUMN_QUOTE"));
-                sql.append('(');
-                sql.append(getDataType("COLUMN_QUOTE"));
-                sql.append(foreignDao.getPrimaryKeyColumnName());
-                sql.append(getDataType("COLUMN_QUOTE"));
-                sql.append(')');
-            }
-            else {
-            }
+            appendConstraint(sql, columnName, getManyToOneDao(columnName));
+        }
+    }
+    
+    protected void appendConstraint(StringBuffer sql, String columnName, DaoImpl foreignDao) {
+        sql.append(", ");
+        if (DIALECT_MySQL.equals(dialect)) {
+            sql.append("CONSTRAINT ");
+            sql.append(getDataType("COLUMN_QUOTE"));
+            sql.append("Fk");
+            sql.append(getTableName());
+            sql.append(columnName);
+            sql.append(getDataType("COLUMN_QUOTE"));
+            sql.append(" FOREIGN KEY (");
+            sql.append(getDataType("COLUMN_QUOTE"));
+            sql.append(columnName);
+            sql.append(getDataType("COLUMN_QUOTE"));
+            sql.append(") REFERENCES ");
+            sql.append(getDataType("COLUMN_QUOTE"));
+            sql.append(foreignDao.getTableName());
+            sql.append(getDataType("COLUMN_QUOTE"));
+            sql.append('(');
+            sql.append(getDataType("COLUMN_QUOTE"));
+            sql.append(foreignDao.getPrimaryKeyColumnName());
+            sql.append(getDataType("COLUMN_QUOTE"));
+            sql.append(')');
+        }
+        else {
         }
     }
     
@@ -722,10 +739,10 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 Long lid = jdbcIncrementer.nextLongValue();
                 simpleKey = (ID) lid;
                 props.put(getPrimaryKeyColumnName(), simpleKey);
-                LOG.info("generating ID {}", simpleKey);
+                LOG.info("generating ID {} for {}", simpleKey, getTableName());
             }
             propsList.add(props);
-            LOG.debug("persistCore {}", props);
+            LOG.info("persistCore {} with {}", getTableName(), props);
             
             parentKey = null;
             if (null != getParentKeyColumnName()) {

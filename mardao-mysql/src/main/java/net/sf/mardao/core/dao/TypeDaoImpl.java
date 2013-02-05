@@ -411,8 +411,8 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         sql.append(") FROM ");
         sql.append(getTableName());
         
-        appendWhereFilters(sql, filters);
-        final int count = jdbcTemplate.queryForInt(sql.toString(), Collections.EMPTY_MAP);
+        Map<String, Object> params = appendWhereFilters(sql, filters);
+        final int count = jdbcTemplate.queryForInt(sql.toString(), params);
         LOG.debug("{} returns {}", sql.toString(), count);
         return count;
     }

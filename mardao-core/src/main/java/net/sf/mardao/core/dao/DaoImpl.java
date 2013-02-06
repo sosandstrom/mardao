@@ -755,6 +755,18 @@ public abstract class DaoImpl<T, ID extends Serializable,
         return returnValue;
     }
     
+    @Override
+    public Iterable<T> queryChunk(int offset, int limit, 
+            Object ancestorKey, Object primaryKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
+        Iterable<T> returnValue = queryIterable(false, offset, limit, 
+                ancestorKey, primaryKey, 
+                primaryOrderBy, primaryIsAscending, 
+                secondaryOrderBy, secondaryIsAscending, filters);
+        return returnValue;
+    }
+    
     public Iterable<ID> queryAllKeys() {
         Iterable<ID> returnValue = null;
         

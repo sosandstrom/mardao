@@ -1,10 +1,12 @@
 package net.sf.mardao.core.geo;
 
+import java.io.Serializable;
+
 /**
  *
  * @author os
  */
-public class DLocation {
+public class DLocation implements Serializable {
     private float latitude;
     private float longitude;
 

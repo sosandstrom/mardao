@@ -127,6 +127,11 @@ public interface Dao<T, ID extends Serializable> {
     
     Iterable<T> queryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys);
     
+    Iterable<T> queryChunk(int offset, int limit, 
+            Object ancestorKey, Object primaryKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters);
+    
     CursorPage<T, ID> queryPage(int pageSize, Serializable cursorString);
 
     CursorPage<T, ID> queryPage(int pageSize, 

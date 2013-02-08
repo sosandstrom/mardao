@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.dao.TypeDaoImpl;
 
@@ -87,6 +88,15 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         return value;
     }
     
+    @Override
+    protected void setDomainStringProperty(Book domain, String name, Map<String, String> properties) {
+        final String value = properties.get(name);
+        Class clazz = getColumnClass(name);
+        // many-to-ones
+        
+        setDomainProperty(domain, name, parseProperty(value, clazz));
+    }
+
     public Iterable<Book> queryByTitle(String title) {
         Filter filter = createEqualsFilter(COLUMN_NAME_TITLE, title);
         

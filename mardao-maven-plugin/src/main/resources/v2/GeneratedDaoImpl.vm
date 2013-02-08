@@ -249,6 +249,19 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
         }
     }
 
+    @Override
+    protected void setDomainStringProperty(final ${entity.simpleName} domain, final String name, final Map<String, String> properties) {
+        final String value = properties.get(name);
+        Class clazz = getColumnClass(name);
+        // many-to-ones
+#foreach( $field in $entity.manyToOnes )	 
+        if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            clazz = ${field.entity.pk.type}.class;
+        }
+#end
+        setDomainProperty(domain, name, parseProperty(value, clazz));
+    }
+
     /**
      * Overrides to substitute Entity properties with foreign keys
      */

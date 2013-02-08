@@ -3,6 +3,7 @@ package net.sf.mardao.test;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.dao.TypeDaoImpl;
 
@@ -57,12 +58,33 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         }
     }
 
+    @Override
+    protected void setDomainStringProperty(Book domain, String name, Map<String, String> properties) {
+        final String value = properties.get(name);
+        Class clazz = getColumnClass(name);
+        // many-to-ones
+        
+        setDomainProperty(domain, name, parseProperty(value, clazz));
+    }
+
     public Collection<String> getColumnNames() {
         return COLUMN_NAMES;
     }
 
     @Override
     public Class getColumnClass(String columnName) {
+        if (COLUMN_NAME_ID.equals(columnName)) {
+            return Long.class;
+        }
+        if (COLUMN_NAME_TITLE.equals(columnName)) {
+            return String.class;
+        }
+        if ("createdBy".equals(columnName) || "updatedBy".equals(columnName)) {
+            return String.class;
+        }
+        if ("createdDate".equals(columnName) || "updatedDate".equals(columnName)) {
+            return Date.class;
+        }
         return Object.class;
     }
     

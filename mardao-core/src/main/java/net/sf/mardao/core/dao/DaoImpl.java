@@ -184,8 +184,43 @@ public abstract class DaoImpl<T, ID extends Serializable,
     protected abstract Object getCoreProperty(E core, String name, Class domainPropertyClass);
     /** Implemented in TypeDaoImpl */
     protected abstract void setCoreProperty(Object core, String name, Object value);
+
+    protected abstract void setDomainStringProperty(T domain, String name, Map<String, String> properties);
     
     // --- END persistence-type beans must implement these ---
+    
+    public T createDomain(Map<String, String> properties) {
+        if (null == properties) {
+            return null;
+        }
+        
+        final ID simpleKey = getSimpleKey(properties);
+        final P parentKey = (P) getParentKey(properties);
+        
+        try {
+            final T domain = createDomain(parentKey, simpleKey);
+
+            // created, updated
+            setDomainStringProperty(domain, getCreatedByColumnName(), properties);
+            setDomainStringProperty(domain, getCreatedDateColumnName(), properties);
+            setDomainStringProperty(domain, getUpdatedByColumnName(), properties);
+            setDomainStringProperty(domain, getUpdatedDateColumnName(), properties);
+
+            // Domain Entity-specific properties
+            for (String name : getColumnNames()) {
+                setDomainStringProperty(domain, name, properties);
+            }
+
+            return domain;
+        }
+        catch (IllegalAccessException shouldNeverHappen) {
+            LOG.error(getTableName(), shouldNeverHappen);
+        }
+        catch (InstantiationException shouldNeverHappen) {
+            LOG.error(getTableName(), shouldNeverHappen);
+        }
+        return null;
+    }
     
     public T coreToDomain(E core) {
         if (null == core) {
@@ -417,6 +452,20 @@ public abstract class DaoImpl<T, ID extends Serializable,
         }
         
         return value;
+    }
+    
+    @Override
+    public Object getParentKey(Map<String, String> properties) {
+        String value = properties.get(getParentKeyColumnName());
+        Class clazz = getColumnClass(getParentKeyColumnName());
+        return parseProperty(value, clazz);
+    }
+    
+    @Override
+    public ID getSimpleKey(Map<String, String> properties) {
+        String value = properties.get(getPrimaryKeyColumnName());
+        Class clazz = getColumnClass(getPrimaryKeyColumnName());
+        return (ID) parseProperty(value, clazz);
     }
     
     protected static Cache getMemCache() {
@@ -1096,6 +1145,33 @@ public abstract class DaoImpl<T, ID extends Serializable,
         if (null != map && null != name) {
             map.put(name, value);
         }
+    }
+    
+    public static Object parseProperty(String value, Class clazz) {
+        if (null == value) {
+            return null;
+        }
+        
+        if (Long.class.equals(clazz)) {
+            return Long.parseLong(value);
+        }
+        if (Integer.class.equals(clazz)) {
+            return Integer.parseInt(value);
+        }
+        if (Short.class.equals(clazz)) {
+            return Short.parseShort(value);
+        }
+        if (Byte.class.equals(clazz)) {
+            return Byte.parseByte(value);
+        }
+        if (String.class.equals(clazz)) {
+            return value;
+        }
+        if (Date.class.equals(clazz)) {
+            long l = Long.parseLong(value);
+            return new Date(l);
+        }
+        throw new UnsupportedOperationException("Unparseable property " + value + " of class " + clazz.getName());
     }
 
     public void setMardaoParentDao(DaoImpl mardaoParentDao) {

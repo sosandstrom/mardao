@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import junit.framework.TestCase;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.dao.TypeDaoImpl;
@@ -251,5 +253,19 @@ public class TypeDaoTest extends TestCase {
             count++;
         }
         assertEquals(51, count);
+    }
+    
+    public void testCreateDomainFromProperties() {
+        Map<String, String> p = new HashMap<String, String>();
+        p.put(BookDaoImpl.COLUMN_NAME_ID, "42");
+        p.put(BookDaoImpl.COLUMN_NAME_TITLE, "MyTitle");
+        p.put(dao.getCreatedByColumnName(), "Creator");
+        p.put(dao.getCreatedDateColumnName(), "1");
+        p.put(dao.getUpdatedByColumnName(), "Updator");
+        p.put(dao.getUpdatedDateColumnName(), "123455678");
+        
+        Book actual = dao.createDomain(p);
+        assertEquals((Long) 42L, actual.getId());
+        assertEquals("MyTitle", actual.getTitle());
     }
 }

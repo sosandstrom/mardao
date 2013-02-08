@@ -20,6 +20,7 @@ import net.sf.mardao.core.geo.DLocation;
  */
 public interface Dao<T, ID extends Serializable> {
     
+    T createDomain(Map<String, String> properties);
     Filter createEqualsFilter(String columnName, Object value);
     Filter createGreaterThanOrEqualFilter(String columnName, Object value);
     Filter createInFilter(String fieldName, Collection param);
@@ -42,10 +43,12 @@ public interface Dao<T, ID extends Serializable> {
     String getPrimaryKeyColumnName();
     
     ID getSimpleKey(T domain);
+    ID getSimpleKey(Map<String, String> properties);
     
     ID getSimpleKeyByPrimaryKey(Object primaryKey);
     
     Object getParentKey(T domain);
+    Object getParentKey(Map<String, String> properties);
     
     Object getParentKeyByPrimaryKey(Object primaryKey);
     

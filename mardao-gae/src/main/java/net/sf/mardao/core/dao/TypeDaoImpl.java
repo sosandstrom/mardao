@@ -97,10 +97,15 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     protected Key createCoreKey(Object parentKey, ID simpleKey) {
+        if (null == simpleKey && null == parentKey) {
+            return null;
+        }
+        
         final Key pk = (Key) parentKey;
         Key core;
         if (Long.class.isAssignableFrom(simpleIdClass)) {
-            core = KeyFactory.createKey(pk, getTableName(), ((Long)simpleKey).longValue());
+            core = KeyFactory.createKey(pk, getTableName(), 
+                    null != simpleKey ? ((Long)simpleKey).longValue() : null);
         }
         else {
             core = KeyFactory.createKey(pk, getTableName(), (String)simpleKey);

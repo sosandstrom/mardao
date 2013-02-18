@@ -41,10 +41,15 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     static {
         DATA_DIALECTS.put(DIALECT_DEFAULT, DATA_TYPES_DEFAULT);
         DATA_DIALECTS.put(DIALECT_MySQL, DATA_TYPES_MySQL);
-        
+
+        DATA_TYPES_DEFAULT.setProperty(Double.class.getName(), "DOUBLE PRECISION");
         DATA_TYPES_DEFAULT.setProperty(Long.class.getName(), "BIGINT");
+        DATA_TYPES_DEFAULT.setProperty(Integer.class.getName(), "INTEGER");
+        DATA_TYPES_DEFAULT.setProperty(Short.class.getName(), "SMALLINT");
+        DATA_TYPES_DEFAULT.setProperty(Byte.class.getName(), "TINYINT");
         DATA_TYPES_DEFAULT.setProperty(Date.class.getName(), "TIMESTAMP");
         DATA_TYPES_DEFAULT.setProperty(String.class.getName(), "VARCHAR");
+        DATA_TYPES_DEFAULT.setProperty(Boolean.class.getName(), "BIT(1)");
         DATA_TYPES_DEFAULT.setProperty(DLocation.class.getName(), "VARCHAR(33)");
         DATA_TYPES_DEFAULT.setProperty(getPrimaryKeyClass(Long.class.getName()), "BIGINT");
         DATA_TYPES_DEFAULT.setProperty(getPrimaryKeyClass(String.class.getName()), "VARCHAR(128)");
@@ -691,6 +696,9 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 final int commaIndex = latLong.indexOf(',');
                 value = new DLocation(Float.parseFloat(latLong.substring(0, commaIndex)), 
                         Float.parseFloat(latLong.substring(commaIndex+1)));
+            }
+            if (Boolean.class.equals(domainPropertyClass) && null != value) {
+                value = Boolean.valueOf(1 == (Integer)value);
             }
         }
         return value;

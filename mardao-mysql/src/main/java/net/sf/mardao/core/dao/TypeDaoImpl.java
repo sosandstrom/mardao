@@ -676,7 +676,6 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             return domain;
         }
         catch (EmptyResultDataAccessException notFound) {
-//            LOG.info("   {} NOT FOUND", params);
             return null;
         }
     }
@@ -696,9 +695,6 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 final int commaIndex = latLong.indexOf(',');
                 value = new DLocation(Float.parseFloat(latLong.substring(0, commaIndex)), 
                         Float.parseFloat(latLong.substring(commaIndex+1)));
-            }
-            if (Boolean.class.equals(domainPropertyClass) && null != value) {
-                value = Boolean.valueOf(1 == (Integer)value);
             }
         }
         return value;

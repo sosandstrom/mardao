@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.Future;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.geo.DLocation;
@@ -35,6 +36,8 @@ public interface Dao<T, ID extends Serializable> {
     Class getColumnClass(String columnName);
     
     Map<String, Object> getDomainProperties(Object domain);
+    
+    T getDomain(Future<?> future);
 
     String getKeyString(Object key);
 
@@ -115,6 +118,12 @@ public interface Dao<T, ID extends Serializable> {
     T findByPrimaryKey(ID simpleKey);
 
     T findByPrimaryKey(Object primaryKey);
+    
+    Future<?> findByPrimaryKeyForFuture(Object parentKey, ID simpleKey);
+    
+    Future<?> findByPrimaryKeyForFuture(ID simpleKey);
+
+    Future<?> findByPrimaryKeyForFuture(Object primaryKey);
     
     ID persist(T domain);
 

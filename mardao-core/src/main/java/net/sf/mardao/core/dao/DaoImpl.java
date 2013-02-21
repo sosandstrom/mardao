@@ -15,6 +15,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.logging.Level;
 import net.sf.jsr107cache.Cache;
 import net.sf.jsr107cache.CacheException;
 import net.sf.jsr107cache.CacheFactory;
@@ -72,6 +76,11 @@ public abstract class DaoImpl<T, ID extends Serializable,
     protected final Class<ID> simpleIdClass;
     
     protected DaoImpl mardaoParentDao;
+    
+    protected static final Runnable RUNNABLE_VOID = new Runnable() {
+        public void run() {
+        }
+    };
     
     /** to list the property names for ManyToOne relations */
     protected List<String> getBasicColumnNames() {
@@ -131,6 +140,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
     protected abstract int doDelete(Iterable<T> domains);
     
     protected abstract T doFindByPrimaryKey(Object parentKey, ID simpleKeys);
+    protected abstract Future<?> doFindByPrimaryKeyForFuture(Object parentKey, ID simpleKeys);
     protected abstract Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys);
     
     protected abstract T findUniqueBy(Filter... filters);
@@ -690,9 +700,14 @@ public abstract class DaoImpl<T, ID extends Serializable,
     }
     
     public T findByPrimaryKey(Object parentKey, ID simpleKey) {
-        // TODO: find in cache
+        final T cached = getCachedByPrimaryKey(parentKey, simpleKey);
+        if (null != cached) {
+            return cached;
+        }
         
-        return doFindByPrimaryKey(parentKey, simpleKey);
+        final T domain = doFindByPrimaryKey(parentKey, simpleKey);
+        putCachedByPrimaryKey(parentKey, simpleKey, domain);
+        return domain;
     }
     
     public T findByPrimaryKey(ID simpleKey) {
@@ -703,6 +718,68 @@ public abstract class DaoImpl<T, ID extends Serializable,
         final P parentKey = coreKeyToParentKey((C) primaryKey);
         final ID simpleKey = coreKeyToSimpleKey((C) primaryKey);
         return findByPrimaryKey(parentKey, simpleKey);
+    }
+    
+    public Future<?> findByPrimaryKeyForFuture(Object parentKey, ID simpleKey) {
+        final T cached = getCachedByPrimaryKey(parentKey, simpleKey);
+        if (null != cached) {
+            return new FutureTask(RUNNABLE_VOID, cached);
+        }
+        
+        final Future<?> future = doFindByPrimaryKeyForFuture(parentKey, simpleKey);
+        
+        // cache will be populated in getDomain(Future);
+        
+        return future;
+    }
+    
+    public Future<?> findByPrimaryKeyForFuture(ID simpleKey) {
+        return findByPrimaryKeyForFuture(null, simpleKey);
+    }
+
+    public Future<?> findByPrimaryKeyForFuture(Object primaryKey) {
+        final P parentKey = coreKeyToParentKey((C) primaryKey);
+        final ID simpleKey = coreKeyToSimpleKey((C) primaryKey);
+        return findByPrimaryKeyForFuture(parentKey, simpleKey);
+    }
+    
+    protected T getCachedByPrimaryKey(Object parentKey, ID simpleKey) {
+        if (memCacheEntities && null != simpleKey) {
+            final String memCacheKey = createMemCacheKey(parentKey, simpleKey);
+            T cached = (T) getMemCache().get(memCacheKey);
+            if (null != cached) {
+                return cached;
+            }
+        }
+        return null;
+    }
+
+    protected String putCachedByPrimaryKey(Object parentKey, ID simpleKey, T domain) {
+        if (memCacheEntities && null != simpleKey && null != domain) {
+            final String memCacheKey = createMemCacheKey(parentKey, simpleKey);
+            getMemCache().put(memCacheKey, domain);
+            return memCacheKey;
+        }
+        return null;
+    }
+    
+    @Override
+    public T getDomain(Future<?> future) {
+        if (null != future) {
+        try {
+                final T domain = coreToDomain((E) future.get());
+                if (memCacheEntities && null != domain) {
+                    final Object parentKey = getParentKey(domain);
+                    final ID simpleKey = getSimpleKey(domain);
+                    putCachedByPrimaryKey(parentKey, simpleKey, domain);
+                }
+            } catch (InterruptedException ex) {
+                LOG.warn("Interrupted", ex);
+            } catch (ExecutionException ex) {
+                LOG.warn("Executing", ex);
+            }
+        }
+        return null;
     }
 
     public Object getPrimaryKey(Object parentKey, ID simpleKey) {

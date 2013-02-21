@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import javax.sql.DataSource;
 import net.sf.mardao.core.CompositeKey;
 import net.sf.mardao.core.CoreEntity;
@@ -654,6 +657,22 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
+    protected Future<?> doFindByPrimaryKeyForFuture(final Object parentKey, final ID simpleKey) {
+        final Filter primaryKeyFilter = createEqualsFilter(getPrimaryKeyColumnName(), simpleKey);
+        final CompositeKey primaryKey = (CompositeKey) getPrimaryKey(parentKey, simpleKey);
+        return new FutureTask<CoreEntity>(new Callable<CoreEntity>() {
+            @Override
+            public CoreEntity call() throws Exception {
+                Map<String, Object> props = findUniquePropsBy(primaryKeyFilter);
+                final CoreEntity core = new CoreEntity();
+                core.setProperties(props);
+                core.setPrimaryKey(primaryKey);
+                return core;
+            }
+        });
+    }
+    
+    @Override
     protected Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys) {
         final ArrayList<ID> values = new ArrayList<ID>();
         for (ID id : simpleKeys) {
@@ -664,20 +683,27 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 null, false, null, false, inFilter);
     }
     
-    @Override
-    protected T findUniqueBy(Filter... filters) {
+    protected Map<String, Object> findUniquePropsBy(Filter... filters) {
         StringBuffer sql = createSelect(false);
         Map<String, Object> params = appendWhereFilters(sql, filters);
         LOG.info("{} with params {}", sql.toString(), params);
         try {
             final Map<String, Object> props = jdbcTemplate.queryForMap(sql.toString(), params);
-            final T domain = propsToDomain(props);
-//            LOG.info("   returns {}", domain);
-            return domain;
+            return props;
         }
         catch (EmptyResultDataAccessException notFound) {
             return null;
         }
+    }
+
+    @Override
+    protected T findUniqueBy(Filter... filters) {
+        final Map<String, Object> props = findUniquePropsBy(filters);
+        if (null == props) {
+            return null;
+        }
+        final T domain = propsToDomain(props);
+        return domain;
     }
 
     @Override

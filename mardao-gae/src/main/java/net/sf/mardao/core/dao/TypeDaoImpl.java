@@ -1,5 +1,6 @@
 package net.sf.mardao.core.dao;
 
+import com.google.appengine.api.datastore.AsyncDatastoreService;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +24,7 @@ import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Text;
+import java.util.concurrent.Future;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.geo.DLocation;
@@ -172,6 +174,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
+    protected Future<?> doFindByPrimaryKeyForFuture(Object parentKey, ID simpleKey) {
+        final Key coreKey = createCoreKey(parentKey, simpleKey);
+        LOG.debug("findByPrimaryKeyForFuture {}", coreKey);
+        final Future<Entity> future = getAsyncDatastoreService().get(coreKey);
+        return future;
+    }
+
+    @Override
     protected Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys) {
         // TODO: get batch with batch size
         final Collection<Key> coreKeys = createCoreKeys(parentKey, simpleKeys);
@@ -191,7 +201,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         final Iterable<ID> simpleKeys = queryAllKeys();
         return delete(null, simpleKeys);
     }
-    
+
     @Override
     protected T findUniqueBy(Filter... filters) {
         final PreparedQuery pq = prepare(false, null, null,
@@ -372,6 +382,10 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             return text.getValue();
         }
         return (String) value;
+    }
+
+    protected static AsyncDatastoreService getAsyncDatastoreService() {
+        return DatastoreServiceFactory.getAsyncDatastoreService();
     }
 
     protected static DatastoreService getDatastoreService() {

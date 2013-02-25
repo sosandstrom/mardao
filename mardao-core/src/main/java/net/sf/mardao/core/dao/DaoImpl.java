@@ -18,7 +18,6 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.logging.Level;
 import net.sf.jsr107cache.Cache;
 import net.sf.jsr107cache.CacheException;
 import net.sf.jsr107cache.CacheFactory;
@@ -476,6 +475,15 @@ public abstract class DaoImpl<T, ID extends Serializable,
         String value = properties.get(getPrimaryKeyColumnName());
         Class clazz = getColumnClass(getPrimaryKeyColumnName());
         return (ID) parseProperty(value, clazz);
+    }
+
+    @Override
+    public Collection<ID> getSimpleKeys(Iterable<T> domains) {
+        final ArrayList<ID> keys = new ArrayList<ID>();
+        for (T t : domains) {
+            keys.add(getSimpleKey(t));
+        }
+        return keys;
     }
     
     protected static Cache getMemCache() {

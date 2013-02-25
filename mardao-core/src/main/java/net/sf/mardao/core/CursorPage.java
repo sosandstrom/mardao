@@ -13,17 +13,13 @@ public class CursorPage<T extends Object, ID extends Serializable> {
     private int requestedPageSize;
     
     /** provide this to get next page */
-    private Serializable cursorKey;
+    private String cursorKey;
     
     /** the page of items */
     private Collection<T> items;
 
-    public Serializable getCursorKey() {
+    public String getCursorKey() {
         return cursorKey;
-    }
-
-    public void setCursorKey(Serializable cursorKey) {
-        this.cursorKey = cursorKey;
     }
 
     public void setCursorKey(String cursorKey) {

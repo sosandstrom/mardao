@@ -50,6 +50,8 @@ public interface Dao<T, ID extends Serializable> {
     
     ID getSimpleKeyByPrimaryKey(Object primaryKey);
     
+    Collection<ID> getSimpleKeys(Iterable<T> domains);
+    
     Object getParentKey(T domain);
     Object getParentKey(Map<String, String> properties);
     

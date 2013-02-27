@@ -147,7 +147,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
     
     /** Implemented in TypeDaoImpl */
     protected abstract Collection<C> persistCore(Iterable<E> itrbl);
-    
+
     /** Implemented in TypeDaoImpl */
     protected abstract CursorPage<T, ID> queryPage(boolean keysOnly, int pageSize,
             Object ancestorKey, Object primaryKey,
@@ -156,20 +156,57 @@ public abstract class DaoImpl<T, ID extends Serializable,
             Serializable cursorString,
             Filter... filters);
 
-    /** Implemented in TypeDaoImpl */
-    protected abstract Iterable<T> queryIterable(boolean keysOnly, 
+    /** Convenience method taking a variable number of filter input parameters */
+    protected Iterable<T> queryIterable(boolean keysOnly,
             int offset, int limit,
             Object ancestorKey, Object primaryKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
-            Filter... filters);
+            Filter... filters) {
+
+        Collection<Filter> filterCollection = new ArrayList<Filter>();
+        for (Filter filter : filters) {
+            filterCollection.add(filter);
+        }
+
+        return queryIterable(keysOnly, offset, limit, ancestorKey, primaryKey,
+                primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
+                filterCollection);
+    }
+
+    /** Implemented in TypeDaoImpl */
+    protected abstract Iterable<T> queryIterable(
+            boolean keysOnly,
+            int offset, int limit,
+            Object ancestorKey, Object primaryKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending,
+            Collection<Filter> filters);
+
+    /** Convenience method taking a variable number of filter input parameters */
+    protected Iterable<ID> queryIterableKeys(
+            int offset, int limit,
+            Object ancestorKey, Object primaryKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending,
+            Filter... filters) {
+
+        Collection<Filter> filterCollection = new ArrayList<Filter>();
+        for (Filter filter : filters) {
+            filterCollection.add(filter);
+        }
+
+        return queryIterableKeys(offset, limit, ancestorKey, primaryKey,
+                primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
+                filterCollection);
+    }
 
     /** Implemented in TypeDaoImpl */
     protected abstract Iterable<ID> queryIterableKeys(int offset, int limit,
             Object ancestorKey, Object primaryKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
-            Filter... filters);
+            Collection<Filter> filters);
 
     /** Implemented in TypeDaoImpl */
     protected abstract ID coreToSimpleKey(E core);

@@ -8,3 +8,5 @@ release.properties
 target/
 bin/
 tmp/
+.idea
+*.iml

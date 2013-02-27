@@ -588,11 +588,22 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         return params;
     }
 
+    // This method is here for backward compatibility with old methods
+    protected Map<String, Object> appendWhereFilters(StringBuffer sql,
+                                                     Filter... filters) {
+
+        Collection<Filter> filterCollection = new ArrayList<Filter>();
+        for (Filter filter : filters) {
+            filterCollection.add(filter);
+        }
+
+        return appendWhereFilters(sql, filterCollection);
+    }
 
     protected Map<String, Object> appendWhereFilters(StringBuffer sql, 
-            Filter... filters) {
+            Collection<Filter> filters) {
         final Map<String, Object> params = new HashMap<String, Object>();
-        if (null == filters || 0 == filters.length) {
+        if (null == filters || 0 == filters.size()) {
             return params;
         }
         
@@ -821,13 +832,31 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         return cursorPage;
     }
 
+    // This method is here for backward compatibility with old methods
+    protected Iterable<T> queryIterable(boolean keysOnly,
+                                        int offset, int limit,
+                                        Object ancestorKey, Object simpleKey,
+                                        String primaryOrderBy, boolean primaryIsAscending,
+                                        String secondaryOrderBy, boolean secondaryIsAscending,
+                                        Filter... filters) {
+
+        Collection<Filter> filterCollection = new ArrayList<Filter>();
+        for (Filter filter : filters) {
+            filterCollection.add(filter);
+        }
+
+        return queryIterable(keysOnly, offset, limit, ancestorKey, simpleKey,
+                primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
+                filterCollection);
+    }
+
     @Override
     protected Iterable<T> queryIterable(boolean keysOnly, 
             int offset, int limit,
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
-            Filter... filters) {
+            Collection<Filter> filters) {
         if ((/* -1 == limit ||*/ 1000 < limit) && !keysOnly) {
             throw new UnsupportedOperationException("Not supported for Large Objects yet.");
         }
@@ -855,13 +884,31 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         return domains;
     }
 
-    @Override
+    // This method is here for backward compatibility with old methods
     protected Iterable<ID> queryIterableKeys(
             int offset, int limit,
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
             Filter... filters) {
+
+        Collection<Filter> filterCollection = new ArrayList<Filter>();
+        for (Filter filter : filters) {
+            filterCollection.add(filter);
+        }
+
+        return queryIterableKeys(offset, limit, ancestorKey, simpleKey,
+                primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
+                filterCollection);
+    }
+
+    @Override
+    protected Iterable<ID> queryIterableKeys(
+            int offset, int limit,
+            Object ancestorKey, Object simpleKey,
+            String primaryOrderBy, boolean primaryIsAscending,
+            String secondaryOrderBy, boolean secondaryIsAscending,
+            Collection<Filter> filters) {
         
         final StringBuffer sql = createSelect(true);
         

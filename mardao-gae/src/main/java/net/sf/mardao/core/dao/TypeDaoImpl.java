@@ -327,7 +327,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
-            Filter... filters) {
+            Collection<Filter> filters) {
         
         final PreparedQuery pq = prepare(keysOnly, (Key)ancestorKey, (Key)simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
@@ -345,7 +345,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
-            Filter... filters) {
+            Collection<Filter> filters) {
         
         final PreparedQuery pq = prepare(true, (Key)ancestorKey, (Key)simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
@@ -434,10 +434,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     /**
-     * @param ascending
-     * @param orderBy
+     *
      * @param filters
-     * 
+     * @param orderBy
+     * @param direction
+     * @return
      */
     protected PreparedQuery prepare(Map<String, Object> filters, String orderBy, boolean direction) {
         return prepare(filters, orderBy, direction, null, false);
@@ -476,17 +477,34 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         return datastore.prepare(q);
     }
 
+    // This method is here for backwards compatibility for old methods that still use variable length filter arguments
+    protected PreparedQuery prepare(boolean keysOnly, Key ancestorKey, Key simpleKey, String orderBy, boolean ascending,
+                                    String secondaryOrderBy, boolean secondaryAscending, Filter... filters) {
+
+        Collection<Filter> filterCollection = new ArrayList<Filter>();
+        for (Filter filter : filters) {
+            filterCollection.add(filter);
+        }
+
+        return prepare(keysOnly, ancestorKey, simpleKey,
+                orderBy, ascending, secondaryOrderBy, secondaryAscending,
+                filterCollection);
+    }
+
     /**
-     * 
+     *
      * @param keysOnly
-     * @param parentKey
+     * @param ancestorKey
+     * @param simpleKey
      * @param orderBy
      * @param ascending
+     * @param secondaryOrderBy
+     * @param secondaryAscending
      * @param filters
      * @return
      */
     protected PreparedQuery prepare(boolean keysOnly, Key ancestorKey, Key simpleKey, String orderBy, boolean ascending,
-            String secondaryOrderBy, boolean secondaryAscending, Filter... filters) {
+            String secondaryOrderBy, boolean secondaryAscending, Collection<Filter> filters) {
         LOG.debug("prepare {} with filters {}", getTableName(), filters);
         final DatastoreService datastore = getDatastoreService();
 

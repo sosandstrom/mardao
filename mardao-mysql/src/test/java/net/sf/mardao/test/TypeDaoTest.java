@@ -3,6 +3,7 @@ package net.sf.mardao.test;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
 import junit.framework.TestCase;
@@ -222,5 +223,30 @@ public class TypeDaoTest extends TestCase {
             count++;
         }
         assertEquals(51, count);
+    }
+    
+    public void testUpdate() {
+        final String NAME = "John Doe";
+        DaoImpl.setPrincipalName(NAME);
+        final Book expected = new Book();
+        expected.setTitle("Hello Galaxy");
+        dao.persist(expected);
+        assertNotNull(expected.getId());
+        assertNotNull(expected.getCreatedDate());
+        assertEquals(NAME, expected.getCreatedBy());
+        assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
+        assertEquals(NAME, expected.getUpdatedBy());
+        
+        final Date createdDate = expected.getCreatedDate();
+        DaoImpl.setPrincipalName("Jane Doe");
+        expected.setTitle("Updated Title");
+        dao.update(expected);
+        assertEquals(createdDate, expected.getCreatedDate());
+        assertEquals(NAME, expected.getCreatedBy());
+        assertTrue(createdDate.before(expected.getUpdatedDate()));
+        assertEquals("Jane Doe", expected.getUpdatedBy());
+        assertEquals("Updated Title", expected.getTitle());
+        
+        DaoImpl.setPrincipalName(null);
     }
 }

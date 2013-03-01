@@ -1,11 +1,11 @@
 package net.sf.mardao.test.dao;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import junit.framework.TestCase;
-import net.sf.mardao.test.dao.GeneratedDEmployeeDao;
-import net.sf.mardao.test.dao.GeneratedDEmployeeDaoImpl;
+import net.sf.mardao.core.dao.DaoImpl;
 import net.sf.mardao.test.domain.DEmployee;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +45,7 @@ public class GeneratedDaoTest extends TestCase {
     protected void populate() {
         LOG.info("--- populate() " + getName() + " ---");
         
+        DaoImpl.setPrincipalName("populator");
         Map<Long, DEmployee> employees = new HashMap<Long, DEmployee>();
         for (int i = 1; i < 132; i++) {
             DEmployee employee = new DEmployee();
@@ -57,6 +58,7 @@ public class GeneratedDaoTest extends TestCase {
             employeeDao.persist(employee);
             employees.put(Long.valueOf(i), employee);
         }
+        DaoImpl.setPrincipalName(null);
     }
     
     @Override
@@ -118,5 +120,29 @@ public class GeneratedDaoTest extends TestCase {
             actual.put(e.getId(), e);
         }
         assertEquals("ManyToOne employees", 8, actual.size());
+    }
+    
+    public void testUpdate() {
+        final DEmployee manager = employeeDao.findByPrimaryKey(1L);
+        assertNotNull("ManyToOne manager", manager);
+        final Date createdDate = manager.getCreatedDate();
+        assertNotNull(createdDate);
+        final Date updatedDate = manager.getUpdatedDate();
+        assertNotNull(updatedDate);
+        assertFalse(updatedDate.before(createdDate));
+        final String createdBy = manager.getCreatedBy();
+        assertEquals("populator", createdBy);
+        final String updatedBy = manager.getUpdatedBy();
+        assertEquals("populator", createdBy);
+        
+        manager.setNickname("Speedy Gonzales");
+        DaoImpl.setPrincipalName("updator");
+        employeeDao.update(manager);
+        DaoImpl.setPrincipalName(null);
+        
+        assertEquals(createdBy, manager.getCreatedBy());
+        assertEquals(createdDate, manager.getCreatedDate());
+        assertEquals("updator", manager.getUpdatedBy());
+        assertTrue(updatedDate.before(manager.getUpdatedDate()));
     }
 }

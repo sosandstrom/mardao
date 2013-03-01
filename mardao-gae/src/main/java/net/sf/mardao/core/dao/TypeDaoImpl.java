@@ -333,7 +333,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                               primaryOrderBy, primaryIsAscending, 
                               secondaryOrderBy, secondaryIsAscending, filters);
         
-        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, 100, null);
+        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, offset, limit);
         final CursorIterable<T> returnValue = new CursorIterable<T>(_iterable);
         
         return returnValue;
@@ -351,7 +351,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                               primaryOrderBy, primaryIsAscending, 
                               secondaryOrderBy, secondaryIsAscending, filters);
         
-        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, 100, null);
+        final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, offset, limit);
         final KeysIterable<ID> returnValue = new KeysIterable<ID>(_iterable);
         
         return returnValue;
@@ -400,6 +400,20 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             fetchOptions.startCursor(Cursor.fromWebSafeString(cursorString));
         }
         
+        return pq.asQueryResultIterable(fetchOptions);
+    }
+
+    protected QueryResultIterable<Entity> asQueryResultIterable(PreparedQuery pq, int offset, int limit) {
+        FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
+
+        if (0 < limit) {
+            fetchOptions.limit(limit);
+        }
+
+        if (0 < offset) {
+            fetchOptions.offset(offset);
+        }
+
         return pq.asQueryResultIterable(fetchOptions);
     }
 

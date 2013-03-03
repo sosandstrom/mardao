@@ -465,29 +465,18 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
      */
     protected PreparedQuery prepare(Map<String, Object> filters, String orderBy, boolean direction, String secondaryOrderBy,
             boolean secondaryDirection) {
-        LOG.debug("prepare {} filters {}", getTableName(), filters);
-        final DatastoreService datastore = getDatastoreService();
-
-        Query q = new Query(getTableName());
+        Filter[] filtersArray = new Filter[null != filters ? filters.size() : 0];
 
         // filter query:
         if (null != filters) {
+            int i = 0;
             for(Entry<String, Object> filter : filters.entrySet()) {
-                q.addFilter(filter.getKey(), FilterOperator.EQUAL, filter.getValue());
+                filtersArray[i] = createEqualsFilter(filter.getKey(), filter.getValue());
+                i++;
             }
         }
-
-        // sort query?
-        if (null != orderBy) {
-            q.addSort(orderBy, direction ? SortDirection.ASCENDING : SortDirection.DESCENDING);
-
-            // secondary sort order?
-            if (null != secondaryOrderBy) {
-                q.addSort(secondaryOrderBy, secondaryDirection ? SortDirection.ASCENDING : SortDirection.DESCENDING);
-            }
-        }
-
-        return datastore.prepare(q);
+        
+        return prepare(false, null, null, orderBy, direction, secondaryOrderBy, secondaryDirection, filtersArray);
     }
 
     /**

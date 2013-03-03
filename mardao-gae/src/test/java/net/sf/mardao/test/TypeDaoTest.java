@@ -46,6 +46,7 @@ public class TypeDaoTest extends TestCase {
     
     @Override
     protected void tearDown() throws Exception {
+        LOG.info("+++ tearDown() {} +++", getName());
         helper.tearDown();
         super.tearDown();
     }
@@ -84,6 +85,30 @@ public class TypeDaoTest extends TestCase {
         assertNotNull(actual);
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getTitle(), actual.getTitle());
+        assertEquals(expected.getCreatedDate(), actual.getUpdatedDate());
+        assertEquals(NAME, actual.getCreatedBy());
+        assertEquals(NAME, actual.getUpdatedBy());
+    }
+
+    public void testQueryOneItemWithNullFilter() {
+        final String NAME = "John Doe";
+        DaoImpl.setPrincipalName(NAME);
+        final Book expected = new Book();
+        expected.setTitle(NAME);
+        dao.persist(expected);
+        assertNotNull(expected.getId());
+        assertNotNull(expected.getCreatedDate());
+        assertEquals(NAME, expected.getCreatedBy());
+        assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
+        DaoImpl.setPrincipalName(null);
+        
+        final Iterable<Book> page = ((BookDaoImpl)dao).queryByTitleAppArg0(NAME, null);
+        assertNotNull(page);
+        final Book actual = page.iterator().next();
+        assertNotNull(actual);
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getTitle(), actual.getTitle());
+        assertEquals(expected.getAppArg0(), actual.getAppArg0());
         assertEquals(expected.getCreatedDate(), actual.getUpdatedDate());
         assertEquals(NAME, actual.getCreatedBy());
         assertEquals(NAME, actual.getUpdatedBy());

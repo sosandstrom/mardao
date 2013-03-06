@@ -781,6 +781,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
                     final ID simpleKey = getSimpleKey(domain);
                     putCachedByPrimaryKey(parentKey, simpleKey, domain);
                 }
+                return domain;
             } catch (InterruptedException ex) {
                 LOG.warn("Interrupted", ex);
             } catch (ExecutionException ex) {

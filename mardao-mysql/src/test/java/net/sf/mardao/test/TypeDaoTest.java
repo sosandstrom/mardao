@@ -114,7 +114,7 @@ public class TypeDaoTest extends TestCase {
         dao.persist(batch);
         DaoImpl.setPrincipalName(null);
         
-        Serializable cursorString = null;
+        String cursorString = null;
         CursorPage<Book, Long> page;
         for (int p = 0; p < 11; p++) {
             page = dao.queryPage(10, cursorString);

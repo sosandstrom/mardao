@@ -536,7 +536,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
 //        getDatastoreService().delete(keys);
 //        return -1;
     }
-
+    
     @Override
     public int deleteAll() {
         String sql = String.format("DELETE FROM %s;", getTableName());
@@ -886,6 +886,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             }
             ((CoreEntity) core).setProperty(name, value);
         }
+    }
+
+    @Override
+    protected CursorPage<ID, ID> whatsDeleted(Date since, int pageSize, String cursorKey) {
+        LOG.warn("whatsDeleted not implemented for MySQL yet.");
+        CursorPage<ID, ID> page = new CursorPage<ID, ID>();
+        page.setItems(Collections.EMPTY_LIST);
+        return page;
     }
     
     // --- END persistence-type beans must implement these ---

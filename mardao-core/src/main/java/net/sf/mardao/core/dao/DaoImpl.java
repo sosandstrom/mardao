@@ -780,8 +780,18 @@ public abstract class DaoImpl<T, ID extends Serializable,
     @Override
     public T getDomain(Future<?> future) {
         if (null != future) {
-        try {
-                final T domain = coreToDomain((E) future.get());
+            try {
+                final Object result = future.get();
+                if (null == result) {
+                    return null;
+                }
+                
+                // if it was found in cache, it will be the Domain object, not core Entity
+                if (this.persistentClass.equals(result.getClass())) {
+                    return (T) result;
+                }
+                
+                final T domain = coreToDomain((E) result);
                 if (memCacheEntities && null != domain) {
                     final Object parentKey = getParentKey(domain);
                     final ID simpleKey = getSimpleKey(domain);

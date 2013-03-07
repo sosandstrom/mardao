@@ -146,19 +146,19 @@ public interface Dao<T, ID extends Serializable> {
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters);
     
-    CursorPage<T, ID> queryPage(int pageSize, Serializable cursorString);
+    CursorPage<T, ID> queryPage(int pageSize, String cursorString);
 
     CursorPage<T, ID> queryPage(int pageSize, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
-            Serializable cursorString);
+            String cursorString);
     
     void update(Iterable<T> domains);
     
     void update(T domain);
     
-    CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey);
+    CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey);
     
-    CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, int pageSize, Serializable cursorKey, Filter... filters);
+    CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, int pageSize, String cursorKey, Filter... filters);
     
     void writeAsCsv(OutputStream out, String[] columns, CsvConverter<T> converter, Object ancestorKey,
             String primaryOrderBy, boolean primaryIsAscending,
@@ -173,7 +173,7 @@ public interface Dao<T, ID extends Serializable> {
     
     CursorPage<T, ID> queryInGeobox(float lat, float lng, int bits, int pageSize, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
-            Serializable cursorString, Filter... filters);
+            String cursorString, Filter... filters);
 
     Collection<T> findNearest(final float lat, final float lng, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 

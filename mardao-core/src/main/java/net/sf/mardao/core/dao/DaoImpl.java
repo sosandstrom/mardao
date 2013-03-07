@@ -61,6 +61,8 @@ public abstract class DaoImpl<T, ID extends Serializable,
     /** Using slf4j logging */
     protected static final Logger   LOG = LoggerFactory.getLogger(DaoImpl.class);
     
+    protected static final String AUDIT_CURSOR_PREFIX = "audit-";
+    
     private Collection<Integer> boxBits = Arrays.asList(
         Geobox.BITS_18_154m, Geobox.BITS_15_1224m, Geobox.BITS_12_10km
     );
@@ -195,6 +197,8 @@ public abstract class DaoImpl<T, ID extends Serializable,
     protected abstract void setCoreProperty(Object core, String name, Object value);
 
     protected abstract void setDomainStringProperty(T domain, String name, Map<String, String> properties);
+    
+    protected abstract CursorPage<ID, ID> whatsDeleted(Date since, int pageSize, String cursorKey);
     
     // --- END persistence-type beans must implement these ---
     
@@ -1013,7 +1017,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
         return entities.values();
     }
     
-    public CursorPage<T, ID> queryPage(int pageSize, Serializable cursorString) {
+    public CursorPage<T, ID> queryPage(int pageSize, String cursorString) {
         return queryPage(false, pageSize, null, null,
                 null, false, null, false,
                 cursorString);
@@ -1021,7 +1025,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
 
     public CursorPage<T, ID> queryPage(int pageSize, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
-            Serializable cursorString) {
+            String cursorString) {
         return queryPage(false, pageSize, null, null,
                 primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
                 cursorString);
@@ -1029,7 +1033,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
 
     public CursorPage<T, ID> queryInGeobox(float lat, float lng, int bits, int pageSize, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
-            Serializable cursorString, Filter... filters) {
+            String cursorString, Filter... filters) {
         if (!boxBits.contains(bits)) {
             throw new IllegalArgumentException("Unboxed resolution, hashed are " + boxBits);
         }
@@ -1177,7 +1181,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
      * @return the IDs for the entities with updatedDate >= since, in descending order.
      */
     @Override
-    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey) {
+    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey) {
         return whatsChanged(null, since, pageSize, cursorKey);
     }
     
@@ -1188,21 +1192,45 @@ public abstract class DaoImpl<T, ID extends Serializable,
      */
     @Override
     public CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, 
-            int pageSize, Serializable cursorKey, Filter... filters) {
+            int pageSize, String cursorKey, Filter... filters) {
         final String updatedDateColumnName = getUpdatedDateColumnName();
         if (null == updatedDateColumnName) {
             throw new UnsupportedOperationException("Not supported without @UpdatedDate");
         }
+        CursorPage<ID, ID> idPage = null;
+        String auditCursorKey = cursorKey;
         
-        Filter allFilters[] = Arrays.copyOf(filters, (null != filters ? filters.length : 0) + 1);
-        allFilters[allFilters.length-1] = createGreaterThanOrEqualFilter(updatedDateColumnName, since);
-        final CursorPage<T, ID> entityPage = queryPage(true, pageSize, parentKey, null, 
-                                  updatedDateColumnName, true, null, false, 
-                                  cursorKey, allFilters);
+        // start with returning updated IDs
+        if (null == cursorKey || !cursorKey.startsWith(AUDIT_CURSOR_PREFIX)) {
+            auditCursorKey = null;
+            Filter allFilters[] = Arrays.copyOf(filters, (null != filters ? filters.length : 0) + 1);
+            allFilters[allFilters.length-1] = createGreaterThanOrEqualFilter(updatedDateColumnName, since);
+            final CursorPage<T, ID> entityPage = queryPage(true, pageSize, parentKey, null, 
+                                      updatedDateColumnName, true, null, false, 
+                                      cursorKey, allFilters);
         
-        // convert entities to IDs only
-        final CursorPage<ID, ID> idPage = domainPageToSimplePage(entityPage);
+            // convert entities to IDs only
+            idPage = domainPageToSimplePage(entityPage);
+        }
         
+        // add all deleted IDs to last page
+        if (null == idPage || // audit cursor key
+                null == idPage.getCursorKey() || // no more udated items
+                idPage.getItems().size() < pageSize) { // incomplete updated page
+        
+            // full audit page or append to existing?
+            int remainingSize = null == idPage ? pageSize : 
+                    pageSize - idPage.getItems().size();
+            final CursorPage<ID, ID> deletedKeys = whatsDeleted(since, 
+                    remainingSize, auditCursorKey);
+            if (null == idPage) {
+                idPage = deletedKeys;
+            }
+            else {
+                idPage.getItems().addAll(deletedKeys.getItems());
+                idPage.setCursorKey(deletedKeys.getCursorKey());
+            }
+        }
         return idPage;
     }
 

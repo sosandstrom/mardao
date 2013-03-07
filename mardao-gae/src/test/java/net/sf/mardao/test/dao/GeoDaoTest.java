@@ -68,7 +68,7 @@ public class GeoDaoTest extends TestCase {
     }
     
     public void testQueryInGeobox() {
-        Serializable cursorString = null;
+        String cursorString = null;
         
         CursorPage<DEmployee, Long> page = employeeDao.queryInGeobox(20f, 110f, Geobox.BITS_18_154m, 60,
                 null, false, null, false, cursorString);

@@ -1,5 +1,7 @@
 package net.sf.mardao.test;
 
+import com.google.appengine.api.datastore.DeleteContext;
+import com.google.appengine.api.datastore.PostDelete;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -25,6 +27,11 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         super(Book.class, Long.class);
         this.memCacheAll = true;
         this.memCacheEntities = true;
+    }
+    
+    @PostDelete(kinds = {"Book"})
+    void postDeleteCallback(DeleteContext context) {
+        doDeleteAuditCallback(context);
     }
 
     @Override

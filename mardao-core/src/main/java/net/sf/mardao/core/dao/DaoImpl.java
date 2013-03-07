@@ -735,7 +735,9 @@ public abstract class DaoImpl<T, ID extends Serializable,
     public Future<?> findByPrimaryKeyForFuture(Object parentKey, ID simpleKey) {
         final T cached = getCachedByPrimaryKey(parentKey, simpleKey);
         if (null != cached) {
-            return new FutureTask(RUNNABLE_VOID, cached);
+            final FutureTask task = new FutureTask(RUNNABLE_VOID, cached);
+            task.run();
+            return task;
         }
         
         final Future<?> future = doFindByPrimaryKeyForFuture(parentKey, simpleKey);
@@ -789,7 +791,11 @@ public abstract class DaoImpl<T, ID extends Serializable,
             } catch (InterruptedException ex) {
                 LOG.warn("Interrupted", ex);
             } catch (ExecutionException ex) {
-                LOG.warn("Executing", ex);
+                if (null == ex.getCause() ||
+                        !"com.google.appengine.api.datastore.EntityNotFoundException"
+                        .equals(ex.getCause().getClass().getName())) {
+                    LOG.warn("Executing", ex);
+                }
             }
         }
         return null;

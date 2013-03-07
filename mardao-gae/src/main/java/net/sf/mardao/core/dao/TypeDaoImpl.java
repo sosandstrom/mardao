@@ -213,6 +213,18 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
+    protected Future<?> doPersistCoreForFuture(Entity core) {
+        final Future<?> future = getAsyncDatastoreService().put(core);
+        return future;
+    }
+
+    @Override
+    protected Future<List<Key>> doPersistCoreForFuture(Iterable<Entity> entities) {
+        final Future<List<Key>> future = getAsyncDatastoreService().put(entities);
+        return (Future<List<Key>>) future;
+    }
+
+    @Override
     protected Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys) {
         // TODO: get batch with batch size
         final Collection<Key> coreKeys = createCoreKeys(parentKey, simpleKeys);

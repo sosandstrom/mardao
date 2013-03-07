@@ -142,6 +142,8 @@ public abstract class DaoImpl<T, ID extends Serializable,
     
     protected abstract T doFindByPrimaryKey(Object parentKey, ID simpleKeys);
     protected abstract Future<?> doFindByPrimaryKeyForFuture(Object parentKey, ID simpleKeys);
+    protected abstract Future<List<C>> doPersistCoreForFuture(Iterable<E> entities);
+    protected abstract Future<?> doPersistCoreForFuture(E core);
     protected abstract Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys);
     
     protected abstract T findUniqueBy(Filter... filters);
@@ -421,6 +423,16 @@ public abstract class DaoImpl<T, ID extends Serializable,
         ID id;
         for (E core : cores) {
             id = coreToSimpleKey(core);
+            ids.add(id);
+        }
+        return ids;
+    }
+
+    public Collection<ID> coreKeysToSimpleKeys(Iterable<C> cores) {
+        final Collection<ID> ids = new ArrayList<ID>();
+        ID id;
+        for (C core : cores) {
+            id = coreKeyToSimpleKey(core);
             ids.add(id);
         }
         return ids;
@@ -811,6 +823,71 @@ public abstract class DaoImpl<T, ID extends Serializable,
         return null;
     }
 
+    @Override
+    public ID getSimpleKey(Future<?> future) {
+        if (null != future) {
+            try {
+                final Object result = future.get();
+                if (null == result) {
+                    return null;
+                }
+                
+                // if it was found in cache, it will be the ID object, not core Key
+                if (this.simpleIdClass.equals(result.getClass())) {
+                    return (ID) result;
+                }
+                
+                final ID simpleKey = coreKeyToSimpleKey((C) result);
+                return simpleKey;
+            } catch (InterruptedException ex) {
+                LOG.warn("Interrupted", ex);
+            } catch (ExecutionException ex) {
+                if (null == ex.getCause() ||
+                        !"com.google.appengine.api.datastore.EntityNotFoundException"
+                        .equals(ex.getCause().getClass().getName())) {
+                    LOG.warn("Executing", ex);
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Collection<ID> getSimpleKeys(Future<List<?>> future) {
+        if (null != future) {
+            try {
+                final Object result = future.get();
+                if (null == result) {
+                    return null;
+                }
+                
+                List list = (List) result;
+                // return empty list
+                if (list.isEmpty()) {
+                    return list;
+                }
+                
+                // if it was found in cache, it will be the ID object, not core Key
+                Object first = list.get(0);
+                if (this.simpleIdClass.equals(first.getClass())) {
+                    return (Collection<ID>) list;
+                }
+                
+                final Collection<ID> simpleKeys = coreKeysToSimpleKeys(list);
+                return simpleKeys;
+            } catch (InterruptedException ex) {
+                LOG.warn("Interrupted", ex);
+            } catch (ExecutionException ex) {
+                if (null == ex.getCause() ||
+                        !"com.google.appengine.api.datastore.EntityNotFoundException"
+                        .equals(ex.getCause().getClass().getName())) {
+                    LOG.warn("Executing", ex);
+                }
+            }
+        }
+        return null;
+    }
+
     public Object getPrimaryKey(Object parentKey, ID simpleKey) {
         return createCoreKey(parentKey, simpleKey);
     }
@@ -855,6 +932,25 @@ public abstract class DaoImpl<T, ID extends Serializable,
         final Iterable<ID> ids = persist(Arrays.asList(domain));
         final ID id = ids.iterator().hasNext() ? ids.iterator().next() : null;
         return id;
+    }
+    
+    @Override
+    public Future<?> persistForFuture(T domain) {
+        final Date currentDate = new Date();
+        LOG.debug("persistForFuture {}s", getTableName());
+        return doPersistCoreForFuture(domainToCore(domain, currentDate));
+    }
+    
+    @Override
+    public Future<List<?>> persistForFuture(Iterable<T> domains) {
+        final Date currentDate = new Date();
+        LOG.debug("persistForFuture {}s", getTableName());
+        ArrayList<E> entities = new ArrayList<E>();
+        for (T d : domains) {
+            entities.add(domainToCore(d, currentDate));
+        }
+        Future f = doPersistCoreForFuture(entities);
+        return f;
     }
     
     public Iterable<T> queryAll() {

@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import net.sf.mardao.core.CursorPage;
@@ -45,6 +46,8 @@ public interface Dao<T, ID extends Serializable> {
 
     String getPrimaryKeyColumnName();
     
+    ID getSimpleKey(Future<?> future);
+    Collection<ID> getSimpleKeys(Future<List<?>> futures);
     ID getSimpleKey(T domain);
     ID getSimpleKey(Map<String, String> properties);
     
@@ -130,6 +133,10 @@ public interface Dao<T, ID extends Serializable> {
     ID persist(T domain);
 
     Collection<ID> persist(Iterable<T> domains);
+    
+    Future<?> persistForFuture(T domain);
+
+    Future<List<?>> persistForFuture(Iterable<T> domains);
     
     Iterable<T> queryAll();
     

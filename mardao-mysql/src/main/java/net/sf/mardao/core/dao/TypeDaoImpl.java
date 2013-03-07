@@ -660,7 +660,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected Future<?> doFindByPrimaryKeyForFuture(final Object parentKey, final ID simpleKey) {
         final Filter primaryKeyFilter = createEqualsFilter(getPrimaryKeyColumnName(), simpleKey);
         final CompositeKey primaryKey = (CompositeKey) getPrimaryKey(parentKey, simpleKey);
-        return new FutureTask<CoreEntity>(new Callable<CoreEntity>() {
+        FutureTask<CoreEntity> task = new FutureTask<CoreEntity>(new Callable<CoreEntity>() {
             @Override
             public CoreEntity call() throws Exception {
                 Map<String, Object> props = findUniquePropsBy(primaryKeyFilter);
@@ -670,7 +670,37 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 return core;
             }
         });
+        new Thread(task).start();
+        return task;
     }
+
+    @Override
+    protected Future<?> doPersistCoreForFuture(final CoreEntity core) {
+        FutureTask<CompositeKey> task = new FutureTask<CompositeKey>(new Callable<CompositeKey>() {
+            @Override
+            public CompositeKey call() throws Exception {
+                Collection<CompositeKey> ids = persistCore(Arrays.asList(core));
+                return ids.iterator().next();
+            }
+        });
+        new Thread(task).start();
+        return task;
+    }
+
+    @Override
+    protected Future<List<CompositeKey>> doPersistCoreForFuture(final Iterable<CoreEntity> entities) {
+        FutureTask<List<CompositeKey>> task = new FutureTask<List<CompositeKey>>(new Callable<List<CompositeKey>>() {
+            @Override
+            public List<CompositeKey> call() throws Exception {
+                List<CompositeKey> ids = persistCore(entities);
+                return ids;
+            }
+        });
+        new Thread(task).start();
+        return task;
+    }
+    
+    
     
     @Override
     protected Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys) {
@@ -755,10 +785,9 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
     
     @Override
-    protected Collection<CompositeKey> persistCore(Iterable<CoreEntity> itrbl) {
-        final Collection<CompositeKey> returnValue = new ArrayList<CompositeKey>();
+    protected List<CompositeKey> persistCore(Iterable<CoreEntity> itrbl) {
+        final List<CompositeKey> returnValue = new ArrayList<CompositeKey>();
         final ArrayList<Map<String, Object>> propsList = new ArrayList<Map<String, Object>>();
-        Long key;
         CompositeKey parentKey, primaryKey;
         ID simpleKey;
         Map<String, Object> props;

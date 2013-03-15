@@ -155,6 +155,12 @@ public class TypeDaoTest extends TestCase {
             page = dao.queryPage(10, cursorString);
             LOG.info(String.format("queried page %d with cursor %s, got %d items", p, cursorString, page.getItems().size()));
             assertEquals("For page " + p, 10 == p ? 0 : 10, page.getItems().size());
+            if (null == cursorString) {
+                assertEquals(Integer.valueOf(100), page.getTotalSize());
+            }
+            else {
+                assertNull(page.getTotalSize());
+            }
             
             cursorString = page.getCursorKey();
         }

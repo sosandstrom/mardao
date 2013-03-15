@@ -842,6 +842,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         cursorPage.setRequestedPageSize(requestedPageSize);
         cursorPage.setItems(domains);
         
+        if (null == cursorString && populateTotalSize) {
+            int count = count(ancestorKey, simpleKey, filters);
+            cursorPage.setTotalSize(count);
+        }
+        
         // only if next is available
         if (domains.size() == requestedPageSize) {
             cursorPage.setCursorKey(Integer.toString(offset + requestedPageSize));

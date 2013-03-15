@@ -112,6 +112,12 @@ public abstract class DaoImpl<T, ID extends Serializable,
     
     /** inject to get different behavior */
     private static Map memCacheConfig = Collections.EMPTY_MAP;
+    
+    /**
+     * Set this to false in DaoBean constructor, to disable the count()
+     * query for first page (cursorKey is null).
+     */
+    protected boolean populateTotalSize = true;
 
     protected DaoImpl(Class<T> domainType, Class<ID> simpleIdType) {
         this.persistentClass = domainType;

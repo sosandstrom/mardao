@@ -350,6 +350,12 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         final CursorPage<T, ID> cursorPage = new CursorPage<T, ID>();
         cursorPage.setRequestedPageSize(requestedPageSize);
         
+        // if first page and populate totalSize, fetch this with async query:
+        if (null == cursorString && populateTotalSize) {
+            int count = count(ancestorKey, simpleKey, filters);
+            cursorPage.setTotalSize(count);
+        }
+        
         final Collection<T> domains = new ArrayList<T>();
         for (Entity core : iterable) {
             domains.add(coreToDomain(core));

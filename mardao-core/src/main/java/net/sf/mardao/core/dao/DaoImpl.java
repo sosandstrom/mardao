@@ -157,7 +157,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
             Object ancestorKey, Object primaryKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
-            Serializable cursorString,
+            String cursorString,
             Filter... filters);
 
     /** Implemented in TypeDaoImpl */

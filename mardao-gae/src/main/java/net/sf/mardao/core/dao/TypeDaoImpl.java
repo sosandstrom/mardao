@@ -338,7 +338,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
-            Serializable cursorString,
+            String cursorString,
             Filter... filters) {
         
         final PreparedQuery pq = prepare(keysOnly, (Key)ancestorKey, (Key)simpleKey, 

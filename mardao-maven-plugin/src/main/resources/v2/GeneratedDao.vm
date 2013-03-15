@@ -86,7 +86,7 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	 * @return a Page of ${entity.simpleName}s for the specified ${field.name} (parent)
 	 */
 	CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
-            int pageSize, Serializable cursorString);
+            int pageSize, String cursorString);
 
 #end   
 	// ----------------------- field finders -------------------------------
@@ -133,7 +133,7 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	 * @return a Page of ${entity.simpleName}s for the specified ${field.name}
 	 */
 	CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name},
-            int pageSize, Serializable cursorString);
+            int pageSize, String cursorString);
 
 #end	
 
@@ -178,7 +178,7 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	 * @return a CursorPage of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
 	CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${field.nameFirst}(${field.type} ${field.name},
-            int pageSize, Serializable cursorString);
+            int pageSize, String cursorString);
 
 #if( $foreign )	
 	/**

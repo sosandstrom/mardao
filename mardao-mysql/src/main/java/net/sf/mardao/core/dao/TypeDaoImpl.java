@@ -827,7 +827,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
-            Serializable cursorString,
+            String cursorString,
             Filter... filters) {
         
         final int offset = null != cursorString ? Integer.parseInt(cursorString.toString()) : 0;

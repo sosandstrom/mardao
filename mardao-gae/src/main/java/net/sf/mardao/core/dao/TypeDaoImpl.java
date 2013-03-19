@@ -36,7 +36,6 @@ import net.sf.mardao.core.geo.DLocation;
 public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID> {
     
-    protected final Key AUDIT_PARENT_KEY = KeyFactory.createKey(getTableName(), 1L);
     protected final String AUDIT_KIND = "DAudit";
     
     protected TypeDaoImpl(Class<T> type, Class<ID> idType) {
@@ -160,6 +159,10 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected void doDeleteAuditCallback(DeleteContext context) {
         // only do batch-persist of DAudit Entities
         if (context.getCurrentIndex() == context.getElements().size()-1) {
+            
+            // create here to get correct namespace
+            final Key AUDIT_PARENT_KEY = KeyFactory.createKey(getTableName(), 1L);
+            
             LOG.debug("index={}, size={}", context.getCurrentIndex(), context.getElements().size());
             final boolean longType = Long.class.isAssignableFrom(simpleIdClass);
             final Date now = new Date();
@@ -579,6 +582,9 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         LOG.debug("prepare {} for audit since {}", getTableName(), since);
         final DatastoreService datastore = getDatastoreService();
 
+        // create here to get correct namespace
+        final Key AUDIT_PARENT_KEY = KeyFactory.createKey(getTableName(), 1L);
+            
         Query q = new Query(AUDIT_KIND, AUDIT_PARENT_KEY);
         q.setKeysOnly();
         q.addFilter(getUpdatedDateColumnName(), FilterOperator.GREATER_THAN_OR_EQUAL, since);

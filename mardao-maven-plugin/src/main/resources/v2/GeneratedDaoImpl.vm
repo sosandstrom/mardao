@@ -44,6 +44,10 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
         ${field.name}Dao = dao;
         MANY_TO_ONE_DAOS.put(COLUMN_NAME_${field.name.toUpperCase()}, dao);
     }
+    /** Getter for Many-To-One ${field.name} DAO */
+    protected Generated${field.entity.simpleName}DaoImpl get${helper.firstToUpper($field.name)}Dao() {
+        return ${field.name}Dao;
+    }
 #end
 
     /** to list the property names for ManyToOne relations */

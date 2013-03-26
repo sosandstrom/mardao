@@ -24,6 +24,7 @@ import net.sf.jsr107cache.CacheFactory;
 import net.sf.jsr107cache.CacheManager;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
+import net.sf.mardao.core.MardaoListFuture;
 import net.sf.mardao.core.geo.DLocation;
 import net.sf.mardao.core.geo.Geobox;
 import org.slf4j.Logger;
@@ -880,6 +881,16 @@ public abstract class DaoImpl<T, ID extends Serializable,
                 }
                 
                 final Collection<ID> simpleKeys = coreKeysToSimpleKeys(list);
+                
+                // populate keys on domains
+                if (future instanceof MardaoListFuture) {
+                    Iterable<T> domains = ((MardaoListFuture) future).getDomains();
+                    Iterator<ID> i = simpleKeys.iterator();
+                    for (T d : domains) {
+                        setSimpleKey(d, i.next());
+                    }
+                }
+                
                 return simpleKeys;
             } catch (InterruptedException ex) {
                 LOG.warn("Interrupted", ex);
@@ -955,8 +966,9 @@ public abstract class DaoImpl<T, ID extends Serializable,
         for (T d : domains) {
             entities.add(domainToCore(d, currentDate));
         }
-        Future f = doPersistCoreForFuture(entities);
-        return f;
+        Future coreFuture = doPersistCoreForFuture(entities);
+        final MardaoListFuture returnValue = new MardaoListFuture(coreFuture, domains);
+        return returnValue;
     }
     
     public Iterable<T> queryAll() {

@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import junit.framework.TestCase;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.dao.TypeDaoImpl;
@@ -355,5 +356,25 @@ public class TypeDaoTest extends TestCase {
         Book actual = dao.createDomain(p);
         assertEquals((Long) 42L, actual.getId());
         assertEquals("MyTitle", actual.getTitle());
+    }
+    
+    public void testPersistForFuture() {
+        ArrayList<Book> books = new ArrayList<Book>();
+        for (int i = 0; i < 23; i++) {
+            Book b = new Book();
+            b.setAppArg0(Integer.toString(i));
+            b.setTitle(String.format("Title for %d", i));
+            books.add(b);
+        }
+        
+        Future<List<?>> future = dao.persistForFuture(books);
+        Collection<Long> ids = dao.getSimpleKeys(future);
+        assertEquals(23, ids.size());
+        for (Long id : ids) {
+            assertNotNull(id);
+        }
+        for (Book b : books) {
+            assertNotNull(b.getId());
+        }
     }
 }

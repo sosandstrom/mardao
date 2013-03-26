@@ -62,6 +62,7 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.2.2</version>
                 <configuration>
+                    <mavenExecutorId>forked-path</mavenExecutorId>
                     <preparationGoals>clean install</preparationGoals>
                 </configuration>
             </plugin>
@@ -143,10 +144,6 @@
             <url>file:../mvn-repo/snapshots</url>
             <!--            <url>https://github.com/sosandstrom/maven-repo/snapshots</url>-->
         </snapshotRepository>
-        <site>
-            <id>github-project-site</id>
-            <url>gitsite:git@github.com/sosandstrom/mardao.git</url>
-        </site>        
     </distributionManagement>
 
     <scm>

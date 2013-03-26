@@ -1,5 +1,6 @@
 pom.xml.releaseBackup
 release.properties
+pom.xml.asc
 
 .project
 .classpath

@@ -14,6 +14,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.concurrent.Future;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
@@ -218,10 +219,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
 
     @Override
     protected ID findUniqueKeyBy(Filter... filters) {
-        List<ID> keys = findKeysBy(null, false, 1, 0, filters);
-        return keys.isEmpty() ? null : keys.get(0);
+        Iterable<ID> itrbl = queryIterableKeys(0, 1, null, null, null, false, null, false, filters);
+        Iterator<ID> itr = itrbl.iterator();
+        return itr.hasNext() ? itr.next() : null;
     }
-
+    
     @Override
     protected Object getCoreProperty(ContentValues core, String name, Class domainPropertyClass) {
         Object value = null;
@@ -303,7 +305,10 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     }
 
     @Override
-    protected Iterable<ID> queryIterableKeys(int offset, int limit, Object ancestorKey, Object primaryKey, String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
+    protected Iterable<ID> queryIterableKeys(int offset, int limit, 
+            Object ancestorKey, Object primaryKey, 
+            String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
+            Filter... filters) {
         return queryIterable(true, limit, offset, ancestorKey, primaryKey, 
                 primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
                 filters);
@@ -564,53 +569,6 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     }
 
 //    @Override
-//    protected List<T> findBy(final Map<String, Object> filters, final String primaryOrderBy, final boolean primaryDirection,
-//            final String secondaryOrderBy, final boolean secondaryDirection, final int limit, final int offset) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
-//
-//    @Override
-//    protected List<Long> findCoreKeysByParent(final Long parentKey) {
-//        // TODO Auto-generated method stub
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
-//
-//    @Override
-    protected List<ID> findKeysBy(final String orderBy, final boolean ascending, final int limit, final int offset,
-            final Filter... filters) {
-        Cursor cursor = queryKeysBy(orderBy, ascending, limit, offset, filters);
-        List<ID> list = convert(cursor);
-        cursor.close();
-        return list;
-    }
-//
-//    @Override
-//    protected List<Long> findKeysByParent(final Long parentKey) {
-//        // TODO Auto-generated method stub
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
-//
-//    public List<Long> persist(final Iterable<T> domains) {
-//        Log.d(TAG, "persist(Iterable)");
-//        final List<Long> ids = new ArrayList<Long>();
-//        Long id;
-//        for (T domain : domains) {
-//            id = persist(domain);
-//            ids.add(id);
-//        }
-//        return ids;
-//    }
-//
-//    @Override
-//    public Long persist(final T domain) {
-//        final AndroidEntity entity = createEntity(domain);
-//        persistUpdateDates(domain, entity, new Date());
-//        final Long id = persistEntity(entity);
-//        persistUpdateKeys(domain, id);
-//        return id;
-//    }
-//
-//    @Override
     protected Long persistCore(final ContentValues core) {
         Long id = -1L;
         final SQLiteDatabase dbCon = getDbConnection();
@@ -626,72 +584,6 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
             releaseDbConnection();
         }
         return id;
-    }
-//
-//    @Override
-//    protected final void persistUpdateDates(final CreatedUpdatedEntity domain, final AndroidEntity entity, final Date date) {
-//
-//        // populate createdDate
-//        String propertyName = domain._getNameCreatedDate();
-//        if (null != propertyName) {
-//
-//            // only if not previously created
-//            if (null == entity.getProperty(propertyName)) {
-//                entity.setProperty(propertyName, date.getTime());
-//                domain._setCreatedDate(date);
-//            }
-//        }
-//
-//        // update updatedDate
-//        propertyName = domain._getNameUpdatedDate();
-//        if (null != propertyName) {
-//
-//            // always update the date
-//            entity.setProperty(propertyName, date.getTime());
-//            domain._setUpdatedDate(date);
-//        }
-//    }
-//
-//    @Override
-//    protected void persistUpdateKeys(final T domain, final Long key) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
-//
-//    protected void populate(final AndroidEntity entity, final String name, final Object value) {
-//        if (null != entity && null != name) {
-//            entity.setProperty(name, value);
-//        }
-//    }
-//
-//    public CursorIterable<T> queryAll() {
-//        return queryBy(null, false, -1, 0);
-//    }
-//
-//    public CursorIterable<T> queryByPrimaryKeys(final Iterable<Long> primaryKeys) {
-//        return queryBy(null, false, -1, 0, createInFilter(getPrimaryKeyColumnName(), primaryKeys));
-//    }
-//    
-//    protected CursorIterable<T> queryByManyToMany(final AndroidManyToManyDaoBean m2mDao, final boolean owning, final Long foreignId) {
-//        final Collection<Long> ids = fetchKeysForManyToMany(m2mDao, owning, foreignId);
-//        return queryByPrimaryKeys(ids);
-//    }
-//
-//    protected CursorIterable<T> queryBy(final String columnName, final Object value) {
-//        return queryBy(null, false, -1, 0, createEqualsFilter(columnName, value));
-//    }
-//
-//    protected CursorIterable<T> queryBy(final String orderBy, final boolean ascending, final int limit, final int offset,
-//            final Expression... filters) {
-//        return (CursorIterable<T>) queryBy(false, orderBy, ascending, limit, offset, filters);
-//    }
-
-    protected Cursor queryKeysBy(final String columnName, final Object value) {
-        return queryKeysBy(null, false, -1, 0, createEqualsFilter(columnName, value));
-    }
-
-    protected Cursor queryKeysBy(final String orderBy, final boolean ascending, final int limit, final int offset,
-            final Filter... filters) {
-        return queryBy(this, true, orderBy, ascending, null, false, limit, offset, filters);
     }
 
     @Override
@@ -728,10 +620,13 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
 
         final SQLiteDatabase dbCon = dao.getDbConnection();
         try {
+            System.out.println("factory=" + factory + ", columns=" + Arrays.asList(columns));
             Cursor cursor = dbCon.queryWithFactory(factory, true, dao.getTableName(), columns, selection, selectionArgs, null,
                     null, orderByClause, limitClause);
             Log.d("queryBy", "sArgs=" + sArgs);
             Log.d("queryBy", dao.getTableName() + " WHERE " + selection + " returns " + cursor.getCount());
+            System.out.println("sArgs=" + sArgs);
+            System.out.println(dao.getTableName() + " WHERE " + selection + " returns " + cursor.getCount() + " in " + cursor);
             return cursor;
         }
         finally {

@@ -1,4 +1,4 @@
-package net.sf.mardao.api.dao;
+package net.sf.mardao.core.dao;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.sf.mardao.api.domain.AndroidLongEntity;
 
 import org.easymock.Capture;
 import org.easymock.EasyMock;
@@ -27,6 +26,10 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import java.util.Collection;
+import javax.persistence.Basic;
+import net.sf.mardao.core.Filter;
+import net.sf.mardao.core.domain.AndroidLongEntity;
 
 @RunWith(MardaoAndroidTestRunner.class)
 public class AndroidDaoTest {
@@ -43,28 +46,30 @@ public class AndroidDaoTest {
 
     @Test
     public void testPersistEntity() {
-        testDao.persistEntity(testDao.createEntity(IN));
+        testDao.persist(IN);
     }
 
     @Test
     public void testFindAll() {
-        Assert.assertEquals(Arrays.asList(OUT), testDao.findAll());
+        ArrayList actual = TypeDaoImpl.asList(testDao.queryAll());
+        Assert.assertEquals(Arrays.asList(OUT), actual);
     }
 
     @Test
     public void testFindAllKeys() {
-        Assert.assertEquals(Arrays.asList(new Long[]{2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L,}), testDao.findAllKeys());
+        ArrayList actual = TypeDaoImpl.asList(testDao.queryAllKeys());
+        Assert.assertEquals(Arrays.asList(new Long[]{2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L,}), actual);
     }
 
     @Test
     public void testQueryAll() {
-        Cursor cursor = testDao.queryAll();
+        Cursor cursor = (CursorIterable) testDao.queryAll();
         if (cursor.moveToFirst()) {
             int idCol = cursor.getColumnIndex("_id");
             int testCol = cursor.getColumnIndex("test");
             do {
                 TestBean expected = OUT[cursor.getPosition()];
-                Assert.assertEquals(expected._id, cursor.getLong(idCol));
+                Assert.assertEquals(expected.get_id().longValue(), cursor.getLong(idCol));
                 Assert.assertEquals(expected.test, cursor.getString(testCol));
             }
             while (cursor.moveToNext());
@@ -92,7 +97,8 @@ public class AndroidDaoTest {
 
     @Before
     public void createDao() {
-        testDao = new TestDao(TestBean.class, mockHelper);
+        testDao = new TestDao();
+        TestDao.setDatabaseHelper(mockHelper);
         testDao.getDbConnection();
     }
 
@@ -105,46 +111,51 @@ public class AndroidDaoTest {
 
     private static class TestBean extends AndroidLongEntity implements Serializable {
 
-        long   _id;
+        @Basic
         String test;
 
         public TestBean() {
         }
 
-        public TestBean(final int _id, final String test) {
-            this._id = _id;
+        public TestBean(final long _id, final String test) {
+            super(_id);
             this.test = test;
         }
 
         @Override
-        public Long getSimpleKey() {
-            return _id;
+        public String subString() {
+            return String.format("%s, test:%s", super.subString(), test);
         }
 
-        @Override
-        public String toString() {
-            return _id + " - " + test;
-        }
-
+        
         @Override
         public boolean equals(final Object obj) {
             if (obj instanceof TestBean) {
                 TestBean other = (TestBean) obj;
-                return _id == other._id && String.valueOf(test).equals(other.test);
+                return super.equals(obj) && 
+                        null == test ? null == other.test : test.equals(other.test);
             }
             return false;
         }
 
+        public String getTest() {
+            return test;
+        }
+
+        public void setTest(String test) {
+            this.test = test;
+        }
+
     }
 
-    private static class TestDao extends AndroidDaoImpl<TestBean> {
+    private static class TestDao extends TypeDaoImpl<TestBean, Long> {
 
-        public TestDao(final Class<TestBean> type, final AbstractDatabaseHelper helper) {
-            super(type, helper);
+        public TestDao() {
+            super(TestBean.class, Long.class);
         }
 
         public List<String> getColumnNames() {
-            return Arrays.asList(new String[]{"_id", "test"});
+            return Arrays.asList(new String[]{"test"});
         }
 
         public String getTableName() {
@@ -155,39 +166,48 @@ public class AndroidDaoTest {
             return "_id";
         }
 
-        @Override
-        protected TestBean createDomain(final Cursor cursor) {
-            TestBean testBean = new TestBean();
+        public Filter createEqualsFilter(String columnName, Object value) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
 
-            testBean._id = cursor.getLong(cursor.getColumnIndex("_id"));
-            testBean.test = cursor.getString(cursor.getColumnIndex("test"));
+        public Filter createGreaterThanOrEqualFilter(String columnName, Object value) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
 
-            return testBean;
+        public Filter createInFilter(String fieldName, Collection param) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        public Class getColumnClass(String columnName) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        public Long getSimpleKey(TestBean domain) {
+            return domain.get_id();
         }
 
         @Override
-        protected TestBean createDomain(final AndroidEntity entity) {
-            TestBean testBean = new TestBean();
-
-            testBean._id = (Long) entity.getProperty("_id");
-            testBean.test = (String) entity.getProperty("test");
-
-            return testBean;
+        protected Object getDomainProperty(TestBean domain, String name) {
+            if ("_id".equals(name)) {
+                return domain.get_id();
+            }
+            if ("test".equals(name)) {
+                return domain.getTest();
+            }
+            return super.getDomainProperty(domain, name); //To change body of generated methods, choose Tools | Templates.
+        }
+        
+        @Override
+        protected void setDomainStringProperty(TestBean domain, String name, Map<String, String> properties) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
-        @Override
-        protected AndroidEntity createEntity(final TestBean domain) {
-            AndroidEntity entity = new AndroidEntity();
-
-            entity.setProperty("_id", domain._id);
-            entity.setProperty("test", domain.test);
-
-            return entity;
+        public void setSimpleKey(TestBean domain, Long simpleKey) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
-        @Override
-        protected void populate(final AndroidEntity entity, final Map<String, Object> nameValuePairs) {
-            throw new RuntimeException(entity + "  " + nameValuePairs);
+        public int deleteAll() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
     }
@@ -209,7 +229,7 @@ public class AndroidDaoTest {
                     public Long answer() {
                         ContentValues contentValues = contentValuesCapture.getValue();
 
-                        Assert.assertEquals(IN._id, contentValues.get("_id"));
+                        Assert.assertEquals(IN.get_id(), contentValues.get("_id"));
                         Assert.assertEquals(IN.test, contentValues.get("test"));
 
                         return (Long) contentValues.get("_id");
@@ -222,7 +242,7 @@ public class AndroidDaoTest {
                         EasyMock.anyObject(String.class), EasyMock.anyObject(String.class))).andAnswer(new IAnswer<Cursor>() {
             @SuppressWarnings("unchecked")
             public Cursor answer() {
-                CursorIterable<AndroidLongEntity> cursor = EasyMock.createMock(CursorIterable.class);
+                CursorIterable<AndroidLongEntity, Long> cursor = EasyMock.createMock(CursorIterable.class);
 
                 final AtomicInteger cursorPosition = new AtomicInteger(-1);
                 final AtomicBoolean cursorClosed = new AtomicBoolean(false);
@@ -312,7 +332,7 @@ public class AndroidDaoTest {
 
                 EasyMock.expect(cursor.getLong(0)).andAnswer(new IAnswer<Long>() {
                     public Long answer() throws Throwable {
-                        return OUT[cursorPosition.get()]._id;
+                        return OUT[cursorPosition.get()].get_id();
                     }
                 }).anyTimes();
 
@@ -337,7 +357,7 @@ public class AndroidDaoTest {
             public Integer answer() throws Throwable {
                 Object[] args = EasyMock.getCurrentArguments();
 
-                Assert.assertArrayEquals(new String[]{String.valueOf(IN._id)}, (Object[]) args[2]);
+                Assert.assertArrayEquals(new String[]{String.valueOf(IN.get_id())}, (Object[]) args[2]);
 
                 return 1;
             }

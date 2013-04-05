@@ -1,4 +1,4 @@
-package net.sf.mardao.api.dao;
+package net.sf.mardao.core.dao;
 
 import java.io.File;
 

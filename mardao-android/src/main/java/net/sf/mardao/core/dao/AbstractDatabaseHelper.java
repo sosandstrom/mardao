@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.sf.mardao.api.dao;
+package net.sf.mardao.core.dao;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import java.util.Collection;
 import java.util.List;
-import net.sf.mardao.api.domain.AndroidLongEntity;
 
 /**
  *
@@ -130,7 +129,7 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
         }
     }
     
-    public static final List<Long> asKeys(Collection<AndroidLongEntity> entities) {
-        return AndroidDaoImpl.asKeys(entities);
-    }
+//    public static final List<Long> asKeys(Collection entities) {
+//        return TypeDaoImpl.asKeys(entities);
+//    }
 }

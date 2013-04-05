@@ -1,28 +1,26 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package net.sf.mardao.api.dao;
+package net.sf.mardao.core.dao;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
-import net.sf.mardao.api.domain.AndroidLongEntity;
 import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteCursorDriver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQuery;
+import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 
  * @author os
  */
-public class CursorIterable<T extends AndroidLongEntity> extends SQLiteCursor implements Iterable<T> {
+public class CursorIterable<T, ID extends Serializable> extends SQLiteCursor implements Iterable<T> {
 
     private boolean           iterating   = false;
     private boolean           inIteration = false;
 
-    private AndroidDaoImpl<T> dao;
+    private TypeDaoImpl<T, ID> dao;
 
     public CursorIterable(final SQLiteDatabase db, final SQLiteCursorDriver driver, final String editTable,
             final SQLiteQuery query) {
@@ -30,7 +28,7 @@ public class CursorIterable<T extends AndroidLongEntity> extends SQLiteCursor im
     }
 
     public CursorIterable(final SQLiteDatabase db, final SQLiteCursorDriver driver, final String editTable,
-            final SQLiteQuery query, final AndroidDaoImpl<T> dao) {
+            final SQLiteQuery query, final TypeDaoImpl<T, ID> dao) {
         super(db, driver, editTable, query);
         this.dao = dao;
     }
@@ -63,15 +61,21 @@ public class CursorIterable<T extends AndroidLongEntity> extends SQLiteCursor im
         }
 
         public synchronized T next() {
-            // use cursor, create domain object, move to next
-            if (isAfterLast()) {
+            try {
+                // use cursor, create domain object, move to next
+                if (isAfterLast()) {
+                    return null;
+                }
+                T domain = dao.createDomain(CursorIterable.this);
+                inIteration = true;
+                moveToNext();
+                inIteration = false;
+                return domain;
+            } catch (InstantiationException ex) {
+                return null;
+            } catch (IllegalAccessException ex) {
                 return null;
             }
-            T domain = dao.createDomain(CursorIterable.this);
-            inIteration = true;
-            moveToNext();
-            inIteration = false;
-            return domain;
         }
 
         public void remove() {

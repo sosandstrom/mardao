@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.sf.mardao.api.dao;
+package net.sf.mardao.core.dao;
 
 import java.io.Serializable;
 

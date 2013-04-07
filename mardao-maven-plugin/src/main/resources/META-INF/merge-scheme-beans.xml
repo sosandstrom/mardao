@@ -498,6 +498,7 @@
 
 				<!-- spring-dao.xml bean context -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
+                                        <property name="requiresOnClasspath" value="org.slf4j.ILoggerFactory" />
 					<property name="templatePrefix" value="v2/spring-dao" />
 					<property name="templateSuffix" value=".vm" />
 					<property name="destFolder" value="resources" />
@@ -505,6 +506,30 @@
 					<property name="listingEntities" value="true" />
 					<property name="filePrefix" value="spring-dao" />
 					<property name="fileSuffix" value=".xml" />
+				</bean>
+
+				<!-- concrete DatabaseHelper (stub) -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+                                        <property name="requiresOnClasspath" value="net.sf.mardao.core.domain.AndroidLongEntity" />
+					<property name="templatePrefix" value="v2/DatabaseHelper" />
+					<property name="templateSuffix" value="Android.vm" />
+					<property name="destFolder" value="srcDao" />
+					<property name="entity" value="false" />
+					<property name="listingEntities" value="true" />
+					<property name="filePrefix" value="DatabaseHelper" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+
+				<!-- generated DatabaseHelper -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+                                        <property name="requiresOnClasspath" value="net.sf.mardao.core.domain.AndroidLongEntity" />
+					<property name="templatePrefix" value="v2/GeneratedDatabaseHelper" />
+					<property name="templateSuffix" value="Android.vm" />
+					<property name="destFolder" value="targetDao" />
+					<property name="entity" value="false" />
+					<property name="listingEntities" value="true" />
+					<property name="filePrefix" value="GeneratedDatabaseHelper" />
+					<property name="fileSuffix" value=".java" />
 				</bean>
 			</list>
 		</property>

@@ -160,7 +160,10 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
         return new Filter.IN(fieldName, param);
     }
 
-    
+    public int deleteAll() {
+        return deleteWithConnection(null, null);
+    }
+
     @Override
     protected int doDelete(Object parentKey, Iterable<ID> simpleKeys) {
         StringBuffer sb = new StringBuffer();
@@ -566,6 +569,15 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
             dao.releaseDbConnection();
         }
 
+    }
+    
+    public void onCreate(SQLiteDatabase sqldb) {
+        Log.i(TAG, "onCreate " + getTableName());
+    }
+
+    public void onUpgrade(SQLiteDatabase sqldb, int fromVersion, int toVersion) {
+        Log.i(TAG, String.format("onUpgrade(%s) from %d to %d",
+                getTableName(), fromVersion, toVersion));
     }
 
 //    @Override

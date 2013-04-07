@@ -3,11 +3,14 @@ package net.sf.mardao.plugin;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.sf.mardao.domain.MergeScheme;
 import net.sf.mardao.domain.MergeTemplate;
@@ -139,6 +142,8 @@ public class AbstractMardaoMojo extends AbstractMojo {
     
     public static final java.text.DateFormat DATEFORMAT   = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
+    protected URLClassLoader loader;
+    
     protected String                         daoBasePackage;
     protected String                         domainBasePackage;
     protected String                         controllerBasePackage;
@@ -318,6 +323,16 @@ public class AbstractMardaoMojo extends AbstractMojo {
     }
 
     protected void mergeTemplate(MergeTemplate mt, String entityName) {
+        if (null != mt.getRequiresOnClasspath()) {
+            try {
+                loader.loadClass(mt.getRequiresOnClasspath());
+            } catch (ClassNotFoundException ex) {
+                getLog().info(String.format("Skipping %s as %s is not on classpath.", 
+                        mt.getTemplatePrefix(), mt.getRequiresOnClasspath()));
+                return;
+            }
+        }
+        
         // {prefix} {entitiyName} {middle} {persistenceType} {suffix}
         // Abstract Employee Dao Spring .java
 
@@ -349,7 +364,9 @@ public class AbstractMardaoMojo extends AbstractMojo {
         // lookup destination folder, and merge the template:
         File folder = destFolders.get(mt.getDestFolder());
 
-        mergeTemplate(templateName.toString(), folder, fileName.toString());
+        boolean overwrite = "targetDao".equals(mt.getDestFolder());
+        mergeTemplate(templateName.toString(), folder, fileName.toString(),
+                overwrite);
     }
 
     /**
@@ -359,7 +376,8 @@ public class AbstractMardaoMojo extends AbstractMojo {
      * @param folder
      * @param javaFilename
      */
-    private void mergeTemplate(String templateFilename, File folder, String javaFilename) {
+    private void mergeTemplate(String templateFilename, File folder, 
+            String javaFilename, boolean overwrite) {
         final File javaFile = new File(folder, javaFilename);
 
         // create destination folder?
@@ -369,7 +387,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
         }
 
         // up-to-date?
-        if (false == javaFile.exists()) {
+        if (false == javaFile.exists() || overwrite) {
             getLog().info("Merging " + templateFilename + " for " + javaFilename);
             try {
                 final PrintWriter writer = new PrintWriter(javaFile);

@@ -1,0 +1,114 @@
+package ${daoPackage};
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import net.sf.mardao.core.dao.AbstractDatabaseHelper;
+
+/**
+ * Generated Database Helper, which instantiates the entity Dao(s).
+ * @author mardao
+ */
+public abstract class GeneratedDatabaseHelper extends AbstractDatabaseHelper {
+
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )
+    /** Dao for Entity ${entity.simpleName} */
+    protected final ${entity.simpleName}Dao ${helper.firstToLower($entity.simpleName)}Dao;
+## loop inner Many-To-Many daos
+#foreach( $field in $entity.manyToManys )
+#if( $field.mappedBy )		 
+##  This is inverse side (mappedBy="lorem")
+#set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
+            /** Dao for Many-To-Many relation ${field.name} */
+            protected final AndroidManyToManyDaoBean ${daoName};
+#else
+	 // This is owning side
+#end
+#end
+#end
+#end
+    
+    protected GeneratedDatabaseHelper(Context context) {
+        super(context);
+
+        // instantiate m2m Daos first
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+## loop inner Many-To-Many daos
+#foreach( $field in $entity.manyToManys )
+#if( $field.mappedBy )		 
+##  This is inverse side (mappedBy="lorem")
+#set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
+        ${daoName} = new AndroidManyToManyDaoBean(this, "${field.mappedBy}_${field.name}");
+#end
+#end
+#end
+#end
+
+        // then ordinary Daos
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+        ${helper.firstToLower($entity.simpleName)}Dao = new ${entity.simpleName}DaoBean();
+## loop inner Many-To-One daos
+#foreach( $field in $entity.manyToOnes )
+            // Dao for Many-To-One relation ${field.name}
+            ((${entity.simpleName}DaoBean) ${helper.firstToLower($entity.simpleName)}Dao).set${helper.firstToUpper($field.name)}Dao((Generated${field.entity.simpleName}DaoImpl) ${helper.firstToLower($field.entity.simpleName)}Dao);
+#end
+## loop inner Many-To-Many daos
+#foreach( $field in $entity.manyToManys )
+#if( $field.mappedBy )		 
+##  This is inverse side (mappedBy="lorem")
+#set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
+#else
+##  This is owning side
+#set( $key = $entity.simpleName + "." + $field.name )
+#set( $inverse = $inverseFields.get($key))
+#set( $daoName = "m2m_" + $field.name + "_" + $inverse.name + "Dao" )
+#end
+            // Dao for Many-To-Many relation ${field.name}
+            ((${entity.simpleName}DaoBean) ${helper.firstToLower($entity.simpleName)}Dao).set${helper.firstToUpper($field.name)}Dao(${daoName});
+#end
+#end
+#end
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase sqld) {
+        Log.i(TAG, "DatabaseHelper.onCreate()");
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )
+    ((${entity.simpleName}DaoBean) ${helper.firstToLower($entity.simpleName)}Dao).onCreate(sqld);
+## loop inner Many-To-Many daos
+#foreach( $field in $entity.manyToManys )
+#if( $field.mappedBy )		 
+##  This is inverse side (mappedBy="lorem")
+#set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
+            ${daoName}.onCreate(sqld);
+#end
+#end
+#end
+#end
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase sqld, int fromVersion, int toVersion) {
+        Log.i(TAG, "DatabaseHelper.onUpgrade()");
+
+#foreach( $group in $packages.values() )
+#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+        ((${entity.simpleName}DaoBean) ${helper.firstToLower($entity.simpleName)}Dao).onUpgrade(sqld, fromVersion, toVersion);
+## loop inner Many-To-Many daos
+#foreach( $field in $entity.manyToManys )
+#if( $field.mappedBy )		 
+##  This is inverse side (mappedBy="lorem")
+#set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
+            ${daoName}.onUpgrade(sqld, fromVersion, toVersion);
+#end
+#end
+#end
+#end
+    }
+    
+}

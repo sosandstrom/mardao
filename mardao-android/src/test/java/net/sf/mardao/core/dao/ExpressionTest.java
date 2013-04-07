@@ -1,7 +1,5 @@
 package net.sf.mardao.core.dao;
 
-import net.sf.mardao.core.dao.TypeDaoImpl;
-import net.sf.mardao.core.dao.AndroidEntity;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -14,8 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import android.database.Cursor;
-import java.util.Collection;
 import net.sf.mardao.core.Filter;
 
 @RunWith(MardaoAndroidTestRunner.class)
@@ -71,10 +67,6 @@ public class ExpressionTest {
             }
 
             public void setSimpleKey(AndroidLongEntity domain, Long simpleKey) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            public int deleteAll() {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 

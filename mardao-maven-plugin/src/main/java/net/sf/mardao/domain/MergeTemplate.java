@@ -12,6 +12,11 @@ public class MergeTemplate {
 	private boolean typeSpecific = false;
 	private boolean typeAppend = true;
 	private boolean listingEntities = false;
+
+        /**
+         * @since 2.2.4
+         */
+        private String requiresOnClasspath = null;
 	
 	public void setListingEntities(boolean listingEntities) {
 		this.listingEntities = listingEntities;
@@ -79,6 +84,14 @@ public class MergeTemplate {
 	public boolean isTypeAppend() {
 		return typeAppend;
 	}
+
+    public String getRequiresOnClasspath() {
+        return requiresOnClasspath;
+    }
+
+    public void setRequiresOnClasspath(String requiresOnClasspath) {
+        this.requiresOnClasspath = requiresOnClasspath;
+    }
 	
 	
 }

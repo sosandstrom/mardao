@@ -50,8 +50,6 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
      */
     private PluginDescriptor descriptor;    
     
-    protected URLClassLoader loader;
-
     private final Map<String, Group> packages = new HashMap<String, Group>();
     private final Map<String, Entity> entities = new HashMap<String, Entity>();
     private final Map<File, Entity> entityFiles = new TreeMap<File, Entity>();

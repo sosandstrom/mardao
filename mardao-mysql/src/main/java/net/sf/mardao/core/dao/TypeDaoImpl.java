@@ -23,6 +23,8 @@ import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.geo.DLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.NonTransientDataAccessException;
@@ -70,6 +72,9 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     /** Used to generate unique ids */
     @Autowired
     protected DataFieldMaxValueIncrementer jdbcIncrementer;
+    
+    /** Using slf4j logging */
+    protected static final Logger   LOG = LoggerFactory.getLogger(DaoImpl.class);
     
     protected TypeDaoImpl(Class<T> type, Class<ID> idType) {
         super(type, idType);

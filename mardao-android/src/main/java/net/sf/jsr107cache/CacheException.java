@@ -8,6 +8,6 @@ package net.sf.jsr107cache;
  *
  * @author sosandstrom
  */
-public class CacheException extends RuntimeException {
+public class CacheException extends Exception {
 
 }

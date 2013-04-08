@@ -42,6 +42,7 @@ public abstract class GeneratedDatabaseHelper extends AbstractDatabaseHelper {
 ##  This is inverse side (mappedBy="lorem")
 #set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
         ${daoName} = new AndroidManyToManyDaoBean(this, "${field.mappedBy}_${field.name}");
+        ${daoName}.setDatabaseHelper(this);
 #end
 #end
 #end
@@ -51,6 +52,7 @@ public abstract class GeneratedDatabaseHelper extends AbstractDatabaseHelper {
 #foreach( $group in $packages.values() )
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
         ${helper.firstToLower($entity.simpleName)}Dao = new ${entity.simpleName}DaoBean();
+        ((${entity.simpleName}DaoBean) ${helper.firstToLower($entity.simpleName)}Dao).setDatabaseHelper(this);
 ## loop inner Many-To-One daos
 #foreach( $field in $entity.manyToOnes )
             // Dao for Many-To-One relation ${field.name}

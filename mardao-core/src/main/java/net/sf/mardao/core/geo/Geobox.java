@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Geobox {
-    static final Logger LOG = LoggerFactory.getLogger(Geobox.class);
 
     public static final int RADIUS = 6378135;
     
@@ -71,7 +68,7 @@ public class Geobox {
         final long mLat = getMask(lat, 90f, bits);
         final long mLng = getMask(lng, 180f, bits+1);
         final long hash = precision | (mLat<<30L) | mLng;
-        LOG.info("lat 0x{}, long 0x{}, bits 0x" + Long.toHexString(precision), Long.toHexString(mLat), Long.toHexString(mLng));
+//        LOG.info("lat 0x{}, long 0x{}, bits 0x" + Long.toHexString(precision), Long.toHexString(mLat), Long.toHexString(mLng));
         
         return hash;
     }
@@ -105,8 +102,8 @@ public class Geobox {
         if (0 < bit) {
             tail = getHashRecursive(minor, major + (major < 0 ? dM : -dM), bit-1, dMinor, dM);
         }
-        LOG.info("bit {}, maj {}, dM {} hash 0b{}", new Object[] {
-           Integer.toString(bit), Float.toString(major), Float.toString(dMajor), Long.toBinaryString(hash)});
+//        LOG.info("bit {}, maj {}, dM {} hash 0b{}", new Object[] {
+//           Integer.toString(bit), Float.toString(major), Float.toString(dMajor), Long.toBinaryString(hash)});
         return hash | tail;
     }
     
@@ -125,9 +122,9 @@ public class Geobox {
                 hash |= 1L << b;
                 minor = major - D_MAJOR[i+1];
             }
-            LOG.debug("bit {}, maj {}, dM {} hash 0b{} 0x{}", new Object[] {
-                Integer.toString(b), Float.toString(major), Float.toString(D_MAJOR[i]), 
-                Long.toBinaryString(hash), Long.toHexString(hash)});
+//            LOG.debug("bit {}, maj {}, dM {} hash 0b{} 0x{}", new Object[] {
+//                Integer.toString(b), Float.toString(major), Float.toString(D_MAJOR[i]), 
+//                Long.toBinaryString(hash), Long.toHexString(hash)});
             
             major = temp;
         }
@@ -192,9 +189,9 @@ public class Geobox {
             nLat = lat - dy/2;
         }
         
-        LOG.info("getCell=0x{} bit={} lat={} lng={} dy={} dx={} mx=0x{} my=0x{}", new Object[] {
-            Long.toHexString(my+mx), bit, lat, lng, dy, dx,
-            Long.toHexString(mx), Long.toHexString(my)});
+//        LOG.info("getCell=0x{} bit={} lat={} lng={} dy={} dx={} mx=0x{} my=0x{}", new Object[] {
+//            Long.toHexString(my+mx), bit, lat, lng, dy, dx,
+//            Long.toHexString(mx), Long.toHexString(my)});
         long sub = (2 < bit) ? getCell(nLat, nLng, bit-2, dy/2, dx/2) : 0;
         long returnValue = my +  mx + sub;
         

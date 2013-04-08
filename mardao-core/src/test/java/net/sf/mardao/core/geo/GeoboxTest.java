@@ -8,15 +8,13 @@ import net.sf.mardao.core.geo.DLocation;
 import net.sf.mardao.core.geo.Geobox;
 import java.util.Set;
 import junit.framework.TestCase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author os
  */
 public class GeoboxTest extends TestCase {
-    static final Logger LOG = LoggerFactory.getLogger(GeoboxTest.class);
+//    static final Logger LOG = LoggerFactory.getLogger(GeoboxTest.class);
     
     public GeoboxTest(String testName) {
         super(testName);
@@ -25,12 +23,12 @@ public class GeoboxTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        LOG.info("=== {} setUp() ===", getName());
+//        LOG.info("=== {} setUp() ===", getName());
     }
     
     @Override
     protected void tearDown() throws Exception {
-        LOG.info("--- {} tearDown() ---", getName());
+//        LOG.info("--- {} tearDown() ---", getName());
         super.tearDown();
     }
     
@@ -55,17 +53,17 @@ public class GeoboxTest extends TestCase {
     }
     
     public void testGetMask() {
-        LOG.info("mask for -179 is 0x{}", Long.toHexString(Geobox.getMask(-179f, 180f, 16)));
-        LOG.info("mask for -1 is 0x{}", Long.toHexString(Geobox.getMask(-1f, 180f, 16)));
-        LOG.info("mask for 0 is 0x{}", Long.toHexString(Geobox.getMask(0f, 180f, 16)));
-        LOG.info("mask for 1 is 0x{}", Long.toHexString(Geobox.getMask(1f, 180f, 16)));
-        LOG.info("mask for 179 is 0x{}", Long.toHexString(Geobox.getMask(179f, 180f, 16)));
+//        LOG.info("mask for -179 is 0x{}", Long.toHexString(Geobox.getMask(-179f, 180f, 16)));
+//        LOG.info("mask for -1 is 0x{}", Long.toHexString(Geobox.getMask(-1f, 180f, 16)));
+//        LOG.info("mask for 0 is 0x{}", Long.toHexString(Geobox.getMask(0f, 180f, 16)));
+//        LOG.info("mask for 1 is 0x{}", Long.toHexString(Geobox.getMask(1f, 180f, 16)));
+//        LOG.info("mask for 179 is 0x{}", Long.toHexString(Geobox.getMask(179f, 180f, 16)));
     }
     
     public void testGetHash() {
-        LOG.info("hash for (-89,-179) is 0x{}", Long.toHexString(Geobox.getHash(-89.99f, -179.99f, 28)));
-        LOG.info("hash for (0,0) is 0x{}", Long.toHexString(Geobox.getHash(0f, 0f, 28)));
-        LOG.info("hash for (89,179) is 0x{}", Long.toHexString(Geobox.getHash(89.999988f, 179.99995f, 28)));
+//        LOG.info("hash for (-89,-179) is 0x{}", Long.toHexString(Geobox.getHash(-89.99f, -179.99f, 28)));
+//        LOG.info("hash for (0,0) is 0x{}", Long.toHexString(Geobox.getHash(0f, 0f, 28)));
+//        LOG.info("hash for (89,179) is 0x{}", Long.toHexString(Geobox.getHash(89.999988f, 179.99995f, 28)));
     }
     
     public void testGetDistance() {
@@ -74,10 +72,10 @@ public class GeoboxTest extends TestCase {
         final DLocation P2 = new DLocation(56.3445f, 15.05f);
         final DLocation P3 = new DLocation(56.34043f, 15.05f);
         final DLocation P4 = new DLocation(56.34001f, 15.05f);
-        LOG.info("0.047 = {}m", Geobox.distance(P0, P1));
-        LOG.info("0.0045 = {}m", Geobox.distance(P0, P2));
-        LOG.info("0.00043 = {}m", Geobox.distance(P0, P3));
-        LOG.info("56.34000..56.34001 (0.00001) = {}", Geobox.distance(P0, P4));
+//        LOG.info("0.047 = {}m", Geobox.distance(P0, P1));
+//        LOG.info("0.0045 = {}m", Geobox.distance(P0, P2));
+//        LOG.info("0.00043 = {}m", Geobox.distance(P0, P3));
+//        LOG.info("56.34000..56.34001 (0.00001) = {}", Geobox.distance(P0, P4));
     }
 
 //    public void testBits() {
@@ -114,7 +112,7 @@ public class GeoboxTest extends TestCase {
 
             DLocation pMin = new DLocation(latMin, lat);
             DLocation pMax = new DLocation(latMax, lat);
-            LOG.info("lat distance for {} bits is {}m", bits, Geobox.distance(pMin, pMax));
+//            LOG.info("lat distance for {} bits is {}m", bits, Geobox.distance(pMin, pMax));
 
             pMin = new DLocation(lat, latMin);
             pMax = new DLocation(lat, latMax);
@@ -123,83 +121,15 @@ public class GeoboxTest extends TestCase {
     }
     
     public void testTuple() {
-        LOG.info("tuple20={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_20_39m));
-        LOG.info("tuple22={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_22_10m));
-        LOG.info("tuple23={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_23_53dm));
+//        LOG.info("tuple20={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_20_39m));
+//        LOG.info("tuple22={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_22_10m));
+//        LOG.info("tuple23={}", Geobox.getTuple(56.34f, 15.05f, Geobox.BITS_23_53dm));
         
         final long hash = Geobox.getHash(55.6030006409f, 13.0010004044f, Geobox.BITS_12_10km);
-        LOG.info("geoHash 12 = {}", hash);
+//        LOG.info("geoHash 12 = {}", hash);
         Set<Long> boxes = Geobox.getTuple(55.6030006409f, 13.0010004044f, Geobox.BITS_12_10km);
-        LOG.info("tuple 12 = {}", boxes);
+//        LOG.info("tuple 12 = {}", boxes);
         assertTrue("TupleContains", boxes.contains(hash));
     }
     
-//    public void testGetHashMatrix4x4() {
-//        final int N = 2;
-//        final float DY = 90f/N;
-//        final float DX = 180f/N;
-//        final Long v[] = new Long[N*2];
-//        final String s[] = new String[N*2];
-//        for (int y = N-1; -N <= y; y--) {
-//            for (int x = -N; x < N; x++) {
-//                v[x+N] = Geobox.getHashIterative(DX*(x+0.01f), DY*(y+0.01f), N+1);
-//                s[x+N] = Long.toBinaryString(v[x+N]);
-//            }
-//            LOG.info("{}\t{}\t{}\t{}", s);
-//        }
-//    }
-//
-//    public void testGetHashMatrix8x8() {
-//        final int N = 4;
-//        final float DY = 90f/N;
-//        final float DX = 180f/N;
-//        final Long v[] = new Long[N*2];
-//        final String s[] = new String[N*2];
-//        for (int y = N-1; -N <= y; y--) {
-//            for (int x = -N; x < N; x++) {
-//                v[x+N] = Geobox.getHashIterative(DX*(x+0.01f), DY*(y+0.01f), N+1);
-//                s[x+N] = Long.toBinaryString(v[x+N]);
-//            }
-//            LOG.info("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", s);
-//        }
-//    }
-//
-//    public void testGetHashMatrix16x16() {
-//        final int N = 8;
-//        final float DY = 90f/N;
-//        final float DX = 180f/N;
-//        final Long v[] = new Long[N*2];
-//        final String s[] = new String[N*2];
-//        for (int y = N-1; -N <= y; y--) {
-//            for (int x = -N; x < N; x++) {
-//                v[x+N] = Geobox.getHashIterative(DX*(x+0.01f), DY*(y+0.01f), 7);
-//                s[x+N] = Long.toBinaryString(v[x+N]);
-//            }
-//            LOG.info("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", s);
-//        }
-//    }
-//
-    /*
-    public void testGetCellSE1() {
-        assertEquals("(-10,10) 1B", 6L, Geobox.getCell(-10f, 10f, 1));
-    }
-    public void testGetCellSE2() {
-        assertEquals("(-10,10) 2B", 0x6AL, Geobox.getCell(-10f, 10f, 2));
-    }
-    public void testGetCellSW() {
-        assertEquals("(-90,-180) 4B", 0x0000L, Geobox.getCell(-90f, -180f, 4));
-    }
-    public void testGetCellSE() {
-        assertEquals("(-90,180) 4B", 0x5555L, Geobox.getCell(-90f, 180f, 4));
-    }
-    public void testGetCellNW() {
-        assertEquals("(90,-180) 4B", 0xAAAAL, Geobox.getCell(90f, -180f, 4));
-    }
-    public void testGetCellNE() {
-        assertEquals("(90,180) 4B", 0xFFFFL, Geobox.getCell(90f, 180f, 4));
-    }
-    public void testGetCellOrigo() {
-        assertEquals("(0,0) 4B", 0xC000L, Geobox.getCell(0f, 0f, 4));
-    }
-    */
 }

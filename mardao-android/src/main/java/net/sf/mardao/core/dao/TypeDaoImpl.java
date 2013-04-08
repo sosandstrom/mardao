@@ -29,9 +29,20 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
 
     protected TypeDaoImpl(final Class<T> type, Class<ID> idType) {
         super(type, idType);
-        Log.d(TAG, "<init>");
+        debug("<init>");
     }
 
+    @Override
+    protected void println(int priority, String format, Object... args) {
+        Log.println(priority, TAG, String.format(format, args));
+    }
+
+    @Override
+    protected void printStackTrace(int priority, String message, Throwable t) {
+        Log.println(priority, TAG, message);
+        Log.println(priority, TAG, Log.getStackTraceString(t));
+    }
+    
     protected final synchronized SQLiteDatabase getDbConnection() {
         return databaseHelper.getDbConnection();
     }
@@ -174,7 +185,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
             sb.append(i.hasNext() ? "," : "");
         }
         final String whereClause = String.format("%s IN (%s)", getPrimaryKeyColumnName(), sb.toString());
-        Log.d(TAG, "delete " + getTableName() + " WHERE " + whereClause);
+        debug("delete %s WHERE %s", getTableName(), whereClause);
         final String whereArgs[] = {};
         return deleteWithConnection(whereClause, whereArgs);
     }
@@ -335,6 +346,10 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
             }
             if (value instanceof Byte) {
                 cv.put(name, (Byte) value);
+                return;
+            }
+            if (value instanceof Date) {
+                cv.put(name, (Long) ((Date)value).getTime());
                 return;
             }
             if (value instanceof Double) {
@@ -572,12 +587,12 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     }
     
     public void onCreate(SQLiteDatabase sqldb) {
-        Log.i(TAG, "onCreate " + getTableName());
+        info("onCreate %s", getTableName());
     }
 
     public void onUpgrade(SQLiteDatabase sqldb, int fromVersion, int toVersion) {
-        Log.i(TAG, String.format("onUpgrade(%s) from %d to %d",
-                getTableName(), fromVersion, toVersion));
+        info("onUpgrade(%s) from %d to %d",
+                getTableName(), fromVersion, toVersion);
     }
 
 //    @Override
@@ -585,11 +600,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
         Long id = -1L;
         final SQLiteDatabase dbCon = getDbConnection();
         try {
-            Log.d(TAG, "persistEntity " + getTableName() + " " + core);
+            debug("persistEntity %s %s", getTableName(), core);
             id = dbCon.insertOrThrow(getTableName(), null, core);
         }
         catch (SQLiteException e) {
-            Log.d(TAG, e.getMessage() + " updating existing row");
+            debug("%s updating existing row", e.getMessage());
             id = updateByCore(core);
         }
         finally {
@@ -635,8 +650,8 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
             System.out.println("factory=" + factory + ", columns=" + Arrays.asList(columns));
             Cursor cursor = dbCon.queryWithFactory(factory, true, dao.getTableName(), columns, selection, selectionArgs, null,
                     null, orderByClause, limitClause);
-            Log.d("queryBy", "sArgs=" + sArgs);
-            Log.d("queryBy", dao.getTableName() + " WHERE " + selection + " returns " + cursor.getCount());
+//            debug("queryBy sArgs=%s", sArgs);
+//            debug("queryBy %s WHERE %s returns %d", dao.getTableName(), selection, cursor.getCount());
             System.out.println("sArgs=" + sArgs);
             System.out.println(dao.getTableName() + " WHERE " + selection + " returns " + cursor.getCount() + " in " + cursor);
             return cursor;
@@ -691,11 +706,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
         try {
             id = entity.getAsLong(getPrimaryKeyColumnName());
             String whereArgs[] = {id.toString()};
-            Log.d(TAG, "updateByCore " + getTableName() + " "+ entity);
+            debug("updateByCore %s %s", getTableName(), entity);
             dbCon.update(getTableName(), entity, "_id = ?", whereArgs);
         }
         catch (SQLiteException e2) {
-            Log.e(TAG, "SQLiteException" + e2.getMessage() + e2.toString());
+            error("SQLiteException %s: %s", e2.getMessage(), e2.toString());
             id = -1L;
         }
         finally {

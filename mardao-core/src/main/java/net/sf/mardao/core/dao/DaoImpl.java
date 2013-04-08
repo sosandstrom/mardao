@@ -27,9 +27,6 @@ import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.MardaoListFuture;
 import net.sf.mardao.core.geo.DLocation;
 import net.sf.mardao.core.geo.Geobox;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * This is the base class for all implementations of the Dao Bean.
@@ -59,9 +56,6 @@ public abstract class DaoImpl<T, ID extends Serializable,
     /** Default name of the geoboxes column is "geoboxes" */
     public static final String COLUMN_NAME_GEOBOXES_DEFAULT = "geoboxes";
 
-    /** Using slf4j logging */
-    protected static final Logger   LOG = LoggerFactory.getLogger(DaoImpl.class);
-    
     protected static final String AUDIT_CURSOR_PREFIX = "audit-";
     
     private Collection<Integer> boxBits = Arrays.asList(
@@ -210,6 +204,45 @@ public abstract class DaoImpl<T, ID extends Serializable,
     protected abstract CursorPage<ID, ID> whatsDeleted(Date since, int pageSize, String cursorKey);
     
     // --- END persistence-type beans must implement these ---
+
+    // --- BEGIN Logging interface ---
+    
+    /** Override this method to do other than System.out.println() */
+    protected void println(int priority, String format, Object... args) {
+        System.out.println(String.format("%s: %s", getTableName(),
+                String.format(format, args)));
+    }
+    /** Override this method to do other than System.out.println() */
+    protected void printStackTrace(int priority, String message, Throwable t) {
+        System.out.println(String.format("%s: %s: %s", getTableName(),
+                message, t));
+    }
+    protected void debug(String message, Throwable t) {
+        printStackTrace(3, message, t);
+    }
+    protected void debug(String format, Object... args) {
+        println(3, format, args);
+    }
+    protected void error(String message, Throwable t) {
+        printStackTrace(6, message, t);
+    }
+    protected void error(String format, Object... args) {
+        println(6, format, args);
+    }
+    protected void info(String message, Throwable t) {
+        printStackTrace(4, message, t);
+    }
+    protected void info(String format, Object... args) {
+        println(4, format, args);
+    }
+    protected void warn(String message, Throwable t) {
+        printStackTrace(5, message, t);
+    }
+    protected void warn(String format, Object... args) {
+        println(5, format, args);
+    }
+    
+    // --- END Logging interface ---
     
     public T createDomain(Map<String, String> properties) {
         if (null == properties) {
@@ -236,10 +269,10 @@ public abstract class DaoImpl<T, ID extends Serializable,
             return domain;
         }
         catch (IllegalAccessException shouldNeverHappen) {
-            LOG.error(getTableName(), shouldNeverHappen);
+            error(getTableName(), shouldNeverHappen);
         }
         catch (InstantiationException shouldNeverHappen) {
-            LOG.error(getTableName(), shouldNeverHappen);
+            error(getTableName(), shouldNeverHappen);
         }
         return null;
     }
@@ -269,10 +302,10 @@ public abstract class DaoImpl<T, ID extends Serializable,
             return domain;
         }
         catch (IllegalAccessException shouldNeverHappen) {
-            LOG.error(getTableName(), shouldNeverHappen);
+            error(getTableName(), shouldNeverHappen);
         }
         catch (InstantiationException shouldNeverHappen) {
-            LOG.error(getTableName(), shouldNeverHappen);
+            error(getTableName(), shouldNeverHappen);
         }
         return null;
     }
@@ -509,21 +542,21 @@ public abstract class DaoImpl<T, ID extends Serializable,
         return keys;
     }
     
-    protected static Cache getMemCache() {
+    protected Cache getMemCache() {
         if (null == memCache) {
             try {
                 final CacheFactory factory = CacheManager.getInstance().getCacheFactory();
                 memCache = factory.createCache(memCacheConfig);
             }
             catch (CacheException ce) {
-                LOG.error("Could not create memCache", ce);
+                error("Could not create memCache", ce);
             }
         }
         return memCache;
     }
     
     protected final void updateMemCache(Collection<String> memCacheKeys) {
-        LOG.debug("removing cache for {} {}", memCacheKeys.size(), getTableName());
+        debug("removing cache for {} {}", memCacheKeys.size(), getTableName());
         if (!memCacheKeys.isEmpty()) {
             // invalidate cache
             if (memCacheAll) {
@@ -543,7 +576,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
             updateMemCache(domains.keySet());
         }
         else {
-            LOG.debug("updating cache for {} {}", domains.size(), getTableName());
+            debug("updating cache for %d %s", domains.size(), getTableName());
             if (!domains.isEmpty()) {
                 // invalidate cache
                 if (memCacheAll) {
@@ -818,12 +851,12 @@ public abstract class DaoImpl<T, ID extends Serializable,
                 }
                 return domain;
             } catch (InterruptedException ex) {
-                LOG.warn("Interrupted", ex);
+                warn("Interrupted", ex);
             } catch (ExecutionException ex) {
                 if (null == ex.getCause() ||
                         !"com.google.appengine.api.datastore.EntityNotFoundException"
                         .equals(ex.getCause().getClass().getName())) {
-                    LOG.warn("Executing", ex);
+                    warn("Executing", ex);
                 }
             }
         }
@@ -847,12 +880,12 @@ public abstract class DaoImpl<T, ID extends Serializable,
                 final ID simpleKey = coreKeyToSimpleKey((C) result);
                 return simpleKey;
             } catch (InterruptedException ex) {
-                LOG.warn("Interrupted", ex);
+                warn("Interrupted", ex);
             } catch (ExecutionException ex) {
                 if (null == ex.getCause() ||
                         !"com.google.appengine.api.datastore.EntityNotFoundException"
                         .equals(ex.getCause().getClass().getName())) {
-                    LOG.warn("Executing", ex);
+                    warn("Executing", ex);
                 }
             }
         }
@@ -893,12 +926,12 @@ public abstract class DaoImpl<T, ID extends Serializable,
                 
                 return simpleKeys;
             } catch (InterruptedException ex) {
-                LOG.warn("Interrupted", ex);
+                warn("Interrupted", ex);
             } catch (ExecutionException ex) {
                 if (null == ex.getCause() ||
                         !"com.google.appengine.api.datastore.EntityNotFoundException"
                         .equals(ex.getCause().getClass().getName())) {
-                    LOG.warn("Executing", ex);
+                    warn("Executing", ex);
                 }
             }
         }
@@ -954,14 +987,14 @@ public abstract class DaoImpl<T, ID extends Serializable,
     @Override
     public Future<?> persistForFuture(T domain) {
         final Date currentDate = new Date();
-        LOG.debug("persistForFuture {}s", getTableName());
+        debug("persistForFuture %ss", getTableName());
         return doPersistCoreForFuture(domainToCore(domain, currentDate));
     }
     
     @Override
     public Future<List<?>> persistForFuture(Iterable<T> domains) {
         final Date currentDate = new Date();
-        LOG.debug("persistForFuture {}s", getTableName());
+        debug("persistForFuture %ss", getTableName());
         ArrayList<E> entities = new ArrayList<E>();
         for (T d : domains) {
             entities.add(domainToCore(d, currentDate));
@@ -986,14 +1019,14 @@ public abstract class DaoImpl<T, ID extends Serializable,
             // populate memCache, and get the Collection
             if (memCacheAll) {
                 returnValue = updateMemCacheAll(returnValue);
-                LOG.debug("Queried {} entities for {}.queryAll()", ((Collection)returnValue).size(), getTableName());
+                debug("Queried %d entities for %s.queryAll()", ((Collection)returnValue).size(), getTableName());
             }
             else {
-                LOG.debug("Queried entities for {}.queryAll()", getTableName());
+                debug("Queried entities for %s.queryAll()", getTableName());
             }
         }
         else {
-            LOG.debug("Fetched {} entities from memCache {}.queryAll()", ((Collection)returnValue).size(), getTableName());
+            debug("Fetched %d entities from memCache %s.queryAll()", ((Collection)returnValue).size(), getTableName());
         }
         return returnValue;
     }
@@ -1112,11 +1145,11 @@ public abstract class DaoImpl<T, ID extends Serializable,
                 entitiesCached = entities.size();
                 
             } catch (CacheException ex) {
-                LOG.warn(String.format("Error getting cached %ss", getTableName()), ex);
+                warn(String.format("Error getting cached %ss", getTableName()));
             }
             catch (NullPointerException ifNoCache) {
                 memCacheEntities = false;
-                LOG.warn("Disabling non-functional cache for {}.memCacheEntities", getTableName());
+                warn("Disabling non-functional cache for {}.memCacheEntities", getTableName());
             }
         }
          
@@ -1143,7 +1176,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
             entitiesQueried = entities.size();
         }
         
-        LOG.debug("cached:{}, queried:{}", entitiesCached, entitiesQueried);
+        debug("cached:%d, queried:%d", entitiesCached, entitiesQueried);
         return entities.values();
     }
     
@@ -1268,7 +1301,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
             if (!getColumnNames().contains(col)) {
                 if (!getPrimaryKeyColumnName().equals(col)) {
                     if (!col.equals(getParentKeyColumnName())) {
-                        LOG.warn("No such column {}", col);
+                        warn("No such column %s", col);
                         continue;
                     }
                 }
@@ -1283,7 +1316,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
             sb.append(escapeCsv(col));
         }
         pw.println(sb.toString());
-        LOG.debug(sb.toString());
+        debug(sb.toString());
 
         // now write each row
         for (T domain : qi) {
@@ -1300,7 +1333,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
             }
 
             pw.println(sb.toString());
-            LOG.debug(sb.toString());
+            debug(sb.toString());
         }
         pw.flush();
     }

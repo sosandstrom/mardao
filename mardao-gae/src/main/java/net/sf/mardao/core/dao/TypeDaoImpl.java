@@ -30,11 +30,15 @@ import java.util.Date;
 import java.util.concurrent.Future;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
-import static net.sf.mardao.core.dao.DaoImpl.LOG;
 import net.sf.mardao.core.geo.DLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID> {
+    
+    /** Using slf4j logging */
+    protected static final Logger   LOG = LoggerFactory.getLogger(DaoImpl.class);
     
     protected final String AUDIT_KIND = "DAudit";
     
@@ -610,6 +614,54 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         }
         
         return cursorPage;
+    }
+
+    @Override
+    protected void println(int priority, String format, Object... args) {
+        switch (priority) {
+            case 3:
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(String.format(format, args));
+                }
+                break;
+            case 4:
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(String.format(format, args));
+                }
+                break;
+            case 5:
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(String.format(format, args));
+                }
+                break;
+            case 6:
+                LOG.error(String.format(format, args));
+                break;
+        }
+    }
+
+    @Override
+    protected void printStackTrace(int priority, String message, Throwable t) {
+        switch (priority) {
+            case 3:
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(message, t);
+                }
+                break;
+            case 4:
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(message, t);
+                }
+                break;
+            case 5:
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(message, t);
+                }
+                break;
+            case 6:
+                LOG.error(message, t);
+                break;
+        }
     }
     
     public class CursorIterable<T> implements QueryResultIterable<T> {

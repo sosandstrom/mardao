@@ -1,26 +1,31 @@
 package net.sf.mardao.core.dao;
 
 import android.content.ContentValues;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import android.database.Cursor;
+import java.util.ArrayList;
+import java.util.Date;
+
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Future;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.geo.DLocation;
 
-public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T, ID, Long, Iterable, ContentValues, Long> {
+public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T, ID, Long, CursorIterable, ContentValues, Long> {
+    public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     protected final String                 TAG           = getClass().getSimpleName();
     protected static final String OPERATION_IN = " IN (%s)";
 
@@ -51,7 +56,8 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
         databaseHelper.releaseDbConnection();
     }
     
-    protected static String appendWhereFilters(StringBuffer sb, ArrayList<String> sArgs, Filter... filters) {
+    protected static String appendWhereFilters(ArrayList<String> sArgs, Filter... filters) {
+        final StringBuffer sb = new StringBuffer();
         String selection = null;
         String operand;
         Object operation;
@@ -70,6 +76,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
                 sArgs.add(operand);
             }
             sb.append(operation);
+            sb.append("?");
             selection = sb.toString();
         }
         return selection;
@@ -147,10 +154,114 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     protected Long createCoreKey(Object parentKey, ID simpleKey) {
         return (Long) simpleKey;
     }
+    
+    public static void putString(String columnName, CursorIterable cursor, ContentValues core) {
+        if (null != columnName) {
+            int columnIndex = cursor.getColumnIndex(columnName);
+            if (-1 < columnIndex) {
+                core.put(columnName, cursor.getString(columnIndex));
+            }
+        }
+    }
+
+    public static void putLong(String columnName, CursorIterable cursor, ContentValues core) {
+        if (null != columnName) {
+            int columnIndex = cursor.getColumnIndex(columnName);
+            if (-1 < columnIndex) {
+                core.put(columnName, cursor.getLong(columnIndex));
+            }
+        }
+    }
+    
+    protected Object getFromCursor(String columnName, CursorIterable cursor) {
+        if (null != columnName) {
+            final int columnIndex = cursor.getColumnIndex(columnName);
+            if (-1 < columnIndex) {
+
+                final Class clazz = getColumnClass(columnName);
+                if (Double.class.equals(clazz)) {
+                    return cursor.getDouble(columnIndex);
+                }
+                if (Float.class.equals(clazz)) {
+                    return cursor.getFloat(columnIndex);
+                }
+                if (Long.class.equals(clazz)) {
+                    return cursor.getLong(columnIndex);
+                }
+                if (Integer.class.equals(clazz)) {
+                    return cursor.getInt(columnIndex);
+                }
+                if (Short.class.equals(clazz)) {
+                    return cursor.getShort(columnIndex);
+                }
+                if (Byte.class.equals(clazz)) {
+                    return (byte) cursor.getShort(columnIndex);
+                }
+                if (Date.class.equals(clazz)) {
+                    String s = cursor.getString(columnIndex);
+                    try {
+                        return SDF.parse(s);
+                    } catch (ParseException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                if (String.class.equals(clazz)) {
+                    return cursor.getString(columnIndex);
+                }
+                if (Boolean.class.equals(clazz)) {
+                    return 0 != cursor.getShort(columnIndex);
+                }
+                if (DLocation.class.equals(clazz)) {
+                    String s = cursor.getString(columnIndex);
+                    String latLong[] = s.split(",");
+                    return new DLocation(Float.parseFloat(latLong[0]), Float.parseFloat(latLong[1]));
+                }
+            }
+        }
+        return null;
+    }
+    
+    protected void setDomainFromCursor(T domain, String columnName, CursorIterable cursor) {
+        final Object value = getFromCursor(columnName, cursor);
+        if (null != value) {
+            setDomainProperty(domain, columnName, value);
+        }
+    }
+
+    /**
+     * Invoked by CursorIterable to map from cursor to domain object
+     * @param cursor
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException 
+     */
+    public T createDomain(CursorIterable cursor) throws InstantiationException, IllegalAccessException {
+        if (null == cursor) {
+            return null;
+        }
+        
+        final ID simpleKey = (ID) getFromCursor(getPrimaryKeyColumnName(), cursor);
+        final Long parentKey = (Long) getFromCursor(getParentKeyColumnName(), cursor);
+        
+        final T domain = createDomain(parentKey, simpleKey);
+        
+        // created, updated
+        setDomainFromCursor(domain, getCreatedByColumnName(), cursor);
+        setDomainFromCursor(domain, getCreatedDateColumnName(), cursor);
+        setDomainFromCursor(domain, getUpdatedByColumnName(), cursor);
+        setDomainFromCursor(domain, getUpdatedDateColumnName(), cursor);
+
+        // Domain Entity-specific properties
+        for (String name : getColumnNames()) {
+            setDomainFromCursor(domain, name, cursor);
+        }
+
+        return domain;
+    }
 
     @Override
     protected String createMemCacheKey(Object parentKey, ID simpleKey) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return String.format("%s.%s.%s", getTableName(), parentKey, simpleKey);
     }
 
     @Override
@@ -243,11 +354,20 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
         Object value = null;
         if (null != core && null != name) {
             value = core.get(name);
-            if (DLocation.class.equals(domainPropertyClass) && null != value) {
-                final String latLong = (String)value;
-                final int commaIndex = latLong.indexOf(',');
-                value = new DLocation(Float.parseFloat(latLong.substring(0, commaIndex)), 
-                        Float.parseFloat(latLong.substring(commaIndex+1)));
+            if (null != value) {
+                if (DLocation.class.equals(domainPropertyClass)) {
+                    final String latLong = (String)value;
+                    final int commaIndex = latLong.indexOf(',');
+                    value = new DLocation(Float.parseFloat(latLong.substring(0, commaIndex)), 
+                            Float.parseFloat(latLong.substring(commaIndex+1)));
+                }
+                else if (Date.class.equals(domainPropertyClass)) {
+                    try {
+                        value = SDF.parse((String)value);
+                    } catch (ParseException ex) {
+                        error(value.toString(), ex);
+                    }
+                }
             }
         }
         return value;
@@ -334,49 +454,19 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
             final ContentValues cv = (ContentValues) core;
             if (null == value) {
                 cv.putNull(name);
+                return;
             }
             if (value instanceof DLocation) {
                 final DLocation location = (DLocation) value;
-                value = String.format("%f,%f", location.getLatitude(), location.getLongitude());
-            }
-            
-            if (value instanceof Boolean) {
-                cv.put(name, (Boolean) value);
-                return;
-            }
-            if (value instanceof Byte) {
-                cv.put(name, (Byte) value);
+                cv.put(name, String.format("%f,%f", location.getLatitude(), location.getLongitude()));
                 return;
             }
             if (value instanceof Date) {
-                cv.put(name, (Long) ((Date)value).getTime());
+                cv.put(name, SDF.format((Date) value));
                 return;
             }
-            if (value instanceof Double) {
-                cv.put(name, (Double) value);
-                return;
-            }
-            if (value instanceof Float) {
-                cv.put(name, (Float) value);
-                return;
-            }
-            if (value instanceof Integer) {
-                cv.put(name, (Integer) value);
-                return;
-            }
-            if (value instanceof Long) {
-                cv.put(name, (Long) value);
-                return;
-            }
-            if (value instanceof Short) {
-                cv.put(name, (Short) value);
-                return;
-            }
-            if (value instanceof String) {
-                cv.put(name, (String) value);
-                return;
-            }
-            throw new UnsupportedOperationException(value.getClass().getName() + " not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            
+            cv.put(name, String.valueOf(value));
         }
     }
 
@@ -587,7 +677,9 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     }
     
     public void onCreate(SQLiteDatabase sqldb) {
-        info("onCreate %s", getTableName());
+        final String createSql = createTable();
+        info("onCreate() %s", createSql);
+        sqldb.execSQL(createSql);
     }
 
     public void onUpgrade(SQLiteDatabase sqldb, int fromVersion, int toVersion) {
@@ -637,9 +729,8 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
             columns = null;
         }
 
-        StringBuffer sb = new StringBuffer();
         ArrayList<String> sArgs = new ArrayList<String>();
-        String selection = appendWhereFilters(sb, sArgs, filters);
+        String selection = appendWhereFilters(sArgs, filters);
         
         final String[] selectionArgs = sArgs.isEmpty() ? null : sArgs.toArray(new String[sArgs.size()]);
         final String orderByClause = null != orderBy ? orderBy + (ascending ? " ASC" : " DESC") : null;
@@ -647,7 +738,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
 
         final SQLiteDatabase dbCon = dao.getDbConnection();
         try {
-            System.out.println("factory=" + factory + ", columns=" + Arrays.asList(columns));
+            System.out.println("factory=" + factory + ", columns=" + (null != columns ? columns[0] : "*"));
             Cursor cursor = dbCon.queryWithFactory(factory, true, dao.getTableName(), columns, selection, selectionArgs, null,
                     null, orderByClause, limitClause);
 //            debug("queryBy sArgs=%s", sArgs);
@@ -751,6 +842,128 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     //            databaseHelper.commitTransaction(trans);
     //        }
     //    }
+    
+    // ------------------ CREATE TABLE statements ------------------------------
+    
+    protected static final Properties DATA_TYPES_DEFAULT = new Properties();
+    
+    static {
+        DATA_TYPES_DEFAULT.setProperty(Double.class.getName(), "REAL");
+        DATA_TYPES_DEFAULT.setProperty(Float.class.getName(), "REAL");
+        DATA_TYPES_DEFAULT.setProperty(Long.class.getName(), "INTEGER");
+        DATA_TYPES_DEFAULT.setProperty(Integer.class.getName(), "INTEGER");
+        DATA_TYPES_DEFAULT.setProperty(Short.class.getName(), "INTEGER");
+        DATA_TYPES_DEFAULT.setProperty(Byte.class.getName(), "INTEGER");
+        DATA_TYPES_DEFAULT.setProperty(Date.class.getName(), "DATETIME");
+        DATA_TYPES_DEFAULT.setProperty(String.class.getName(), "VARCHAR");
+        DATA_TYPES_DEFAULT.setProperty(Boolean.class.getName(), "NUMERIC");
+        DATA_TYPES_DEFAULT.setProperty(DLocation.class.getName(), "VARCHAR(33)");
+        DATA_TYPES_DEFAULT.setProperty("AUTO_INCREMENT", "AUTO_INCREMENT");
+        DATA_TYPES_DEFAULT.setProperty("COLUMN_QUOTE", "`");
+//        DATA_TYPES_DEFAULT.setProperty(String.class.getName(), "VARCHAR(500)");
+
+    }
+    
+    protected String createTable() {
+        final StringBuffer sql = new StringBuffer();
+        sql.append("CREATE TABLE ");
+        sql.append(getTableName());
+        // column definitions
+        sql.append(" (");
+
+        sql.append("_id INTEGER PRIMARY KEY AUTOINCREMENT");
+        appendParentKeyColumnDefinition(sql);
+        
+        for (String columnName : getBasicColumnNames()) {
+            sql.append(", ");
+            appendColumnDefinition(sql, columnName);
+        }
+        
+        // foreign keys?
+        for (String columnName : getManyToOneColumnNames()) {
+            sql.append(", ");
+            appendColumnDefinition(sql, columnName);
+        }
+        
+        appendConstraints(sql);
+        
+        sql.append(");");
+        
+        return sql.toString();
+    }
+
+    protected void appendParentKeyColumnDefinition(StringBuffer sql) {
+        final String columnName = getParentKeyColumnName();
+        if (null != columnName) {
+            sql.append(", ");
+            appendColumnDefinition(sql, columnName, true);
+        }
+    }
+    
+    protected void appendColumnDefinition(StringBuffer sql, String columnName, 
+            boolean isPrimaryKey) {
+        sql.append(columnName);
+        sql.append(' ');
+        final String className = getColumnClass(columnName).getName();
+        String dataType = getDataType(className, isPrimaryKey);
+        if (null == dataType) {
+            dataType = getDataType(Long.class.getName());
+        }
+        sql.append(dataType);
+    }
+    
+    protected void appendColumnDefinition(StringBuffer sql, String columnName) {
+        appendColumnDefinition(sql, columnName, false);
+    }
+    
+    protected void appendConstraints(StringBuffer sql) {
+        
+        // parent key
+        if (null != getParentKeyColumnName()) {
+            appendConstraint(sql, getParentKeyColumnName(), mardaoParentDao);
+        }
+        
+        // ManyToOnes
+        for (String columnName : getManyToOneColumnNames()) {
+            appendConstraint(sql, columnName, getManyToOneDao(columnName));
+        }
+    }
+    
+    protected void appendConstraint(StringBuffer sql, String columnName, DaoImpl foreignDao) {
+        sql.append(", ");
+        sql.append("CONSTRAINT ");
+        sql.append(getDataType("COLUMN_QUOTE"));
+        sql.append("Fk");
+        sql.append(getTableName());
+        sql.append(columnName);
+        sql.append(getDataType("COLUMN_QUOTE"));
+        sql.append(" FOREIGN KEY (");
+        sql.append(getDataType("COLUMN_QUOTE"));
+        sql.append(columnName);
+        sql.append(getDataType("COLUMN_QUOTE"));
+        sql.append(") REFERENCES ");
+        sql.append(getDataType("COLUMN_QUOTE"));
+        sql.append(foreignDao.getTableName());
+        sql.append(getDataType("COLUMN_QUOTE"));
+        sql.append('(');
+        sql.append(getDataType("COLUMN_QUOTE"));
+        sql.append(foreignDao.getPrimaryKeyColumnName());
+        sql.append(getDataType("COLUMN_QUOTE"));
+        sql.append(')');
+    }
+    
+    protected String getDataType(String className) {
+        return getDataType(className, false);
+    }
+    
+    protected String getDataType(String className, boolean isPrimaryKey) {
+        String returnValue = DATA_TYPES_DEFAULT.getProperty(className);
+
+        return returnValue;
+    }
+    
+    
+    //  ----------------- getters and setters ----------------------------------
     
     public static void setDatabaseHelper(AbstractDatabaseHelper databaseHelper) {
         TypeDaoImpl.databaseHelper = databaseHelper;

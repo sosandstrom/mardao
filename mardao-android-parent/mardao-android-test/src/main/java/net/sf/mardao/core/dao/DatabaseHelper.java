@@ -1,0 +1,17 @@
+package net.sf.mardao.core.dao;
+
+import android.content.Context;
+
+/**
+ * Empty helper for Business Logic, created by mardao
+ * @author mardao
+ */
+public class DatabaseHelper extends GeneratedDatabaseHelper {
+    
+    public DatabaseHelper(Context context) {
+        super(context);
+    }
+    
+    // TODO: write your public business methods here!
+    
+}

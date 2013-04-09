@@ -6,6 +6,7 @@ pom.xml.asc
 .classpath
 .settings/
 
+gen/
 target/
 bin/
 tmp/

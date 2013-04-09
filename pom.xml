@@ -17,7 +17,7 @@
         <module>mardao-core</module>
         <module>mardao-gae</module>
         <module>mardao-mysql</module>
-        <module>mardao-android</module>
+        <module>mardao-android-parent</module>
     </modules>
 
     <properties>
@@ -171,6 +171,7 @@
 
         <developer>
             <id>alex-richards</id>
+            <email>alexrichards.github@gmail.com</email>
             <timezone>7</timezone>
         </developer>
     </developers>

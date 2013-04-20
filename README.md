@@ -2,7 +2,7 @@
 
 Mardao Architect's Java DAO generator
 
-Latest Stable Version: 2.0.2
+Latest Stable Version: 2.3.0
 
 License: http://www.gnu.org/licenses/lgpl.html
 
@@ -13,6 +13,18 @@ For more info and support, visit the mardao wiki at
 (Mardao Wiki)[https://github.com/sosandstrom/mardao/wiki]
 
 # Release History
+
+## Release 2.3.0 Overview:
+
+* Support for Android
+
+## Release date: 2013-04-20
+
+## New features:
+
+## Fixed bugs:
+
+--------------------------------------------------------------------------------
 
 ## Release 2.0.3 Overview:
 

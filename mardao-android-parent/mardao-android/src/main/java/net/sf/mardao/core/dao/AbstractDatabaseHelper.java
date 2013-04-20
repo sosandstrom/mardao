@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import java.util.List;
 
 /**
  *
@@ -19,7 +20,7 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
     public static final String TAG = AbstractDatabaseHelper.class.getSimpleName();
     
     /** The database name is 'mardao' */
-    protected static final String DATABASE_NAME = "mardao";
+    public static final String DATABASE_NAME = "mardao";
 
     /** for singleton database connection strategy */
     private static SQLiteDatabase _db = null;
@@ -64,6 +65,31 @@ public abstract class AbstractDatabaseHelper extends SQLiteOpenHelper {
         if (null != _db) {
             _db.close();
             _db = null;
+        }
+    }
+    
+    public abstract List<TypeDaoImpl<? extends Object,Long>> getDaos();
+    
+    @Override
+    public void onCreate(SQLiteDatabase sqld) {
+        Log.i(TAG, "DatabaseHelper.onCreate()");
+        for (TypeDaoImpl dao : getDaos()) {
+            dao.onCreate(sqld);
+        }
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase sqld, int fromVersion, int toVersion) {
+        Log.i(TAG, "DatabaseHelper.onUpgrade()");
+        for (TypeDaoImpl dao : getDaos()) {
+            dao.onUpgrade(sqld, fromVersion, toVersion);
+        }
+    }
+    
+    public void dropAll() {
+        Log.i(TAG, "DatabaseHelper.dropAll()");
+        for (TypeDaoImpl dao : getDaos()) {
+            dao.dropTable();
         }
     }
 }

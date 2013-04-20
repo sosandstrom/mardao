@@ -6,16 +6,16 @@ import java.util.Collection;
 import java.util.List;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.dao.Dao;
-import net.sf.mardao.core.domain.ExtendsBean;
+import net.sf.mardao.core.domain.DUnique;
 import net.sf.mardao.core.geo.DLocation;
 
 /**
- * DAO interface with finder methods for ExtendsBean entities.
+ * DAO interface with finder methods for DUnique entities.
  *
  * Generated on 2013-04-20T10:45:30.310+0700.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
-public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long> {
+public interface GeneratedDUniqueDao extends Dao<DUnique, java.lang.Long> {
 
 	/** Column name for primary key attribute is "_id" */
 	static final String COLUMN_NAME__ID = "_id";
@@ -25,6 +25,8 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
 	static final String COLUMN_NAME_CREATEDBY = "createdBy";
 	/** Column name for field createdDate is "createdDate" */
 	static final String COLUMN_NAME_CREATEDDATE = "createdDate";
+	/** Column name for field email is "email" */
+	static final String COLUMN_NAME_EMAIL = "email";
 	/** Column name for field message is "message" */
 	static final String COLUMN_NAME_MESSAGE = "message";
 	/** Column name for field updatedBy is "updatedBy" */
@@ -35,12 +37,14 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
 	/** The list of attribute names */
 	static final List<String> COLUMN_NAMES = Arrays.asList(		COLUMN_NAME_CREATEDBY,
 		COLUMN_NAME_CREATEDDATE,
+		COLUMN_NAME_EMAIL,
 		COLUMN_NAME_MESSAGE,
 		COLUMN_NAME_UPDATEDBY,
 		COLUMN_NAME_UPDATEDDATE);
 	/** The list of Basic attribute names */
 	static final List<String> BASIC_NAMES = Arrays.asList(		COLUMN_NAME_CREATEDBY,
 		COLUMN_NAME_CREATEDDATE,
+		COLUMN_NAME_EMAIL,
 		COLUMN_NAME_MESSAGE,
 		COLUMN_NAME_UPDATEDBY,
 		COLUMN_NAME_UPDATEDDATE);
@@ -52,14 +56,14 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
 	/**
 	 * query-by method for field createdBy
 	 * @param createdBy the specified attribute
-	 * @return an Iterable of ExtendsBeans for the specified createdBy
+	 * @return an Iterable of DUniques for the specified createdBy
 	 */
-	Iterable<ExtendsBean> queryByCreatedBy(java.lang.String createdBy);
+	Iterable<DUnique> queryByCreatedBy(java.lang.String createdBy);
 		
 	/**
 	 * query-keys-by method for field createdBy
 	 * @param createdBy the specified attribute
-	 * @return an Iterable of ExtendsBeans for the specified createdBy
+	 * @return an Iterable of DUniques for the specified createdBy
 	 */
 	Iterable<java.lang.Long> queryKeysByCreatedBy(java.lang.String createdBy);
 
@@ -68,23 +72,23 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
 	 * @param createdBy the specified attribute
          * @param pageSize the number of domain entities in the page
          * @param cursorString non-null if get next page
-	 * @return a Page of ExtendsBeans for the specified createdBy
+	 * @return a Page of DUniques for the specified createdBy
 	 */
-	CursorPage<ExtendsBean, java.lang.Long> queryPageByCreatedBy(java.lang.String createdBy,
+	CursorPage<DUnique, java.lang.Long> queryPageByCreatedBy(java.lang.String createdBy,
             int pageSize, String cursorString);
 
 
 	/**
 	 * query-by method for field createdDate
 	 * @param createdDate the specified attribute
-	 * @return an Iterable of ExtendsBeans for the specified createdDate
+	 * @return an Iterable of DUniques for the specified createdDate
 	 */
-	Iterable<ExtendsBean> queryByCreatedDate(java.util.Date createdDate);
+	Iterable<DUnique> queryByCreatedDate(java.util.Date createdDate);
 		
 	/**
 	 * query-keys-by method for field createdDate
 	 * @param createdDate the specified attribute
-	 * @return an Iterable of ExtendsBeans for the specified createdDate
+	 * @return an Iterable of DUniques for the specified createdDate
 	 */
 	Iterable<java.lang.Long> queryKeysByCreatedDate(java.util.Date createdDate);
 
@@ -93,23 +97,37 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
 	 * @param createdDate the specified attribute
          * @param pageSize the number of domain entities in the page
          * @param cursorString non-null if get next page
-	 * @return a Page of ExtendsBeans for the specified createdDate
+	 * @return a Page of DUniques for the specified createdDate
 	 */
-	CursorPage<ExtendsBean, java.lang.Long> queryPageByCreatedDate(java.util.Date createdDate,
+	CursorPage<DUnique, java.lang.Long> queryPageByCreatedDate(java.util.Date createdDate,
             int pageSize, String cursorString);
 
 
 	/**
+	 * find-by method for unique field email
+	 * @param email the unique attribute
+	 * @return the unique DUnique for the specified email
+	 */
+	DUnique findByEmail(java.lang.String email);
+
+        /**
+	 * find-key-by method for unique attribute field email
+	 * @param email the unique attribute
+	 * @return the unique DUnique for the specified attribute
+	 */
+	java.lang.Long findKeyByEmail(java.lang.String email);
+
+	/**
 	 * query-by method for field message
 	 * @param message the specified attribute
-	 * @return an Iterable of ExtendsBeans for the specified message
+	 * @return an Iterable of DUniques for the specified message
 	 */
-	Iterable<ExtendsBean> queryByMessage(java.lang.String message);
+	Iterable<DUnique> queryByMessage(java.lang.String message);
 		
 	/**
 	 * query-keys-by method for field message
 	 * @param message the specified attribute
-	 * @return an Iterable of ExtendsBeans for the specified message
+	 * @return an Iterable of DUniques for the specified message
 	 */
 	Iterable<java.lang.Long> queryKeysByMessage(java.lang.String message);
 
@@ -118,23 +136,23 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
 	 * @param message the specified attribute
          * @param pageSize the number of domain entities in the page
          * @param cursorString non-null if get next page
-	 * @return a Page of ExtendsBeans for the specified message
+	 * @return a Page of DUniques for the specified message
 	 */
-	CursorPage<ExtendsBean, java.lang.Long> queryPageByMessage(java.lang.String message,
+	CursorPage<DUnique, java.lang.Long> queryPageByMessage(java.lang.String message,
             int pageSize, String cursorString);
 
 
 	/**
 	 * query-by method for field updatedBy
 	 * @param updatedBy the specified attribute
-	 * @return an Iterable of ExtendsBeans for the specified updatedBy
+	 * @return an Iterable of DUniques for the specified updatedBy
 	 */
-	Iterable<ExtendsBean> queryByUpdatedBy(java.lang.String updatedBy);
+	Iterable<DUnique> queryByUpdatedBy(java.lang.String updatedBy);
 		
 	/**
 	 * query-keys-by method for field updatedBy
 	 * @param updatedBy the specified attribute
-	 * @return an Iterable of ExtendsBeans for the specified updatedBy
+	 * @return an Iterable of DUniques for the specified updatedBy
 	 */
 	Iterable<java.lang.Long> queryKeysByUpdatedBy(java.lang.String updatedBy);
 
@@ -143,23 +161,23 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
 	 * @param updatedBy the specified attribute
          * @param pageSize the number of domain entities in the page
          * @param cursorString non-null if get next page
-	 * @return a Page of ExtendsBeans for the specified updatedBy
+	 * @return a Page of DUniques for the specified updatedBy
 	 */
-	CursorPage<ExtendsBean, java.lang.Long> queryPageByUpdatedBy(java.lang.String updatedBy,
+	CursorPage<DUnique, java.lang.Long> queryPageByUpdatedBy(java.lang.String updatedBy,
             int pageSize, String cursorString);
 
 
 	/**
 	 * query-by method for field updatedDate
 	 * @param updatedDate the specified attribute
-	 * @return an Iterable of ExtendsBeans for the specified updatedDate
+	 * @return an Iterable of DUniques for the specified updatedDate
 	 */
-	Iterable<ExtendsBean> queryByUpdatedDate(java.util.Date updatedDate);
+	Iterable<DUnique> queryByUpdatedDate(java.util.Date updatedDate);
 		
 	/**
 	 * query-keys-by method for field updatedDate
 	 * @param updatedDate the specified attribute
-	 * @return an Iterable of ExtendsBeans for the specified updatedDate
+	 * @return an Iterable of DUniques for the specified updatedDate
 	 */
 	Iterable<java.lang.Long> queryKeysByUpdatedDate(java.util.Date updatedDate);
 
@@ -168,9 +186,9 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
 	 * @param updatedDate the specified attribute
          * @param pageSize the number of domain entities in the page
          * @param cursorString non-null if get next page
-	 * @return a Page of ExtendsBeans for the specified updatedDate
+	 * @return a Page of DUniques for the specified updatedDate
 	 */
-	CursorPage<ExtendsBean, java.lang.Long> queryPageByUpdatedDate(java.util.Date updatedDate,
+	CursorPage<DUnique, java.lang.Long> queryPageByUpdatedDate(java.util.Date updatedDate,
             int pageSize, String cursorString);
 
 
@@ -189,7 +207,14 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
 	/**
 	 * Persist an entity given all attributes
 	 */
-	ExtendsBean persist(		java.lang.Long _id, 
+	DUnique persist(		java.lang.Long _id, 
+		java.lang.String email, 
 		java.lang.String message);	
+
+	/**
+	 * Persists an entity unless it already exists
+	 */
+	 DUnique persist(java.lang.String email, 
+                java.lang.String message);
 
 }

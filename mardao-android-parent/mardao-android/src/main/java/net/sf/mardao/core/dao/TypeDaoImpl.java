@@ -308,7 +308,13 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
 
     @Override
     public void dropTable() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        final SQLiteDatabase dbCon = getDbConnection();
+        try {
+                dbCon.execSQL(String.format("DROP TABLE IF EXISTS %s", getTableName()));
+        }
+        finally {
+            releaseDbConnection();
+        }
     }
 
     @Override

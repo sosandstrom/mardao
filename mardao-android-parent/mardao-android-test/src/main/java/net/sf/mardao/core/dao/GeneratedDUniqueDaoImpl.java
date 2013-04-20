@@ -15,16 +15,16 @@ import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.dao.DaoImpl;
 import net.sf.mardao.core.dao.TypeDaoImpl;
 import net.sf.mardao.core.geo.DLocation;
-import net.sf.mardao.core.domain.ExtendsBean;
+import net.sf.mardao.core.domain.DUnique;
 
 /**
- * The ExtendsBean domain-object specific finders and methods go in this POJO.
+ * The DUnique domain-object specific finders and methods go in this POJO.
  * 
  * Generated on 2013-04-20T10:45:30.310+0700.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
-public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.lang.Long> 
-	implements GeneratedExtendsBeanDao {
+public class GeneratedDUniqueDaoImpl extends TypeDaoImpl<DUnique, java.lang.Long> 
+	implements GeneratedDUniqueDao {
 
 
     /** to list the property names for ManyToOne relations */
@@ -42,8 +42,8 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
     private final Map<String, DaoImpl> MANY_TO_ONE_DAOS = new TreeMap<String, DaoImpl>();
 
     /** Default constructor */
-   public GeneratedExtendsBeanDaoImpl() {
-      super(ExtendsBean.class, java.lang.Long.class);
+   public GeneratedDUniqueDaoImpl() {
+      super(DUnique.class, java.lang.Long.class);
    }
 
    // ------ BEGIN DaoImpl overrides -----------------------------
@@ -62,7 +62,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
    }
 
     @Override
-    protected Object getDomainProperty(ExtendsBean domain, String name) {
+    protected Object getDomainProperty(DUnique domain, String name) {
         Object value;
         // simple key?
         if (COLUMN_NAME__ID.equals(name)) {
@@ -74,6 +74,9 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
         }
         else if (COLUMN_NAME_CREATEDDATE.equals(name)) {
             value = domain.getCreatedDate();
+        }
+        else if (COLUMN_NAME_EMAIL.equals(name)) {
+            value = domain.getEmail();
         }
         else if (COLUMN_NAME_MESSAGE.equals(name)) {
             value = domain.getMessage();
@@ -112,6 +115,9 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
         else if (COLUMN_NAME_CREATEDDATE.equals(name)) {
             clazz = java.util.Date.class;
         }
+        else if (COLUMN_NAME_EMAIL.equals(name)) {
+            clazz = java.lang.String.class;
+        }
         else if (COLUMN_NAME_MESSAGE.equals(name)) {
             clazz = java.lang.String.class;
         }
@@ -132,7 +138,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
     }
       
     @Override
-    protected void setDomainProperty(final ExtendsBean domain, final String name, final Object value) {
+    protected void setDomainProperty(final DUnique domain, final String name, final Object value) {
         // simple key?
         if (COLUMN_NAME__ID.equals(name)) {
             domain.set_id((java.lang.Long) value);
@@ -143,6 +149,9 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
         }
         else if (COLUMN_NAME_CREATEDDATE.equals(name)) {
             domain.setCreatedDate((java.util.Date) value);
+        }
+        else if (COLUMN_NAME_EMAIL.equals(name)) {
+            domain.setEmail((java.lang.String) value);
         }
         else if (COLUMN_NAME_MESSAGE.equals(name)) {
             domain.setMessage((java.lang.String) value);
@@ -162,7 +171,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
     }
 
     @Override
-    protected void setDomainStringProperty(final ExtendsBean domain, final String name, final Map<String, String> properties) {
+    protected void setDomainStringProperty(final DUnique domain, final String name, final Map<String, String> properties) {
         final String value = properties.get(name);
         Class clazz = getColumnClass(name);
         // many-to-ones
@@ -185,12 +194,12 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 
    // ------ END DaoImpl overrides -----------------------------
 
-        // ExtendsBean has no parent
+        // DUnique has no parent
 
         /**
-         * @return the simple key for specified ExtendsBean domain object
+         * @return the simple key for specified DUnique domain object
          */
-        public Long getSimpleKey(ExtendsBean domain) {
+        public Long getSimpleKey(DUnique domain) {
             if (null == domain) {
                 return null;
             }
@@ -198,9 +207,9 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
         }
 
         /**
-         * @return the simple key for specified ExtendsBean domain object
+         * @return the simple key for specified DUnique domain object
          */
-        public void setSimpleKey(ExtendsBean domain, Long _id) {
+        public void setSimpleKey(DUnique domain, Long _id) {
             domain.set_id(_id);
         }
 
@@ -208,14 +217,14 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
             return COLUMN_NAME_CREATEDBY;
         }
 
-        public String getCreatedBy(ExtendsBean domain) {
+        public String getCreatedBy(DUnique domain) {
             if (null == domain) {
                 return null;
             }
             return domain.getCreatedBy();
         }
 
-        public void _setCreatedBy(ExtendsBean domain, String creator) {
+        public void _setCreatedBy(DUnique domain, String creator) {
             domain.setCreatedBy(creator);
         }
 
@@ -223,14 +232,14 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
             return COLUMN_NAME_UPDATEDBY;
         }
 
-        public String getUpdatedBy(ExtendsBean domain) {
+        public String getUpdatedBy(DUnique domain) {
             if (null == domain) {
                 return null;
             }
             return domain.getUpdatedBy();
         }
 
-        public void _setUpdatedBy(ExtendsBean domain, String updator) {
+        public void _setUpdatedBy(DUnique domain, String updator) {
             domain.setUpdatedBy(updator);
         }
 
@@ -238,14 +247,14 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
             return COLUMN_NAME_CREATEDDATE;
         }
 
-        public Date getCreatedDate(ExtendsBean domain) {
+        public Date getCreatedDate(DUnique domain) {
             if (null == domain) {
                 return null;
             }
             return domain.getCreatedDate();
         }
 
-        public void _setCreatedDate(ExtendsBean domain, Date date) {
+        public void _setCreatedDate(DUnique domain, Date date) {
             domain.setCreatedDate(date);
         }
 
@@ -253,14 +262,14 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
             return COLUMN_NAME_UPDATEDDATE;
         }
 
-        public Date getUpdatedDate(ExtendsBean domain) {
+        public Date getUpdatedDate(DUnique domain) {
             if (null == domain) {
                 return null;
             }
             return domain.getUpdatedDate();
         }
 
-        public void _setUpdatedDate(ExtendsBean domain, Date date) {
+        public void _setUpdatedDate(DUnique domain, Date date) {
             domain.setUpdatedDate(date);
         }
 
@@ -268,7 +277,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	/**
          * {@inheritDoc}
 	 */
-	public final Iterable<ExtendsBean> queryByCreatedBy(java.lang.String createdBy) {
+	public final Iterable<DUnique> queryByCreatedBy(java.lang.String createdBy) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_CREATEDBY, createdBy);
             return queryIterable(false, 0, -1, null, null, null, false, null, false, filter);
 	}
@@ -276,7 +285,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	/**
 	 * query-key-by method for attribute field createdBy
 	 * @param createdBy the specified attribute
-	 * @return an Iterable of keys to the ExtendsBeans with the specified attribute
+	 * @return an Iterable of keys to the DUniques with the specified attribute
 	 */
 	public final Iterable<java.lang.Long> queryKeysByCreatedBy(java.lang.String createdBy) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_CREATEDBY, createdBy);
@@ -288,9 +297,9 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	 * @param createdBy the specified attribute
          * @param pageSize the number of domain entities in the page
          * @param cursorString non-null if get next page
-	 * @return a Page of ExtendsBeans for the specified createdBy
+	 * @return a Page of DUniques for the specified createdBy
 	 */
-	public final CursorPage<ExtendsBean, java.lang.Long> queryPageByCreatedBy(java.lang.String createdBy,
+	public final CursorPage<DUnique, java.lang.Long> queryPageByCreatedBy(java.lang.String createdBy,
             int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_CREATEDBY, createdBy);
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
@@ -300,7 +309,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	/**
          * {@inheritDoc}
 	 */
-	public final Iterable<ExtendsBean> queryByCreatedDate(java.util.Date createdDate) {
+	public final Iterable<DUnique> queryByCreatedDate(java.util.Date createdDate) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_CREATEDDATE, createdDate);
             return queryIterable(false, 0, -1, null, null, null, false, null, false, filter);
 	}
@@ -308,7 +317,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	/**
 	 * query-key-by method for attribute field createdDate
 	 * @param createdDate the specified attribute
-	 * @return an Iterable of keys to the ExtendsBeans with the specified attribute
+	 * @return an Iterable of keys to the DUniques with the specified attribute
 	 */
 	public final Iterable<java.lang.Long> queryKeysByCreatedDate(java.util.Date createdDate) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_CREATEDDATE, createdDate);
@@ -320,9 +329,9 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	 * @param createdDate the specified attribute
          * @param pageSize the number of domain entities in the page
          * @param cursorString non-null if get next page
-	 * @return a Page of ExtendsBeans for the specified createdDate
+	 * @return a Page of DUniques for the specified createdDate
 	 */
-	public final CursorPage<ExtendsBean, java.lang.Long> queryPageByCreatedDate(java.util.Date createdDate,
+	public final CursorPage<DUnique, java.lang.Long> queryPageByCreatedDate(java.util.Date createdDate,
             int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_CREATEDDATE, createdDate);
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
@@ -330,9 +339,29 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 
 	 
 	/**
+	 * find-by method for unique attribute field email
+	 * @param email the unique attribute
+	 * @return the unique DUnique for the specified attribute
+	 */
+	public final DUnique findByEmail(java.lang.String email) {
+                Filter filter = createEqualsFilter(COLUMN_NAME_EMAIL, email);
+		return findUniqueBy(filter);
+	}
+
+	/**
+	 * find-key-by method for unique attribute field email
+	 * @param email the unique attribute
+	 * @return the unique DUnique for the specified attribute
+	 */
+	public final java.lang.Long findKeyByEmail(java.lang.String email) {
+                Filter filter = createEqualsFilter(COLUMN_NAME_EMAIL, email);
+		return findUniqueKeyBy(filter);
+	}
+	 
+	/**
          * {@inheritDoc}
 	 */
-	public final Iterable<ExtendsBean> queryByMessage(java.lang.String message) {
+	public final Iterable<DUnique> queryByMessage(java.lang.String message) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_MESSAGE, message);
             return queryIterable(false, 0, -1, null, null, null, false, null, false, filter);
 	}
@@ -340,7 +369,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	/**
 	 * query-key-by method for attribute field message
 	 * @param message the specified attribute
-	 * @return an Iterable of keys to the ExtendsBeans with the specified attribute
+	 * @return an Iterable of keys to the DUniques with the specified attribute
 	 */
 	public final Iterable<java.lang.Long> queryKeysByMessage(java.lang.String message) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_MESSAGE, message);
@@ -352,9 +381,9 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	 * @param message the specified attribute
          * @param pageSize the number of domain entities in the page
          * @param cursorString non-null if get next page
-	 * @return a Page of ExtendsBeans for the specified message
+	 * @return a Page of DUniques for the specified message
 	 */
-	public final CursorPage<ExtendsBean, java.lang.Long> queryPageByMessage(java.lang.String message,
+	public final CursorPage<DUnique, java.lang.Long> queryPageByMessage(java.lang.String message,
             int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_MESSAGE, message);
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
@@ -364,7 +393,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	/**
          * {@inheritDoc}
 	 */
-	public final Iterable<ExtendsBean> queryByUpdatedBy(java.lang.String updatedBy) {
+	public final Iterable<DUnique> queryByUpdatedBy(java.lang.String updatedBy) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_UPDATEDBY, updatedBy);
             return queryIterable(false, 0, -1, null, null, null, false, null, false, filter);
 	}
@@ -372,7 +401,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	/**
 	 * query-key-by method for attribute field updatedBy
 	 * @param updatedBy the specified attribute
-	 * @return an Iterable of keys to the ExtendsBeans with the specified attribute
+	 * @return an Iterable of keys to the DUniques with the specified attribute
 	 */
 	public final Iterable<java.lang.Long> queryKeysByUpdatedBy(java.lang.String updatedBy) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_UPDATEDBY, updatedBy);
@@ -384,9 +413,9 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	 * @param updatedBy the specified attribute
          * @param pageSize the number of domain entities in the page
          * @param cursorString non-null if get next page
-	 * @return a Page of ExtendsBeans for the specified updatedBy
+	 * @return a Page of DUniques for the specified updatedBy
 	 */
-	public final CursorPage<ExtendsBean, java.lang.Long> queryPageByUpdatedBy(java.lang.String updatedBy,
+	public final CursorPage<DUnique, java.lang.Long> queryPageByUpdatedBy(java.lang.String updatedBy,
             int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_UPDATEDBY, updatedBy);
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
@@ -396,7 +425,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	/**
          * {@inheritDoc}
 	 */
-	public final Iterable<ExtendsBean> queryByUpdatedDate(java.util.Date updatedDate) {
+	public final Iterable<DUnique> queryByUpdatedDate(java.util.Date updatedDate) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_UPDATEDDATE, updatedDate);
             return queryIterable(false, 0, -1, null, null, null, false, null, false, filter);
 	}
@@ -404,7 +433,7 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	/**
 	 * query-key-by method for attribute field updatedDate
 	 * @param updatedDate the specified attribute
-	 * @return an Iterable of keys to the ExtendsBeans with the specified attribute
+	 * @return an Iterable of keys to the DUniques with the specified attribute
 	 */
 	public final Iterable<java.lang.Long> queryKeysByUpdatedDate(java.util.Date updatedDate) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_UPDATEDDATE, updatedDate);
@@ -416,9 +445,9 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	 * @param updatedDate the specified attribute
          * @param pageSize the number of domain entities in the page
          * @param cursorString non-null if get next page
-	 * @return a Page of ExtendsBeans for the specified updatedDate
+	 * @return a Page of DUniques for the specified updatedDate
 	 */
-	public final CursorPage<ExtendsBean, java.lang.Long> queryPageByUpdatedDate(java.util.Date updatedDate,
+	public final CursorPage<DUnique, java.lang.Long> queryPageByUpdatedDate(java.util.Date updatedDate,
             int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_UPDATEDDATE, updatedDate);
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
@@ -438,10 +467,11 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 	/**
 	 * Persist an entity given all attributes
 	 */
-	public ExtendsBean persist(		java.lang.Long _id, 
+	public DUnique persist(		java.lang.Long _id, 
+		java.lang.String email, 
 		java.lang.String message) {
 
-            ExtendsBean domain = null;
+            DUnique domain = null;
             // if primaryKey specified, use it
             if (null != _id) {
                     domain = findByPrimaryKey(_id);
@@ -449,12 +479,13 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
 		
             // create new?
             if (null == domain) {
-                    domain = new ExtendsBean();
+                    domain = new DUnique();
                     // generate Id?
                     if (null != _id) {
                             domain.set_id(_id);
                     }
                     // fields
+                    domain.setEmail(email);
                     domain.setMessage(message);
                     // one-to-ones
                     // many-to-ones
@@ -464,6 +495,21 @@ public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.l
             return domain;
 	}
 
+
+	/**
+	 * Persists an entity unless it already exists
+	 */
+	public DUnique persist(java.lang.String email, 
+                java.lang.String message) {
+            DUnique domain = findByEmail(email);
+            if (null == domain) {
+                domain = new DUnique();
+                domain.setEmail(email);
+                domain.setMessage(message);
+                persist(domain);
+            }
+            return domain;
+	}
 
 
 }

@@ -4,6 +4,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.util.Arrays;
+import java.util.List;
+
 import net.sf.mardao.core.dao.AbstractDatabaseHelper;
 
 /**
@@ -16,6 +19,9 @@ public abstract class GeneratedDatabaseHelper extends AbstractDatabaseHelper {
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )
     /** Dao for Entity ${entity.simpleName} */
     protected final ${entity.simpleName}Dao ${helper.firstToLower($entity.simpleName)}Dao;
+    public ${entity.simpleName}Dao get${entity.simpleName}Dao() {
+        return ${helper.firstToLower($entity.simpleName)}Dao;
+    }
 ## loop inner Many-To-Many daos
 #foreach( $field in $entity.manyToManys )
 #if( $field.mappedBy )		 
@@ -77,40 +83,36 @@ public abstract class GeneratedDatabaseHelper extends AbstractDatabaseHelper {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase sqld) {
-        Log.i(TAG, "DatabaseHelper.onCreate()");
+    public List<TypeDaoImpl<? extends Object,Long>> getDaos() {
+        return Arrays.asList(
+#set( $isFirst = true )
 #foreach( $group in $packages.values() )
 #foreach(  $entity in $helper.getEntitiesResolved($group.entities) )
-    ((${entity.simpleName}DaoBean) ${helper.firstToLower($entity.simpleName)}Dao).onCreate(sqld);
-## loop inner Many-To-Many daos
-#foreach( $field in $entity.manyToManys )
-#if( $field.mappedBy )		 
-##  This is inverse side (mappedBy="lorem")
-#set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
-            ${daoName}.onCreate(sqld);
+#if( $isFirst )#set( $isFirst = false )#else,
 #end
+           (${entity.simpleName}DaoBean) ${helper.firstToLower($entity.simpleName)}Dao#end
 #end
-#end
-#end
+
+        );
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase sqld, int fromVersion, int toVersion) {
-        Log.i(TAG, "DatabaseHelper.onUpgrade()");
-
-#foreach( $group in $packages.values() )
-#foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
-        ((${entity.simpleName}DaoBean) ${helper.firstToLower($entity.simpleName)}Dao).onUpgrade(sqld, fromVersion, toVersion);
-## loop inner Many-To-Many daos
-#foreach( $field in $entity.manyToManys )
-#if( $field.mappedBy )		 
-##  This is inverse side (mappedBy="lorem")
-#set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
-            ${daoName}.onUpgrade(sqld, fromVersion, toVersion);
-#end
-#end
-#end
-#end
-    }
+##    @Override
+##    public void onUpgrade(SQLiteDatabase sqld, int fromVersion, int toVersion) {
+##        Log.i(TAG, "DatabaseHelper.onUpgrade()");
+##
+###foreach( $group in $packages.values() )
+###foreach(  $entity in $helper.getEntitiesResolved($group.entities) )	
+##        ((${entity.simpleName}DaoBean) ${helper.firstToLower($entity.simpleName)}Dao).onUpgrade(sqld, fromVersion, toVersion);
+#### loop inner Many-To-Many daos
+###foreach( $field in $entity.manyToManys )
+###if( $field.mappedBy )		 
+####  This is inverse side (mappedBy="lorem")
+###set( $daoName = "m2m_" + ${field.mappedBy} + "_" + $field.name + "Dao" )
+##            ${daoName}.onUpgrade(sqld, fromVersion, toVersion);
+###end
+###end
+###end
+###end
+##    }
     
 }

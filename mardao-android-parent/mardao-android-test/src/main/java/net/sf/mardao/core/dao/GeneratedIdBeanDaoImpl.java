@@ -20,7 +20,7 @@ import net.sf.mardao.core.domain.IdBean;
 /**
  * The IdBean domain-object specific finders and methods go in this POJO.
  * 
- * Generated on 2013-04-09T16:13:40.169+0700.
+ * Generated on 2013-04-20T10:45:30.310+0700.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public class GeneratedIdBeanDaoImpl extends TypeDaoImpl<IdBean, java.lang.Long> 

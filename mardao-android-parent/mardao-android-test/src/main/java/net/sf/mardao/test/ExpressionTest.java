@@ -1,4 +1,4 @@
-package net.sf.mardao.core.dao;
+package net.sf.mardao.test;
 
 import java.util.List;
 import java.util.Map;
@@ -8,6 +8,7 @@ import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.dao.TypeDaoImpl;
 import net.sf.mardao.core.domain.AndroidLongEntity;
 import android.test.InstrumentationTestCase;
+import net.sf.mardao.core.dao.TypeDaoImpl;
 
 public class ExpressionTest extends InstrumentationTestCase {
 

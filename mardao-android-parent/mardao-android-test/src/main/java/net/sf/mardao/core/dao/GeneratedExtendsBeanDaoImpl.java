@@ -20,7 +20,7 @@ import net.sf.mardao.core.domain.ExtendsBean;
 /**
  * The ExtendsBean domain-object specific finders and methods go in this POJO.
  * 
- * Generated on 2013-04-20T10:45:30.310+0700.
+ * Generated on 2013-04-20T12:06:15.231+0700.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public class GeneratedExtendsBeanDaoImpl extends TypeDaoImpl<ExtendsBean, java.lang.Long> 

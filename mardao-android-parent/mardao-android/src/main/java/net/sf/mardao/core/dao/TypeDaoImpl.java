@@ -31,6 +31,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
 
     protected static AbstractDatabaseHelper databaseHelper;
     protected final CursorFactory          cursorFactory = new CursorIterableFactory<T, ID>(this);
+    protected int minLogPriority = Log.INFO;
 
     protected TypeDaoImpl(final Class<T> type, Class<ID> idType) {
         super(type, idType);
@@ -39,13 +40,17 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
 
     @Override
     protected void println(int priority, String format, Object... args) {
-        Log.println(priority, TAG, String.format(format, args));
+        if (minLogPriority <= priority) {
+            Log.println(priority, TAG, String.format(format, args));
+        }
     }
 
     @Override
     protected void printStackTrace(int priority, String message, Throwable t) {
-        Log.println(priority, TAG, message);
-        Log.println(priority, TAG, Log.getStackTraceString(t));
+        if (minLogPriority <= priority) {
+            Log.println(priority, TAG, message);
+            Log.println(priority, TAG, Log.getStackTraceString(t));
+        }
     }
     
     protected final synchronized SQLiteDatabase getDbConnection() {
@@ -412,10 +417,72 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     @Override
     protected Collection<Long> persistCore(Iterable<ContentValues> itrbl) {
         ArrayList<Long> ids = new ArrayList<Long>();
-        for (ContentValues core : itrbl) {
-            ids.add(persistCore(core));
+        final SQLiteDatabase dbCon = getDbConnection();
+        info("Persisting batch of core entities...");
+        try {
+            for (ContentValues core : itrbl) {
+                ids.add(persistCore(core, dbCon));
+            }
+            info("Persted batch of %d.", ids.size());
+            return ids;
         }
-        return ids;
+        finally {
+            releaseDbConnection();
+        }
+    }
+
+    /**
+     * Override to avoid Iterable behavior in vain
+     * @param domain
+     * @return 
+     */
+    @Override
+    public ID persist(T domain) {
+        final SQLiteDatabase dbCon = getDbConnection();
+        try {
+            ContentValues core = domainToCore(domain, new Date());
+            final Long id = persistCore(core, dbCon);
+            setSimpleKey(domain, (ID) id);
+
+            // update cache (do not remove)
+            updateMemCache(false, Arrays.asList(domain));
+            return (ID) id;
+        }
+        finally {
+            releaseDbConnection();
+        }
+    }    
+
+    /**
+     * Overriding this method to save heap, as Android have no real batch-persist method.
+     * @param domains
+     * @return 
+     */
+    @Override
+    public Collection<ID> persist(Iterable<T> domains) {
+        final Date currentDate = new Date();
+
+        ArrayList<ID> ids = new ArrayList<ID>();
+        final SQLiteDatabase dbCon = getDbConnection();
+        info("Persisting batch of core entities...");
+        try {
+            ContentValues core;
+            ID id;
+            for (T d : domains) {
+                core = domainToCore(d, currentDate);
+                id = (ID) persistCore(core, dbCon);
+                setSimpleKey(d, id);
+                ids.add(id);
+            }
+            info("Persted batch of %d.", ids.size());
+
+            // update cache (do not remove)
+            updateMemCache(false, domains);
+            return ids;
+        }
+        finally {
+            releaseDbConnection();
+        }
     }
 
     @Override
@@ -484,8 +551,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     @Override
     public void update(Iterable<T> domains) {
         Date now = new Date();
-        for (T t : domains) {
-            updateByCore(domainToCore(t, now));
+        final SQLiteDatabase dbCon = getDbConnection();
+        try {
+            for (T t : domains) {
+                updateByCore(domainToCore(t, now), dbCon);
+            }
+        }
+        finally {
+            releaseDbConnection();
         }
     }
 
@@ -695,20 +768,25 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
 
 //    @Override
     protected Long persistCore(final ContentValues core) {
-        Long id = -1L;
         final SQLiteDatabase dbCon = getDbConnection();
         try {
-            debug("persistEntity %s %s", getTableName(), core);
-            id = dbCon.insertOrThrow(getTableName(), null, core);
-        }
-        catch (SQLiteException e) {
-            debug("%s updating existing row", e.getMessage());
-            id = updateByCore(core);
+            return persistCore(core, dbCon);
         }
         finally {
             releaseDbConnection();
         }
-        return id;
+    }
+
+    protected Long persistCore(final ContentValues core, final SQLiteDatabase dbCon) {
+        try {
+            final Long id = dbCon.insertOrThrow(getTableName(), null, core);
+            debug("inserted %s for ID %d", getTableName(), id);
+            return id;
+        }
+        catch (SQLiteException e) {
+            debug("%s updating existing row", e.getMessage());
+            return updateByCore(core, dbCon);
+        }
     }
 
     @Override
@@ -744,13 +822,12 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
 
         final SQLiteDatabase dbCon = dao.getDbConnection();
         try {
-            System.out.println("factory=" + factory + ", columns=" + (null != columns ? columns[0] : "*"));
             Cursor cursor = dbCon.queryWithFactory(factory, true, dao.getTableName(), columns, selection, selectionArgs, null,
                     null, orderByClause, limitClause);
 //            debug("queryBy sArgs=%s", sArgs);
 //            debug("queryBy %s WHERE %s returns %d", dao.getTableName(), selection, cursor.getCount());
-            System.out.println("sArgs=" + sArgs);
-            System.out.println(dao.getTableName() + " WHERE " + selection + " returns " + cursor.getCount() + " in " + cursor);
+//            System.out.println("sArgs=" + sArgs);
+//            System.out.println(dao.getTableName() + " WHERE " + selection + " returns " + cursor.getCount() + " in " + cursor);
             return cursor;
         }
         finally {
@@ -789,31 +866,42 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
 
     protected List<Long> updateByCore(final Iterable<ContentValues> entities) {
         final List<Long> ids = new ArrayList<Long>();
-
-        for (ContentValues entity: entities) {
-            ids.add(updateByCore(entity));
-        }
-
-        return ids;
-    }
-
-    protected Long updateByCore(final ContentValues entity) {
         final SQLiteDatabase dbCon = getDbConnection();
-        Long id = -1L;
         try {
-            id = entity.getAsLong(getPrimaryKeyColumnName());
-            String whereArgs[] = {id.toString()};
-            debug("updateByCore %s %s", getTableName(), entity);
-            dbCon.update(getTableName(), entity, "_id = ?", whereArgs);
-        }
-        catch (SQLiteException e2) {
-            error("SQLiteException %s: %s", e2.getMessage(), e2.toString());
-            id = -1L;
+
+            for (ContentValues entity: entities) {
+                ids.add(updateByCore(entity, dbCon));
+            }
+
+            return ids;
         }
         finally {
             releaseDbConnection();
         }
-        return id;
+    }
+
+    protected Long updateByCore(final ContentValues entity) {
+        final SQLiteDatabase dbCon = getDbConnection();
+        try {
+            return updateByCore(entity, dbCon);
+        }
+        finally {
+            releaseDbConnection();
+        }
+    }
+
+    protected Long updateByCore(final ContentValues entity, final SQLiteDatabase dbCon) {
+        try {
+            final Long id = entity.getAsLong(getPrimaryKeyColumnName());
+            String whereArgs[] = {id.toString()};
+            debug("updateByCore %s %s", getTableName(), entity);
+            dbCon.update(getTableName(), entity, "_id = ?", whereArgs);
+            return id;
+        }
+        catch (SQLiteException e2) {
+            error("SQLiteException %s: %s", e2.getMessage(), e2.toString());
+            return -1L;
+        }
     }
 
     //    protected void updateManyToMany(final AndroidManyToManyDaoBean m2mDao,  boolean owning,

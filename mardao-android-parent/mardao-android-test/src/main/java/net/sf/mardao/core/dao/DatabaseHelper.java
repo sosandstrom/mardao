@@ -1,6 +1,9 @@
 package net.sf.mardao.core.dao;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import java.util.Collection;
+import net.sf.mardao.core.domain.DUnique;
 import net.sf.mardao.core.domain.ExtendsBean;
 
 /**
@@ -22,4 +25,13 @@ public class DatabaseHelper extends GeneratedDatabaseHelper {
         return extendsBeanDao.findByPrimaryKey(id);
     }
     
+    public Collection<Long> persistBatch(Iterable<DUnique> batch) {
+        SQLiteDatabase t = beginTransaction();
+        try {
+            return dUniqueDao.persist(batch);
+        }
+        finally {
+            commitTransaction(t);
+        }
+    }
 }

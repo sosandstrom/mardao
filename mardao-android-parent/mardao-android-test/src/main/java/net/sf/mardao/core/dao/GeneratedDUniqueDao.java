@@ -12,7 +12,7 @@ import net.sf.mardao.core.geo.DLocation;
 /**
  * DAO interface with finder methods for DUnique entities.
  *
- * Generated on 2013-04-20T10:45:30.310+0700.
+ * Generated on 2013-04-20T12:06:15.231+0700.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public interface GeneratedDUniqueDao extends Dao<DUnique, java.lang.Long> {

@@ -185,4 +185,15 @@ public interface Dao<T, ID extends Serializable> {
     Collection<T> findNearest(final float lat, final float lng, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             int offset, int limit, Filter... filters);
+    
+    // --- Transaction methods ---
+    
+    Object beginTransaction();
+    
+    void commitTransaction(Object transaction);
+    
+    void rollbackActiveTransaction(Object transaction);
+    
+//    boolean isActiveTransaction(Object transaction);
+    
 }

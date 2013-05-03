@@ -2,9 +2,11 @@ package net.sf.mardao.test.dao;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import junit.framework.TestCase;
+import net.sf.mardao.test.domain.DCrossPrinter;
 import net.sf.mardao.test.domain.DEmployee;
 import net.sf.mardao.test.domain.DOrganization;
 import org.slf4j.Logger;
@@ -18,10 +20,12 @@ public class GeneratedDaoTest extends TestCase {
     static final Logger LOG = LoggerFactory.getLogger(GeneratedDaoTest.class);
     
     final LocalServiceTestHelper helper = new LocalServiceTestHelper(
-            new LocalDatastoreServiceTestConfig());
+            new LocalDatastoreServiceTestConfig()
+                .setDefaultHighRepJobPolicyUnappliedJobPercentage(10));
     
     GeneratedDEmployeeDao employeeDao;
     GeneratedDOrganizationDaoImpl organizationDao;
+    GeneratedDCrossPrinterDao crossPrinterDao;
     
     public GeneratedDaoTest(String testName) {
         super(testName);
@@ -38,6 +42,8 @@ public class GeneratedDaoTest extends TestCase {
         this.employeeDao = employeeImpl;
         
         this.organizationDao = new GeneratedDOrganizationDaoImpl();
+        
+        this.crossPrinterDao = new GeneratedDCrossPrinterDaoImpl();
         
         populate();
         LOG.info("--- setUp() " + getName() + " ---");
@@ -154,5 +160,50 @@ public class GeneratedDaoTest extends TestCase {
             assertNotNull(e.getBalance());
         }
         assertEquals("ManyToOne employees", 43, actual.size());
+    }
+    
+    public void populateTransactional() {
+        DOrganization org = organizationDao.persist(999L, "transactional");
+        ArrayList<DCrossPrinter> printers = new ArrayList<DCrossPrinter>();
+        for (int i = 0; i < 3; i++) {
+            DCrossPrinter dcp = new DCrossPrinter();
+            dcp.setName(String.format("Printer #%d", i));
+            printers.add(dcp);
+        }
+        crossPrinterDao.persist(printers);
+    }
+    
+    public void testTransactionCommit() throws InterruptedException {
+        
+        final Object tx = organizationDao.beginTransaction();
+        try {
+            populateTransactional();
+            
+            organizationDao.commitTransaction(tx);
+        }
+        finally {
+            organizationDao.rollbackActiveTransaction(tx);
+        }
+        
+        Thread.sleep(1000L);
+        
+        int printers = crossPrinterDao.count();
+        assertEquals(3, printers);
+    }
+    
+    public void testTransactionRollback() throws InterruptedException {
+        
+        final Object tx = organizationDao.beginTransaction();
+        try {
+            populateTransactional();
+        }
+        finally {
+            organizationDao.rollbackActiveTransaction(tx);
+        }
+        
+        Thread.sleep(1000L);
+        
+        int printers = crossPrinterDao.count();
+        assertEquals(0, printers);
     }
 }

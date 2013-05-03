@@ -26,6 +26,8 @@ import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.datastore.TransactionOptions;
 import java.util.Date;
 import java.util.concurrent.Future;
 import net.sf.mardao.core.CursorPage;
@@ -41,6 +43,8 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected static final Logger   LOG = LoggerFactory.getLogger(DaoImpl.class);
     
     protected final String AUDIT_KIND = "DAudit";
+    
+    protected static final ThreadLocal<Transaction> TRANSACTION = new ThreadLocal<Transaction>();
     
     protected TypeDaoImpl(Class<T> type, Class<ID> idType) {
         super(type, idType);
@@ -187,14 +191,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     @Override
     protected int doDelete(Object parentKey, Iterable<ID> simpleKeys) {
         final Collection<Key> coreKeys = createCoreKeys(parentKey, simpleKeys);
-        getDatastoreService().delete(coreKeys);
+        getDatastoreService().delete(TRANSACTION.get(), coreKeys);
         return -1;
     }
 
     @Override
     protected int doDelete(Iterable<T> domains) {
         final Iterable<Key> keys = (Iterable) domainsToPrimaryKeys(domains);
-        getDatastoreService().delete(keys);
+        getDatastoreService().delete(TRANSACTION.get(), keys);
         return -1;
     }
     
@@ -203,7 +207,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         final Key coreKey = createCoreKey(parentKey, simpleKey);
         LOG.debug("findByPrimaryKey {}", coreKey);
         try {
-            final Entity entity = getDatastoreService().get(coreKey);
+            final Entity entity = getDatastoreService().get(TRANSACTION.get(), coreKey);
             final T domain = coreToDomain(entity);
             return domain;
         } catch (EntityNotFoundException expected) {
@@ -235,7 +239,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys) {
         // TODO: get batch with batch size
         final Collection<Key> coreKeys = createCoreKeys(parentKey, simpleKeys);
-        final Map<Key, Entity> entities = getDatastoreService().get(coreKeys);
+        final Map<Key, Entity> entities = getDatastoreService().get(TRANSACTION.get(), coreKeys);
         
         final Collection<T> domains = new ArrayList<T>();
         T domain;
@@ -336,7 +340,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
 
     @Override
     protected Collection<Key> persistCore(Iterable<Entity> itrbl) {
-        final List<Key> returnValue = getDatastoreService().put(itrbl);
+        final List<Key> returnValue = getDatastoreService().put(TRANSACTION.get(), itrbl);
         return returnValue;
     }
     
@@ -447,6 +451,46 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected static DatastoreService getDatastoreService() {
         return DatastoreServiceFactory.getDatastoreService();
     }
+    
+    // --- BEGIN Transaction methods ---
+    
+    @Override
+    public Object beginTransaction() {
+        TransactionOptions options = TransactionOptions.Builder.withXG(true);
+        Transaction transaction = getDatastoreService().beginTransaction(options);
+        TRANSACTION.set(transaction);
+        return transaction;
+    }
+
+    @Override
+    public void commitTransaction(Object transaction) {
+        Transaction tx = (Transaction) transaction;
+        tx.commit();
+        LOG.debug("committed transaction successfully");
+        TRANSACTION.remove();
+    }
+
+    @Override
+    public void rollbackActiveTransaction(Object transaction) {
+        Transaction tx = (Transaction) transaction;
+        if (tx.isActive()) {
+            try {
+                LOG.warn("Transaction Rollback {} in {}", getTableName(), TRANSACTION.get());
+                tx.rollback();
+            }
+            finally {
+                TRANSACTION.remove();
+            }
+        }
+    }
+
+//    @Override
+//    public boolean isActiveTransaction(Object transaction) {
+//        Transaction tx = (Transaction) transaction;
+//        return tx.isActive();
+//    }
+    
+    // --- END Transaction methods ---
 
     protected QueryResultIterable<Entity> asQueryResultIterable(PreparedQuery pq, int chunkSize, String cursorString) {
         FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
@@ -578,7 +622,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             }
         }
 
-        return datastore.prepare(q);
+        return datastore.prepare(TRANSACTION.get(), q);
     }
 
     @Override

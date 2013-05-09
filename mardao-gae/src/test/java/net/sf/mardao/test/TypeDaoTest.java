@@ -248,27 +248,27 @@ public class TypeDaoTest extends TestCase {
         assertNull(deleted.getCursorKey());
     }
 
-    public void testWriteAsCsv() throws FileNotFoundException, IOException {
-        final String NAME = "John Doe";
-        List<Book> batch = new ArrayList<Book>(115);
-        DaoImpl.setPrincipalName(NAME);
-        for (int i = 0; i < 115; i++) {
-            Book expected = new Book();
-            expected.setId(1000L+i);
-            expected.setTitle("Hex: 0x" + Integer.toHexString(i));
-            batch.add(expected);
-        }
-        dao.persist(batch);
-        DaoImpl.setPrincipalName(null);
-
-        File tmp = new File(System.getProperty("java.io.tmpdir"));
-        File f = new File(tmp, "typeDao.csv");
-        LOG.info("writing CSV to {}", f.getAbsolutePath());
-        FileOutputStream fos = new FileOutputStream(f);
-        dao.writeAsCsv(fos, new String[] {/**"id", */ "title"}, dao, null, null, false, null, false);
-        fos.close();
-    }
-    
+//    public void testWriteAsCsv() throws FileNotFoundException, IOException {
+//        final String NAME = "John Doe";
+//        List<Book> batch = new ArrayList<Book>(115);
+//        DaoImpl.setPrincipalName(NAME);
+//        for (int i = 0; i < 115; i++) {
+//            Book expected = new Book();
+//            expected.setId(1000L+i);
+//            expected.setTitle("Hex: 0x" + Integer.toHexString(i));
+//            batch.add(expected);
+//        }
+//        dao.persist(batch);
+//        DaoImpl.setPrincipalName(null);
+//
+//        File tmp = new File(System.getProperty("java.io.tmpdir"));
+//        File f = new File(tmp, "typeDao.csv");
+//        LOG.info("writing CSV to {}", f.getAbsolutePath());
+//        FileOutputStream fos = new FileOutputStream(f);
+//        dao.writeAsCsv(fos, new String[] {/**"id", */ "title"}, dao, null, null, false, null, false);
+//        fos.close();
+//    }
+//    
     public void testQueryAllMemCache() {
         final String NAME = "John Doe";
         List<Book> batch = new ArrayList<Book>(115);

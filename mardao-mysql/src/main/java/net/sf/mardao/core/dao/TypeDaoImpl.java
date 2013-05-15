@@ -1034,6 +1034,21 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
+    public Object beginTransaction() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void commitTransaction(Object transaction) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
+
+    @Override
+    public void rollbackActiveTransaction(Object transaction) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
+
+    @Override
     protected void println(int priority, String format, Object... args) {
         switch (priority) {
             case 3:

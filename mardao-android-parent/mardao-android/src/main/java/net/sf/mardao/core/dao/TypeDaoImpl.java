@@ -1056,6 +1056,23 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
         return returnValue;
     }
     
+    @Override
+    public Object beginTransaction() {
+        return databaseHelper.beginTransaction();
+    }
+
+    @Override
+    public void commitTransaction(Object transaction) {
+        databaseHelper.commitTransaction((SQLiteDatabase) transaction);
+    }
+
+    @Override
+    public void rollbackActiveTransaction(Object transaction) {
+        SQLiteDatabase t = (SQLiteDatabase) transaction;
+        if (null != t && t.isOpen()) {
+            databaseHelper.rollbackTransaction(t);
+        }
+    }
     
     //  ----------------- getters and setters ----------------------------------
     

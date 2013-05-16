@@ -21,7 +21,7 @@ public class GeneratedDaoTest extends TestCase {
     
     final LocalServiceTestHelper helper = new LocalServiceTestHelper(
             new LocalDatastoreServiceTestConfig()
-                .setDefaultHighRepJobPolicyUnappliedJobPercentage(10));
+                .setDefaultHighRepJobPolicyUnappliedJobPercentage(1));
     
     GeneratedDEmployeeDao employeeDao;
     GeneratedDOrganizationDaoImpl organizationDao;

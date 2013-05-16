@@ -6,11 +6,6 @@ package net.sf.mardao.test;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -34,7 +29,7 @@ public class TypeDaoTest extends TestCase {
     static final Logger LOG = LoggerFactory.getLogger(TypeDaoTest.class);
     
     final LocalServiceTestHelper helper = new LocalServiceTestHelper(
-            new LocalDatastoreServiceTestConfig());
+            new LocalDatastoreServiceTestConfig().setDefaultHighRepJobPolicyUnappliedJobPercentage(0));
     
     TypeDaoImpl<Book, Long> dao;
     

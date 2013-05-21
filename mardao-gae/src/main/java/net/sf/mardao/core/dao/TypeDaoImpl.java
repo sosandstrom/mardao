@@ -375,7 +375,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         
         // only if next is available
         if (domains.size() == requestedPageSize) {
-            cursorPage.setCursorKey(iterable.getCursor().toWebSafeString());
+            
+            // only if page size != total size
+            if (null == cursorPage.getTotalSize() || domains.size() < cursorPage.getTotalSize()) {
+                cursorPage.setCursorKey(iterable.getCursor().toWebSafeString());
+            }
         }
         
         return cursorPage;

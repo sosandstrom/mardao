@@ -1,10 +1,12 @@
 package net.sf.mardao.test.dao;
 
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import junit.framework.TestCase;
 import net.sf.mardao.test.domain.DCrossPrinter;
 import net.sf.mardao.test.domain.DEmployee;
@@ -160,6 +162,27 @@ public class GeneratedDaoTest extends TestCase {
             assertNotNull(e.getBalance());
         }
         assertEquals("ManyToOne employees", 43, actual.size());
+    }
+    
+    public void testQueryByAncestorKey() {
+        final Object orgKey = organizationDao.getPrimaryKey(null, 425L);
+        assertNotNull("by Parent orgKey", orgKey);
+        final Map<Key, Object> map = organizationDao.queryByAncestorKey(orgKey);
+        assertEquals(44, map.size());
+        Key previous = null;
+        for (Entry<Key, Object> entry : map.entrySet()) {
+            if (null != previous) {
+                assertEquals("Sort order", 1, entry.getKey().compareTo(previous));
+                assertEquals(employeeDao.getTableName(), entry.getValue().getClass().getSimpleName());
+                assertEquals("parentKey", orgKey, employeeDao.getParentKey((DEmployee) entry.getValue()));
+            }
+            else {
+                assertEquals(orgKey, entry.getKey());
+                assertEquals(organizationDao.getTableName(), entry.getValue().getClass().getSimpleName());
+            }
+            
+            previous = entry.getKey();
+        }
     }
     
     public void populateTransactional() {

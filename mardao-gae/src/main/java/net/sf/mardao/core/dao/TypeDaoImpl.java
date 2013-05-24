@@ -236,6 +236,15 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
+    protected Iterable<Entity> doQueryByAncestorKey(Key ancestorKey) {
+        final DatastoreService datastore = getDatastoreService();
+        final Query query = new Query().setAncestor(ancestorKey)
+                .addSort(Entity.KEY_RESERVED_PROPERTY, SortDirection.ASCENDING);
+        final PreparedQuery pq = datastore.prepare(TRANSACTION.get(), query);
+        return pq.asIterable();
+    }
+
+    @Override
     protected Iterable<T> doQueryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys) {
         // TODO: get batch with batch size
         final Collection<Key> coreKeys = createCoreKeys(parentKey, simpleKeys);
@@ -274,6 +283,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         final Entity entity = pq.asSingleEntity();
         final ID simpleKey = coreToSimpleKey(entity);
         return simpleKey;
+    }
+
+    @Override
+    protected String getCoreKind(Entity core) {
+        return null != core ? core.getKind() : null;
     }
     
     @Override

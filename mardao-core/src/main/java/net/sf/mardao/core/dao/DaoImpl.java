@@ -78,6 +78,8 @@ public abstract class DaoImpl<T, ID extends Serializable,
         }
     };
     
+    protected static final HashMap<String, DaoImpl> DAO_MAP = new HashMap<String, DaoImpl>();
+    
     /** to list the property names for ManyToOne relations */
     protected List<String> getBasicColumnNames() {
         return Collections.EMPTY_LIST;
@@ -117,6 +119,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
     protected DaoImpl(Class<T> domainType, Class<ID> simpleIdType) {
         this.persistentClass = domainType;
         this.simpleIdClass = simpleIdType;
+        DAO_MAP.put(getTableName(), this);
     }
 
     public String getTableName() {
@@ -400,6 +403,14 @@ public abstract class DaoImpl<T, ID extends Serializable,
         }
 
         return core;
+    }
+    
+    protected Iterable<E> doQueryByAncestorKey(C ancestorKey) {
+        throw new UnsupportedOperationException("Not supported by Database type.");
+    }
+    
+    protected String getCoreKind(E core) {
+        throw new UnsupportedOperationException("Not supported by Database type.");
     }
     
     public Map<String, Object> getDomainProperties(Object domainObject) {
@@ -1113,6 +1124,32 @@ public abstract class DaoImpl<T, ID extends Serializable,
         }
         
         return returnValue;
+    }
+    
+    /**
+     * Retrieves the full ancestor tree for specified key.
+     * @param ancestorKey
+     * @return a map with Core Key as key, Domain object as value.
+     */
+    public TreeMap<C, Object> queryByAncestorKey(Object ancestorKey) {
+        final Iterable<E> entities = doQueryByAncestorKey((C) ancestorKey);
+        final TreeMap<C, Object> domainMap = new TreeMap<C, Object>();
+        String kind;
+        DaoImpl dao;
+        
+        for (E core : entities) {
+            kind = getCoreKind(core);
+            if (null != kind) {
+                dao = DAO_MAP.get(kind);
+                if (null != dao) {
+                    final Object domain = dao.coreToDomain(core);
+                    final Object key = dao.getPrimaryKey(domain);
+                    domainMap.put((C) key, domain);
+                }
+            }
+        }
+        
+        return domainMap;
     }
     
     public Iterable<T> queryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys) {

@@ -1218,7 +1218,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
         // sorting on distance has to be done outside datastore, i.e. here in application:
         Map<Double, T> orderedMap = new TreeMap<Double, T>();
         for (int bits : boxBits) {       
-            final CursorPage<T, ID> subList = queryInGeobox(lat, lng, bits, limit,
+            final CursorPage<T, ID> subList = queryInGeobox(lat, lng, bits, size,
                     primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
                     null, filters);
             for (T model : subList.getItems()) {

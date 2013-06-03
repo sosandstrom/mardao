@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Future;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
@@ -145,6 +146,8 @@ public interface Dao<T, ID extends Serializable> {
     Iterable<ID> queryAllKeys();
     
     Iterable<ID> queryAllKeys(Object parentKey);
+    
+    TreeMap queryByAncestorKey(Object ancestorKey);
     
     Iterable<T> queryByPrimaryKeys(Object parentKey, Iterable<ID> simpleKeys);
     

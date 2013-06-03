@@ -1131,6 +1131,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
      * @param ancestorKey
      * @return a map with Core Key as key, Domain object as value.
      */
+    @Override
     public TreeMap<C, Object> queryByAncestorKey(Object ancestorKey) {
         final Iterable<E> entities = doQueryByAncestorKey((C) ancestorKey);
         final TreeMap<C, Object> domainMap = new TreeMap<C, Object>();

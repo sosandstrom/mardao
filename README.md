@@ -2,7 +2,7 @@
 
 Mardao Architect's Java DAO generator
 
-Latest Stable Version: 2.0.2
+Latest Stable Version: 2.3.1
 
 License: http://www.gnu.org/licenses/lgpl.html
 
@@ -11,8 +11,34 @@ It generates DAO classes using your annotated domain classes as input.
 
 For more info and support, visit the mardao wiki at
 (Mardao Wiki)[https://github.com/sosandstrom/mardao/wiki]
+or the Open Pockets blog at
+(Open Pockets)[http://blog.bassac.se]
 
 # Release History
+
+## Release 2.3.1 Overview:
+
+* Dao-supported transactions
+
+## Release date: 2013-05-15
+
+## New features:
+
+## Fixed bugs:
+
+--------------------------------------------------------------------------------
+
+## Release 2.3.0 Overview:
+
+* Support for Android again
+
+## Release date: 2013-04-20
+
+## New features:
+
+## Fixed bugs:
+
+--------------------------------------------------------------------------------
 
 ## Release 2.0.3 Overview:
 

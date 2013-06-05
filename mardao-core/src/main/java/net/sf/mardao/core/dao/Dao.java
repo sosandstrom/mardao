@@ -191,12 +191,25 @@ public interface Dao<T, ID extends Serializable> {
     
     // --- Transaction methods ---
     
+    /**
+     * Starts a transaction and returns a generic reference
+     * @return a generic reference
+     * @since 2.3.1
+     */
     Object beginTransaction();
     
+    /**
+     * Commits a transaction
+     * @param transaction a generic reference, as returned by beginTransaction
+     * @since 2.3.1
+     */
     void commitTransaction(Object transaction);
     
+    /**
+     * Rollbacks a transaction, if active
+     * @param transaction a generic reference, as returned by beginTransaction
+     * @since 2.3.1
+     */
     void rollbackActiveTransaction(Object transaction);
-    
-//    boolean isActiveTransaction(Object transaction);
     
 }

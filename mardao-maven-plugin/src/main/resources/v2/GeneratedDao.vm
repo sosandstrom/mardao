@@ -180,6 +180,13 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${field.nameFirst}(${field.type} ${field.name},
             int pageSize, String cursorString);
 
+	/**
+	 * query-key-by method for many-to-one field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return an Iterable of keys to the ${entity.simpleName}s with the specified attribute
+	 */
+	Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
+
 #if( $foreign )	
 	/**
 	 * find-by method for many-to-one field ${field.name}

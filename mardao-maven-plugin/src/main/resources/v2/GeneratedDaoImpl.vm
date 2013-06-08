@@ -569,6 +569,17 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
         }
 
+	/**
+	 * query-key-by method for many-to-one field ${field.name}
+	 * @param ${field.name} the specified attribute
+	 * @return an Iterable of keys to the ${entity.simpleName}s with the specified attribute
+	 */
+	public final Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
+            final Object foreignKey = ${field.name}Dao.getPrimaryKey(${field.name});
+            final Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, foreignKey);
+            return queryIterableKeys(0, -1, null, null, null, false, null, false, filter);
+	}
+
 #if( $foreign )  
 ##	/**
 ##	 * find-by method for many-to-one field ${field.name}

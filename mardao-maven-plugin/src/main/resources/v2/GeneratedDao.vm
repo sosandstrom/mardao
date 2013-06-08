@@ -183,19 +183,27 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	/**
 	 * query-key-by method for many-to-one field ${field.name}
 	 * @param ${field.name} the specified attribute
+         * @since 2.3.2
 	 * @return an Iterable of keys to the ${entity.simpleName}s with the specified attribute
 	 */
 	Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name});
 
 #if( $foreign )	
 	/**
-	 * find-by method for many-to-one field ${field.name}
-	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
-	 * @return a Collection of ${entity.simpleName}s belonging to the many-to-one relation
+	 * query-by method for many-to-one field ${field.name}
+	 * @param ${foreign.pk.name} the related ${field.type} entity's simple key
+	 * @return an Iterable of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
-	List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
-#end	
+	Iterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
+
+	/**
+	 * query-keys-by method for many-to-one field ${field.name}
+	 * @param ${foreign.pk.name} the related ${field.type} entity's simple key
+	 * @return an Iterable of ${entity.pk.type} keys belonging to the many-to-one relation
+	 */
+	Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
 	
+#end	
 #end	
 	
 	// ----------------------- many-to-many finders -------------------------

@@ -572,6 +572,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 	/**
 	 * query-key-by method for many-to-one field ${field.name}
 	 * @param ${field.name} the specified attribute
+         * @since 2.3.2
 	 * @return an Iterable of keys to the ${entity.simpleName}s with the specified attribute
 	 */
 	public final Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}(${field.type} ${field.name}) {
@@ -581,24 +582,28 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
 	}
 
 #if( $foreign )  
-##	/**
-##	 * find-by method for many-to-one field ${field.name}
-##	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
-##	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
-##	 */
-##	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}Key(Key ${field.name}Key) {
-##		return findBy(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name}Key);
-##	}	
-##
 	/**
-	 * find-by method for many-to-one field ${field.name}
-	 * @param ${foreign.pk.name} the related ${field.type} entity's primary key
-	 * @return a List of ${entity.simpleName}s belonging to the many-to-one relation
+	 * query-by method for many-to-one field ${field.name}
+	 * @param ${foreign.pk.name} the related ${field.type} entity's simple key
+	 * @return an Iterable of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
-	public final List<${entity.simpleName}> findBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
-            throw new UnsupportedOperationException("Not supported yet.");
-//		return findByKey(COLUMN_NAME_${field.name.toUpperCase()}, ${field.type}.class, ${foreign.pk.name});
-	}	
+	public final Iterable<${entity.simpleName}> queryBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+            final Object foreignKey = ${field.name}Dao.getPrimaryKey(null, ${foreign.pk.name});
+            final Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, foreignKey);
+            return queryIterable(false, 0, -1, null, null, null, false, null, false, filter);
+	}
+
+	/**
+	 * query-keys-by method for many-to-one field ${field.name}
+	 * @param ${foreign.pk.name} the related ${field.type} entity's simple key
+	 * @return an Iterable of ${entity.pk.type} keys belonging to the many-to-one relation
+	 */
+	public final Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name}) {
+            final Object foreignKey = ${field.name}Dao.getPrimaryKey(null, ${foreign.pk.name});
+            final Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, foreignKey);
+            return queryIterableKeys(0, -1, null, null, null, false, null, false, filter);
+	}
+
 #end	
 	
 #end	

@@ -78,7 +78,7 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         else if (COLUMN_NAME_APPARG0.equals(name)) {
             domain.setAppArg0(convertText(value));
         } else if (COLUMN_NAME_APPARG1.equals(name)) {
-            domain.setAppArg1(convertCollectionTextElement(value));
+            domain.setAppArg1(convertTextCollection((Collection)value));
         }
         else {
             super.setDomainProperty(domain, name, value);

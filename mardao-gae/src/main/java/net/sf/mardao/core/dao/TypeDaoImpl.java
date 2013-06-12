@@ -321,11 +321,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 value = ((Text)value).getValue();
                 
             } else if (value instanceof Collection) {
-                for (Object element : (Collection)value) {
-                    if (value instanceof Text) {
-                        element =  ((Text)element).getValue();
-                    }
-                }
+                value = convertTextCollection((Collection)value);
             }
         }
         return value;
@@ -489,29 +485,28 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         }
         return (String) value;
     }
-    protected static final Collection<String> convertCollectionTextElement(Object value) {
+    
+    protected static final Collection convertTextCollection(Collection value) {
         if (null == value) {
             return null;
         }
         boolean isTextMode = false;
-        for (Object element : (Collection)value) {
+        for (Object element : value) {
+            //check only first element
             if ((element instanceof Text)) {
-                System.out.println(" **********TEXT TYPE***********");
-                isTextMode = true; break;
+                isTextMode = true; 
             }
-            System.out.println(" **********NOT TEXT TYPE***********");
             break;
-            
         }
         
         if (isTextMode) {
-            Collection<String> newValue = new ArrayList<String>();
-            for (Object element : (Collection)value) {
-                newValue.add(convertText(element));
+            Collection<String> stringValue = new ArrayList<String>();
+            for (Object element : value) {
+                stringValue.add(convertText(element));
             }
-            value = newValue;
+            value = stringValue;
         }
-        return (Collection<String>)value;
+        return value;
     }
     
     

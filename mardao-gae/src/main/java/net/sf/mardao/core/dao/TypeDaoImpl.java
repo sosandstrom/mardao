@@ -1,12 +1,22 @@
 package net.sf.mardao.core.dao;
 
-import com.google.appengine.api.datastore.AsyncDatastoreService;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Future;
+
+import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.Filter;
+import net.sf.mardao.core.geo.DLocation;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.appengine.api.datastore.AsyncDatastoreService;
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -28,13 +38,6 @@ import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.TransactionOptions;
-import java.util.Date;
-import java.util.concurrent.Future;
-import net.sf.mardao.core.CursorPage;
-import net.sf.mardao.core.Filter;
-import net.sf.mardao.core.geo.DLocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID> {
@@ -316,6 +319,13 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             }
             else if (value instanceof Text) {
                 value = ((Text)value).getValue();
+                
+            } else if (value instanceof Collection) {
+                for (Object element : (Collection)value) {
+                    if (value instanceof Text) {
+                        element =  ((Text)element).getValue();
+                    }
+                }
             }
         }
         return value;
@@ -445,6 +455,24 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             if (value instanceof String && 500 < value.toString().length()) {
                 value = new Text(value.toString());
             }
+            if (value instanceof Collection) {
+                    boolean isTextMode = false;
+                    for (Object element : (Collection)value) {
+                        if (!(element instanceof String)) {
+                            break;
+                        } else if (500 < ((String)element).length()){
+                                isTextMode = true; break;
+                        }
+                    }
+                    if (isTextMode) {
+                        Collection<Text> newValue = new ArrayList<Text>();
+                        for (Object element : (Collection)value) {
+                            newValue.add(new Text(element.toString()));
+                        }
+                        value = newValue;
+                    }
+            }
+            
             ((Entity) core).setProperty(name, value);
         }
     }
@@ -461,7 +489,32 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         }
         return (String) value;
     }
-
+    protected static final Collection<String> convertCollectionTextElement(Object value) {
+        if (null == value) {
+            return null;
+        }
+        boolean isTextMode = false;
+        for (Object element : (Collection)value) {
+            if ((element instanceof Text)) {
+                System.out.println(" **********TEXT TYPE***********");
+                isTextMode = true; break;
+            }
+            System.out.println(" **********NOT TEXT TYPE***********");
+            break;
+            
+        }
+        
+        if (isTextMode) {
+            Collection<String> newValue = new ArrayList<String>();
+            for (Object element : (Collection)value) {
+                newValue.add(convertText(element));
+            }
+            value = newValue;
+        }
+        return (Collection<String>)value;
+    }
+    
+    
     protected static AsyncDatastoreService getAsyncDatastoreService() {
         return DatastoreServiceFactory.getAsyncDatastoreService();
     }

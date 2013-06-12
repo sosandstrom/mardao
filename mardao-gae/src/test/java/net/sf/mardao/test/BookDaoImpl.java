@@ -17,10 +17,12 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
     public static final String COLUMN_NAME_ID = "id";
     public static final String COLUMN_NAME_TITLE = "title";
     public static final String COLUMN_NAME_APPARG0 = "appArg0";
+    public static final String COLUMN_NAME_APPARG1 = "appArg1";
     
     public static final Collection<String> COLUMN_NAMES = Arrays.asList(
             COLUMN_NAME_TITLE,
-            COLUMN_NAME_APPARG0
+            COLUMN_NAME_APPARG0,
+            COLUMN_NAME_APPARG1
             );
 
     public BookDaoImpl() {
@@ -42,8 +44,9 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         }
         else if (COLUMN_NAME_APPARG0.equals(name)) {
             value = domain.getAppArg0();
-        }
-        else {
+        } else if (COLUMN_NAME_APPARG1.equals(name)){
+            value = domain.getAppArg1();
+        } else {
             try {
                 value = super.getDomainProperty(domain, name);
             }
@@ -74,6 +77,8 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         }
         else if (COLUMN_NAME_APPARG0.equals(name)) {
             domain.setAppArg0(convertText(value));
+        } else if (COLUMN_NAME_APPARG1.equals(name)) {
+            domain.setAppArg1(convertTextCollection((Collection)value));
         }
         else {
             super.setDomainProperty(domain, name, value);
@@ -103,6 +108,9 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         }
         if (COLUMN_NAME_APPARG0.equals(columnName)) {
             return String.class;
+        }
+        if (COLUMN_NAME_APPARG1.equals(columnName)){
+            return java.util.Collection.class;
         }
         if ("createdBy".equals(columnName) || "updatedBy".equals(columnName)) {
             return String.class;

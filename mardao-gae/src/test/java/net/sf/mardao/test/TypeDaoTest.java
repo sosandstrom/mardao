@@ -102,7 +102,10 @@ public class TypeDaoTest extends TestCase {
         expected.setTitle(name.toString());
         
         dao.persist(expected);
-        
+        final Book actualValue = dao.findByPrimaryKey(43l);
+        for (String item : expected.getAppArg1()) {
+            assertTrue("AppArg1", actualValue.getAppArg1().contains(item));
+        }
         
         assertNotNull(expected.getCreatedDate());
         assertEquals(NAME, expected.getCreatedBy());

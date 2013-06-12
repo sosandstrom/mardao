@@ -7,6 +7,7 @@ package net.sf.mardao.test;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -67,8 +68,42 @@ public class TypeDaoTest extends TestCase {
         DaoImpl.setPrincipalName(NAME);
         final Book expected = new Book();
         expected.setId(42L);
-        expected.setTitle(name.toString());
+        expected.setAppArg1(Arrays.asList("test1","ddddddd"));
+
         dao.persist(expected);
+        assertNotNull(expected.getCreatedDate());
+        assertEquals(NAME, expected.getCreatedBy());
+        assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
+        DaoImpl.setPrincipalName(null);
+        
+        final CursorPage<Book, Long> page = dao.queryPage(10, null);
+        assertNotNull(page);
+        assertNotNull(page.getItems());
+        assertFalse(page.getItems().isEmpty());
+        final Book actual = page.getItems().iterator().next();
+        assertNotNull(actual);
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getTitle(), actual.getTitle());
+        assertEquals(expected.getCreatedDate(), actual.getUpdatedDate());
+        assertEquals(NAME, actual.getCreatedBy());
+        assertEquals(NAME, actual.getUpdatedBy());
+    }
+    
+    public void testCollectionTextItem() {
+        final String NAME = "John Doe2";
+        final StringBuffer name = new StringBuffer();
+        for (int i = 0; i < 500; i++) {
+            name.append(NAME);
+        }
+        DaoImpl.setPrincipalName(NAME);
+        final Book expected = new Book();
+        expected.setId(43L);
+        expected.setAppArg1(Arrays.asList("test12wwwwwwww","ddddddd"+name.toString()));
+        expected.setTitle(name.toString());
+        
+        dao.persist(expected);
+        
+        
         assertNotNull(expected.getCreatedDate());
         assertEquals(NAME, expected.getCreatedBy());
         assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());

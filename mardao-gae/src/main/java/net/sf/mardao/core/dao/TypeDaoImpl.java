@@ -1,12 +1,22 @@
 package net.sf.mardao.core.dao;
 
-import com.google.appengine.api.datastore.AsyncDatastoreService;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Future;
+
+import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.Filter;
+import net.sf.mardao.core.geo.DLocation;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.appengine.api.datastore.AsyncDatastoreService;
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -28,13 +38,6 @@ import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.TransactionOptions;
-import java.util.Date;
-import java.util.concurrent.Future;
-import net.sf.mardao.core.CursorPage;
-import net.sf.mardao.core.Filter;
-import net.sf.mardao.core.geo.DLocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID> {
@@ -316,6 +319,9 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             }
             else if (value instanceof Text) {
                 value = ((Text)value).getValue();
+                
+            } else if (value instanceof Collection) {
+                value = convertTextCollection((Collection)value);
             }
         }
         return value;
@@ -445,6 +451,24 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             if (value instanceof String && 500 < value.toString().length()) {
                 value = new Text(value.toString());
             }
+            if (value instanceof Collection) {
+                    boolean isTextMode = false;
+                    for (Object element : (Collection)value) {
+                        if (!(element instanceof String)) {
+                            break;
+                        } else if (500 < ((String)element).length()){
+                                isTextMode = true; break;
+                        }
+                    }
+                    if (isTextMode) {
+                        Collection<Text> newValue = new ArrayList<Text>();
+                        for (Object element : (Collection)value) {
+                            newValue.add(new Text(element.toString()));
+                        }
+                        value = newValue;
+                    }
+            }
+            
             ((Entity) core).setProperty(name, value);
         }
     }
@@ -461,7 +485,31 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         }
         return (String) value;
     }
-
+    
+    protected static final Collection convertTextCollection(Collection value) {
+        if (null == value) {
+            return null;
+        }
+        boolean isTextMode = false;
+        for (Object element : value) {
+            //check only first element
+            if ((element instanceof Text)) {
+                isTextMode = true; 
+            }
+            break;
+        }
+        
+        if (isTextMode) {
+            Collection<String> stringValue = new ArrayList<String>();
+            for (Object element : value) {
+                stringValue.add(convertText(element));
+            }
+            value = stringValue;
+        }
+        return value;
+    }
+    
+    
     protected static AsyncDatastoreService getAsyncDatastoreService() {
         return DatastoreServiceFactory.getAsyncDatastoreService();
     }

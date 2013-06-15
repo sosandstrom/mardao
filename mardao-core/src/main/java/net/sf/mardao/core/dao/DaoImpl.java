@@ -255,29 +255,20 @@ public abstract class DaoImpl<T, ID extends Serializable,
         final ID simpleKey = getSimpleKey(properties);
         final P parentKey = (P) getParentKey(properties);
         
-        try {
-            final T domain = createDomain(parentKey, simpleKey);
+        final T domain = createDomain(parentKey, simpleKey);
 
-            // created, updated
-            setDomainStringProperty(domain, getCreatedByColumnName(), properties);
-            setDomainStringProperty(domain, getCreatedDateColumnName(), properties);
-            setDomainStringProperty(domain, getUpdatedByColumnName(), properties);
-            setDomainStringProperty(domain, getUpdatedDateColumnName(), properties);
+        // created, updated
+        setDomainStringProperty(domain, getCreatedByColumnName(), properties);
+        setDomainStringProperty(domain, getCreatedDateColumnName(), properties);
+        setDomainStringProperty(domain, getUpdatedByColumnName(), properties);
+        setDomainStringProperty(domain, getUpdatedDateColumnName(), properties);
 
-            // Domain Entity-specific properties
-            for (String name : getColumnNames()) {
-                setDomainStringProperty(domain, name, properties);
-            }
+        // Domain Entity-specific properties
+        for (String name : getColumnNames()) {
+            setDomainStringProperty(domain, name, properties);
+        }
 
-            return domain;
-        }
-        catch (IllegalAccessException shouldNeverHappen) {
-            error(getTableName(), shouldNeverHappen);
-        }
-        catch (InstantiationException shouldNeverHappen) {
-            error(getTableName(), shouldNeverHappen);
-        }
-        return null;
+        return domain;
     }
     
     public T coreToDomain(E core) {
@@ -288,29 +279,20 @@ public abstract class DaoImpl<T, ID extends Serializable,
         final ID simpleKey = coreToSimpleKey(core);
         final P parentKey = coreToParentKey(core);
         
-        try {
-            final T domain = createDomain(parentKey, simpleKey);
+        final T domain = createDomain(parentKey, simpleKey);
 
-            // created, updated
-            copyCorePropertyToDomain(getCreatedByColumnName(), core, domain);
-            copyCorePropertyToDomain(getCreatedDateColumnName(), core, domain);
-            copyCorePropertyToDomain(getUpdatedByColumnName(), core, domain);
-            copyCorePropertyToDomain(getUpdatedDateColumnName(), core, domain);
+        // created, updated
+        copyCorePropertyToDomain(getCreatedByColumnName(), core, domain);
+        copyCorePropertyToDomain(getCreatedDateColumnName(), core, domain);
+        copyCorePropertyToDomain(getUpdatedByColumnName(), core, domain);
+        copyCorePropertyToDomain(getUpdatedDateColumnName(), core, domain);
 
-            // Domain Entity-specific properties
-            for (String name : getColumnNames()) {
-                copyCorePropertyToDomain(name, core, domain);
-            }
+        // Domain Entity-specific properties
+        for (String name : getColumnNames()) {
+            copyCorePropertyToDomain(name, core, domain);
+        }
 
-            return domain;
-        }
-        catch (IllegalAccessException shouldNeverHappen) {
-            error(getTableName(), shouldNeverHappen);
-        }
-        catch (InstantiationException shouldNeverHappen) {
-            error(getTableName(), shouldNeverHappen);
-        }
-        return null;
+        return domain;
     }
     
     protected Object copyCorePropertyToDomain(String name, E core, T domain) {
@@ -339,20 +321,30 @@ public abstract class DaoImpl<T, ID extends Serializable,
         return createDomain(null, null);
     }
 
-    public T createDomain(Object primaryKey) throws InstantiationException, IllegalAccessException {
+    @Override
+    public T createDomain(Object primaryKey) {
         C pk = (C) primaryKey;
         Object parentKey = coreKeyToParentKey(pk);
         ID simpleKey = coreKeyToSimpleKey(pk);
         return createDomain(parentKey, simpleKey);
     }
 
-    public T createDomain(Object parentKey, ID simpleKey) throws InstantiationException, IllegalAccessException {
-        final T domain = persistentClass.newInstance();
-        
-        setParentKey(domain, parentKey);
-        setSimpleKey(domain, simpleKey);
-        
-        return domain;
+    @Override
+    public T createDomain(Object parentKey, ID simpleKey) {
+        try {
+            final T domain = persistentClass.newInstance();
+
+            setParentKey(domain, parentKey);
+            setSimpleKey(domain, simpleKey);
+
+            return domain;
+        }
+        catch (IllegalAccessException ex) {
+            throw new RuntimeException("Access", ex);
+        }
+        catch (InstantiationException ex) {
+            throw new RuntimeException("Access", ex);
+        }
     }
     
     public E domainToCore(T domain, final Date currentDate) {

@@ -24,6 +24,8 @@ import net.sf.mardao.core.geo.DLocation;
 public interface Dao<T, ID extends Serializable> {
     
     T createDomain(Map<String, String> properties);
+    T createDomain(Object primaryKey);
+    T createDomain(Object parentKey, ID simpleKey);
     Filter createEqualsFilter(String columnName, Object value);
     Filter createGreaterThanOrEqualFilter(String columnName, Object value);
     Filter createInFilter(String fieldName, Collection param);

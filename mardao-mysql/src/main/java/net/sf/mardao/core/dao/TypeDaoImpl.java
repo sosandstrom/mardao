@@ -99,18 +99,8 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             final Class pkClass = getColumnClass(getPrimaryKeyColumnName());
             final ID simpleKey = (ID) (Long.class.equals(pkClass) ? 
                           rs.getLong(getPrimaryKeyColumnName()) : rs.getString(getPrimaryKeyColumnName()));
-            final T domain;
-            try {
-                domain = createDomain(parentKey, simpleKey);
+            final T domain = createDomain(parentKey, simpleKey);
                 
-                // TODO: populate
-                
-            } catch (InstantiationException ex) {
-                throw new SQLException("Instantiating domain", ex);
-            } catch (IllegalAccessException ex) {
-                throw new SQLException("Accessing domain", ex);
-            }
-            
             return domain;
         }
         

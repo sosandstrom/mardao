@@ -221,13 +221,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
         else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
             ${field.entity.simpleName} foreign = null;
             if (null != value) {
-                try {
-                    foreign = ${field.name}Dao.createDomain(value);
-                } catch (InstantiationException ex) {
-                    LOG.error("Creating foreign domain", ex);
-                } catch (IllegalAccessException ex) {
-                    LOG.error("Creating foreign domain", ex);
-                }
+                foreign = ${field.name}Dao.createDomain(value);
             }
             domain.set${field.nameFirst}(foreign);
         }

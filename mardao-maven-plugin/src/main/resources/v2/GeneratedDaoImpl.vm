@@ -271,13 +271,13 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
         else if (null == value) {
             // do nothing in particular, will call super at end
         }
-###foreach( $field in $entity.manyToOnes )	 
-##        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
-##            // many-to-one: replace foreign entity with its primary key
-##            ${field.entity.simpleName} foreign = (${field.entity.simpleName}) value;
-##            value = ${field.nameLower}Dao.getPrimaryKey(foreign);
-##        }
-###end
+#foreach( $field in $entity.manyToOnes )	 
+        else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
+            // many-to-one: replace foreign entity with its primary key
+            ${field.entity.simpleName} foreign = (${field.entity.simpleName}) value;
+            value = ${field.nameLower}Dao.getPrimaryKey(foreign);
+        }
+#end
         super.setCoreProperty(core, name, value);
     }
 

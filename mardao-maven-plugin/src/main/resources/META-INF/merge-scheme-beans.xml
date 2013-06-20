@@ -496,6 +496,18 @@
 					<property name="fileSuffix" value=".java" />
 				</bean>
 
+				<!-- DaoConfig bean context -->
+				<bean class="net.sf.mardao.domain.MergeTemplate">
+                                        <property name="requiresOnClasspath" value="org.slf4j.ILoggerFactory" />
+					<property name="templatePrefix" value="v2/DaoConfig" />
+					<property name="templateSuffix" value=".vm" />
+					<property name="destFolder" value="targetDao" />
+					<property name="entity" value="false" />
+					<property name="listingEntities" value="true" />
+					<property name="filePrefix" value="DaoConfig" />
+					<property name="fileSuffix" value=".java" />
+				</bean>
+
 				<!-- spring-dao.xml bean context -->
 				<bean class="net.sf.mardao.domain.MergeTemplate">
                                         <property name="requiresOnClasspath" value="org.slf4j.ILoggerFactory" />

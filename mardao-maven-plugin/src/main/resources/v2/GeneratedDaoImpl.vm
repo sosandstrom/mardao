@@ -114,9 +114,10 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
         // many-to-ones
 #foreach( $field in $entity.manyToOnes )	 
         else if (COLUMN_NAME_${field.nameUpper}.equals(name)) {
-            final ${field.entity.className} foreign = domain.get${field.nameFirst}();
-            final Object foreignKey = ${field.name}Dao.getPrimaryKey(foreign);
-            value = foreignKey;
+            value = domain.get${field.nameFirst}();
+##            final ${field.entity.className} foreign = domain.get${field.nameFirst}();
+##            final Object foreignKey = ${field.name}Dao.getPrimaryKey(foreign);
+##            value = foreignKey;
         }
 #end
         // many-to-manys
@@ -652,7 +653,13 @@ ${field.type} ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
 		final Filter[] filters = new Filter[$uniqueFields.size()];
                 int i = 0;
 #foreach( $field in $uniqueFields )
+#if( $entity.manyToOnes.contains($field) )
+#set( $foreign = $field.entity )
+                final Object ${field.name}Key = ${field.name}Dao.getPrimaryKey(${field.name});
+                filters[i++] = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name}Key);
+#else
                 filters[i++] = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
+#end
 #end
 		return findUniqueBy(filters);
 	}

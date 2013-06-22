@@ -203,7 +203,35 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	 */
 	Iterable<${entity.pk.type}> queryKeysBy${helper.firstToUpper($field.name)}${helper.firstToUpper($foreign.pk.name)}(${foreign.pk.type} ${foreign.pk.name});
 	
-#end	
+#end
+
+	/**
+	 * query-by method for many-to-one field ${field.name}
+	 * @param ${field.name}Key the related ${field.type} entity's primary key
+         * @since 2.3.3
+	 * @return an Iterable of ${entity.simpleName}s belonging to the many-to-one relation
+	 */
+	Iterable<${entity.simpleName}> queryBy${field.nameFirst}Key(Object ${field.name}Key);
+
+	/**
+	 * query-keys-by method for many-to-one field ${field.name}
+	 * @param ${field.name}Key the related ${field.type} entity's primary key
+         * @since 2.3.3
+	 * @return an Iterable of ${entity.pk.type} keys belonging to the many-to-one relation
+	 */
+	Iterable<${entity.pk.type}> queryKeysBy${field.nameFirst}Key(Object ${field.name}Key);
+
+	/**
+	 * query-page-by method for many-to-one field ${field.name}
+	 * @param ${field.name}Key the related ${field.type} primary key
+         * @param pageSize the number of domain entities in the page
+         * @param cursorString non-null if get next page
+         * @since 2.3.3
+	 * @return a CursorPage of ${entity.simpleName}s belonging to the many-to-one relation
+	 */
+	CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${field.nameFirst}Key(Object ${field.name}Key,
+                int pageSize, String cursorString);
+
 #end	
 	
 	// ----------------------- many-to-many finders -------------------------

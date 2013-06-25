@@ -702,7 +702,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         Query q = new Query(AUDIT_KIND, AUDIT_PARENT_KEY);
         q.setKeysOnly();
         q.addFilter(getUpdatedDateColumnName(), FilterOperator.GREATER_THAN_OR_EQUAL, since);
-        q.addSort(getUpdatedDateColumnName(), SortDirection.ASCENDING);
+//        q.addSort(getUpdatedDateColumnName(), SortDirection.ASCENDING);
         PreparedQuery pq = datastore.prepare(q);
         
         final String cursorKey = null != auditCursorKey ? 

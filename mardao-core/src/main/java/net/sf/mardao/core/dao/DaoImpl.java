@@ -1399,7 +1399,8 @@ public abstract class DaoImpl<T, ID extends Serializable,
             Filter allFilters[] = Arrays.copyOf(filters, (null != filters ? filters.length : 0) + 1);
             allFilters[allFilters.length-1] = createGreaterThanOrEqualFilter(updatedDateColumnName, since);
             final CursorPage<T, ID> entityPage = queryPage(true, pageSize, parentKey, null, 
-                                      updatedDateColumnName, true, null, false, 
+                                      null, false, null, false, 
+//                                      updatedDateColumnName, true, null, false, 
                                       cursorKey, allFilters);
         
             // convert entities to IDs only

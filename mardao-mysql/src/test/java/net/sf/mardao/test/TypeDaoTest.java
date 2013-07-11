@@ -69,7 +69,7 @@ public class TypeDaoTest extends TestCase {
         assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
         DaoImpl.setPrincipalName(null);
         
-        final CursorPage<Book, Long> page = dao.queryPage(10, null);
+        final CursorPage<Book> page = dao.queryPage(10, null);
         assertNotNull(page);
         assertNotNull(page.getItems());
         assertFalse(page.getItems().isEmpty());
@@ -90,7 +90,7 @@ public class TypeDaoTest extends TestCase {
         assertNotNull(expected.getId());
         assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
         
-        final CursorPage<Book, Long> page = dao.queryPage(10, null);
+        final CursorPage<Book> page = dao.queryPage(10, null);
         assertNotNull(page);
         assertNotNull(page.getItems());
         assertFalse(page.getItems().isEmpty());
@@ -117,7 +117,7 @@ public class TypeDaoTest extends TestCase {
         DaoImpl.setPrincipalName(null);
         
         String cursorString = null;
-        CursorPage<Book, Long> page;
+        CursorPage<Book> page;
         for (int p = 0; p < 11; p++) {
             page = dao.queryPage(10, cursorString);
             LOG.info(String.format("queried page %d with cursor %s, got %d items", p, cursorString, page.getItems().size()));

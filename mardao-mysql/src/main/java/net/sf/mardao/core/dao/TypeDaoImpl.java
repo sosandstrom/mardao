@@ -818,7 +818,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
     
     @Override
-    protected CursorPage<T, ID> queryPage(boolean keysOnly, int requestedPageSize,
+    protected CursorPage<T> queryPage(boolean keysOnly, int requestedPageSize,
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
@@ -833,7 +833,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 primaryOrderBy, primaryIsAscending, 
                 secondaryOrderBy, secondaryIsAscending, filters);
         
-        final CursorPage<T, ID> cursorPage = new CursorPage<T, ID>();
+        final CursorPage<T> cursorPage = new CursorPage<T>();
         cursorPage.setRequestedPageSize(requestedPageSize);
         cursorPage.setItems(domains);
         
@@ -922,9 +922,9 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
-    protected CursorPage<ID, ID> whatsDeleted(Date since, int pageSize, String cursorKey) {
+    protected CursorPage<ID> whatsDeleted(Date since, int pageSize, String cursorKey) {
         LOG.warn("whatsDeleted not implemented for MySQL yet.");
-        CursorPage<ID, ID> page = new CursorPage<ID, ID>();
+        CursorPage<ID> page = new CursorPage<ID>();
         page.setItems(Collections.EMPTY_LIST);
         return page;
     }

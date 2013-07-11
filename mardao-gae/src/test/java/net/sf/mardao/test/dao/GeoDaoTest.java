@@ -2,7 +2,6 @@ package net.sf.mardao.test.dao;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import junit.framework.TestCase;
@@ -70,7 +69,7 @@ public class GeoDaoTest extends TestCase {
     public void testQueryInGeobox() {
         String cursorString = null;
         
-        CursorPage<DEmployee, Long> page = employeeDao.queryInGeobox(20f, 110f, Geobox.BITS_18_154m, 60,
+        CursorPage<DEmployee> page = employeeDao.queryInGeobox(20f, 110f, Geobox.BITS_18_154m, 60,
                 null, false, null, false, cursorString);
         assertEquals(60, page.getItems().size());
         final DLocation centre = new DLocation(20f, 110f);

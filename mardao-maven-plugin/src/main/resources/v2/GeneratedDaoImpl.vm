@@ -326,7 +326,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
          * @param cursorString non-null if get next page
 	 * @return a Page of ${entity.simpleName}s for the specified ${field.name}
 	 */
-	public final CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
+	public final CursorPage<${entity.simpleName}> queryPageBy${helper.firstToUpper($field.name)}(${field.type} ${field.name},
             int pageSize, String cursorString) {
             return queryPage(false, pageSize, ${field.name}, null, null, false, null, false, cursorString);
         }
@@ -501,7 +501,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
          * @param cursorString non-null if get next page
 	 * @return a Page of ${entity.simpleName}s for the specified ${field.name}
 	 */
-	public final CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name},
+	public final CursorPage<${entity.simpleName}> queryPageBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name},
             int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name});
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
@@ -555,7 +555,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
          * @param cursorString non-null if get next page
 	 * @return a CursorPage of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
-	public final CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${field.nameFirst}(${field.type} ${field.name},
+	public final CursorPage<${entity.simpleName}> queryPageBy${field.nameFirst}(${field.type} ${field.name},
                 int pageSize, String cursorString) {
             final Object foreignKey = ${field.name}Dao.getPrimaryKey(${field.name});
             return queryPageBy${field.nameFirst}Key(foreignKey, pageSize, cursorString);
@@ -627,7 +627,7 @@ public class Generated${entity.simpleName}DaoImpl extends TypeDaoImpl<${entity.s
          * @since 2.3.3
 	 * @return a CursorPage of ${entity.simpleName}s belonging to the many-to-one relation
 	 */
-	public final CursorPage<${entity.simpleName}, ${entity.pk.type}> queryPageBy${field.nameFirst}Key(Object ${field.name}Key,
+	public final CursorPage<${entity.simpleName}> queryPageBy${field.nameFirst}Key(Object ${field.name}Key,
                 int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_${field.name.toUpperCase()}, ${field.name}Key);
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);

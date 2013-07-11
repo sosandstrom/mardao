@@ -76,7 +76,7 @@ public class TypeDaoTest extends TestCase {
         assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
         DaoImpl.setPrincipalName(null);
         
-        final CursorPage<Book, Long> page = dao.queryPage(10, null);
+        final CursorPage<Book> page = dao.queryPage(10, null);
         assertNotNull(page);
         assertNotNull(page.getItems());
         assertFalse(page.getItems().isEmpty());
@@ -112,7 +112,7 @@ public class TypeDaoTest extends TestCase {
         assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
         DaoImpl.setPrincipalName(null);
         
-        final CursorPage<Book, Long> page = dao.queryPage(10, null);
+        final CursorPage<Book> page = dao.queryPage(10, null);
         assertNotNull(page);
         assertNotNull(page.getItems());
         assertFalse(page.getItems().isEmpty());
@@ -157,7 +157,7 @@ public class TypeDaoTest extends TestCase {
         assertNotNull(expected.getId());
         assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
         
-        final CursorPage<Book, Long> page = dao.queryPage(10, null);
+        final CursorPage<Book> page = dao.queryPage(10, null);
         assertNotNull(page);
         assertNotNull(page.getItems());
         assertFalse(page.getItems().isEmpty());
@@ -184,7 +184,7 @@ public class TypeDaoTest extends TestCase {
         DaoImpl.setPrincipalName(null);
         
         String cursorString = null;
-        CursorPage<Book, Long> page;
+        CursorPage<Book> page;
         for (int p = 0; p < 11; p++) {
             page = dao.queryPage(10, cursorString);
             LOG.info(String.format("queried page %d with cursor %s, got %d items", p, cursorString, page.getItems().size()));
@@ -256,7 +256,7 @@ public class TypeDaoTest extends TestCase {
         
         DaoImpl.setPrincipalName(null);
 
-        CursorPage<Long, Long> updated = dao.whatsChanged(since, 10, null);
+        CursorPage<Long> updated = dao.whatsChanged(since, 10, null);
         assertEquals(10, updated.getItems().size());
         for (Long id : updated.getItems()) {
             assertTrue(1055L <= id);
@@ -264,7 +264,7 @@ public class TypeDaoTest extends TestCase {
         }
         assertFalse(updated.getCursorKey().startsWith("audit-"));
         
-        CursorPage<Long, Long> mixed = dao.whatsChanged(since, 10, updated.getCursorKey());
+        CursorPage<Long> mixed = dao.whatsChanged(since, 10, updated.getCursorKey());
         assertEquals(10, mixed.getItems().size());
         for (Long id : mixed.getItems()) {
             assertTrue(1040L <= id);
@@ -272,7 +272,7 @@ public class TypeDaoTest extends TestCase {
         }
         assertTrue(mixed.getCursorKey().startsWith("audit-"));
         
-        CursorPage<Long, Long> deleted = dao.whatsChanged(since, 11, mixed.getCursorKey());
+        CursorPage<Long> deleted = dao.whatsChanged(since, 11, mixed.getCursorKey());
         assertEquals(10, deleted.getItems().size());
         for (Long id : deleted.getItems()) {
             assertTrue(1040L <= id);

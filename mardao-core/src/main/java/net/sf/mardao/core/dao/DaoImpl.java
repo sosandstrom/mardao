@@ -157,7 +157,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
     protected abstract Collection<C> persistCore(Iterable<E> itrbl);
     
     /** Implemented in TypeDaoImpl */
-    protected abstract CursorPage<T, ID> queryPage(boolean keysOnly, int pageSize,
+    protected abstract CursorPage<T> queryPage(boolean keysOnly, int pageSize,
             Object ancestorKey, Object primaryKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
@@ -204,7 +204,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
 
     protected abstract void setDomainStringProperty(T domain, String name, Map<String, String> properties);
     
-    protected abstract CursorPage<ID, ID> whatsDeleted(Date since, int pageSize, String cursorKey);
+    protected abstract CursorPage<ID> whatsDeleted(Date since, int pageSize, String cursorKey);
     
     // --- END persistence-type beans must implement these ---
 
@@ -445,8 +445,8 @@ public abstract class DaoImpl<T, ID extends Serializable,
         return keys;
     }
     
-    public CursorPage<ID, ID> domainPageToSimplePage(CursorPage<T, ID> domainPage) {
-        final CursorPage<ID, ID> idPage = new CursorPage<ID, ID>();
+    public CursorPage<ID> domainPageToSimplePage(CursorPage<T> domainPage) {
+        final CursorPage<ID> idPage = new CursorPage<ID>();
         idPage.setCursorKey(domainPage.getCursorKey());
         idPage.setItems(domainsToSimpleKeys(domainPage.getItems()));
         idPage.setRequestedPageSize(domainPage.getRequestedPageSize());
@@ -1210,13 +1210,13 @@ public abstract class DaoImpl<T, ID extends Serializable,
         return entities.values();
     }
     
-    public CursorPage<T, ID> queryPage(int pageSize, String cursorString) {
+    public CursorPage<T> queryPage(int pageSize, String cursorString) {
         return queryPage(false, pageSize, null, null,
                 null, false, null, false,
                 cursorString);
     }
 
-    public CursorPage<T, ID> queryPage(int pageSize, 
+    public CursorPage<T> queryPage(int pageSize, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             String cursorString) {
         return queryPage(false, pageSize, null, null,
@@ -1224,7 +1224,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
                 cursorString);
     }
 
-    public CursorPage<T, ID> queryInGeobox(float lat, float lng, int bits, int pageSize, 
+    public CursorPage<T> queryInGeobox(float lat, float lng, int bits, int pageSize, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             String cursorString, Filter... filters) {
         if (!boxBits.contains(bits)) {
@@ -1248,7 +1248,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
         // sorting on distance has to be done outside datastore, i.e. here in application:
         Map<Double, T> orderedMap = new TreeMap<Double, T>();
         for (int bits : boxBits) {       
-            final CursorPage<T, ID> subList = queryInGeobox(lat, lng, bits, size,
+            final CursorPage<T> subList = queryInGeobox(lat, lng, bits, size,
                     primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
                     null, filters);
             for (T model : subList.getItems()) {
@@ -1374,7 +1374,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
      * @return the IDs for the entities with updatedDate >= since, in descending order.
      */
     @Override
-    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey) {
+    public CursorPage<ID> whatsChanged(Date since, int pageSize, String cursorKey) {
         return whatsChanged(null, since, pageSize, cursorKey);
     }
     
@@ -1384,13 +1384,13 @@ public abstract class DaoImpl<T, ID extends Serializable,
      * @return the IDs for the entities with updatedDate >= since, in descending order.
      */
     @Override
-    public CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, 
+    public CursorPage<ID> whatsChanged(Object parentKey, Date since, 
             int pageSize, String cursorKey, Filter... filters) {
         final String updatedDateColumnName = getUpdatedDateColumnName();
         if (null == updatedDateColumnName) {
             throw new UnsupportedOperationException("Not supported without @UpdatedDate");
         }
-        CursorPage<ID, ID> idPage = null;
+        CursorPage<ID> idPage = null;
         String auditCursorKey = cursorKey;
         
         // start with returning updated IDs
@@ -1398,7 +1398,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
             auditCursorKey = null;
             Filter allFilters[] = Arrays.copyOf(filters, (null != filters ? filters.length : 0) + 1);
             allFilters[allFilters.length-1] = createGreaterThanOrEqualFilter(updatedDateColumnName, since);
-            final CursorPage<T, ID> entityPage = queryPage(true, pageSize, parentKey, null, 
+            final CursorPage<T> entityPage = queryPage(true, pageSize, parentKey, null, 
                                       null, false, null, false, 
 //                                      updatedDateColumnName, true, null, false, 
                                       cursorKey, allFilters);
@@ -1415,7 +1415,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
             // full audit page or append to existing?
             int remainingSize = null == idPage ? pageSize : 
                     pageSize - idPage.getItems().size();
-            final CursorPage<ID, ID> deletedKeys = whatsDeleted(since, 
+            final CursorPage<ID> deletedKeys = whatsDeleted(since, 
                     remainingSize, auditCursorKey);
             if (null == idPage) {
                 idPage = deletedKeys;

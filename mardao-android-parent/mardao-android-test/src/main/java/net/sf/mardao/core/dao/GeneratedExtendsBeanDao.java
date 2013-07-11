@@ -12,7 +12,7 @@ import net.sf.mardao.core.geo.DLocation;
 /**
  * DAO interface with finder methods for ExtendsBean entities.
  *
- * Generated on 2013-04-20T12:06:15.231+0700.
+ * Generated on 2013-07-11T16:57:11.736+0700.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long> {
@@ -70,7 +70,7 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
          * @param cursorString non-null if get next page
 	 * @return a Page of ExtendsBeans for the specified createdBy
 	 */
-	CursorPage<ExtendsBean, java.lang.Long> queryPageByCreatedBy(java.lang.String createdBy,
+	CursorPage<ExtendsBean> queryPageByCreatedBy(java.lang.String createdBy,
             int pageSize, String cursorString);
 
 
@@ -95,7 +95,7 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
          * @param cursorString non-null if get next page
 	 * @return a Page of ExtendsBeans for the specified createdDate
 	 */
-	CursorPage<ExtendsBean, java.lang.Long> queryPageByCreatedDate(java.util.Date createdDate,
+	CursorPage<ExtendsBean> queryPageByCreatedDate(java.util.Date createdDate,
             int pageSize, String cursorString);
 
 
@@ -120,7 +120,7 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
          * @param cursorString non-null if get next page
 	 * @return a Page of ExtendsBeans for the specified message
 	 */
-	CursorPage<ExtendsBean, java.lang.Long> queryPageByMessage(java.lang.String message,
+	CursorPage<ExtendsBean> queryPageByMessage(java.lang.String message,
             int pageSize, String cursorString);
 
 
@@ -145,7 +145,7 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
          * @param cursorString non-null if get next page
 	 * @return a Page of ExtendsBeans for the specified updatedBy
 	 */
-	CursorPage<ExtendsBean, java.lang.Long> queryPageByUpdatedBy(java.lang.String updatedBy,
+	CursorPage<ExtendsBean> queryPageByUpdatedBy(java.lang.String updatedBy,
             int pageSize, String cursorString);
 
 
@@ -170,7 +170,7 @@ public interface GeneratedExtendsBeanDao extends Dao<ExtendsBean, java.lang.Long
          * @param cursorString non-null if get next page
 	 * @return a Page of ExtendsBeans for the specified updatedDate
 	 */
-	CursorPage<ExtendsBean, java.lang.Long> queryPageByUpdatedDate(java.util.Date updatedDate,
+	CursorPage<ExtendsBean> queryPageByUpdatedDate(java.util.Date updatedDate,
             int pageSize, String cursorString);
 
 

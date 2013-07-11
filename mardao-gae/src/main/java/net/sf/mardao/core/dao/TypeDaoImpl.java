@@ -365,7 +365,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
     
     @Override
-    protected CursorPage<T, ID> queryPage(boolean keysOnly, int requestedPageSize,
+    protected CursorPage<T> queryPage(boolean keysOnly, int requestedPageSize,
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
@@ -378,7 +378,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         
         final QueryResultList<Entity> iterable = asQueryResultList(pq, requestedPageSize, (String) cursorString);
         
-        final CursorPage<T, ID> cursorPage = new CursorPage<T, ID>();
+        final CursorPage<T> cursorPage = new CursorPage<T>();
         cursorPage.setRequestedPageSize(requestedPageSize);
         
         // if first page and populate totalSize, fetch this with async query:
@@ -692,7 +692,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
-    protected CursorPage<ID,ID> whatsDeleted(Date since, int requestedPageSize, String auditCursorKey) {
+    protected CursorPage<ID> whatsDeleted(Date since, int requestedPageSize, String auditCursorKey) {
         LOG.debug("prepare {} for audit since {}", getTableName(), since);
         final DatastoreService datastore = getDatastoreService();
 
@@ -709,7 +709,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 auditCursorKey.substring(AUDIT_CURSOR_PREFIX.length()) :
                 null;
         final QueryResultList<Entity> iterable = asQueryResultList(pq, requestedPageSize, cursorKey);
-        final CursorPage<ID, ID> cursorPage = new CursorPage<ID, ID>();
+        final CursorPage<ID> cursorPage = new CursorPage<ID>();
         cursorPage.setRequestedPageSize(requestedPageSize);
         
         final Collection<ID> ids = new ArrayList<ID>();

@@ -12,7 +12,7 @@ import net.sf.mardao.core.geo.DLocation;
 /**
  * DAO interface with finder methods for DUnique entities.
  *
- * Generated on 2013-04-20T12:06:15.231+0700.
+ * Generated on 2013-07-11T16:57:11.736+0700.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public interface GeneratedDUniqueDao extends Dao<DUnique, java.lang.Long> {
@@ -74,7 +74,7 @@ public interface GeneratedDUniqueDao extends Dao<DUnique, java.lang.Long> {
          * @param cursorString non-null if get next page
 	 * @return a Page of DUniques for the specified createdBy
 	 */
-	CursorPage<DUnique, java.lang.Long> queryPageByCreatedBy(java.lang.String createdBy,
+	CursorPage<DUnique> queryPageByCreatedBy(java.lang.String createdBy,
             int pageSize, String cursorString);
 
 
@@ -99,7 +99,7 @@ public interface GeneratedDUniqueDao extends Dao<DUnique, java.lang.Long> {
          * @param cursorString non-null if get next page
 	 * @return a Page of DUniques for the specified createdDate
 	 */
-	CursorPage<DUnique, java.lang.Long> queryPageByCreatedDate(java.util.Date createdDate,
+	CursorPage<DUnique> queryPageByCreatedDate(java.util.Date createdDate,
             int pageSize, String cursorString);
 
 
@@ -138,7 +138,7 @@ public interface GeneratedDUniqueDao extends Dao<DUnique, java.lang.Long> {
          * @param cursorString non-null if get next page
 	 * @return a Page of DUniques for the specified message
 	 */
-	CursorPage<DUnique, java.lang.Long> queryPageByMessage(java.lang.String message,
+	CursorPage<DUnique> queryPageByMessage(java.lang.String message,
             int pageSize, String cursorString);
 
 
@@ -163,7 +163,7 @@ public interface GeneratedDUniqueDao extends Dao<DUnique, java.lang.Long> {
          * @param cursorString non-null if get next page
 	 * @return a Page of DUniques for the specified updatedBy
 	 */
-	CursorPage<DUnique, java.lang.Long> queryPageByUpdatedBy(java.lang.String updatedBy,
+	CursorPage<DUnique> queryPageByUpdatedBy(java.lang.String updatedBy,
             int pageSize, String cursorString);
 
 
@@ -188,7 +188,7 @@ public interface GeneratedDUniqueDao extends Dao<DUnique, java.lang.Long> {
          * @param cursorString non-null if get next page
 	 * @return a Page of DUniques for the specified updatedDate
 	 */
-	CursorPage<DUnique, java.lang.Long> queryPageByUpdatedDate(java.util.Date updatedDate,
+	CursorPage<DUnique> queryPageByUpdatedDate(java.util.Date updatedDate,
             int pageSize, String cursorString);
 
 

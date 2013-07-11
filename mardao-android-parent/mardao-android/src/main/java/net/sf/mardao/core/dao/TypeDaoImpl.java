@@ -486,13 +486,13 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     }
 
     @Override
-    protected CursorPage<T, ID> queryPage(boolean keysOnly, int pageSize, 
+    protected CursorPage<T> queryPage(boolean keysOnly, int pageSize, 
             Object ancestorKey, Object primaryKey, 
             String primaryOrderBy, boolean primaryIsAscending, 
             String secondaryOrderBy, boolean secondaryIsAscending, 
             String cursorString, Filter... filters) {
         
-        CursorPage<T, ID> page = new CursorPage<T, ID>();
+        CursorPage<T> page = new CursorPage<T>();
         
         int offset = null != cursorString ? Integer.parseInt(cursorString) : 0;
         Iterable<T> itrbl = queryIterable(keysOnly, offset, pageSize, 
@@ -544,7 +544,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     }
 
     @Override
-    protected CursorPage<ID, ID> whatsDeleted(Date since, int pageSize, String cursorKey) {
+    protected CursorPage<ID> whatsDeleted(Date since, int pageSize, String cursorKey) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

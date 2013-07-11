@@ -20,7 +20,7 @@ import net.sf.mardao.core.domain.DUnique;
 /**
  * The DUnique domain-object specific finders and methods go in this POJO.
  * 
- * Generated on 2013-04-20T12:06:15.231+0700.
+ * Generated on 2013-07-11T16:57:11.736+0700.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public class GeneratedDUniqueDaoImpl extends TypeDaoImpl<DUnique, java.lang.Long> 
@@ -299,7 +299,7 @@ public class GeneratedDUniqueDaoImpl extends TypeDaoImpl<DUnique, java.lang.Long
          * @param cursorString non-null if get next page
 	 * @return a Page of DUniques for the specified createdBy
 	 */
-	public final CursorPage<DUnique, java.lang.Long> queryPageByCreatedBy(java.lang.String createdBy,
+	public final CursorPage<DUnique> queryPageByCreatedBy(java.lang.String createdBy,
             int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_CREATEDBY, createdBy);
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
@@ -331,7 +331,7 @@ public class GeneratedDUniqueDaoImpl extends TypeDaoImpl<DUnique, java.lang.Long
          * @param cursorString non-null if get next page
 	 * @return a Page of DUniques for the specified createdDate
 	 */
-	public final CursorPage<DUnique, java.lang.Long> queryPageByCreatedDate(java.util.Date createdDate,
+	public final CursorPage<DUnique> queryPageByCreatedDate(java.util.Date createdDate,
             int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_CREATEDDATE, createdDate);
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
@@ -383,7 +383,7 @@ public class GeneratedDUniqueDaoImpl extends TypeDaoImpl<DUnique, java.lang.Long
          * @param cursorString non-null if get next page
 	 * @return a Page of DUniques for the specified message
 	 */
-	public final CursorPage<DUnique, java.lang.Long> queryPageByMessage(java.lang.String message,
+	public final CursorPage<DUnique> queryPageByMessage(java.lang.String message,
             int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_MESSAGE, message);
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
@@ -415,7 +415,7 @@ public class GeneratedDUniqueDaoImpl extends TypeDaoImpl<DUnique, java.lang.Long
          * @param cursorString non-null if get next page
 	 * @return a Page of DUniques for the specified updatedBy
 	 */
-	public final CursorPage<DUnique, java.lang.Long> queryPageByUpdatedBy(java.lang.String updatedBy,
+	public final CursorPage<DUnique> queryPageByUpdatedBy(java.lang.String updatedBy,
             int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_UPDATEDBY, updatedBy);
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);
@@ -447,7 +447,7 @@ public class GeneratedDUniqueDaoImpl extends TypeDaoImpl<DUnique, java.lang.Long
          * @param cursorString non-null if get next page
 	 * @return a Page of DUniques for the specified updatedDate
 	 */
-	public final CursorPage<DUnique, java.lang.Long> queryPageByUpdatedDate(java.util.Date updatedDate,
+	public final CursorPage<DUnique> queryPageByUpdatedDate(java.util.Date updatedDate,
             int pageSize, String cursorString) {
             final Filter filter = createEqualsFilter(COLUMN_NAME_UPDATEDDATE, updatedDate);
             return queryPage(false, pageSize, null, null, null, false, null, false, cursorString, filter);

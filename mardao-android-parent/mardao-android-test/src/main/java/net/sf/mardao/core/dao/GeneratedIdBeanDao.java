@@ -12,7 +12,7 @@ import net.sf.mardao.core.geo.DLocation;
 /**
  * DAO interface with finder methods for IdBean entities.
  *
- * Generated on 2013-04-20T12:06:15.231+0700.
+ * Generated on 2013-07-11T16:57:11.736+0700.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public interface GeneratedIdBeanDao extends Dao<IdBean, java.lang.Long> {
@@ -54,7 +54,7 @@ public interface GeneratedIdBeanDao extends Dao<IdBean, java.lang.Long> {
          * @param cursorString non-null if get next page
 	 * @return a Page of IdBeans for the specified message
 	 */
-	CursorPage<IdBean, java.lang.Long> queryPageByMessage(java.lang.String message,
+	CursorPage<IdBean> queryPageByMessage(java.lang.String message,
             int pageSize, String cursorString);
 
 

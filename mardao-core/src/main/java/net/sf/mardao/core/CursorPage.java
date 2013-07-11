@@ -1,13 +1,12 @@
 package net.sf.mardao.core;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 /**
  *
  * @author os
  */
-public class CursorPage<T extends Object, ID extends Serializable> {
+public class CursorPage<T extends Object> {
     
     /** requested page size, not acutal */
     @Deprecated

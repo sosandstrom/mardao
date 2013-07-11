@@ -158,9 +158,9 @@ public interface Dao<T, ID extends Serializable> {
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters);
     
-    CursorPage<T, ID> queryPage(int pageSize, String cursorString);
+    CursorPage<T> queryPage(int pageSize, String cursorString);
 
-    CursorPage<T, ID> queryPage(int pageSize, 
+    CursorPage<T> queryPage(int pageSize, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             String cursorString);
     
@@ -168,9 +168,9 @@ public interface Dao<T, ID extends Serializable> {
     
     void update(T domain);
     
-    CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey);
+    CursorPage<ID> whatsChanged(Date since, int pageSize, String cursorKey);
     
-    CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, int pageSize, String cursorKey, Filter... filters);
+    CursorPage<ID> whatsChanged(Object parentKey, Date since, int pageSize, String cursorKey, Filter... filters);
     
     void writeAsCsv(OutputStream out, String[] columns, CsvConverter<T> converter, Object ancestorKey,
             String primaryOrderBy, boolean primaryIsAscending,
@@ -183,7 +183,7 @@ public interface Dao<T, ID extends Serializable> {
 
     // --- GeoDao methods ---
     
-    CursorPage<T, ID> queryInGeobox(float lat, float lng, int bits, int pageSize, 
+    CursorPage<T> queryInGeobox(float lat, float lng, int bits, int pageSize, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             String cursorString, Filter... filters);
 

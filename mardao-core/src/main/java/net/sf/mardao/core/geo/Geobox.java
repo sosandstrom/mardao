@@ -136,7 +136,7 @@ public class Geobox {
      * @param lat
      * @param lng
      * @param precision in nibbles (4 bits per nibble)
-     * @return 
+     * @return the geohash long for specified lat,long,precision
      */
     public static long getCell(float lat, float lng, int precision) {
         return getCell(lat, lng, 4*precision, 90.0f, 180.0f);
@@ -258,8 +258,8 @@ public class Geobox {
    /**
      * Calculates the great circle distance between two points (law of cosines).
      *
-     * @param p1: indicating the first point.
-     * @param p2: indicating the second point.
+     * @param p1 indicating the first point.
+     * @param p2 indicating the second point.
      * @return The 2D great-circle distance between the two given points, in meters.
      */
 	public static double distance(DLocation p1, DLocation p2) {

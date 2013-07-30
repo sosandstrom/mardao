@@ -59,7 +59,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
     protected static final String AUDIT_CURSOR_PREFIX = "audit-";
     
     private Collection<Integer> boxBits = Arrays.asList(
-        Geobox.BITS_18_154m, Geobox.BITS_15_1224m, Geobox.BITS_12_10km
+        Geobox.BITS_18_152m, Geobox.BITS_15_1222m, Geobox.BITS_12_9783m
     );
 
     /** set this, to have createdBy and updatedBy set */

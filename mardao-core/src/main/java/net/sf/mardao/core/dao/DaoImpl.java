@@ -1251,9 +1251,12 @@ public abstract class DaoImpl<T, ID extends Serializable,
             final CursorPage<T> subList = queryInGeobox(lat, lng, bits, size,
                     primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
                     null, filters);
+            final double S = Geobox.getCellSize(bits, lat);
             for (T model : subList.getItems()) {
                 double d = Geobox.distance(getGeoLocation(model), p);
-                orderedMap.put(d, model);
+                if (d < S) {
+                    orderedMap.put(d, model);
+                }
             }
             
             if (size <= orderedMap.size()) {

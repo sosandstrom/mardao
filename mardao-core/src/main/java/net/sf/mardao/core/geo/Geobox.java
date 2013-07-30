@@ -8,6 +8,7 @@ import java.util.TreeSet;
 public class Geobox {
 
     public static final int RADIUS = 6378135;
+    public static final int D = 40075004;
     
     static final float[] D_MAJOR = new float[58];
     
@@ -288,5 +289,18 @@ public class Geobox {
 		}
 		return result;
 	}
+        
+        public static int getCellSize(int bits) {
+            return D >> bits;
+        }
+        
+        public static double getCellSize(int bits, double latitude) {
+            return Math.cos(latitude) * getCellSize(bits);
+        }
 
+        public static void main(String args[]) {
+            for (int i = 0; i < 27; i++) {
+                System.out.println(String.format("For bits %d, s=%d", i, getCellSize(i)));
+            }
+        }
 }

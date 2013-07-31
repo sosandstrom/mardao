@@ -25,6 +25,7 @@ import net.sf.jsr107cache.CacheManager;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.MardaoListFuture;
+import net.sf.mardao.core.domain.AbstractLongEntity;
 import net.sf.mardao.core.geo.DLocation;
 import net.sf.mardao.core.geo.Geobox;
 
@@ -1243,17 +1244,20 @@ public abstract class DaoImpl<T, ID extends Serializable,
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             int offset, int limit, Filter... filters) {
         final DLocation p = new DLocation(lat, lng);
-        final int size = offset + (0 < limit ? limit : 10000);
+        final int MAX_SIZE = 10000;
+        final int size = offset + (0 < limit ? limit : MAX_SIZE);
         
         // sorting on distance has to be done outside datastore, i.e. here in application:
         Map<Double, T> orderedMap = new TreeMap<Double, T>();
         for (int bits : boxBits) {       
-            final CursorPage<T> subList = queryInGeobox(lat, lng, bits, size,
+            final CursorPage<T> subList = queryInGeobox(lat, lng, bits, MAX_SIZE,
                     primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
                     null, filters);
             final double S = Geobox.getCellSize(bits, lat);
+//            info("--- bits:%d cellSize: %f ---", bits, S);
             for (T model : subList.getItems()) {
                 double d = Geobox.distance(getGeoLocation(model), p);
+//                System.out.println(String.format(" - id:%d, dist:%f", ((AbstractLongEntity)model).getId(), d));
                 if (d < S) {
                     orderedMap.put(d, model);
                 }

@@ -2,6 +2,8 @@ package net.sf.mardao.test.dao;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import junit.framework.TestCase;
@@ -88,5 +90,4 @@ public class GeoDaoTest extends TestCase {
             assertTrue("distance", distance < 308);
         }
     }
-    
 }

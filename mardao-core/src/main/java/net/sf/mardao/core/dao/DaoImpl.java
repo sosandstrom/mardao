@@ -1240,6 +1240,21 @@ public abstract class DaoImpl<T, ID extends Serializable,
                 cursorString, geoFilters);
     }
 
+    public Iterable<T> findInGeobox(float lat, float lng, int bits, int limit, 
+            String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
+            Filter... filters) {
+        if (!boxBits.contains(bits)) {
+            throw new IllegalArgumentException("Unboxed resolution, hashed are " + boxBits);
+        }
+        
+        final long box = Geobox.getHash(lat, lng, bits);
+        
+        final Filter geoFilters[] = Arrays.copyOf(filters, filters != null ? filters.length + 1 : 1, Filter[].class);
+        geoFilters[geoFilters.length-1] = createEqualsFilter(getGeoboxesColumnName(), box);
+        return queryIterable(false, 0, limit, null, null, primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending, 
+                geoFilters);
+    }
+
     public Collection<T> findNearest(final float lat, final float lng, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             int offset, int limit, Filter... filters) {
@@ -1250,12 +1265,12 @@ public abstract class DaoImpl<T, ID extends Serializable,
         // sorting on distance has to be done outside datastore, i.e. here in application:
         Map<Double, T> orderedMap = new TreeMap<Double, T>();
         for (int bits : boxBits) {       
-            final CursorPage<T> subList = queryInGeobox(lat, lng, bits, MAX_SIZE,
+            final Iterable<T> subList = findInGeobox(lat, lng, bits, MAX_SIZE,
                     primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
-                    null, filters);
+                    filters);
             final double S = Geobox.getCellSize(bits, lat);
 //            info("--- bits:%d cellSize: %f ---", bits, S);
-            for (T model : subList.getItems()) {
+            for (T model : subList) {
                 double d = Geobox.distance(getGeoLocation(model), p);
 //                System.out.println(String.format(" - id:%d, dist:%f", ((AbstractLongEntity)model).getId(), d));
                 if (d < S) {

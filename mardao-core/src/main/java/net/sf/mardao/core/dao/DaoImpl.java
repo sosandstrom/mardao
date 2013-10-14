@@ -205,7 +205,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
 
     protected abstract void setDomainStringProperty(T domain, String name, Map<String, String> properties);
     
-    protected abstract CursorPage<ID> whatsDeleted(Date since, int pageSize, String cursorKey);
+    protected abstract CursorPage<ID> whatsDeleted(Date since, String deletedBy, int pageSize, String cursorKey);
     
     // --- END persistence-type beans must implement these ---
 
@@ -1437,7 +1437,16 @@ public abstract class DaoImpl<T, ID extends Serializable,
             // full audit page or append to existing?
             int remainingSize = null == idPage ? pageSize : 
                     pageSize - idPage.getItems().size();
-            final CursorPage<ID> deletedKeys = whatsDeleted(since, 
+
+            // Filter audit table on user if provided in filter
+            String deletedBy = null;
+            for (int i = 0; i < filters.length; i++) {
+                if (filters[i].getColumn().equalsIgnoreCase(getUpdatedByColumnName())) {
+                    deletedBy = (String)filters[i].getOperand();
+                    break;
+                }
+            }
+            final CursorPage<ID> deletedKeys = whatsDeleted(since, deletedBy,
                     remainingSize, auditCursorKey);
             if (null == idPage) {
                 idPage = deletedKeys;

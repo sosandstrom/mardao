@@ -544,7 +544,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     }
 
     @Override
-    protected CursorPage<ID> whatsDeleted(Date since, int pageSize, String cursorKey) {
+    protected CursorPage<ID> whatsDeleted(Date since, String deletedBy, int pageSize, String cursorKey) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

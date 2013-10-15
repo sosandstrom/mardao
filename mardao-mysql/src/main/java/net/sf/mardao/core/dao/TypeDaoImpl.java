@@ -922,7 +922,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
-    protected CursorPage<ID> whatsDeleted(Date since, String deletedBy, int pageSize, String cursorKey) {
+    protected CursorPage<ID> whatsDeleted(Date since, String byUser, int pageSize, String cursorKey) {
         LOG.warn("whatsDeleted not implemented for MySQL yet.");
         CursorPage<ID> page = new CursorPage<ID>();
         page.setItems(Collections.EMPTY_LIST);

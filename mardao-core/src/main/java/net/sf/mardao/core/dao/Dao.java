@@ -169,9 +169,13 @@ public interface Dao<T, ID extends Serializable> {
     void update(T domain);
     
     CursorPage<ID> whatsChanged(Date since, int pageSize, String cursorKey);
-    
+
+    @Deprecated
     CursorPage<ID> whatsChanged(Object parentKey, Date since, int pageSize, String cursorKey, Filter... filters);
-    
+
+    CursorPage<ID> whatsChanged(Object parentKey, Date since, String byUser, int pageSize, String cursorKey, Filter... filters);
+
+
     void writeAsCsv(OutputStream out, String[] columns, CsvConverter<T> converter, Object ancestorKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending, 

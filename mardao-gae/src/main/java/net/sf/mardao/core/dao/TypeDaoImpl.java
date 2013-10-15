@@ -697,7 +697,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     @Override
-    protected CursorPage<ID> whatsDeleted(Date since, String deletedBy, int requestedPageSize, String auditCursorKey) {
+    protected CursorPage<ID> whatsDeleted(Date since, String byUser, int requestedPageSize, String auditCursorKey) {
         LOG.debug("prepare {} for audit since {}", getTableName(), since);
         final DatastoreService datastore = getDatastoreService();
 
@@ -707,9 +707,9 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         Query q = new Query(AUDIT_KIND, AUDIT_PARENT_KEY);
         q.setKeysOnly();
         q.addFilter(getUpdatedDateColumnName(), FilterOperator.GREATER_THAN_OR_EQUAL, since);
-        if (null != deletedBy) {
-            LOG.debug("audit with user {}", deletedBy);
-            q.addFilter(getUpdatedByColumnName(), FilterOperator.EQUAL, deletedBy);
+        if (null != byUser) {
+            LOG.debug("audit with user {}", byUser);
+            q.addFilter(getUpdatedByColumnName(), FilterOperator.EQUAL, byUser);
         }
 //        q.addSort(getUpdatedDateColumnName(), SortDirection.ASCENDING);
         PreparedQuery pq = datastore.prepare(q);

@@ -1,10 +1,12 @@
 pom.xml.releaseBackup
 release.properties
 pom.xml.asc
+*.iml
 
 .project
 .classpath
 .settings/
+.idea/
 
 gen/
 target/

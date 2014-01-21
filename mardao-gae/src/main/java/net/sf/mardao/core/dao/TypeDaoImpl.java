@@ -522,6 +522,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     
     @Override
     public Object beginTransaction() {
+      return beginTransactionImpl();
+    }
+
+  /**
+   * Accessible by a transaction manager
+   * @return
+   */
+    public static Transaction beginTransactionImpl()  {
         TransactionOptions options = TransactionOptions.Builder.withXG(true);
         Transaction transaction = getDatastoreService().beginTransaction(options);
         TRANSACTION.set(transaction);
@@ -531,6 +539,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     @Override
     public void commitTransaction(Object transaction) {
         Transaction tx = (Transaction) transaction;
+        commitTransactionImpl(tx);
+    }
+
+  /**
+   * Accessible by a transaction manager
+   * @param tx
+   */
+    public static void commitTransactionImpl(Transaction tx) {
         tx.commit();
         LOG.debug("committed transaction successfully");
         TRANSACTION.remove();
@@ -539,9 +555,13 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     @Override
     public void rollbackActiveTransaction(Object transaction) {
         Transaction tx = (Transaction) transaction;
+        rollbackActiveTransactionImpl(tx);
+    }
+
+    public static void rollbackActiveTransactionImpl(Transaction tx) {
         if (tx.isActive()) {
             try {
-                LOG.warn("Transaction Rollback {} in {}", getTableName(), TRANSACTION.get());
+                LOG.warn("Transaction Rollback in {}", TRANSACTION.get());
                 tx.rollback();
             }
             finally {
@@ -550,12 +570,6 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         }
     }
 
-//    @Override
-//    public boolean isActiveTransaction(Object transaction) {
-//        Transaction tx = (Transaction) transaction;
-//        return tx.isActive();
-//    }
-    
     // --- END Transaction methods ---
 
     protected QueryResultIterable<Entity> asQueryResultIterable(PreparedQuery pq, int chunkSize, String cursorString) {
@@ -614,7 +628,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     /**
-     * @param ascending
+     * @param direction
      * @param orderBy
      * @param filters
      * 
@@ -648,7 +662,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     /**
      * 
      * @param keysOnly
-     * @param parentKey
+     * @param ancestorKey
      * @param orderBy
      * @param ascending
      * @param filters

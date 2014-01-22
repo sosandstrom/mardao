@@ -17,6 +17,7 @@
         <module>mardao-core</module>
         <module>mardao-gae</module>
         <module>mardao-mysql</module>
+        <module>mardao-guice-jaxrs-gae</module>
         <module>mardao-android-parent</module>
     </modules>
 

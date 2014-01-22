@@ -754,7 +754,8 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 final int commaIndex = latLong.indexOf(',');
                 value = new DLocation(Float.parseFloat(latLong.substring(0, commaIndex)), 
                         Float.parseFloat(latLong.substring(commaIndex+1)));
-            } if (Collection.class.equals(domainPropertyClass) && null !=value) {
+            } 
+            else if (Collection.class.equals(domainPropertyClass) && null !=value) {
                 //get value json and parse to object
                 ObjectMapper mapper = new ObjectMapper();
                 try {
@@ -936,7 +937,8 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             }
             else if (value instanceof CompositeKey) {
                 value = ((CompositeKey) value).getId();
-            } else if (value instanceof Collection) { //set collection type as json
+            } 
+            else if (value instanceof Collection) { //set collection type as json
                 ObjectMapper mapper = new ObjectMapper();
                 try {
                     value = mapper.writeValueAsString(value);

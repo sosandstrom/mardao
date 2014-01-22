@@ -12,3 +12,5 @@ gen/
 target/
 bin/
 tmp/
+.idea
+*.iml

@@ -205,7 +205,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
 
     protected abstract void setDomainStringProperty(T domain, String name, Map<String, String> properties);
     
-    protected abstract CursorPage<ID> whatsDeleted(Date since, int pageSize, String cursorKey);
+    protected abstract CursorPage<ID> whatsDeleted(Date since, String byUser, int pageSize, String cursorKey);
     
     // --- END persistence-type beans must implement these ---
 
@@ -1390,23 +1390,48 @@ public abstract class DaoImpl<T, ID extends Serializable,
         pw.flush();
     }
     
+
     /**
-     * Returns the IDs for the entities with updatedDate >= since, in descending order.
-     * @param since
-     * @return the IDs for the entities with updatedDate >= since, in descending order.
+     * Returns IDs for changed (created/updated/deleted) entities.
+     * @param since return changes with updatedDate newer then this date
+     * @param pageSize size of the page to return
+     * @param cursorKey an optional cursor
+     * @return a list of ID of changed entities.
      */
     @Override
     public CursorPage<ID> whatsChanged(Date since, int pageSize, String cursorKey) {
         return whatsChanged(null, since, pageSize, cursorKey);
     }
-    
+
     /**
-     * Returns the IDs for the entities with updatedDate >= since, in descending order.
-     * @param since
-     * @return the IDs for the entities with updatedDate >= since, in descending order.
+     * Returns IDs for changed (created/updated/deleted) entities.
+     * @param since return changes with updatedDate newer then this date
+     * @param pageSize size of the page to return
+     * @param cursorKey an optional cursor
+     * @param filters additional filters (optional).
+     *                These filters will only filter the results on create/updated entities, never deleted entities.
+     * @return a list of ID of changed entities.
      */
     @Override
-    public CursorPage<ID> whatsChanged(Object parentKey, Date since, 
+    public CursorPage<ID> whatsChanged(Object parentKey, Date since,
+                                       int pageSize, String cursorKey, Filter... filters) {
+        return whatsChanged(parentKey, since, null, pageSize, cursorKey, filters);
+    }
+
+    /**
+     * Returns IDs for changed (created/updated/deleted) entities.
+     * @param parentKey parent key (optional)
+     * @param since return changes with updatedDate newer then this date
+     * @param byUser return changed with updatedBy equal to this user (optional)
+     *                If no user is provided, changes for all users are returned (unless filters are used).
+     * @param pageSize size of the page to return
+     * @param cursorKey an optional cursor
+     * @param filters additional filters (optional).
+     *                These filters will only filter the results on create/updated entities, never deleted entities.
+     * @return a list of ID of changed entities.
+     */
+    @Override
+    public CursorPage<ID> whatsChanged(Object parentKey, Date since, String byUser,
             int pageSize, String cursorKey, Filter... filters) {
         final String updatedDateColumnName = getUpdatedDateColumnName();
         if (null == updatedDateColumnName) {
@@ -1418,12 +1443,21 @@ public abstract class DaoImpl<T, ID extends Serializable,
         // start with returning updated IDs
         if (null == cursorKey || !cursorKey.startsWith(AUDIT_CURSOR_PREFIX)) {
             auditCursorKey = null;
-            Filter allFilters[] = Arrays.copyOf(filters, (null != filters ? filters.length : 0) + 1);
-            allFilters[allFilters.length-1] = createGreaterThanOrEqualFilter(updatedDateColumnName, since);
-            final CursorPage<T> entityPage = queryPage(true, pageSize, parentKey, null, 
-                                      null, false, null, false, 
-//                                      updatedDateColumnName, true, null, false, 
-                                      cursorKey, allFilters);
+
+            ArrayList<Filter> allFilters = new ArrayList<Filter>();
+            if (null != since) {
+                allFilters.add(createGreaterThanOrEqualFilter(updatedDateColumnName, since));
+            }
+            if (null != byUser) {
+                allFilters.add(createEqualsFilter(getUpdatedByColumnName(), byUser));
+            }
+            if (null != filters && filters.length > 0) {
+                allFilters.addAll(Arrays.asList(filters));
+            }
+
+            final CursorPage<T> entityPage = queryPage(true, pageSize, parentKey, null,
+                                      null, false, null, false,
+                                      cursorKey, allFilters.toArray(new Filter[allFilters.size()]));
         
             // convert entities to IDs only
             idPage = domainPageToSimplePage(entityPage);
@@ -1437,7 +1471,8 @@ public abstract class DaoImpl<T, ID extends Serializable,
             // full audit page or append to existing?
             int remainingSize = null == idPage ? pageSize : 
                     pageSize - idPage.getItems().size();
-            final CursorPage<ID> deletedKeys = whatsDeleted(since, 
+
+            final CursorPage<ID> deletedKeys = whatsDeleted(since, byUser,
                     remainingSize, auditCursorKey);
             if (null == idPage) {
                 idPage = deletedKeys;

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.dao.TypeDaoImpl;
 
@@ -14,7 +15,10 @@ import net.sf.mardao.core.dao.TypeDaoImpl;
  */
 public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
     public static final String COLUMN_NAME_ID = "id";
+    public static final String COLUMN_NAME_GROUPS = "groups";
     public static final String COLUMN_NAME_TITLE = "title";
+    
+    public static final String COLUMN_NAME_ROLES = "roles";
 
 	/** Column name for field createdBy is "createdBy" */
 	static final String COLUMN_NAME_CREATEDBY = "createdBy";
@@ -28,6 +32,8 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
     public static final List<String> COLUMN_NAMES = Arrays.asList(
             COLUMN_NAME_CREATEDBY,
             COLUMN_NAME_CREATEDDATE,
+            COLUMN_NAME_GROUPS,
+            COLUMN_NAME_ROLES,
             COLUMN_NAME_TITLE,
             COLUMN_NAME_UPDATEDBY,
             COLUMN_NAME_UPDATEDDATE
@@ -55,7 +61,12 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         }
         else if (COLUMN_NAME_TITLE.equals(name)) {
             clazz = String.class;
-        }
+        } else if (COLUMN_NAME_ROLES.equals(name)) {
+            clazz = Collection.class;
+        } 
+        else if (COLUMN_NAME_GROUPS.equals(name)) {
+            clazz = Collection.class;
+        } 
         else if (COLUMN_NAME_UPDATEDBY.equals(name)) {
             clazz = java.lang.String.class;
         }
@@ -76,8 +87,11 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
         Object value = null;
         if (COLUMN_NAME_TITLE.equals(name)) {
             value = domain.getTitle();
-        }
-        else {
+        } else if (COLUMN_NAME_ROLES.equals(name)) {
+            value = domain.getRoles();
+        } else if (COLUMN_NAME_GROUPS.equals(name)) {
+            value=domain.getGroups();
+        }else {
             try {
                 value = super.getDomainProperty(domain, name);
             }
@@ -107,8 +121,13 @@ public class BookDaoImpl extends TypeDaoImpl<Book, Long> {
     protected void setDomainProperty(Book domain, String name, Object value) {
         if (COLUMN_NAME_TITLE.equals(name)) {
             domain.setTitle(convertText(value));
-        }
-        else {
+        } 
+        else if (COLUMN_NAME_ROLES.equals(name)) {
+            domain.setRoles((Collection)value);
+        } 
+        else if (COLUMN_NAME_GROUPS.equals(name)) { 
+            domain.setGroups((Collection)value);
+        } else {
             super.setDomainProperty(domain, name, value);
         }
     }

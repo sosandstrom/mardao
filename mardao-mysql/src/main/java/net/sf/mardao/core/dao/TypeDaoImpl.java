@@ -1,5 +1,6 @@
 package net.sf.mardao.core.dao;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,13 +17,20 @@ import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+
 import javax.sql.DataSource;
+
 import net.sf.mardao.core.CompositeKey;
 import net.sf.mardao.core.CoreEntity;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.geo.DLocation;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,11 +64,11 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         DATA_TYPES_DEFAULT.setProperty(String.class.getName(), "VARCHAR");
         DATA_TYPES_DEFAULT.setProperty(Boolean.class.getName(), "BIT(1)");
         DATA_TYPES_DEFAULT.setProperty(DLocation.class.getName(), "VARCHAR(33)");
+        DATA_TYPES_DEFAULT.setProperty(Collection.class.getName(), "VARCHAR(500)");
         DATA_TYPES_DEFAULT.setProperty(getPrimaryKeyClass(Long.class.getName()), "BIGINT");
-        DATA_TYPES_DEFAULT.setProperty(getPrimaryKeyClass(String.class.getName()), "VARCHAR(128)");
+        DATA_TYPES_DEFAULT.setProperty(getPrimaryKeyClass(String.class.getName()), "VARCHAR(255)");
         DATA_TYPES_DEFAULT.setProperty("AUTO_INCREMENT", "AUTO_INCREMENT");
         DATA_TYPES_DEFAULT.setProperty("COLUMN_QUOTE", "");
-
         DATA_TYPES_MySQL.setProperty(String.class.getName(), "VARCHAR(500)");
         DATA_TYPES_MySQL.setProperty("COLUMN_QUOTE", "`");
     }
@@ -746,6 +754,19 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                 final int commaIndex = latLong.indexOf(',');
                 value = new DLocation(Float.parseFloat(latLong.substring(0, commaIndex)), 
                         Float.parseFloat(latLong.substring(commaIndex+1)));
+            } 
+            else if (Collection.class.equals(domainPropertyClass) && null !=value) {
+                //get value json and parse to object
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    value =mapper.readValue((String)value,Collection.class);
+                } catch (JsonParseException e) {
+                    LOG.error(e.getMessage(),e);
+                } catch (JsonMappingException e) {
+                    LOG.error(e.getMessage(),e);
+                } catch (IOException e) {
+                    LOG.error(e.getMessage(),e);
+                }
             }
         }
         return value;
@@ -916,6 +937,18 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             }
             else if (value instanceof CompositeKey) {
                 value = ((CompositeKey) value).getId();
+            } 
+            else if (value instanceof Collection) { //set collection type as json
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    value = mapper.writeValueAsString(value);
+                } catch (JsonGenerationException e) {
+                    LOG.error(e.getMessage(),e);
+                } catch (JsonMappingException e) {
+                    LOG.error(e.getMessage(),e);
+                } catch (IOException e) {
+                    LOG.error(e.getMessage(),e);
+                }
             }
             ((CoreEntity) core).setProperty(name, value);
         }
@@ -993,9 +1026,10 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         if (null == value) {
             return null;
         }
+       
         return (String) value;
     }
-
+  
     protected T propsToDomain(Map<String, Object> props) {
         CompositeKey pk;
         CoreEntity core;

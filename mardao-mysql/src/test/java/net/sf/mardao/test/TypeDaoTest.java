@@ -2,6 +2,7 @@ package net.sf.mardao.test;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -64,6 +65,9 @@ public class TypeDaoTest extends TestCase {
         final Book expected = new Book();
         expected.setId(42L);
         expected.setTitle("Hello Galaxy");
+        expected.setRoles(Arrays.asList("Kids","Adults"));
+        expected.setGroups(Arrays.asList(1l,2l,3l,5l));
+        
         dao.persist(expected);
         assertNotNull(expected.getCreatedDate());
         assertEquals(expected.getCreatedDate(), expected.getUpdatedDate());
@@ -77,6 +81,8 @@ public class TypeDaoTest extends TestCase {
         assertNotNull(actual);
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getTitle(), actual.getTitle());
+        assertEquals(expected.getGroups().size(),expected.getGroups().size());
+        assertEquals(expected.getGroups(),expected.getGroups());
         assertEquals(expected.getCreatedDate(), actual.getUpdatedDate());
         assertEquals(NAME, actual.getCreatedBy());
         assertEquals(NAME, actual.getUpdatedBy());
@@ -85,6 +91,7 @@ public class TypeDaoTest extends TestCase {
     public void testQueryOneItemGenerateId() {
         final Book expected = new Book();
         expected.setTitle("Hello Galaxy");
+        expected.setRoles(Arrays.asList("Kids","Adults"));
         dao.persist(expected);
         assertNotNull(expected.getCreatedDate());
         assertNotNull(expected.getId());
@@ -98,6 +105,9 @@ public class TypeDaoTest extends TestCase {
         assertNotNull(actual);
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getTitle(), actual.getTitle());
+        assertEquals(expected.getRoles().size(),expected.getRoles().size());
+        assertEquals(expected.getRoles(),expected.getRoles());
+        
         assertEquals(expected.getCreatedDate(), actual.getUpdatedDate());
         assertEquals(DaoImpl.PRINCIPAL_NAME_ANONYMOUS, actual.getCreatedBy());
         assertEquals(DaoImpl.PRINCIPAL_NAME_ANONYMOUS, actual.getUpdatedBy());

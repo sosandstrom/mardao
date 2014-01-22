@@ -2,6 +2,7 @@ package net.sf.mardao.test.domain;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;
+
 import net.sf.mardao.core.domain.AbstractLongEntity;
 
 /**
@@ -13,6 +14,8 @@ public class DOrganization extends AbstractLongEntity {
     @Basic
     private String name;
     
+  
+    
     public String getName() {
         return name;
     }
@@ -20,5 +23,7 @@ public class DOrganization extends AbstractLongEntity {
     public void setName(String name) {
         this.name = name;
     }
+
+  
 
 }

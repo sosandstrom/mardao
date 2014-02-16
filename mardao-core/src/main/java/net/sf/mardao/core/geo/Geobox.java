@@ -356,10 +356,7 @@ public class Geobox {
 		double p1lon = Math.toRadians(p1.getLongitude());
 		double p2lat = Math.toRadians(p2.getLatitude());
 		double p2lon = Math.toRadians(p2.getLongitude());
-		return RADIUS
-				* Math.acos(makeDoubleInRange(Math.sin(p1lat) * Math.sin(p2lat)
-						+ Math.cos(p1lat) * Math.cos(p2lat)
-						* Math.cos(p2lon - p1lon)));
+		return distance(p1lat, p1lon, p2lat, p2lon);
 	}
         
 	/**
@@ -392,4 +389,20 @@ public class Geobox {
                         i, getCellSize(i), i, getCellSize(i), i));
             }
         }
+
+   /**
+     * Calculates the great circle distance between two points (law of cosines).
+     *
+     * @param p1lat indicating the first point latitude.
+     * @param p1lon indicating the first point longitude.
+     * @param p2lat indicating the second point latitude
+     * @param p2lon indicating the second point longitude
+     * @return The 2D great-circle distance between the two given points, in meters.
+     */
+    public static double distance(double p1lat, double p1lon, double p2lat, double p2lon) {
+        return RADIUS
+                        * Math.acos(makeDoubleInRange(Math.sin(p1lat) * Math.sin(p2lat)
+                                        + Math.cos(p1lat) * Math.cos(p2lat)
+                                        * Math.cos(p2lon - p1lon)));
+    }
 }

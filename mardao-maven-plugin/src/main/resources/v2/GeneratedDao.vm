@@ -259,7 +259,7 @@ public interface Generated${entity.simpleName}Dao extends Dao<${entity.simpleNam
 	
 #foreach( $uniqueFields in $entity.uniqueFieldsSets )
 	/**
-	 * find-by method for unique fields
+	 * find-by method for unique fields ${uniqueFields}
 #foreach( $field in $uniqueFields )	 
 	 * @param ${field.name} the specified ${field.name}
 #end	 

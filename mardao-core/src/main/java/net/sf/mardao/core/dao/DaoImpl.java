@@ -1210,9 +1210,17 @@ public abstract class DaoImpl<T, ID extends Serializable,
         debug("cached:%d, queried:%d", entitiesCached, entitiesQueried);
         return entities.values();
     }
-    
+
+    @Override
     public CursorPage<T> queryPage(int pageSize, String cursorString) {
         return queryPage(false, pageSize, null, null,
+                null, false, null, false,
+                cursorString);
+    }
+
+    @Override
+    public CursorPage<T> queryPage(Object parentKey, int pageSize, String cursorString) {
+        return queryPage(false, pageSize, parentKey, null,
                 null, false, null, false,
                 cursorString);
     }

@@ -159,7 +159,9 @@ public interface Dao<T, ID extends Serializable> {
             String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters);
     
     CursorPage<T> queryPage(int pageSize, String cursorString);
-
+    
+    CursorPage<T> queryPage(Object parentKey, int pageSize, String cursorString);
+    
     CursorPage<T> queryPage(int pageSize, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             String cursorString);

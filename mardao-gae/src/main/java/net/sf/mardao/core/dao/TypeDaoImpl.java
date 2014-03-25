@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Future;
 
+import com.google.appengine.api.datastore.*;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.geo.DLocation;
@@ -16,28 +17,8 @@ import net.sf.mardao.core.geo.DLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.appengine.api.datastore.AsyncDatastoreService;
-import com.google.appengine.api.datastore.Cursor;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.DeleteContext;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.GeoPt;
-import com.google.appengine.api.datastore.Index;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.appengine.api.datastore.QueryResultIterable;
-import com.google.appengine.api.datastore.QueryResultIterator;
-import com.google.appengine.api.datastore.QueryResultList;
-import com.google.appengine.api.datastore.Text;
-import com.google.appengine.api.datastore.Transaction;
-import com.google.appengine.api.datastore.TransactionOptions;
 
 public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID> {
@@ -85,7 +66,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
 
     @Override
     protected int count(Object ancestorKey, Object simpleKey, Filter... filters) {
-       final PreparedQuery pq = prepare(true, (Key) ancestorKey, (Key) simpleKey, null, false, null, false, filters);
+       final PreparedQuery pq = prepare(true, (Key) ancestorKey, (Key) simpleKey, null, false, null, false, null, filters);
        return pq.countEntities(FetchOptions.Builder.withDefaults());
     }
     
@@ -277,7 +258,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected T findUniqueBy(Filter... filters) {
         final PreparedQuery pq = prepare(false, null, null,
                 null, false, null, false,
-                filters);
+                null, filters);
         final Entity entity = pq.asSingleEntity();
         final T domain = coreToDomain(entity);
         return domain;
@@ -287,7 +268,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected ID findUniqueKeyBy(Filter... filters) {
         final PreparedQuery pq = prepare(true, null, null,
                 null, false, null, false,
-                filters);
+                null, filters);
         final Entity entity = pq.asSingleEntity();
         final ID simpleKey = coreToSimpleKey(entity);
         return simpleKey;
@@ -374,12 +355,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
+            Collection<String> projections,
             String cursorString,
             Filter... filters) {
         
         final PreparedQuery pq = prepare(keysOnly, (Key)ancestorKey, (Key)simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
-                              secondaryOrderBy, secondaryIsAscending, filters);
+                              secondaryOrderBy, secondaryIsAscending,
+                              projections, filters);
         
         final QueryResultList<Entity> iterable = asQueryResultList(pq, requestedPageSize, (String) cursorString);
         
@@ -420,7 +403,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         
         final PreparedQuery pq = prepare(keysOnly, (Key)ancestorKey, (Key)simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
-                              secondaryOrderBy, secondaryIsAscending, filters);
+                              secondaryOrderBy, secondaryIsAscending, null, filters);
         
         final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, offset, limit);
         final CursorIterable<T> returnValue = new CursorIterable<T>(_iterable);
@@ -438,7 +421,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         
         final PreparedQuery pq = prepare(true, (Key)ancestorKey, (Key)simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
-                              secondaryOrderBy, secondaryIsAscending, filters);
+                              secondaryOrderBy, secondaryIsAscending, null, filters);
         
         final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, offset, limit);
         final KeysIterable<ID> returnValue = new KeysIterable<ID>(_iterable);
@@ -661,7 +644,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             }
         }
         
-        return prepare(false, null, null, orderBy, direction, secondaryOrderBy, secondaryDirection, filtersArray);
+        return prepare(false, null, null, orderBy, direction, secondaryOrderBy, secondaryDirection, null, filtersArray);
     }
 
     /**
@@ -674,7 +657,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
      * @return
      */
     protected PreparedQuery prepare(boolean keysOnly, Key ancestorKey, Key simpleKey, String orderBy, boolean ascending,
-            String secondaryOrderBy, boolean secondaryAscending, Filter... filters) {
+            String secondaryOrderBy, boolean secondaryAscending, Collection<String> projections, Filter... filters) {
         LOG.debug("prepare {} with filters {}", getTableName(), filters);
         final DatastoreService datastore = getDatastoreService();
 
@@ -704,6 +687,13 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             // secondary sort order?
             if (null != secondaryOrderBy) {
                 q.addSort(secondaryOrderBy, secondaryAscending ? SortDirection.ASCENDING : SortDirection.DESCENDING);
+            }
+        }
+
+        // Add projections
+        if (null != projections) {
+            for (String projection : projections) {
+                q.addProjection(new PropertyProjection(projection, getColumnClass(projection)));
             }
         }
 

@@ -1232,7 +1232,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
                 null, cursorString);
     }
 
-    public CursorPage<T> queryPage(int pageSize,
+    protected CursorPage<T> queryPage(int pageSize,
                                    String primaryOrderBy, boolean primaryIsAscending,
                                    String secondaryOrderBy, boolean secondaryIsAscending,
                                    Collection<String> projections, String cursorString) {

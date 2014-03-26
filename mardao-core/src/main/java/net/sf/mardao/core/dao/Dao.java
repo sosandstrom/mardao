@@ -161,14 +161,11 @@ public interface Dao<T, ID extends Serializable> {
     CursorPage<T> queryPage(int pageSize, String cursorString);
     
     CursorPage<T> queryPage(Object parentKey, int pageSize, String cursorString);
-    
+
+    @Deprecated
     CursorPage<T> queryPage(int pageSize, 
             String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, 
             String cursorString);
-
-    CursorPage<T> queryPage(int pageSize,
-                            String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending,
-                            Collection<String> projections, String cursorString);
     
     void update(Iterable<T> domains);
     

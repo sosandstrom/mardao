@@ -719,16 +719,16 @@ Object ${entity.parent.name},
 ${entity.parent.name}, #end${entity.pk.name});
             }
 		
-#if( 0 < $entity.uniqueFieldsSets.size() )
-#set( $uniqueFields = $entity.uniqueFieldsSets.get(0) )
-            // use find-by unique column set
-            if (null == domain) {
-                domain = findBy#foreach( $field in $uniqueFields )${field.nameFirst}#end(
-#foreach( $field in $uniqueFields )
-                    ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
-#end);
-            }
-#end		
+## #if( 0 < $entity.uniqueFieldsSets.size() )
+## #set( $uniqueFields = $entity.uniqueFieldsSets.get(0) )
+##            // use find-by unique column set
+##            if (null == domain) {
+##                domain = findBy#foreach( $field in $uniqueFields )${field.nameFirst}#end(
+## #foreach( $field in $uniqueFields )
+##                    ${field.name}#if( $velocityCount < $uniqueFields.size() ), #end
+## #end);
+##            }
+## #end		
             // create new?
             if (null == domain) {
                     domain = new ${entity.simpleName}();

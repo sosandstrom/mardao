@@ -352,13 +352,14 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
         if (null != table) {
             for (UniqueConstraint uc : table.uniqueConstraints()) {
                 final Set<Field> uniqueFieldsSet = new TreeSet<Field>();
-                e.getUniqueFieldsSets().add(uniqueFieldsSet);
                 final Set<String> uniqueNamesSet = new TreeSet<String>();
-                e.getUniqueConstraints().add(uniqueNamesSet);
                 for (String columnName : uc.columnNames()) {
                     final Field f = e.getAllFields().get(columnName);
                     if (null != f) {
                         uniqueFieldsSet.add(f);
+                    }
+                    else if (null != e.getParent() && e.getParent().getName().equals(columnName)) {
+                        uniqueFieldsSet.add(e.getParent());
                     }
                     else {
                         getLog().warn("Cannot find unique column field for " + columnName);
@@ -366,7 +367,10 @@ public class ProcessDomainMojo extends AbstractMardaoMojo {
                     uniqueNamesSet.add(columnName);
                 }
                 getLog().info("         @Table( @UniqueConstraint( " + uniqueFieldsSet);
+                e.getUniqueFieldsSets().add(uniqueFieldsSet);
+                e.getUniqueConstraints().add(uniqueNamesSet);
             }
+            getLog().info("                table " + e.getUniqueFieldsSets());
         }
     }
     

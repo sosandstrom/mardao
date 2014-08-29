@@ -121,6 +121,9 @@ public class Entity implements Comparable<Entity> {
                             break;
                         }
                     }
+                    if (null != parent && parent.getName().equals(fieldName)) {
+                        fieldsSet.add(parent);
+                    }
                 }
                 returnValue.add(fieldsSet);
             }

@@ -489,10 +489,13 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     protected CursorPage<T> queryPage(boolean keysOnly, int pageSize, 
             Object ancestorKey, Object primaryKey, 
             String primaryOrderBy, boolean primaryIsAscending, 
-            String secondaryOrderBy, boolean secondaryIsAscending, 
-            String cursorString, Filter... filters) {
+            String secondaryOrderBy, boolean secondaryIsAscending,
+            Collection<String> projections, String cursorString,
+            Filter... filters) {
         
         CursorPage<T> page = new CursorPage<T>();
+
+        // TODO Projections are not implemented in Android yet
         
         int offset = null != cursorString ? Integer.parseInt(cursorString) : 0;
         Iterable<T> itrbl = queryIterable(keysOnly, offset, pageSize, 
@@ -544,7 +547,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends DaoImpl<T,
     }
 
     @Override
-    protected CursorPage<ID> whatsDeleted(Date since, int pageSize, String cursorKey) {
+    protected CursorPage<ID> whatsDeleted(Date since, String byUser, int pageSize, String cursorKey) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

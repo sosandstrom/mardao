@@ -38,6 +38,7 @@ import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.TransactionOptions;
+import com.google.appengine.api.datastore.PropertyProjection;
 
 public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         DaoImpl<T, ID, Key, QueryResultIterable, Entity, Key> implements Dao<T, ID> {
@@ -85,7 +86,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
 
     @Override
     protected int count(Object ancestorKey, Object simpleKey, Filter... filters) {
-       final PreparedQuery pq = prepare(true, (Key) ancestorKey, (Key) simpleKey, null, false, null, false, filters);
+       final PreparedQuery pq = prepare(true, (Key) ancestorKey, (Key) simpleKey, null, false, null, false, null, filters);
        return pq.countEntities(FetchOptions.Builder.withDefaults());
     }
     
@@ -184,8 +185,13 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
                         new Entity(AUDIT_KIND, domainKey.getId(), AUDIT_PARENT_KEY) :
                         new Entity(AUDIT_KIND, domainKey.getName(), AUDIT_PARENT_KEY);
                 audit.setProperty(getUpdatedDateColumnName(), now);
+                String principal = getPrincipalName();
+                if (null == principal) {
+                    principal = PRINCIPAL_NAME_ANONYMOUS;
+                }
+                audit.setProperty(getUpdatedByColumnName(), principal);
                 audits.add(audit);
-                LOG.debug("Created Audit record {}", audit.getKey());
+                LOG.debug("Created Audit record {} updatedBy {}", audit.getKey(), principal);
             }
             persistCore(audits);
         }
@@ -272,7 +278,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected T findUniqueBy(Filter... filters) {
         final PreparedQuery pq = prepare(false, null, null,
                 null, false, null, false,
-                filters);
+                null, filters);
         final Entity entity = pq.asSingleEntity();
         final T domain = coreToDomain(entity);
         return domain;
@@ -282,7 +288,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     protected ID findUniqueKeyBy(Filter... filters) {
         final PreparedQuery pq = prepare(true, null, null,
                 null, false, null, false,
-                filters);
+                null, filters);
         final Entity entity = pq.asSingleEntity();
         final ID simpleKey = coreToSimpleKey(entity);
         return simpleKey;
@@ -369,12 +375,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
+            Collection<String> projections,
             String cursorString,
             Filter... filters) {
         
         final PreparedQuery pq = prepare(keysOnly, (Key)ancestorKey, (Key)simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
-                              secondaryOrderBy, secondaryIsAscending, filters);
+                              secondaryOrderBy, secondaryIsAscending,
+                              projections, filters);
         
         final QueryResultList<Entity> iterable = asQueryResultList(pq, requestedPageSize, (String) cursorString);
         
@@ -415,7 +423,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         
         final PreparedQuery pq = prepare(keysOnly, (Key)ancestorKey, (Key)simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
-                              secondaryOrderBy, secondaryIsAscending, filters);
+                              secondaryOrderBy, secondaryIsAscending, null, filters);
         
         final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, offset, limit);
         final CursorIterable<T> returnValue = new CursorIterable<T>(_iterable);
@@ -433,7 +441,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         
         final PreparedQuery pq = prepare(true, (Key)ancestorKey, (Key)simpleKey, 
                               primaryOrderBy, primaryIsAscending, 
-                              secondaryOrderBy, secondaryIsAscending, filters);
+                              secondaryOrderBy, secondaryIsAscending, null, filters);
         
         final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, offset, limit);
         final KeysIterable<ID> returnValue = new KeysIterable<ID>(_iterable);
@@ -522,6 +530,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     
     @Override
     public Object beginTransaction() {
+      return beginTransactionImpl();
+    }
+
+  /**
+   * Accessible by a transaction manager
+   * @return
+   */
+    public static Transaction beginTransactionImpl()  {
         TransactionOptions options = TransactionOptions.Builder.withXG(true);
         Transaction transaction = getDatastoreService().beginTransaction(options);
         TRANSACTION.set(transaction);
@@ -531,6 +547,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     @Override
     public void commitTransaction(Object transaction) {
         Transaction tx = (Transaction) transaction;
+        commitTransactionImpl(tx);
+    }
+
+  /**
+   * Accessible by a transaction manager
+   * @param tx
+   */
+    public static void commitTransactionImpl(Transaction tx) {
         tx.commit();
         LOG.debug("committed transaction successfully");
         TRANSACTION.remove();
@@ -539,9 +563,13 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     @Override
     public void rollbackActiveTransaction(Object transaction) {
         Transaction tx = (Transaction) transaction;
+        rollbackActiveTransactionImpl(tx);
+    }
+
+    public static void rollbackActiveTransactionImpl(Transaction tx) {
         if (tx.isActive()) {
             try {
-                LOG.warn("Transaction Rollback {} in {}", getTableName(), TRANSACTION.get());
+                LOG.warn("Transaction Rollback in {}", TRANSACTION.get());
                 tx.rollback();
             }
             finally {
@@ -550,12 +578,6 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         }
     }
 
-//    @Override
-//    public boolean isActiveTransaction(Object transaction) {
-//        Transaction tx = (Transaction) transaction;
-//        return tx.isActive();
-//    }
-    
     // --- END Transaction methods ---
 
     protected QueryResultIterable<Entity> asQueryResultIterable(PreparedQuery pq, int chunkSize, String cursorString) {
@@ -614,7 +636,7 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
     }
 
     /**
-     * @param ascending
+     * @param direction
      * @param orderBy
      * @param filters
      * 
@@ -642,20 +664,20 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             }
         }
         
-        return prepare(false, null, null, orderBy, direction, secondaryOrderBy, secondaryDirection, filtersArray);
+        return prepare(false, null, null, orderBy, direction, secondaryOrderBy, secondaryDirection, null, filtersArray);
     }
 
     /**
      * 
      * @param keysOnly
-     * @param parentKey
+     * @param ancestorKey
      * @param orderBy
      * @param ascending
      * @param filters
      * @return
      */
     protected PreparedQuery prepare(boolean keysOnly, Key ancestorKey, Key simpleKey, String orderBy, boolean ascending,
-            String secondaryOrderBy, boolean secondaryAscending, Filter... filters) {
+            String secondaryOrderBy, boolean secondaryAscending, Collection<String> projections, Filter... filters) {
         LOG.debug("prepare {} with filters {}", getTableName(), filters);
         final DatastoreService datastore = getDatastoreService();
 
@@ -688,11 +710,18 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             }
         }
 
+        // Add projections
+        if (null != projections) {
+            for (String projection : projections) {
+                q.addProjection(new PropertyProjection(projection, getColumnClass(projection)));
+            }
+        }
+
         return datastore.prepare(TRANSACTION.get(), q);
     }
 
     @Override
-    protected CursorPage<ID> whatsDeleted(Date since, int requestedPageSize, String auditCursorKey) {
+    protected CursorPage<ID> whatsDeleted(Date since, String byUser, int requestedPageSize, String auditCursorKey) {
         LOG.debug("prepare {} for audit since {}", getTableName(), since);
         final DatastoreService datastore = getDatastoreService();
 
@@ -702,6 +731,10 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
         Query q = new Query(AUDIT_KIND, AUDIT_PARENT_KEY);
         q.setKeysOnly();
         q.addFilter(getUpdatedDateColumnName(), FilterOperator.GREATER_THAN_OR_EQUAL, since);
+        if (null != byUser) {
+            LOG.debug("audit with user {}", byUser);
+            q.addFilter(getUpdatedByColumnName(), FilterOperator.EQUAL, byUser);
+        }
 //        q.addSort(getUpdatedDateColumnName(), SortDirection.ASCENDING);
         PreparedQuery pq = datastore.prepare(q);
         

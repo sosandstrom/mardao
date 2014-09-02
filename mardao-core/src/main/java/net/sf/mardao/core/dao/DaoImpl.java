@@ -1250,7 +1250,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
                 Filter... filters) {
         return queryPage(keysOnly, pageSize, ancestorKey, primaryKey,
                 primaryOrderBy,primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
-                null, cursorString);
+                null, cursorString, filters);
     }
 
     public CursorPage<T> queryInGeobox(float lat, float lng, int bits, int pageSize, 

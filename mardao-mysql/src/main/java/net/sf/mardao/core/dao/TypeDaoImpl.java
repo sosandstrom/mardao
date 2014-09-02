@@ -843,11 +843,14 @@ public abstract class TypeDaoImpl<T, ID extends Serializable> extends
             Object ancestorKey, Object simpleKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
+            Collection<String> projections,
             String cursorString,
             Filter... filters) {
         
         final int offset = null != cursorString ? Integer.parseInt(cursorString.toString()) : 0;
-        
+
+        // TODO Projections not yet implemented in SQL
+
         // we now this Iterable is backed by a List:
         final List<T> domains = (List<T>) queryIterable(keysOnly, offset, requestedPageSize, 
                 ancestorKey, simpleKey, 

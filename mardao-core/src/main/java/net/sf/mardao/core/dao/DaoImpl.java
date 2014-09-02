@@ -162,6 +162,7 @@ public abstract class DaoImpl<T, ID extends Serializable,
             Object ancestorKey, Object primaryKey,
             String primaryOrderBy, boolean primaryIsAscending,
             String secondaryOrderBy, boolean secondaryIsAscending,
+            Collection<String> projections,
             String cursorString,
             Filter... filters);
 
@@ -1211,18 +1212,16 @@ public abstract class DaoImpl<T, ID extends Serializable,
         return entities.values();
     }
 
-    @Override
     public CursorPage<T> queryPage(int pageSize, String cursorString) {
         return queryPage(false, pageSize, null, null,
                 null, false, null, false,
-                cursorString);
+                null, cursorString);
     }
 
-    @Override
     public CursorPage<T> queryPage(Object parentKey, int pageSize, String cursorString) {
         return queryPage(false, pageSize, parentKey, null,
                 null, false, null, false,
-                cursorString);
+                null, cursorString);
     }
 
     public CursorPage<T> queryPage(int pageSize, 
@@ -1230,7 +1229,28 @@ public abstract class DaoImpl<T, ID extends Serializable,
             String cursorString) {
         return queryPage(false, pageSize, null, null,
                 primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
-                cursorString);
+                null, cursorString);
+    }
+
+    protected CursorPage<T> queryPage(int pageSize,
+                                   String primaryOrderBy, boolean primaryIsAscending,
+                                   String secondaryOrderBy, boolean secondaryIsAscending,
+                                   Collection<String> projections, String cursorString) {
+        return queryPage(false, pageSize, null, null,
+                primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
+                projections, cursorString);
+    }
+
+    // Old abstract method signature
+    protected CursorPage<T> queryPage(boolean keysOnly, int pageSize,
+                Object ancestorKey, Object primaryKey,
+                String primaryOrderBy, boolean primaryIsAscending,
+                String secondaryOrderBy, boolean secondaryIsAscending,
+                String cursorString,
+                Filter... filters) {
+        return queryPage(keysOnly, pageSize, ancestorKey, primaryKey,
+                primaryOrderBy,primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
+                null, cursorString, filters);
     }
 
     public CursorPage<T> queryInGeobox(float lat, float lng, int bits, int pageSize, 

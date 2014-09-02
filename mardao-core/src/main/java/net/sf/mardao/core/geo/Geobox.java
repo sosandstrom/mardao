@@ -222,8 +222,8 @@ public class Geobox {
     
     /**
      * 
-     * @param lat
-     * @param lng
+     * @param lat latitude
+     * @param lng longitude
      * @param precision in nibbles (4 bits per nibble)
      * @return the geohash long for specified lat,long,precision
      */
@@ -361,7 +361,8 @@ public class Geobox {
         
 	/**
 	 * This function is used to fix issue 10:
-	 * GeocellUtils.distance(...) uses Math.acos(arg) method. In some cases arg > 1 (i.e 1.0000000002), so acos cannot be calculated and the method returns NaN.
+	 * GeocellUtils.distance(...) uses Math.acos(arg) method. In some cases arg &gt; 1 (i.e 1.0000000002),
+   * so acos cannot be calculated and the method returns NaN.
 	 * @param d
 	 * @return a double between -1 and 1
 	 */

@@ -29,6 +29,13 @@
     </dependency>
     <!-- Test scope dependencies: -->
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>m3-core</artifactId>
+      <version>${project.version}</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>

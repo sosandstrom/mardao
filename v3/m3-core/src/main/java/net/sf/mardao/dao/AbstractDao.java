@@ -20,6 +20,9 @@ public class AbstractDao<T, ID extends Serializable> {
   public T get(ID id) throws IOException {
     Object key = mapper.toKey(id);
     Object value = supplier.readValue(key);
+    if (null == value) {
+      return null;
+    }
     T entity = mapper.fromReadValue(value);
     return entity;
   }

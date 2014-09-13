@@ -1,7 +1,6 @@
 package net.sf.mardao.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 
@@ -16,10 +15,10 @@ import net.sf.mardao.domain.DUser;
  *
  * @author osandstrom Date: 2014-09-12 Time: 20:17
  */
-public class DaoTest {
+public class AbstractDaoTest {
 
-  private DUserDao userDao;
-  private DFactoryDao factoryDao;
+  protected DUserDao userDao;
+  protected DFactoryDao factoryDao;
 
   @Before
   public void setUp() {
@@ -34,9 +33,12 @@ public class DaoTest {
     entity.setId(327L);
     entity.setDisplayName("xHjqLåäö123");
 
+    DUser actual = userDao.get(327L);
+    assertNull(actual);
+
     Long id = userDao.put(entity);
     assertEquals(entity.getId(), id);
-    DUser actual = userDao.get(id);
+    actual = userDao.get(id);
     assertNotNull(actual);
     assertEquals(Long.valueOf(327L), actual.getId());
     assertEquals("xHjqLåäö123", actual.getDisplayName());

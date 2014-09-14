@@ -5,4 +5,4 @@ jdk:
   - openjdk6
 script:
   - mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dmaven.test.skip=true
-  - mvn test -PpluginTest
+  - mvn install -PpluginTest

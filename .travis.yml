@@ -3,4 +3,6 @@ jdk:
 #  - oraclejdk7
 #  - openjdk7
   - openjdk6
-before_script: mvn --version
+script:
+  - mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dmaven.test.skip=true
+  - mvn test -PpluginTest

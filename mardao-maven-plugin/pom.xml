@@ -53,56 +53,64 @@
                 </execution>
               </executions>
             </plugin>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-jar-plugin</artifactId>
-              <version>2.4</version>
-              <executions>
-                <execution>
-                  <id>temp-jar</id>
-                  <phase>process-classes</phase>
-                  <goals>
-                    <goal>jar</goal>
-                  </goals>
-                </execution>
-              </executions>
-            </plugin>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-install-plugin</artifactId>
-              <version>2.5.1</version>
-              <executions>
-                <execution>
-                  <id>temp-install</id>
-                  <phase>process-classes</phase>
-                  <goals>
-                    <goal>install</goal>
-                  </goals>
-                </execution>
-              </executions>
-            </plugin>
-            <plugin>
-              <groupId>${project.groupId}</groupId>
-              <artifactId>${project.artifactId}</artifactId>
-              <version>${project.version}</version>
-              <executions>
-                <execution>
-                  <id>temp-generate</id>
-                  <phase>generate-test-sources</phase>
-                  <goals>
-                    <goal>process-classes</goal>
-                  </goals>
-                  <configuration>
-                    <basePackage>net.sf.mardao.test</basePackage>
-                    <sourceVersion>1.6</sourceVersion>
-                    <classpathElement>${project.basedir}/target/test-classes</classpathElement>
-                    <sourceFolder>${project.basedir}/src/test/java</sourceFolder>
-                    <resourceFolder>${project.basedir}/target/test-classes</resourceFolder>
-                    <targetFolder>${project.basedir}/target/generated-test-sources/dao</targetFolder>
-                  </configuration>
-                </execution>
-              </executions>
-            </plugin>
+        </plugins>
+    </build>
+
+  <profiles>
+    <profile>
+      <id>pluginTest</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>2.4</version>
+            <executions>
+              <execution>
+                <id>temp-jar</id>
+                <phase>process-classes</phase>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-install-plugin</artifactId>
+            <version>2.5.1</version>
+            <executions>
+              <execution>
+                <id>temp-install</id>
+                <phase>process-classes</phase>
+                <goals>
+                  <goal>install</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>${project.artifactId}</artifactId>
+            <version>${project.version}</version>
+            <executions>
+              <execution>
+                <id>temp-generate</id>
+                <phase>generate-test-sources</phase>
+                <goals>
+                  <goal>process-classes</goal>
+                </goals>
+                <configuration>
+                  <basePackage>net.sf.mardao.test</basePackage>
+                  <sourceVersion>1.6</sourceVersion>
+                  <classpathElement>${project.basedir}/target/test-classes</classpathElement>
+                  <sourceFolder>${project.basedir}/src/test/java</sourceFolder>
+                  <resourceFolder>${project.basedir}/target/test-classes</resourceFolder>
+                  <targetFolder>${project.basedir}/target/generated-test-sources/dao</targetFolder>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
@@ -125,7 +133,9 @@
             </executions>
           </plugin>
         </plugins>
-    </build>
+      </build>
+    </profile>
+  </profiles>
 
     <dependencies>
         <dependency>

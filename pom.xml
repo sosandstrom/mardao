@@ -13,8 +13,8 @@
     <description>Mardao is a DAO generator, packaged as a maven plugin. The JPA-annotated Entities is the input to the generator.</description>
 
     <modules>
-        <!--<module>mardao-maven-plugin</module>-->
         <module>mardao-core</module>
+        <module>mardao-maven-plugin</module>
         <module>mardao-gae</module>
     </modules>
 

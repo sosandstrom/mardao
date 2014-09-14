@@ -1,0 +1,42 @@
+package ${daoBasePackage};
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.Filter;
+import net.sf.mardao.core.geo.DLocation;
+import net.sf.mardao.dao.AbstractDao;
+import net.sf.mardao.dao.Supplier;
+import ${entity.className};
+#foreach( $field in $entity.oneToOnes )
+import ${field.entity.className};
+#end
+#foreach( $field in $entity.manyToOnes )
+import ${field.entity.className};
+#end
+#foreach( $field in $entity.manyToManys )	 
+import ${field.entity.className};
+#end
+
+/**
+ * The ${entity.simpleName} domain-object specific finders and methods go in this POJO.
+ * 
+ * Generated on ${currentDate}.
+ * @author mardao DAO generator (${helper.class.name})
+ */
+public class Generated${entity.simpleName}DaoImpl
+  extends AbstractDao<${entity.simpleName}, ${entity.pk.type}> {
+
+  public Generated${entity.simpleName}DaoImpl(Supplier supplier) {
+    super(new ${entity.simpleName}Mapper(supplier), supplier);
+  }
+
+}

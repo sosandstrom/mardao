@@ -8,9 +8,22 @@ import net.sf.mardao.domain.DUser;
  * @author osandstrom Date: 2014-09-03 Time: 20:16
  */
 public class DUserMapper implements Mapper<DUser, Long> {
-  private static final String COLUMN_DISPLAYNAME = "displayName";
-  private static final String COLUMN_ID = "id";
   private final Supplier supplier;
+
+  public enum Field {
+    ID("id"),
+    DISPLAYNAME("displayName");
+
+    private final String fieldName;
+
+    Field(String fieldName) {
+      this.fieldName = fieldName;
+    }
+
+    public String getFieldName() {
+      return fieldName;
+    }
+  }
 
   public DUserMapper(Supplier supplier) {
     this.supplier = supplier;
@@ -36,16 +49,16 @@ public class DUserMapper implements Mapper<DUser, Long> {
     final Long id = getId(entity);
     final Object key = toKey(id);
     final Object value = supplier.createWriteValue(key);
-    supplier.setLong(value, COLUMN_ID, entity.getId());
-    supplier.setString(value, COLUMN_DISPLAYNAME, entity.getDisplayName());
+    supplier.setLong(value, Field.ID.getFieldName(), entity.getId());
+    supplier.setString(value, Field.DISPLAYNAME.getFieldName(), entity.getDisplayName());
     return value;
   }
 
   @Override
   public DUser fromReadValue(Object core) {
     final DUser domain = new DUser();
-    domain.setId(supplier.getLong(core, COLUMN_ID));
-    domain.setDisplayName(supplier.getString(core, COLUMN_DISPLAYNAME));
+    domain.setId(supplier.getLong(core, Field.ID.getFieldName()));
+    domain.setDisplayName(supplier.getString(core, Field.DISPLAYNAME.getFieldName()));
     return domain;
   }
 }

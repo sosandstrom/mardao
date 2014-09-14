@@ -124,7 +124,7 @@ public class AbstractMardaoMojo extends AbstractMojo {
     protected boolean                        containerManagedTransactionManager;
 
     /**
-     * @parameter expression="${generate.persistenceType}" default-value="v2"
+     * @parameter expression="${generate.persistenceType}" default-value="Root"
      */
     protected String                         persistenceType;
 

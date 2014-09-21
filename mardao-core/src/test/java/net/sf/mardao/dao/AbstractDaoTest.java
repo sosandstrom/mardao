@@ -55,4 +55,36 @@ public class AbstractDaoTest {
     assertNotNull(actual);
     assertEquals("mardao", actual.getProviderId());
   }
+
+  @Test
+  public void testQueryByField() throws IOException {
+    createQueryFixtures();
+
+    Iterable<DUser> users = userDao.queryByDisplayName("mod7_2");
+    int count = 0;
+    for (DUser u : users) {
+      count++;
+      assertEquals("mod7_2", u.getDisplayName());
+      assertEquals(2, u.getId() % 7);
+    }
+    assertEquals(9, count);
+  }
+
+  private void createQueryFixtures() throws IOException {
+    for (int i = 1; i < 60; i++) {
+      DUser u = new DUser();
+      u.setId(Long.valueOf(i));
+      u.setDisplayName("mod7_" + (i % 7));
+      userDao.put(u);
+
+      u = new DUser();
+      u.setId(Long.valueOf(1000 + i));
+      u.setDisplayName("user_" + i);
+      userDao.put(u);
+    }
+
+    DFactory f = new DFactory();
+    f.setProviderId("facebook");
+    factoryDao.put(f);
+  }
 }

@@ -1,6 +1,7 @@
 package net.sf.mardao.dao;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -63,7 +64,23 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
                                                      String primaryOrderBy, boolean primaryIsAscending,
                                                      String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
     // this will do for now
-    return kindStore(kind).values();
+    Iterable<Map<String, Object>> remaining = kindStore(kind).values();
+
+    if (null != filters) {
+      for (Filter f : filters) {
+        final ArrayList<Map<String, Object>> after = new ArrayList<Map<String, Object>>();
+        for (Map<String, Object> v : remaining) {
+          if (match(v, f)) {
+            after.add(v);
+          }
+        }
+        remaining = after;
+        if (after.isEmpty()) {
+          break;
+        }
+      }
+    }
+    return remaining;
   }
 
   @Override
@@ -90,5 +107,18 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   @Override
   public String toStringKey(Object key) {
     return null != key ? ((InMemoryKey) key).getName() : null;
+  }
+
+  protected static boolean match(Map<String, Object> v, Filter f) {
+    final Object value = v.get(f.getColumn());
+    if (null == f.getOperand()) {
+      return null == value;
+    }
+    switch (f.getOperator()) {
+      case EQUALS:
+        return f.getOperand().equals(value);
+      default:
+        throw new UnsupportedOperationException("match " + f.getOperator());
+    }
   }
 }

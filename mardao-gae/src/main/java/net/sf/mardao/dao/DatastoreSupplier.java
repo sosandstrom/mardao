@@ -7,10 +7,12 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.QueryResultIterable;
 
 import net.sf.mardao.core.filter.Filter;
 
@@ -40,7 +42,7 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity> {
       secondaryOrderBy, secondaryIsAscending, null, filters);
 
     final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, offset, limit);
-    final CursorIterable<T> returnValue = new CursorIterable<T>(_iterable);
+    return _iterable;
   }
 
   @Override
@@ -153,6 +155,20 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity> {
 //    }
 
     return getSyncService().prepare(/* TRANSACTION.get(),*/ q);
+  }
+
+  protected static QueryResultIterable<Entity> asQueryResultIterable(PreparedQuery pq, int offset, int limit) {
+    FetchOptions fetchOptions = FetchOptions.Builder.withDefaults();
+
+    if (0 < limit) {
+      fetchOptions.limit(limit);
+    }
+
+    if (0 < offset) {
+      fetchOptions.offset(offset);
+    }
+
+    return pq.asQueryResultIterable(fetchOptions);
   }
 
   protected static com.google.appengine.api.datastore.Query.Filter createFilter(Filter mardaoFilter) {

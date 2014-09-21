@@ -17,8 +17,8 @@ public class ${entity.simpleName}Mapper
   private final Supplier supplier;
 
   public enum Field {
-    ${entity.pk.name.toUpperCase()}("${entity.pk.name}")#foreach( $field in $allFields ),
-    ${field.name.toUpperCase()}("${field.columnName}")#end;
+    ${entity.pk.nameUpper}("${entity.pk.name}")#foreach( $field in $allFields ),
+    ${field.nameUpper}("${field.columnName}")#end;
 
     private final String fieldName;
 
@@ -45,11 +45,11 @@ public class ${entity.simpleName}Mapper
     final ${entity.simpleName} entity = new ${entity.simpleName}();
 
     // set primary key:
-    entity.set${entity.pk.nameFirst}(supplier.get${entity.pk.simpleType}(value, Field.${entity.pk.name.toUpperCase()}.getFieldName()));
+    entity.set${entity.pk.nameFirst}(supplier.get${entity.pk.simpleType}(value, Field.${entity.pk.nameUpper}.getFieldName()));
 
     // set all fields:
 #foreach( $field in $allFields )
-    entity.set${field.nameFirst}(supplier.get${field.simpleType}(value, Field.${field.name.toUpperCase()}.getFieldName()));
+    entity.set${field.nameFirst}(supplier.get${field.simpleType}(value, Field.${field.nameUpper}.getFieldName()));
 #end
     return entity;
   }
@@ -76,11 +76,11 @@ public class ${entity.simpleName}Mapper
     final Object value = supplier.createWriteValue(key);
 
     // set the primary key:
-    supplier.set${entity.pk.simpleType}(value, Field.${entity.pk.name.toUpperCase()}.getFieldName(), entity.get${entity.pk.nameFirst}());
+    supplier.set${entity.pk.simpleType}(value, Field.${entity.pk.nameUpper}.getFieldName(), entity.get${entity.pk.nameFirst}());
 
     // set all fields:
 #foreach( $field in $allFields )
-    supplier.set${field.simpleType}(value, Field.${field.name.toUpperCase()}.getFieldName(), entity.get${field.nameFirst}());
+    supplier.set${field.simpleType}(value, Field.${field.nameUpper}.getFieldName(), entity.get${field.nameFirst}());
 #end
     return value;
   }

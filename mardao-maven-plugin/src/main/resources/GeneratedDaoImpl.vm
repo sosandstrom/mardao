@@ -39,4 +39,37 @@ public class Generated${entity.simpleName}DaoImpl
     super(new ${entity.simpleName}Mapper(supplier), supplier);
   }
 
+// ----------------------- field finders -------------------------------
+#foreach( $field in $entity.fields )
+#if( $field.type == 'java.util.Collection' )
+#set( $fieldType = 'java.lang.Object' )
+#else
+#set( $fieldType = $field.type )
+#end
+#if( $entity.isUnique($field.name) )
+##/**
+##* find-by method for unique field ${field.name}
+##* @param ${field.name} the unique attribute
+##* @return the unique ${entity.simpleName} for the specified ${field.name}
+##*/
+##  ${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name});
+##
+##/**
+##* find-key-by method for unique attribute field ${field.name}
+##* @param ${field.name} the unique attribute
+##* @return the unique ${entity.simpleName} for the specified attribute
+##*/
+##  ${entity.pk.type} findKeyBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name});
+#else
+  /**
+  * query-by method for field ${field.name}
+  * @param ${field.name} the specified attribute
+  * @return an Iterable of ${entity.simpleName}s for the specified ${field.name}
+  */
+  Iterable<${entity.simpleName}> queryBy${field.nameFirst}(${fieldType} ${field.name}) {
+    return queryByField(${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
+  }
+
+#end
+#end
 }

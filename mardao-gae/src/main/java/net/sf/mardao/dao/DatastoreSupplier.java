@@ -1,6 +1,7 @@
 package net.sf.mardao.dao;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -8,6 +9,10 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+
+import net.sf.mardao.core.filter.Filter;
 
 /**
  * Stores entities in Google App Engine's Datastore.
@@ -23,6 +28,19 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity> {
       syncService = DatastoreServiceFactory.getDatastoreService();
     }
     return syncService;
+  }
+
+  @Override
+  public Iterable<Entity> queryIterable(String kind, boolean keysOnly, int offset, int limit,
+                                        Object ancestorKey, Object simpleKey,
+                                        String primaryOrderBy, boolean primaryIsAscending,
+                                        String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
+    final PreparedQuery pq = prepare(kind, keysOnly, (Key)ancestorKey, (Key)simpleKey,
+      primaryOrderBy, primaryIsAscending,
+      secondaryOrderBy, secondaryIsAscending, null, filters);
+
+    final QueryResultIterable<Entity> _iterable = asQueryResultIterable(pq, offset, limit);
+    final CursorIterable<T> returnValue = new CursorIterable<T>(_iterable);
   }
 
   @Override
@@ -82,5 +100,69 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity> {
   @Override
   public Entity createWriteValue(Key key) {
     return new Entity(key);
+  }
+
+  /**
+   *
+   * @param keysOnly
+   * @param ancestorKey
+   * @param orderBy
+   * @param ascending
+   * @param filters
+   * @return
+   */
+  protected PreparedQuery prepare(String kind, boolean keysOnly, Key ancestorKey, Key simpleKey,
+                                  String orderBy, boolean ascending,
+                                  String secondaryOrderBy, boolean secondaryAscending, Collection<String> projections, Filter... filters) {
+//    LOG.debug("prepare {} with filters {}", getTableName(), filters);
+
+    Query q = new Query(kind, ancestorKey);
+
+    // keys only?
+    if (keysOnly) {
+      q.setKeysOnly();
+    }
+
+    // filter on keyName:
+    if (null != simpleKey) {
+      q.addFilter(Entity.KEY_RESERVED_PROPERTY, Query.FilterOperator.EQUAL, simpleKey);
+    }
+
+    // filter query:
+    if (null != filters) {
+      for(Filter f : filters) {
+        q.setFilter(createFilter(f));
+      }
+    }
+
+    // sort query?
+    if (null != orderBy) {
+      q.addSort(orderBy, ascending ? Query.SortDirection.ASCENDING : Query.SortDirection.DESCENDING);
+
+      // secondary sort order?
+      if (null != secondaryOrderBy) {
+        q.addSort(secondaryOrderBy, secondaryAscending ? Query.SortDirection.ASCENDING : Query.SortDirection.DESCENDING);
+      }
+    }
+
+    // Add projections
+//    if (null != projections) {
+//      for (String projection : projections) {
+//        q.addProjection(new PropertyProjection(projection, getColumnClass(projection)));
+//      }
+//    }
+
+    return getSyncService().prepare(/* TRANSACTION.get(),*/ q);
+  }
+
+  protected static com.google.appengine.api.datastore.Query.Filter createFilter(Filter mardaoFilter) {
+    switch (mardaoFilter.getOperator()) {
+      case EQUALS:
+        return new Query.FilterPredicate(mardaoFilter.getColumn(), Query.FilterOperator.EQUAL, mardaoFilter.getOperand());
+      case IN:
+        return new Query.FilterPredicate(mardaoFilter.getColumn(), Query.FilterOperator.IN, mardaoFilter.getOperand());
+      default:
+        throw new UnsupportedOperationException("No such Filter Operator " + mardaoFilter.getOperator());
+    }
   }
 }

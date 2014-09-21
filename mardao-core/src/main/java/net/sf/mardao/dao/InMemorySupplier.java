@@ -4,18 +4,32 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.sf.mardao.core.filter.Filter;
+
 /**
- * Stores entities in-memory using a new TreeMap&lt;String, Map&lt;String, Object&gt;&gt;.
+ * Stores entities in-memory using a new TreeMap&lt;InMemoryKey, Map&lt;String, Object&gt;&gt;.
  *
  * @author osandstrom Date: 2014-09-03 Time: 20:48
  */
-public class InMemorySupplier implements Supplier<String, Map<String, Object>, Map<String, Object>> {
+public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Object>, Map<String, Object>> {
 
-  private final Map<String, Map<String, Object>> store = new TreeMap<String, Map<String, Object>>();
+  private final Map<String, Map<String, Map<String, Object>>> store = new TreeMap<String, Map<String, Map<String, Object>>>();
+
+  protected Map<String, Map<String, Object>> kindStore(InMemoryKey key) {
+    return kindStore(key.getKind());
+  }
+  protected Map<String, Map<String, Object>> kindStore(String kind) {
+    Map<String, Map<String, Object>> ks = store.get(kind);
+    if (null == ks && null != kind) {
+      ks = new TreeMap<String, Map<String, Object>>();
+      store.put(kind, ks);
+    }
+    return ks;
+  }
 
   @Override
-  public Map<String, Object> readValue(String key) throws IOException {
-    return store.get(key);
+  public Map<String, Object> readValue(InMemoryKey key) throws IOException {
+    return kindStore(key).get(key.getName());
   }
 
   @Override
@@ -39,33 +53,42 @@ public class InMemorySupplier implements Supplier<String, Map<String, Object>, M
   }
 
   @Override
-  public Map<String, Object> createWriteValue(String key) {
+  public Map<String, Object> createWriteValue(InMemoryKey key) {
     return new TreeMap<String, Object>();
   }
 
   @Override
-  public String writeValue(String key, Map<String, Object> core) throws IOException {
-    store.put(key, core);
+  public Iterable<Map<String, Object>> queryIterable(String kind, boolean keysOnly, int offset, int limit,
+                                                     Object ancestorKey, Object simpleKey,
+                                                     String primaryOrderBy, boolean primaryIsAscending,
+                                                     String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
+    // this will do for now
+    return kindStore(kind).values();
+  }
+
+  @Override
+  public InMemoryKey writeValue(InMemoryKey key, Map<String, Object> core) throws IOException {
+    kindStore(key).put(key.getName(), core);
     return key;
   }
 
   @Override
-  public String toKey(String kind, Long lId) {
-    return null != lId ? lId.toString() : null;
+  public InMemoryKey toKey(String kind, Long lId) {
+    return InMemoryKey.of(kind, null != lId ? lId.toString() : null);
   }
 
   @Override
-  public String toKey(String kind, String sId) {
-    return sId;
+  public InMemoryKey toKey(String kind, String sId) {
+    return InMemoryKey.of(kind, sId);
   }
 
   @Override
   public Long toLongKey(Object key) {
-    return null != key ? Long.parseLong(key.toString()) : null;
+    return null != key ? Long.parseLong(((InMemoryKey) key).getName()) : null;
   }
 
   @Override
   public String toStringKey(Object key) {
-    return (String) key;
+    return null != key ? ((InMemoryKey) key).getName() : null;
   }
 }

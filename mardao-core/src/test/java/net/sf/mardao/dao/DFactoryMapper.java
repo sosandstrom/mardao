@@ -27,6 +27,11 @@ public class DFactoryMapper implements Mapper<DFactory, String> {
   }
 
   @Override
+  public String getKind() {
+    return DFactory.class.getSimpleName();
+  }
+
+  @Override
   public Object toKey(String sId) {
     return supplier.toKey(DFactory.class.getSimpleName(), sId);
   }

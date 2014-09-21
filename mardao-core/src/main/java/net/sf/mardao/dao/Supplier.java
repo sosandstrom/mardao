@@ -2,6 +2,8 @@ package net.sf.mardao.dao;
 
 import java.io.IOException;
 
+import net.sf.mardao.core.filter.Filter;
+
 /**
  * Reads and Writes to physical store.
  *
@@ -24,4 +26,13 @@ public interface Supplier<K, RV, WV> {
   void setString(Object value, String column, String s);
 
   WV createWriteValue(K key);
+
+  // --- query methods ---
+
+  Iterable<RV> queryIterable(String kind, boolean keysOnly,
+                              int offset, int limit,
+                              Object ancestorKey, Object simpleKey,
+                              String primaryOrderBy, boolean primaryIsAscending,
+                              String secondaryOrderBy, boolean secondaryIsAscending,
+                              Filter... filters);
 }

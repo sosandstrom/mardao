@@ -60,6 +60,11 @@ public class ${entity.simpleName}Mapper
   }
 
   @Override
+  public String getKind() {
+    return ${entity.pk.simpleType}.class.getSimpleName();
+  }
+
+  @Override
   public Object toKey(${entity.pk.simpleType} id) {
     return supplier.toKey(${entity.pk.simpleType}.class.getSimpleName(), id);
   }

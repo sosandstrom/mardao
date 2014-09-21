@@ -3,6 +3,9 @@ package net.sf.mardao.dao;
 import java.io.IOException;
 import java.io.Serializable;
 
+import net.sf.mardao.MappingIterable;
+import net.sf.mardao.core.filter.Filter;
+
 /**
  * Created with IntelliJ IDEA.
  *
@@ -16,6 +19,8 @@ public class AbstractDao<T, ID extends Serializable> {
     this.mapper = mapper;
     this.supplier = supplier;
   }
+
+  // --- CRUD methods ---
 
   public T get(ID id) throws IOException {
     Object key = mapper.toKey(id);
@@ -34,5 +39,15 @@ public class AbstractDao<T, ID extends Serializable> {
     key = supplier.writeValue(key, value);
     id = mapper.fromKey(key);
     return id;
+  }
+
+  // --- query methods ---
+
+  protected Iterable<T> queryByField(String fieldName, Object value) {
+    Iterable values = supplier.queryIterable(mapper.getKind(), false, 0, -1,
+      null, null,
+      null, false, null, false,
+      Filter.equalsFilter(fieldName, value));
+    return new MappingIterable<T, ID>(mapper, values.iterator());
   }
 }

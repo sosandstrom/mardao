@@ -11,6 +11,7 @@ public interface Mapper<T, ID extends Serializable> {
   ID fromKey(Object key);
   T fromReadValue(Object value);
   ID getId(T entity);
+  String getKind();
   Object toKey(ID id);
   Object toWriteValue(T entity);
 }

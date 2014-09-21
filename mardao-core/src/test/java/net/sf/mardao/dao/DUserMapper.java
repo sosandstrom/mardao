@@ -40,6 +40,11 @@ public class DUserMapper implements Mapper<DUser, Long> {
   }
 
   @Override
+  public String getKind() {
+    return DUser.class.getSimpleName();
+  }
+
+  @Override
   public Object toKey(Long lId) {
     return supplier.toKey(DUser.class.getSimpleName(), lId);
   }

@@ -70,11 +70,20 @@ public class AbstractDaoTest {
     assertEquals(9, count);
   }
 
+  public void testFindUniqueByField() throws IOException {
+    createQueryFixtures();
+
+    DUser u47 = userDao.findByEmail("user_47@example.com");
+    assertEquals(Long.valueOf(47), u47.getId());
+    assertEquals("user_47@example.com", u47.getEmail());
+  }
+
   private void createQueryFixtures() throws IOException {
     for (int i = 1; i < 60; i++) {
       DUser u = new DUser();
       u.setId(Long.valueOf(i));
       u.setDisplayName("mod7_" + (i % 7));
+      u.setEmail("user_" + i + "@example.com");
       userDao.put(u);
 
       u = new DUser();

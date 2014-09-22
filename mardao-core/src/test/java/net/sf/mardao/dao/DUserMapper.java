@@ -12,6 +12,7 @@ public class DUserMapper implements Mapper<DUser, Long> {
 
   public enum Field {
     ID("id"),
+    EMAIL("email"),
     DISPLAYNAME("displayName");
 
     private final String fieldName;
@@ -56,6 +57,7 @@ public class DUserMapper implements Mapper<DUser, Long> {
     final Object value = supplier.createWriteValue(key);
     supplier.setLong(value, Field.ID.getFieldName(), entity.getId());
     supplier.setString(value, Field.DISPLAYNAME.getFieldName(), entity.getDisplayName());
+    supplier.setString(value, Field.EMAIL.getFieldName(), entity.getEmail());
     return value;
   }
 
@@ -64,6 +66,7 @@ public class DUserMapper implements Mapper<DUser, Long> {
     final DUser domain = new DUser();
     domain.setId(supplier.getLong(core, Field.ID.getFieldName()));
     domain.setDisplayName(supplier.getString(core, Field.DISPLAYNAME.getFieldName()));
+    domain.setEmail(supplier.getString(core, Field.EMAIL.getFieldName()));
     return domain;
   }
 }

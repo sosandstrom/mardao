@@ -35,4 +35,6 @@ public interface Supplier<K, RV, WV> {
                               String primaryOrderBy, boolean primaryIsAscending,
                               String secondaryOrderBy, boolean secondaryIsAscending,
                               Filter... filters);
+
+  RV queryUnique(String kind, Filter... filters);
 }

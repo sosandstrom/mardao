@@ -47,13 +47,15 @@ public class Generated${entity.simpleName}DaoImpl
 #set( $fieldType = $field.type )
 #end
 #if( $entity.isUnique($field.name) )
-##/**
-##* find-by method for unique field ${field.name}
-##* @param ${field.name} the unique attribute
-##* @return the unique ${entity.simpleName} for the specified ${field.name}
-##*/
-##  ${entity.simpleName} findBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name});
-##
+  /**
+   * find-by method for unique field ${field.name}
+   * @param ${field.name} the unique attribute
+   * @return the unique ${entity.simpleName} for the specified ${field.name}
+   */
+  public ${entity.simpleName} findBy${field.nameFirst}(${fieldType} ${field.name}) {
+    return queryUniqueByField(${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
+  }
+
 ##/**
 ##* find-key-by method for unique attribute field ${field.name}
 ##* @param ${field.name} the unique attribute
@@ -62,11 +64,11 @@ public class Generated${entity.simpleName}DaoImpl
 ##  ${entity.pk.type} findKeyBy${helper.firstToUpper($field.name)}(${fieldType} ${field.name});
 #else
   /**
-  * query-by method for field ${field.name}
-  * @param ${field.name} the specified attribute
-  * @return an Iterable of ${entity.simpleName}s for the specified ${field.name}
-  */
-  Iterable<${entity.simpleName}> queryBy${field.nameFirst}(${fieldType} ${field.name}) {
+   * query-by method for field ${field.name}
+   * @param ${field.name} the specified attribute
+   * @return an Iterable of ${entity.simpleName}s for the specified ${field.name}
+   */
+  public Iterable<${entity.simpleName}> queryBy${field.nameFirst}(${fieldType} ${field.name}) {
     return queryByField(${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
   }
 

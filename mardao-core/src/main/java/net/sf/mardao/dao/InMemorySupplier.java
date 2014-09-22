@@ -2,6 +2,7 @@ package net.sf.mardao.dao;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -81,6 +82,14 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
       }
     }
     return remaining;
+  }
+
+  @Override
+  public Map<String, Object> queryUnique(String kind, Filter... filters) {
+    final Iterable<Map<String, Object>> iterable = queryIterable(kind, false, 0, 1,
+      null, null, null, false, null, false, filters);
+    final Iterator<Map<String, Object>> iterator = iterable.iterator();
+    return iterator.hasNext() ? iterator.next() : null;
   }
 
   @Override

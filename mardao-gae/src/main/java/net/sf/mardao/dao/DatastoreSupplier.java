@@ -46,6 +46,15 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity> {
   }
 
   @Override
+  public Entity queryUnique(String kind, Filter... filters) {
+    final PreparedQuery pq = prepare(kind, false, null, null,
+      null, false, null, false,
+      null, filters);
+    final Entity entity = pq.asSingleEntity();
+    return entity;
+  }
+
+  @Override
   public Entity readValue(Key key) throws IOException {
     try {
       return getSyncService().get(key);

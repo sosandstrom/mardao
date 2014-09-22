@@ -43,11 +43,16 @@ public class AbstractDao<T, ID extends Serializable> {
 
   // --- query methods ---
 
-  protected Iterable<T> queryByField(String fieldName, Object value) {
+  protected Iterable<T> queryByField(String fieldName, Object fieldValue) {
     Iterable values = supplier.queryIterable(mapper.getKind(), false, 0, -1,
       null, null,
       null, false, null, false,
-      Filter.equalsFilter(fieldName, value));
+      Filter.equalsFilter(fieldName, fieldValue));
     return new MappingIterable<T, ID>(mapper, values.iterator());
+  }
+
+  protected T queryUniqueByField(String fieldName, Object fieldValue) {
+    final Object value = supplier.queryUnique(mapper.getKind(), Filter.equalsFilter(fieldName, fieldValue));
+    return mapper.fromReadValue(value);
   }
 }

@@ -53,6 +53,9 @@ public class AbstractDao<T, ID extends Serializable> {
 
   protected T queryUniqueByField(String fieldName, Object fieldValue) {
     final Object value = supplier.queryUnique(mapper.getKind(), Filter.equalsFilter(fieldName, fieldValue));
+    if (null == value) {
+      return null;
+    }
     return mapper.fromReadValue(value);
   }
 }

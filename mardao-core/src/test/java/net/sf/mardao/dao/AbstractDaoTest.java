@@ -68,14 +68,21 @@ public class AbstractDaoTest {
       assertEquals(2, u.getId() % 7);
     }
     assertEquals(9, count);
+
+    users = userDao.queryByDisplayName(null);
+    assertFalse(users.iterator().hasNext());
   }
 
+  @Test
   public void testFindUniqueByField() throws IOException {
     createQueryFixtures();
 
     DUser u47 = userDao.findByEmail("user_47@example.com");
     assertEquals(Long.valueOf(47), u47.getId());
     assertEquals("user_47@example.com", u47.getEmail());
+
+    u47 = userDao.findByEmail(null);
+    assertNull(u47);
   }
 
   private void createQueryFixtures() throws IOException {
@@ -89,6 +96,7 @@ public class AbstractDaoTest {
       u = new DUser();
       u.setId(Long.valueOf(1000 + i));
       u.setDisplayName("user_" + i);
+      u.setEmail("user_1000_" + i + "@example.com");
       userDao.put(u);
     }
 

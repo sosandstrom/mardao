@@ -10,6 +10,8 @@ import net.sf.mardao.core.filter.Filter;
  * @author osandstrom Date: 2014-09-03 Time: 19:50
  */
 public interface Supplier<K, RV, WV> {
+  int count(String kind, Object ancestorKey, Object simpleKey, Filter... filters);
+  void deleteValue(K key) throws IOException;
   RV readValue(K key) throws IOException;
   K writeValue(K key, WV value) throws IOException;
 

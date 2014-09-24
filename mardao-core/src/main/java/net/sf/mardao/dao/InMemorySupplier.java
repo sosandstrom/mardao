@@ -2,6 +2,7 @@ package net.sf.mardao.dao;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -17,16 +18,15 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
 
   private final Map<String, Map<String, Map<String, Object>>> store = new TreeMap<String, Map<String, Map<String, Object>>>();
 
-  protected Map<String, Map<String, Object>> kindStore(InMemoryKey key) {
-    return kindStore(key.getKind());
+  @Override
+  public int count(String kind, Object ancestorKey, Object simpleKey, Filter... filters) {
+    final Collection<Map<String, Object>> filtered = filterValues(kindStore(kind).values());
+    return filtered.size();
   }
-  protected Map<String, Map<String, Object>> kindStore(String kind) {
-    Map<String, Map<String, Object>> ks = store.get(kind);
-    if (null == ks && null != kind) {
-      ks = new TreeMap<String, Map<String, Object>>();
-      store.put(kind, ks);
-    }
-    return ks;
+
+  @Override
+  public void deleteValue(InMemoryKey key) throws IOException {
+    kindStore(key).remove(key.getName());
   }
 
   @Override
@@ -65,23 +65,28 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
                                                      String primaryOrderBy, boolean primaryIsAscending,
                                                      String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
     // this will do for now
-    Iterable<Map<String, Object>> remaining = kindStore(kind).values();
+    Collection<Map<String, Object>> remaining = kindStore(kind).values();
 
+    return filterValues(remaining, filters);
+  }
+
+  private Collection<Map<String, Object>> filterValues(Collection<Map<String, Object>> values, Filter... filters) {
+    Collection<Map<String, Object>> after = values;
     if (null != filters) {
       for (Filter f : filters) {
-        final ArrayList<Map<String, Object>> after = new ArrayList<Map<String, Object>>();
-        for (Map<String, Object> v : remaining) {
+        after = new ArrayList<Map<String, Object>>();
+        for (Map<String, Object> v : values) {
           if (match(v, f)) {
             after.add(v);
           }
         }
-        remaining = after;
+        values = after;
         if (after.isEmpty()) {
           break;
         }
       }
     }
-    return remaining;
+    return after;
   }
 
   @Override
@@ -116,6 +121,19 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   @Override
   public String toStringKey(Object key) {
     return null != key ? ((InMemoryKey) key).getName() : null;
+  }
+
+  protected Map<String, Map<String, Object>> kindStore(InMemoryKey key) {
+    return kindStore(key.getKind());
+  }
+
+  protected Map<String, Map<String, Object>> kindStore(String kind) {
+    Map<String, Map<String, Object>> ks = store.get(kind);
+    if (null == ks && null != kind) {
+      ks = new TreeMap<String, Map<String, Object>>();
+      store.put(kind, ks);
+    }
+    return ks;
   }
 
   protected static boolean match(Map<String, Object> v, Filter f) {

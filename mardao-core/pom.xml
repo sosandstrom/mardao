@@ -30,12 +30,11 @@
   </build>
 
   <dependencies>
-    <!-- Test scope dependencies: -->
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jpa_3.0_spec</artifactId>
-      <scope>test</scope>
     </dependency>
+    <!-- Test scope dependencies: -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

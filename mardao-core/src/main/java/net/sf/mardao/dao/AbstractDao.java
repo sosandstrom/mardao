@@ -22,6 +22,15 @@ public class AbstractDao<T, ID extends Serializable> {
 
   // --- CRUD methods ---
 
+  public int count() {
+    return supplier.count(mapper.getKind(), null, null);
+  }
+
+  public void delete(ID id) throws IOException {
+    Object key = mapper.toKey(id);
+    supplier.deleteValue(key);
+  }
+
   public T get(ID id) throws IOException {
     Object key = mapper.toKey(id);
     Object value = supplier.readValue(key);

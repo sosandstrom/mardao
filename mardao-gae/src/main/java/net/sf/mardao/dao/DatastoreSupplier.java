@@ -25,11 +25,15 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity> {
 
   private DatastoreService syncService;
 
-  private DatastoreService getSyncService() {
-    if (null == syncService) {
-      syncService = DatastoreServiceFactory.getDatastoreService();
-    }
-    return syncService;
+  @Override
+  public int count(String kind, Object ancestorKey, Object simpleKey, Filter... filters) {
+    final PreparedQuery pq = prepare(kind, true, (Key) ancestorKey, (Key) simpleKey, null, false, null, false, null, filters);
+    return pq.countEntities(FetchOptions.Builder.withDefaults());
+  }
+
+  @Override
+  public void deleteValue(Key key) throws IOException {
+    getSyncService().delete(key);
   }
 
   @Override
@@ -111,6 +115,13 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity> {
   @Override
   public Entity createWriteValue(Key key) {
     return new Entity(key);
+  }
+
+  private DatastoreService getSyncService() {
+    if (null == syncService) {
+      syncService = DatastoreServiceFactory.getDatastoreService();
+    }
+    return syncService;
   }
 
   /**

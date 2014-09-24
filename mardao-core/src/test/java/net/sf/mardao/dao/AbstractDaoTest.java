@@ -85,6 +85,25 @@ public class AbstractDaoTest {
     assertNull(u47);
   }
 
+  @Test
+  public void testCount() throws IOException {
+    createQueryFixtures();
+    assertEquals(118, userDao.count());
+    assertEquals(1, factoryDao.count());
+  }
+
+  @Test
+  public void testDelete() throws IOException {
+    createQueryFixtures();
+    DUser actual = userDao.get(42L);
+    assertNotNull(actual);
+
+    userDao.delete(42L);
+    actual = userDao.get(42L);
+    assertNull(actual);
+    assertEquals(117, userDao.count());
+  }
+
   private void createQueryFixtures() throws IOException {
     for (int i = 1; i < 60; i++) {
       DUser u = new DUser();

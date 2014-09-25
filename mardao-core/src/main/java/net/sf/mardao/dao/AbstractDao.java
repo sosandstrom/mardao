@@ -7,11 +7,15 @@ import net.sf.mardao.MappingIterable;
 import net.sf.mardao.core.filter.Filter;
 
 /**
- * Created with IntelliJ IDEA.
+ * Generated Daos extends this base class.
  *
  * @author osandstrom Date: 2014-09-03 Time: 19:44
  */
 public class AbstractDao<T, ID extends Serializable> {
+
+  /** set this, to have createdBy and updatedBy set */
+  private static final ThreadLocal<String> principalName = new ThreadLocal<String>();
+
   private final Mapper<T, ID> mapper;
   private final Supplier supplier;
 
@@ -66,5 +70,15 @@ public class AbstractDao<T, ID extends Serializable> {
       return null;
     }
     return mapper.fromReadValue(value);
+  }
+
+  // --- utility methods ---
+
+  public ID getId(Object key) {
+    return mapper.fromKey(key);
+  }
+
+  public static void setPrincipalName(String name) {
+    principalName.set(name);
   }
 }

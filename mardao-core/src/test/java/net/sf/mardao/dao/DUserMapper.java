@@ -1,5 +1,7 @@
 package net.sf.mardao.dao;
 
+import java.util.Date;
+
 import net.sf.mardao.domain.DUser;
 
 /**
@@ -13,6 +15,8 @@ public class DUserMapper implements Mapper<DUser, Long> {
   public enum Field {
     ID("id"),
     EMAIL("email"),
+    BIRTHDATE("birthDate"),
+    CREATEDBY("createdBy"),
     DISPLAYNAME("displayName");
 
     private final String fieldName;
@@ -58,6 +62,8 @@ public class DUserMapper implements Mapper<DUser, Long> {
     supplier.setLong(value, Field.ID.getFieldName(), entity.getId());
     supplier.setString(value, Field.DISPLAYNAME.getFieldName(), entity.getDisplayName());
     supplier.setString(value, Field.EMAIL.getFieldName(), entity.getEmail());
+    supplier.setString(value, Field.CREATEDBY.getFieldName(), entity.getCreatedBy());
+    supplier.setDate(value, Field.BIRTHDATE.getFieldName(), entity.getBirthDate());
     return value;
   }
 
@@ -67,6 +73,28 @@ public class DUserMapper implements Mapper<DUser, Long> {
     domain.setId(supplier.getLong(core, Field.ID.getFieldName()));
     domain.setDisplayName(supplier.getString(core, Field.DISPLAYNAME.getFieldName()));
     domain.setEmail(supplier.getString(core, Field.EMAIL.getFieldName()));
+    domain.setCreatedBy(supplier.getString(core, Field.CREATEDBY.getFieldName()));
+    domain.setBirthDate(supplier.getDate(core, Field.BIRTHDATE.getFieldName()));
     return domain;
+  }
+
+  @Override
+  public String getCreatedByColumnName() {
+    return Field.CREATEDBY.getFieldName();
+  }
+
+  @Override
+  public String getCreatedDateColumnName() {
+    return Field.BIRTHDATE.getFieldName();
+  }
+
+  @Override
+  public String getUpdatedByColumnName() {
+    return null;
+  }
+
+  @Override
+  public String getUpdatedDateColumnName() {
+    return null;
   }
 }

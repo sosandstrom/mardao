@@ -1,10 +1,15 @@
 package net.sf.mardao.domain;
 
+import java.util.Date;
+
 import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import net.sf.mardao.core.CreatedBy;
+import net.sf.mardao.core.CreatedDate;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,6 +28,14 @@ public class DUser {
 
   @Basic
   private String email;
+
+  @CreatedDate
+  @Basic
+  private Date birthDate;
+
+  @CreatedBy
+  @Basic
+  private String createdBy;
 
   public String getDisplayName() {
     return displayName;
@@ -46,5 +59,21 @@ public class DUser {
 
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  public Date getBirthDate() {
+    return birthDate;
+  }
+
+  public void setBirthDate(Date birthDate) {
+    this.birthDate = birthDate;
+  }
+
+  public String getCreatedBy() {
+    return createdBy;
+  }
+
+  public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
   }
 }

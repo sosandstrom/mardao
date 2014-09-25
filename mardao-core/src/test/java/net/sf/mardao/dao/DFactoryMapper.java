@@ -1,5 +1,7 @@
 package net.sf.mardao.dao;
 
+import java.util.Date;
+
 import net.sf.mardao.domain.DFactory;
 import net.sf.mardao.domain.DUser;
 
@@ -50,5 +52,25 @@ public class DFactoryMapper implements Mapper<DFactory, String> {
     final DFactory domain = new DFactory();
     domain.setProviderId(supplier.getString(core, COLUMN_PROVIDERID));
     return domain;
+  }
+
+  @Override
+  public String getCreatedByColumnName() {
+    return null;
+  }
+
+  @Override
+  public String getCreatedDateColumnName() {
+    return null;
+  }
+
+  @Override
+  public String getUpdatedByColumnName() {
+    return null;
+  }
+
+  @Override
+  public String getUpdatedDateColumnName() {
+    return null;
   }
 }

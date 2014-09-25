@@ -3,6 +3,7 @@ package net.sf.mardao.dao;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +18,8 @@ import net.sf.mardao.domain.DUser;
  */
 public class AbstractDaoTest {
 
+  public static final String PRINCIPAL_FIXTURE = "fixture";
+  public static final String PRINCIPAL_SET_UP = "setUp";
   protected DUserDao userDao;
   protected DFactoryDao factoryDao;
 
@@ -25,6 +28,7 @@ public class AbstractDaoTest {
     Supplier supplier = new InMemorySupplier();
     userDao = new DUserDao(supplier);
     factoryDao = new DFactoryDao(supplier);
+    AbstractDao.setPrincipalName(PRINCIPAL_SET_UP);
   }
 
   @Test
@@ -104,7 +108,22 @@ public class AbstractDaoTest {
     assertEquals(117, userDao.count());
   }
 
+  @Test
+  public void testCreated() throws IOException {
+    createQueryFixtures();
+    DUser actual = userDao.get(42L);
+    assertEquals(PRINCIPAL_FIXTURE, actual.getCreatedBy());
+    assertNotNull(actual.getBirthDate());
+  }
+
+  public void testAuditInfo() {
+    DUser actual = new DUser();
+    userDao.updateAuditInfo(actual, "first", new Date(),
+      "createdBy", "birthDate", null, null);
+  }
+
   private void createQueryFixtures() throws IOException {
+    AbstractDao.setPrincipalName(PRINCIPAL_FIXTURE);
     for (int i = 1; i < 60; i++) {
       DUser u = new DUser();
       u.setId(Long.valueOf(i));
@@ -122,5 +141,6 @@ public class AbstractDaoTest {
     DFactory f = new DFactory();
     f.setProviderId("facebook");
     factoryDao.put(f);
+    AbstractDao.setPrincipalName(PRINCIPAL_SET_UP);
   }
 }

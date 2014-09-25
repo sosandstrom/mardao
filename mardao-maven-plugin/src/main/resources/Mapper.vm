@@ -55,6 +55,42 @@ public class ${entity.simpleName}Mapper
   }
 
   @Override
+  public String getCreatedByColumnName() {
+#if( $entity.createdBy )
+    return Field.${entity.createdBy.nameUpper}.getFieldName();
+#else
+    return null;
+#end
+  }
+
+  @Override
+  public String getCreatedDateColumnName() {
+#if( $entity.createdDate )
+    return Field.${entity.createdDate.nameUpper}.getFieldName();
+#else
+    return null;
+#end
+  }
+
+  @Override
+  public String getUpdatedByColumnName() {
+#if( $entity.updatedBy )
+    return Field.${entity.updatedBy.nameUpper}.getFieldName();
+#else
+    return null;
+#end
+  }
+
+  @Override
+  public String getUpdatedDateColumnName() {
+#if( $entity.updatedDate )
+    return Field.${entity.updatedDate.nameUpper}.getFieldName();
+#else
+    return null;
+#end
+  }
+
+@Override
   public ${entity.pk.simpleType} getId(${entity.simpleName} entity) {
     return entity != null ? entity.get${entity.pk.nameFirst}() : null;
   }

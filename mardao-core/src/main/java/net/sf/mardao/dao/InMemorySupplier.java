@@ -3,6 +3,7 @@ package net.sf.mardao.dao;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,13 +36,23 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public String getString(Map<String, Object> core, String column) {
-    return (String) core.get(column);
+  public Date getDate(Map<String, Object> value, String column) {
+    return (Date) value.get(column);
   }
 
   @Override
   public Long getLong(Map<String, Object> core, String column) {
     return (Long) core.get(column);
+  }
+
+  @Override
+  public String getString(Map<String, Object> core, String column) {
+    return (String) core.get(column);
+  }
+
+  @Override
+  public void setDate(Object value, String column, Date d) {
+    ((Map<String, Object>) value).put(column, d);
   }
 
   @Override

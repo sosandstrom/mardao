@@ -2,6 +2,7 @@ package net.sf.mardao.dao;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -93,13 +94,23 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity> {
   }
 
   @Override
-  public String getString(Entity value, String column) {
-    return (String) value.getProperty(column);
+  public Date getDate(Entity value, String column) {
+    return (Date) value.getProperty(column);
   }
 
   @Override
   public Long getLong(Entity value, String column) {
     return (Long) value.getProperty(column);
+  }
+
+  @Override
+  public String getString(Entity value, String column) {
+    return (String) value.getProperty(column);
+  }
+
+  @Override
+  public void setDate(Object value, String column, Date d) {
+    ((Entity) value).setProperty(column, d);
   }
 
   @Override

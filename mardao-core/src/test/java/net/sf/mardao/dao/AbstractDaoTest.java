@@ -116,10 +116,39 @@ public class AbstractDaoTest {
     assertNotNull(actual.getBirthDate());
   }
 
-  public void testAuditInfo() {
+  public void testAuditInfoCreated() {
     DUser actual = new DUser();
-    userDao.updateAuditInfo(actual, "first", new Date(),
+    Date date = new Date();
+    userDao.updateAuditInfo(actual, "first", date,
       "createdBy", "birthDate", null, null);
+    assertEquals("first", actual.getCreatedBy());
+    assertEquals(date, actual.getBirthDate());
+
+    userDao.updateAuditInfo(actual, "second", new Date(0L),
+      "createdBy", "birthDate", null, null);
+    assertEquals("first", actual.getCreatedBy());
+    assertEquals(date, actual.getBirthDate());
+  }
+
+  public void testAuditInfoUpdated() {
+    DUser actual = new DUser();
+    Date date = new Date();
+    userDao.updateAuditInfo(actual, "first", date,
+      null, null, "createdBy", "birthDate");
+    assertEquals("first", actual.getCreatedBy());
+    assertEquals(date, actual.getBirthDate());
+
+    Date date1 = new Date(0L);
+    userDao.updateAuditInfo(actual, "second", date1,
+      null, null, "createdBy", "birthDate");
+    assertEquals("second", actual.getCreatedBy());
+    assertEquals(date1, actual.getBirthDate());
+
+    // do not mess up
+    userDao.updateAuditInfo(actual, null, null,
+      null, null, "createdBy", "birthDate");
+    assertEquals("second", actual.getCreatedBy());
+    assertEquals(date1, actual.getBirthDate());
   }
 
   private void createQueryFixtures() throws IOException {

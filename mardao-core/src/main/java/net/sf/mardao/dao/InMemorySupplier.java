@@ -15,7 +15,7 @@ import net.sf.mardao.core.filter.Filter;
  *
  * @author osandstrom Date: 2014-09-03 Time: 20:48
  */
-public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Object>, Map<String, Object>> {
+public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Object>, Map<String, Object>, Object> {
 
   private final Map<String, Map<String, Map<String, Object>>> store = new TreeMap<String, Map<String, Map<String, Object>>>();
 
@@ -124,7 +124,7 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public InMemoryKey writeValue(TransactionHolder tx, InMemoryKey key, Map<String, Object> core) throws IOException {
+  public InMemoryKey writeValue(TransactionHolder<Object> tx, InMemoryKey key, Map<String, Object> core) throws IOException {
     kindStore(key).put(key.getName(), core);
     return key;
   }

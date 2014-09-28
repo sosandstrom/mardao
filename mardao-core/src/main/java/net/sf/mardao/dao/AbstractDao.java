@@ -53,6 +53,11 @@ public class AbstractDao<T, ID extends Serializable> {
     }
   }
 
+  public <R> R withoutTransaction(TransFunc<R> transFunc) throws IOException {
+    final TransactionHolder holder = new TransactionHolder(null, new Date());
+    return transFunc.apply(holder);
+  }
+
 //  private static void pushTransaction(final Object transaction) {
 //    Stack stack = TRANSACTION_STACKS.get();
 //    if (null == stack) {

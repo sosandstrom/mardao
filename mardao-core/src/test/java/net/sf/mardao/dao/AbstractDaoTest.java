@@ -22,10 +22,11 @@ public class AbstractDaoTest {
   public static final String PRINCIPAL_SET_UP = "setUp";
   protected DUserDao userDao;
   protected DFactoryDao factoryDao;
+  protected Supplier supplier;
 
   @Before
   public void setUp() {
-    Supplier supplier = new InMemorySupplier();
+    supplier = new InMemorySupplier();
     userDao = new DUserDao(supplier);
     factoryDao = new DFactoryDao(supplier);
     AbstractDao.setPrincipalName(PRINCIPAL_SET_UP);
@@ -33,9 +34,9 @@ public class AbstractDaoTest {
 
   @Test
   public void testWriteReadUser() throws IOException {
-    userDao.withCommitTransaction(new TransFunc<Void>() {
+    Long id = userDao.withCommitTransaction(new TransFunc<Long>() {
       @Override
-      public Void apply(TransactionHolder tx) throws IOException {
+      public Long apply(TransactionHolder tx) throws IOException {
         DUser entity = new DUser();
         entity.setId(327L);
         entity.setDisplayName("xHjqLåäö123");
@@ -43,28 +44,38 @@ public class AbstractDaoTest {
         DUser actual = userDao.get(tx, 327L);
         assertNull(actual);
 
-        Long id = userDao.put(tx, entity);
-        assertEquals(entity.getId(), id);
-        actual = userDao.get(tx, id);
-        assertNotNull(actual);
-        assertEquals(Long.valueOf(327L), actual.getId());
-        assertEquals("xHjqLåäö123", actual.getDisplayName());
-        return null;
+        return userDao.put(tx, entity);
       }
     });
+    assertEquals(Long.valueOf(327L), id);
+    DUser actual = userDao.withCommitTransaction(new TransFunc<DUser>() {
+      @Override
+      public DUser apply(TransactionHolder tx) throws IOException {
+        return userDao.get(tx, 327L);
+      }
+    });
+    assertNotNull(actual);
+    assertEquals(Long.valueOf(327L), actual.getId());
+    assertEquals("xHjqLåäö123", actual.getDisplayName());
   }
 
   @Test
   public void testWriteReadFactory() throws IOException {
-    factoryDao.withRollbackTransaction(new TransFunc<Void>() {
+    final String name = factoryDao.withCommitTransaction(new TransFunc<String>() {
       @Override
-      public Void apply(TransactionHolder tx) throws IOException {
+      public String apply(TransactionHolder tx) throws IOException {
         DFactory entity = new DFactory();
         entity.setProviderId("mardao");
 
         String id = factoryDao.put(tx, entity);
-        assertEquals(entity.getProviderId(), id);
-        DFactory actual = factoryDao.get(tx, id);
+        return id;
+      }
+    });
+    assertEquals("mardao", name);
+    factoryDao.withRollbackTransaction(new TransFunc<Void>() {
+      @Override
+      public Void apply(TransactionHolder tx) throws IOException {
+        DFactory actual = factoryDao.get(tx, name);
         assertNotNull(actual);
         assertEquals("mardao", actual.getProviderId());
         return null;
@@ -74,7 +85,7 @@ public class AbstractDaoTest {
 
   @Test
   public void testQueryByField() throws IOException {
-    userDao.withCommitTransaction(new TransFunc<Void>() {
+    userDao.withoutTransaction(new TransFunc<Void>() {
       @Override
       public Void apply(TransactionHolder tx) throws IOException {
         createQueryFixtures(tx);
@@ -97,7 +108,7 @@ public class AbstractDaoTest {
 
   @Test
   public void testFindUniqueByField() throws IOException {
-    DUser u47 = userDao.withCommitTransaction(new TransFunc<DUser>() {
+    DUser u47 = userDao.withoutTransaction(new TransFunc<DUser>() {
       @Override
       public DUser apply(TransactionHolder tx) throws IOException {
         createQueryFixtures(tx);
@@ -114,7 +125,7 @@ public class AbstractDaoTest {
 
   @Test
   public void testCount() throws IOException {
-    userDao.withRollbackTransaction(new TransFunc<Void>() {
+    userDao.withoutTransaction(new TransFunc<Void>() {
       @Override
       public Void apply(TransactionHolder tx) throws IOException {
         createQueryFixtures(tx);
@@ -127,7 +138,7 @@ public class AbstractDaoTest {
 
   @Test
   public void testDelete() throws IOException {
-    userDao.withRollbackTransaction(new TransFunc<Void>() {
+    userDao.withoutTransaction(new TransFunc<Void>() {
       @Override
       public Void apply(TransactionHolder tx) throws IOException {
         createQueryFixtures(tx);
@@ -145,7 +156,7 @@ public class AbstractDaoTest {
 
   @Test
   public void testCreated() throws IOException {
-    DUser actual = userDao.withCommitTransaction(new TransFunc<DUser>() {
+    DUser actual = userDao.withoutTransaction(new TransFunc<DUser>() {
       @Override
       public DUser apply(TransactionHolder tx) throws IOException {
         createQueryFixtures(tx);
@@ -156,42 +167,46 @@ public class AbstractDaoTest {
     assertNotNull(actual.getBirthDate());
   }
 
+  @Test
   public void testAuditInfoCreated() {
-    DUser actual = new DUser();
+    Object key = supplier.toKey("DUser", 1L);
+    Object actual = supplier.createWriteValue(key);
     Date date = new Date();
     userDao.updateAuditInfo(actual, "first", date,
       "createdBy", "birthDate", null, null);
-    assertEquals("first", actual.getCreatedBy());
-    assertEquals(date, actual.getBirthDate());
+    assertEquals("first", supplier.getString(actual, "createdBy"));
+    assertEquals(date, supplier.getDate(actual, "birthDate"));
 
     userDao.updateAuditInfo(actual, "second", new Date(0L),
       "createdBy", "birthDate", null, null);
-    assertEquals("first", actual.getCreatedBy());
-    assertEquals(date, actual.getBirthDate());
+    assertEquals("first", supplier.getString(actual, "createdBy"));
+    assertEquals(date, supplier.getDate(actual, "birthDate"));
   }
 
+  @Test
   public void testAuditInfoUpdated() {
-    DUser actual = new DUser();
+    Object key = supplier.toKey("DUser", 1L);
+    Object actual = supplier.createWriteValue(key);
     Date date = new Date();
     userDao.updateAuditInfo(actual, "first", date,
       null, null, "createdBy", "birthDate");
-    assertEquals("first", actual.getCreatedBy());
-    assertEquals(date, actual.getBirthDate());
+    assertEquals("first", supplier.getString(actual, "createdBy"));
+    assertEquals(date, supplier.getDate(actual, "birthDate"));
 
     Date date1 = new Date(0L);
     userDao.updateAuditInfo(actual, "second", date1,
       null, null, "createdBy", "birthDate");
-    assertEquals("second", actual.getCreatedBy());
-    assertEquals(date1, actual.getBirthDate());
+    assertEquals("second", supplier.getString(actual, "createdBy"));
+    assertEquals(date1, supplier.getDate(actual, "birthDate"));
 
     // do not mess up
     userDao.updateAuditInfo(actual, null, null,
       null, null, "createdBy", "birthDate");
-    assertEquals("second", actual.getCreatedBy());
-    assertEquals(date1, actual.getBirthDate());
+    assertEquals("second", supplier.getString(actual, "createdBy"));
+    assertEquals(date1, supplier.getDate(actual, "birthDate"));
   }
 
-  private void createQueryFixtures(TransactionHolder tx) throws IOException {
+  protected void createQueryFixtures(TransactionHolder tx) throws IOException {
     AbstractDao.setPrincipalName(PRINCIPAL_FIXTURE);
     for (int i = 1; i < 60; i++) {
       DUser u = new DUser();

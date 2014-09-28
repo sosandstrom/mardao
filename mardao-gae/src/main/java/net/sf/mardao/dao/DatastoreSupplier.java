@@ -14,6 +14,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.datastore.TransactionOptions;
 
 import net.sf.mardao.core.filter.Filter;
 
@@ -22,23 +24,42 @@ import net.sf.mardao.core.filter.Filter;
  *
  * @author osandstrom Date: 2014-09-13 Time: 17:43
  */
-public class DatastoreSupplier implements Supplier<Key, Entity, Entity> {
+public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transaction> {
 
   private DatastoreService syncService;
 
   @Override
-  public int count(String kind, Object ancestorKey, Object simpleKey, Filter... filters) {
+  public void rollbackActiveTransaction(TransactionHolder<Transaction> holder) {
+    final Transaction tx = holder.get();
+    if (tx.isActive()) {
+      tx.rollback();
+    }
+  }
+
+  @Override
+  public void commitTransaction(TransactionHolder<Transaction> holder) {
+    holder.get().commit();
+  }
+
+  @Override
+  public Transaction beginTransaction() {
+    TransactionOptions options = TransactionOptions.Builder.withXG(true);
+    return getSyncService().beginTransaction(options);
+  }
+
+  @Override
+  public int count(TransactionHolder<Transaction> tx, String kind, Object ancestorKey, Object simpleKey, Filter... filters) {
     final PreparedQuery pq = prepare(kind, true, (Key) ancestorKey, (Key) simpleKey, null, false, null, false, null, filters);
     return pq.countEntities(FetchOptions.Builder.withDefaults());
   }
 
   @Override
-  public void deleteValue(Key key) throws IOException {
+  public void deleteValue(TransactionHolder<Transaction> tx, Key key) throws IOException {
     getSyncService().delete(key);
   }
 
   @Override
-  public Iterable<Entity> queryIterable(String kind, boolean keysOnly, int offset, int limit,
+  public Iterable<Entity> queryIterable(TransactionHolder<Transaction> tx, String kind, boolean keysOnly, int offset, int limit,
                                         Object ancestorKey, Object simpleKey,
                                         String primaryOrderBy, boolean primaryIsAscending,
                                         String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
@@ -51,7 +72,7 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity> {
   }
 
   @Override
-  public Entity queryUnique(String kind, Filter... filters) {
+  public Entity queryUnique(TransactionHolder<Transaction> tx, String kind, Filter... filters) {
     final PreparedQuery pq = prepare(kind, false, null, null,
       null, false, null, false,
       null, filters);
@@ -60,17 +81,17 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity> {
   }
 
   @Override
-  public Entity readValue(Key key) throws IOException {
+  public Entity readValue(TransactionHolder<Transaction> tx, Key key) throws IOException {
     try {
-      return getSyncService().get(key);
+      return getSyncService().get(tx.get(), key);
     } catch (EntityNotFoundException e) {
       return null;
     }
   }
 
   @Override
-  public Key writeValue(Key key, Entity value) throws IOException {
-    return getSyncService().put(value);
+  public Key writeValue(TransactionHolder<Transaction> tx, Key key, Entity value) throws IOException {
+    return getSyncService().put(tx.get(), value);
   }
 
   @Override

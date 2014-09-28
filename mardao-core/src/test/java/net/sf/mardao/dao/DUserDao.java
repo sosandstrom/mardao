@@ -12,11 +12,11 @@ public class DUserDao extends AbstractDao<DUser, Long> {
     super(new DUserMapper(supplier), supplier);
   }
 
-  public Iterable<DUser> queryByDisplayName(String displayName) {
-    return queryByField(DUserMapper.Field.DISPLAYNAME.getFieldName(), displayName);
+  public Iterable<DUser> queryByDisplayName(TransactionHolder tx, String displayName) {
+    return queryByField(tx, DUserMapper.Field.DISPLAYNAME.getFieldName(), displayName);
   }
 
-  public DUser findByEmail(String email) {
-    return queryUniqueByField(DUserMapper.Field.EMAIL.getFieldName(), email);
+  public DUser findByEmail(TransactionHolder tx, String email) {
+    return queryUniqueByField(tx, DUserMapper.Field.EMAIL.getFieldName(), email);
   }
 }

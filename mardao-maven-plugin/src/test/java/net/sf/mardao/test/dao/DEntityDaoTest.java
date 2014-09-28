@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import net.sf.mardao.dao.InMemorySupplier;
 import net.sf.mardao.dao.Supplier;
+import net.sf.mardao.dao.TransFunc;
+import net.sf.mardao.dao.TransactionHolder;
 import net.sf.mardao.test.domain.DEntity;
 
 /**
@@ -30,21 +32,24 @@ public class DEntityDaoTest {
 
   @Test
   public void testWriteReadUser() throws IOException {
-    DEntity entity = new DEntity();
-    entity.setId(327L);
-    entity.setDisplayName("xHjqLåäö123");
+    DEntity actual = dao.withCommitTransaction(new TransFunc<DEntity>() {
+      @Override
+      public DEntity apply(TransactionHolder tx) throws IOException {
+        DEntity entity = new DEntity();
+        entity.setId(327L);
+        entity.setDisplayName("xHjqLåäö123");
 
-    DEntity actual = dao.get(327L);
-    assertNull(actual);
+        DEntity actual = dao.get(tx, 327L);
+        assertNull(actual);
 
-    Long id = dao.put(entity);
-    assertEquals(entity.getId(), id);
-    actual = dao.get(id);
+        Long id = dao.put(tx, entity);
+        assertEquals(entity.getId(), id);
+        return  dao.get(tx, id);
+      }
+    });
     assertNotNull(actual);
     assertEquals(Long.valueOf(327L), actual.getId());
     assertEquals("xHjqLåäö123", actual.getDisplayName());
   }
-
-
 
 }

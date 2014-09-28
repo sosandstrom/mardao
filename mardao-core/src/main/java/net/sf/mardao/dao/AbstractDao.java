@@ -16,6 +16,7 @@ public class AbstractDao<T, ID extends Serializable> {
 
   /** set this, to have createdBy and updatedBy set */
   private static final ThreadLocal<String> principalName = new ThreadLocal<String>();
+  //private static final ThreadLocal<Stack> TRANSACTION_STACKS = new ThreadLocal<Stack>();
 
   private final Mapper<T, ID> mapper;
   private final Supplier supplier;
@@ -25,20 +26,72 @@ public class AbstractDao<T, ID extends Serializable> {
     this.supplier = supplier;
   }
 
+  // --- transactional methods ---
+
+  public <R> R withCommitTransaction(TransFunc<R> transFunc) throws IOException {
+    return withTransaction(transFunc, true);
+  }
+
+  public <R> R withRollbackTransaction(TransFunc<R> transFunc) throws IOException {
+    return withTransaction(transFunc, false);
+  }
+
+  public <R> R withTransaction(TransFunc<R> transFunc, boolean commit) throws IOException {
+    final Object transaction = supplier.beginTransaction();
+    TransactionHolder holder = new TransactionHolder(transaction, new Date());
+    // pushTransaction(transaction);
+    try {
+      final R result = transFunc.apply(holder);
+      if (commit) {
+        supplier.commitTransaction(holder);
+      }
+      return result;
+    }
+    finally {
+      // popTransaction(transaction);
+      supplier.rollbackActiveTransaction(holder);
+    }
+  }
+
+//  private static void pushTransaction(final Object transaction) {
+//    Stack stack = TRANSACTION_STACKS.get();
+//    if (null == stack) {
+//      stack = new Stack();
+//      TRANSACTION_STACKS.set(stack);
+//    }
+//    stack.push(transaction);
+//  }
+//
+//  private static void popTransaction(final Object transaction) {
+//    final Stack stack = TRANSACTION_STACKS.get();
+//    Object popped = stack.pop();
+//    if (popped != transaction) {
+//      throw new IllegalStateException("Transaction differs.");
+//    }
+//  }
+//
+//  private static Object getCurrentTransaction() {
+//    final Stack stack = TRANSACTION_STACKS.get();
+//    if (null == stack) {
+//      return null;
+//    }
+//    return stack.peek();
+//  }
+
   // --- CRUD methods ---
 
-  public int count() {
-    return supplier.count(mapper.getKind(), null, null);
+  public int count(TransactionHolder tx) {
+    return supplier.count(tx, mapper.getKind(), null, null);
   }
 
-  public void delete(ID id) throws IOException {
+  public void delete(TransactionHolder tx, ID id) throws IOException {
     Object key = mapper.toKey(id);
-    supplier.deleteValue(key);
+    supplier.deleteValue(tx, key);
   }
 
-  public T get(ID id) throws IOException {
+  public T get(TransactionHolder tx, ID id) throws IOException {
     Object key = mapper.toKey(id);
-    Object value = supplier.readValue(key);
+    Object value = supplier.readValue(tx, key);
     if (null == value) {
       return null;
     }
@@ -46,28 +99,28 @@ public class AbstractDao<T, ID extends Serializable> {
     return entity;
   }
 
-  public ID put(T entity) throws IOException {
+  public ID put(TransactionHolder tx, T entity) throws IOException {
     ID id = mapper.getId(entity);
     Object key = mapper.toKey(id);
     Object value = mapper.toWriteValue(entity);
-    updateAuditInfo(value);
-    key = supplier.writeValue(key, value);
+    updateAuditInfo(tx, value);
+    key = supplier.writeValue(tx, key, value);
     id = mapper.fromKey(key);
     return id;
   }
 
   // --- query methods ---
 
-  protected Iterable<T> queryByField(String fieldName, Object fieldValue) {
-    Iterable values = supplier.queryIterable(mapper.getKind(), false, 0, -1,
+  protected Iterable<T> queryByField(TransactionHolder tx, String fieldName, Object fieldValue) {
+    Iterable values = supplier.queryIterable(tx, mapper.getKind(), false, 0, -1,
       null, null,
       null, false, null, false,
       Filter.equalsFilter(fieldName, fieldValue));
     return new MappingIterable<T, ID>(mapper, values.iterator());
   }
 
-  protected T queryUniqueByField(String fieldName, Object fieldValue) {
-    final Object value = supplier.queryUnique(mapper.getKind(), Filter.equalsFilter(fieldName, fieldValue));
+  protected T queryUniqueByField(TransactionHolder tx, String fieldName, Object fieldValue) {
+    final Object value = supplier.queryUnique(tx, mapper.getKind(), Filter.equalsFilter(fieldName, fieldValue));
     if (null == value) {
       return null;
     }
@@ -84,8 +137,8 @@ public class AbstractDao<T, ID extends Serializable> {
     principalName.set(name);
   }
 
-  private void updateAuditInfo(final Object value) {
-    updateAuditInfo(value, principalName.get(), new Date(),
+  private void updateAuditInfo(TransactionHolder tx, final Object value) {
+    updateAuditInfo(value, principalName.get(), tx.getDate(),
       mapper.getCreatedByColumnName(), mapper.getCreatedDateColumnName(),
       mapper.getUpdatedByColumnName(), mapper.getUpdatedDateColumnName());
   }

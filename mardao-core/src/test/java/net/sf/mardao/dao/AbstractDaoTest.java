@@ -36,22 +36,22 @@ public class AbstractDaoTest {
   public void testWriteReadUser() throws IOException {
     Long id = userDao.withCommitTransaction(new TransFunc<Long>() {
       @Override
-      public Long apply(TransactionHolder tx) throws IOException {
+      public Long apply() throws IOException {
         DUser entity = new DUser();
         entity.setId(327L);
         entity.setDisplayName("xHjqLåäö123");
 
-        DUser actual = userDao.get(tx, 327L);
+        DUser actual = userDao.get(327L);
         assertNull(actual);
 
-        return userDao.put(tx, entity);
+        return userDao.put(entity);
       }
     });
     assertEquals(Long.valueOf(327L), id);
     DUser actual = userDao.withCommitTransaction(new TransFunc<DUser>() {
       @Override
-      public DUser apply(TransactionHolder tx) throws IOException {
-        return userDao.get(tx, 327L);
+      public DUser apply() throws IOException {
+        return userDao.get(327L);
       }
     });
     assertNotNull(actual);
@@ -63,19 +63,19 @@ public class AbstractDaoTest {
   public void testWriteReadFactory() throws IOException {
     final String name = factoryDao.withCommitTransaction(new TransFunc<String>() {
       @Override
-      public String apply(TransactionHolder tx) throws IOException {
+      public String apply() throws IOException {
         DFactory entity = new DFactory();
         entity.setProviderId("mardao");
 
-        String id = factoryDao.put(tx, entity);
+        String id = factoryDao.put(entity);
         return id;
       }
     });
     assertEquals("mardao", name);
     factoryDao.withRollbackTransaction(new TransFunc<Void>() {
       @Override
-      public Void apply(TransactionHolder tx) throws IOException {
-        DFactory actual = factoryDao.get(tx, name);
+      public Void apply() throws IOException {
+        DFactory actual = factoryDao.get(name);
         assertNotNull(actual);
         assertEquals("mardao", actual.getProviderId());
         return null;
@@ -85,84 +85,57 @@ public class AbstractDaoTest {
 
   @Test
   public void testQueryByField() throws IOException {
-    userDao.withoutTransaction(new TransFunc<Void>() {
-      @Override
-      public Void apply(TransactionHolder tx) throws IOException {
-        createQueryFixtures(tx);
+      createQueryFixtures();
 
-        Iterable<DUser> users = userDao.queryByDisplayName(tx, "mod7_2");
-        int count = 0;
-        for (DUser u : users) {
-          count++;
-          assertEquals("mod7_2", u.getDisplayName());
-          assertEquals(2, u.getId() % 7);
-        }
-        assertEquals(9, count);
-
-        users = userDao.queryByDisplayName(tx, null);
-        assertFalse(users.iterator().hasNext());
-        return null;
+      Iterable<DUser> users = userDao.queryByDisplayName("mod7_2");
+      int count = 0;
+      for (DUser u : users) {
+        count++;
+        assertEquals("mod7_2", u.getDisplayName());
+        assertEquals(2, u.getId() % 7);
       }
-    });
+      assertEquals(9, count);
+
+      users = userDao.queryByDisplayName(null);
+      assertFalse(users.iterator().hasNext());
   }
 
   @Test
   public void testFindUniqueByField() throws IOException {
-    DUser u47 = userDao.withoutTransaction(new TransFunc<DUser>() {
-      @Override
-      public DUser apply(TransactionHolder tx) throws IOException {
-        createQueryFixtures(tx);
+    createQueryFixtures();
 
-        DUser u47n = userDao.findByEmail(tx, null);
-        assertNull(u47n);
+    DUser u47 = userDao.findByEmail(null);
+    assertNull(u47);
 
-        return userDao.findByEmail(tx, "user_47@example.com");
-      }
-    });
+    u47 = userDao.findByEmail("user_47@example.com");
     assertEquals(Long.valueOf(47), u47.getId());
     assertEquals("user_47@example.com", u47.getEmail());
   }
 
   @Test
   public void testCount() throws IOException {
-    userDao.withoutTransaction(new TransFunc<Void>() {
-      @Override
-      public Void apply(TransactionHolder tx) throws IOException {
-        createQueryFixtures(tx);
-        assertEquals(118, userDao.count(tx));
-        assertEquals(1, factoryDao.count(tx));
-        return null;
-      }
-    });
+      createQueryFixtures();
+      assertEquals(118, userDao.count());
+      assertEquals(1, factoryDao.count());
   }
 
   @Test
   public void testDelete() throws IOException {
-    userDao.withoutTransaction(new TransFunc<Void>() {
-      @Override
-      public Void apply(TransactionHolder tx) throws IOException {
-        createQueryFixtures(tx);
-        DUser actual = userDao.get(tx, 42L);
-        assertNotNull(actual);
+      createQueryFixtures();
+      DUser actual = userDao.get(42L);
+      assertNotNull(actual);
 
-        userDao.delete(tx, 42L);
-        actual = userDao.get(tx, 42L);
-        assertNull(actual);
-        assertEquals(117, userDao.count(tx));
-        return null;
-      }
-    });
+      userDao.delete(42L);
+      actual = userDao.get(42L);
+      assertNull(actual);
+      assertEquals(117, userDao.count());
   }
 
   @Test
   public void testCreated() throws IOException {
-    DUser actual = userDao.withoutTransaction(new TransFunc<DUser>() {
-      @Override
-      public DUser apply(TransactionHolder tx) throws IOException {
-        createQueryFixtures(tx);
-        return userDao.get(tx, 42L);
-      }
-    });
+    createQueryFixtures();
+    DUser actual =  userDao.get(42L);
+
     assertEquals(PRINCIPAL_FIXTURE, actual.getCreatedBy());
     assertNotNull(actual.getBirthDate());
   }
@@ -206,25 +179,25 @@ public class AbstractDaoTest {
     assertEquals(date1, supplier.getDate(actual, "birthDate"));
   }
 
-  protected void createQueryFixtures(TransactionHolder tx) throws IOException {
+  protected void createQueryFixtures() throws IOException {
     AbstractDao.setPrincipalName(PRINCIPAL_FIXTURE);
     for (int i = 1; i < 60; i++) {
       DUser u = new DUser();
       u.setId(Long.valueOf(i));
       u.setDisplayName("mod7_" + (i % 7));
       u.setEmail("user_" + i + "@example.com");
-      userDao.put(tx, u);
+      userDao.put(u);
 
       u = new DUser();
       u.setId(Long.valueOf(1000 + i));
       u.setDisplayName("user_" + i);
       u.setEmail("user_1000_" + i + "@example.com");
-      userDao.put(tx, u);
+      userDao.put(u);
     }
 
     DFactory f = new DFactory();
     f.setProviderId("facebook");
-    factoryDao.put(tx, f);
+    factoryDao.put(f);
     AbstractDao.setPrincipalName(PRINCIPAL_SET_UP);
   }
 }

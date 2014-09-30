@@ -34,17 +34,17 @@ public class DEntityDaoTest {
   public void testWriteReadUser() throws IOException {
     DEntity actual = dao.withCommitTransaction(new TransFunc<DEntity>() {
       @Override
-      public DEntity apply(TransactionHolder tx) throws IOException {
+      public DEntity apply() throws IOException {
         DEntity entity = new DEntity();
         entity.setId(327L);
         entity.setDisplayName("xHjqLåäö123");
 
-        DEntity actual = dao.get(tx, 327L);
+        DEntity actual = dao.get(327L);
         assertNull(actual);
 
-        Long id = dao.put(tx, entity);
+        Long id = dao.put(entity);
         assertEquals(entity.getId(), id);
-        return  dao.get(tx, id);
+        return  dao.get(id);
       }
     });
     assertNotNull(actual);

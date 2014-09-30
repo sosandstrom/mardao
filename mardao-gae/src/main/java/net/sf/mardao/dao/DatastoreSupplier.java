@@ -29,16 +29,15 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   private DatastoreService syncService;
 
   @Override
-  public void rollbackActiveTransaction(TransactionHolder<Transaction> holder) {
-    final Transaction tx = holder.get();
+  public void rollbackActiveTransaction(Transaction tx) {
     if (tx.isActive()) {
       tx.rollback();
     }
   }
 
   @Override
-  public void commitTransaction(TransactionHolder<Transaction> holder) {
-    holder.get().commit();
+  public void commitTransaction(Transaction tx) {
+    tx.commit();
   }
 
   @Override
@@ -48,18 +47,18 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public int count(TransactionHolder<Transaction> tx, String kind, Object ancestorKey, Object simpleKey, Filter... filters) {
+  public int count(Transaction tx, String kind, Object ancestorKey, Object simpleKey, Filter... filters) {
     final PreparedQuery pq = prepare(kind, true, (Key) ancestorKey, (Key) simpleKey, null, false, null, false, null, filters);
     return pq.countEntities(FetchOptions.Builder.withDefaults());
   }
 
   @Override
-  public void deleteValue(TransactionHolder<Transaction> tx, Key key) throws IOException {
+  public void deleteValue(Transaction tx, Key key) throws IOException {
     getSyncService().delete(key);
   }
 
   @Override
-  public Iterable<Entity> queryIterable(TransactionHolder<Transaction> tx, String kind, boolean keysOnly, int offset, int limit,
+  public Iterable<Entity> queryIterable(Transaction tx, String kind, boolean keysOnly, int offset, int limit,
                                         Object ancestorKey, Object simpleKey,
                                         String primaryOrderBy, boolean primaryIsAscending,
                                         String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
@@ -72,7 +71,7 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public Entity queryUnique(TransactionHolder<Transaction> tx, String kind, Filter... filters) {
+  public Entity queryUnique(Transaction tx, String kind, Filter... filters) {
     final PreparedQuery pq = prepare(kind, false, null, null,
       null, false, null, false,
       null, filters);
@@ -81,17 +80,17 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public Entity readValue(TransactionHolder<Transaction> tx, Key key) throws IOException {
+  public Entity readValue(Transaction tx, Key key) throws IOException {
     try {
-      return getSyncService().get(tx.get(), key);
+      return getSyncService().get(tx, key);
     } catch (EntityNotFoundException e) {
       return null;
     }
   }
 
   @Override
-  public Key writeValue(TransactionHolder<Transaction> tx, Key key, Entity value) throws IOException {
-    return getSyncService().put(tx.get(), value);
+  public Key writeValue(Transaction tx, Key key, Entity value) throws IOException {
+    return getSyncService().put(tx, value);
   }
 
   @Override

@@ -11,9 +11,8 @@ public interface TransFunc<R> {
 
   /**
    * Do your transactional statements in this method.
-   * @param tx the transaction holder object
    * @return the result of the statements
    * @throws java.io.IOException can be thrown
    */
-  R apply(TransactionHolder tx) throws IOException;
+  R apply() throws IOException;
 }

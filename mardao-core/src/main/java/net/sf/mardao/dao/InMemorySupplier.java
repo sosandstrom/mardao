@@ -25,28 +25,28 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public void commitTransaction(TransactionHolder holder) {
+  public void commitTransaction(Object tx) {
 
   }
 
   @Override
-  public void rollbackActiveTransaction(TransactionHolder transaction) {
+  public void rollbackActiveTransaction(Object tx) {
 
   }
 
   @Override
-  public int count(TransactionHolder tx, String kind, Object ancestorKey, Object simpleKey, Filter... filters) {
+  public int count(Object tx, String kind, Object ancestorKey, Object simpleKey, Filter... filters) {
     final Collection<Map<String, Object>> filtered = filterValues(kindStore(kind).values());
     return filtered.size();
   }
 
   @Override
-  public void deleteValue(TransactionHolder tx, InMemoryKey key) throws IOException {
+  public void deleteValue(Object tx, InMemoryKey key) throws IOException {
     kindStore(key).remove(key.getName());
   }
 
   @Override
-  public Map<String, Object> readValue(TransactionHolder tx, InMemoryKey key) throws IOException {
+  public Map<String, Object> readValue(Object tx, InMemoryKey key) throws IOException {
     return kindStore(key).get(key.getName());
   }
 
@@ -86,7 +86,7 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public Iterable<Map<String, Object>> queryIterable(TransactionHolder tx, String kind, boolean keysOnly, int offset, int limit,
+  public Iterable<Map<String, Object>> queryIterable(Object tx, String kind, boolean keysOnly, int offset, int limit,
                                                      Object ancestorKey, Object simpleKey,
                                                      String primaryOrderBy, boolean primaryIsAscending,
                                                      String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
@@ -116,7 +116,7 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public Map<String, Object> queryUnique(TransactionHolder tx, String kind, Filter... filters) {
+  public Map<String, Object> queryUnique(Object tx, String kind, Filter... filters) {
     final Iterable<Map<String, Object>> iterable = queryIterable(tx, kind, false, 0, 1,
       null, null, null, false, null, false, filters);
     final Iterator<Map<String, Object>> iterator = iterable.iterator();
@@ -124,7 +124,7 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public InMemoryKey writeValue(TransactionHolder<Object> tx, InMemoryKey key, Map<String, Object> core) throws IOException {
+  public InMemoryKey writeValue(Object tx, InMemoryKey key, Map<String, Object> core) throws IOException {
     kindStore(key).put(key.getName(), core);
     return key;
   }

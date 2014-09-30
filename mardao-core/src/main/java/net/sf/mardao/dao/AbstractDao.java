@@ -3,6 +3,7 @@ package net.sf.mardao.dao;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Stack;
 
 import net.sf.mardao.MappingIterable;
 import net.sf.mardao.core.filter.Filter;
@@ -16,7 +17,7 @@ public class AbstractDao<T, ID extends Serializable> {
 
   /** set this, to have createdBy and updatedBy set */
   private static final ThreadLocal<String> principalName = new ThreadLocal<String>();
-  //private static final ThreadLocal<Stack> TRANSACTION_STACKS = new ThreadLocal<Stack>();
+  private static final ThreadLocal<Stack> TRANSACTION_STACKS = new ThreadLocal<Stack>();
 
   private final Mapper<T, ID> mapper;
   private final Supplier supplier;
@@ -38,65 +39,60 @@ public class AbstractDao<T, ID extends Serializable> {
 
   public <R> R withTransaction(TransFunc<R> transFunc, boolean commit) throws IOException {
     final Object transaction = supplier.beginTransaction();
-    TransactionHolder holder = new TransactionHolder(transaction, new Date());
-    // pushTransaction(transaction);
+    // TransactionHolder holder = new TransactionHolder(transaction, new Date());
+    pushTransaction(transaction);
     try {
-      final R result = transFunc.apply(holder);
+      final R result = transFunc.apply();
       if (commit) {
-        supplier.commitTransaction(holder);
+        supplier.commitTransaction(transaction);
       }
       return result;
     }
     finally {
-      // popTransaction(transaction);
-      supplier.rollbackActiveTransaction(holder);
+      popTransaction(transaction);
+      supplier.rollbackActiveTransaction(transaction);
     }
   }
 
-  public <R> R withoutTransaction(TransFunc<R> transFunc) throws IOException {
-    final TransactionHolder holder = new TransactionHolder(null, new Date());
-    return transFunc.apply(holder);
+  private static void pushTransaction(final Object transaction) {
+    Stack stack = TRANSACTION_STACKS.get();
+    if (null == stack) {
+      stack = new Stack();
+      TRANSACTION_STACKS.set(stack);
+    }
+    stack.push(transaction);
   }
 
-//  private static void pushTransaction(final Object transaction) {
-//    Stack stack = TRANSACTION_STACKS.get();
-//    if (null == stack) {
-//      stack = new Stack();
-//      TRANSACTION_STACKS.set(stack);
-//    }
-//    stack.push(transaction);
-//  }
-//
-//  private static void popTransaction(final Object transaction) {
-//    final Stack stack = TRANSACTION_STACKS.get();
-//    Object popped = stack.pop();
-//    if (popped != transaction) {
-//      throw new IllegalStateException("Transaction differs.");
-//    }
-//  }
-//
-//  private static Object getCurrentTransaction() {
-//    final Stack stack = TRANSACTION_STACKS.get();
-//    if (null == stack) {
-//      return null;
-//    }
-//    return stack.peek();
-//  }
+  private static void popTransaction(final Object transaction) {
+    final Stack stack = TRANSACTION_STACKS.get();
+    Object popped = stack.pop();
+    if (popped != transaction) {
+      throw new IllegalStateException("Transaction differs.");
+    }
+  }
+
+  private static Object getCurrentTransaction() {
+    final Stack stack = TRANSACTION_STACKS.get();
+    if (null == stack) {
+      return null;
+    }
+    return stack.isEmpty() ? null : stack.peek();
+  }
 
   // --- CRUD methods ---
 
-  public int count(TransactionHolder tx) {
-    return supplier.count(tx, mapper.getKind(), null, null);
+  public int count() {
+    return supplier.count(getCurrentTransaction(), mapper.getKind(), null, null);
   }
 
-  public void delete(TransactionHolder tx, ID id) throws IOException {
+  public void delete(ID id) throws IOException {
     Object key = mapper.toKey(id);
-    supplier.deleteValue(tx, key);
+    supplier.deleteValue(getCurrentTransaction(), key);
   }
 
-  public T get(TransactionHolder tx, ID id) throws IOException {
+  public T get(ID id) throws IOException {
     Object key = mapper.toKey(id);
-    Object value = supplier.readValue(tx, key);
+    Object value = supplier.readValue(getCurrentTransaction(), key);
     if (null == value) {
       return null;
     }
@@ -104,28 +100,28 @@ public class AbstractDao<T, ID extends Serializable> {
     return entity;
   }
 
-  public ID put(TransactionHolder tx, T entity) throws IOException {
+  public ID put(T entity) throws IOException {
     ID id = mapper.getId(entity);
     Object key = mapper.toKey(id);
     Object value = mapper.toWriteValue(entity);
-    updateAuditInfo(tx, value);
-    key = supplier.writeValue(tx, key, value);
+    updateAuditInfo(value);
+    key = supplier.writeValue(getCurrentTransaction(), key, value);
     id = mapper.fromKey(key);
     return id;
   }
 
   // --- query methods ---
 
-  protected Iterable<T> queryByField(TransactionHolder tx, String fieldName, Object fieldValue) {
-    Iterable values = supplier.queryIterable(tx, mapper.getKind(), false, 0, -1,
+  protected Iterable<T> queryByField(String fieldName, Object fieldValue) {
+    Iterable values = supplier.queryIterable(getCurrentTransaction(), mapper.getKind(), false, 0, -1,
       null, null,
       null, false, null, false,
       Filter.equalsFilter(fieldName, fieldValue));
     return new MappingIterable<T, ID>(mapper, values.iterator());
   }
 
-  protected T queryUniqueByField(TransactionHolder tx, String fieldName, Object fieldValue) {
-    final Object value = supplier.queryUnique(tx, mapper.getKind(), Filter.equalsFilter(fieldName, fieldValue));
+  protected T queryUniqueByField(String fieldName, Object fieldValue) {
+    final Object value = supplier.queryUnique(getCurrentTransaction(), mapper.getKind(), Filter.equalsFilter(fieldName, fieldValue));
     if (null == value) {
       return null;
     }
@@ -142,8 +138,8 @@ public class AbstractDao<T, ID extends Serializable> {
     principalName.set(name);
   }
 
-  private void updateAuditInfo(TransactionHolder tx, final Object value) {
-    updateAuditInfo(value, principalName.get(), tx.getDate(),
+  private void updateAuditInfo(final Object value) {
+    updateAuditInfo(value, principalName.get(), new Date(),
       mapper.getCreatedByColumnName(), mapper.getCreatedDateColumnName(),
       mapper.getUpdatedByColumnName(), mapper.getUpdatedDateColumnName());
   }

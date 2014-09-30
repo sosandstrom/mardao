@@ -34,21 +34,15 @@ public class DatastoreSupplierTest extends AbstractDaoTest {
   @Override
   @Test
   public void testCount() throws IOException {
-    userDao.withoutTransaction(new TransFunc<Void>() {
-      @Override
-      public Void apply(TransactionHolder tx) throws IOException {
-        createQueryFixtures(tx);
-        try {
-          Thread.sleep(150L);
-        } catch (InterruptedException e) {
-          throw new IOException("sleeping", e);
-        }
-        int count = userDao.count(tx);
-        assertTrue(Integer.toString(count), 116 <= count);
-        assertEquals(1, factoryDao.count(tx));
-        return null;
-      }
-    });
+    createQueryFixtures();
+    try {
+      Thread.sleep(150L);
+    } catch (InterruptedException e) {
+      throw new IOException("sleeping", e);
+    }
+    int count = userDao.count();
+    assertTrue(Integer.toString(count), 116 <= count);
+    assertEquals(1, factoryDao.count());
   }
 
   @After

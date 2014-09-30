@@ -14,7 +14,6 @@ import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
 import net.sf.mardao.core.geo.DLocation;
 import net.sf.mardao.dao.AbstractDao;
-import net.sf.mardao.dao.TransactionHolder;
 import net.sf.mardao.dao.Supplier;
 import ${entity.className};
 #foreach( $field in $entity.oneToOnes )

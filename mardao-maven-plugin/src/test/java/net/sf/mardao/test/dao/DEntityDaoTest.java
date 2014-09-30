@@ -12,7 +12,6 @@ import org.junit.Test;
 import net.sf.mardao.dao.InMemorySupplier;
 import net.sf.mardao.dao.Supplier;
 import net.sf.mardao.dao.TransFunc;
-import net.sf.mardao.dao.TransactionHolder;
 import net.sf.mardao.test.domain.DEntity;
 
 /**

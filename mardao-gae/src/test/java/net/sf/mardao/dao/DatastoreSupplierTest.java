@@ -41,7 +41,7 @@ public class DatastoreSupplierTest extends AbstractDaoTest {
       throw new IOException("sleeping", e);
     }
     int count = userDao.count();
-    assertTrue(Integer.toString(count), 116 <= count);
+    assertTrue(Integer.toString(count), 114 <= count);
     assertEquals(1, factoryDao.count());
   }
 

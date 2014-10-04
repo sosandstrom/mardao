@@ -50,6 +50,11 @@ public class DUserMapper implements Mapper<DUser, Long> {
   }
 
   @Override
+  public void setParentKey(DUser entity, Object parentKey) {
+    // this entity has no parent
+  }
+
+  @Override
   public String getKind() {
     return DUser.class.getSimpleName();
   }

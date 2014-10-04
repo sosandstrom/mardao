@@ -34,6 +34,11 @@ public class DFactoryMapper implements Mapper<DFactory, String> {
   }
 
   @Override
+  public void setParentKey(DFactory entity, Object parentKey) {
+    // this entity has no parent
+  }
+
+  @Override
   public String getKind() {
     return DFactory.class.getSimpleName();
   }

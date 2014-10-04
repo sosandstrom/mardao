@@ -105,6 +105,15 @@ public class ${entity.simpleName}Mapper
   }
 
   @Override
+  public void setParentKey(${entity.simpleName} entity, Object parentKey) {
+#if( $entity.parent )
+    entity.set${entity.parent.nameFirst}(parentKey);
+#else
+    // this entity has no parent
+#end
+}
+
+@Override
   public String getKind() {
     return ${entity.pk.simpleType}.class.getSimpleName();
   }

@@ -142,7 +142,7 @@ public class AbstractDaoTest {
 
   @Test
   public void testAuditInfoCreated() {
-    Object key = supplier.toKey("DUser", 1L);
+    Object key = supplier.toKey(null, "DUser", 1L);
     Object actual = supplier.createWriteValue(key);
     Date date = new Date();
     userDao.updateAuditInfo(actual, "first", date,
@@ -158,7 +158,7 @@ public class AbstractDaoTest {
 
   @Test
   public void testAuditInfoUpdated() {
-    Object key = supplier.toKey("DUser", 1L);
+    Object key = supplier.toKey(null, "DUser", 1L);
     Object actual = supplier.createWriteValue(key);
     Date date = new Date();
     userDao.updateAuditInfo(actual, "first", date,

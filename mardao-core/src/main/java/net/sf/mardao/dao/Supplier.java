@@ -16,11 +16,12 @@ public interface Supplier<K, RV, WV, T> {
   RV readValue(T tx, K key) throws IOException;
   K writeValue(T tx, K key, WV value) throws IOException;
 
-  K toKey(String kind, Long lId);
-  K toKey(String kind, String sId);
+  K toKey(Object parentKey, String kind, Long lId);
+  K toKey(Object parentKey, String kind, String sId);
 
   Long toLongKey(Object key);
   String toStringKey(Object key);
+  K toParentKey(Object key);
 
   Date getDate(RV value, String column);
   Long getLong(RV value, String column);
@@ -47,5 +48,5 @@ public interface Supplier<K, RV, WV, T> {
                               String secondaryOrderBy, boolean secondaryIsAscending,
                               Filter... filters);
 
-  RV queryUnique(T tx, String kind, Filter... filters);
+  RV queryUnique(T tx, Object parentKey, String kind, Filter... filters);
 }

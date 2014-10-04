@@ -116,9 +116,9 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public Map<String, Object> queryUnique(Object tx, String kind, Filter... filters) {
+  public Map<String, Object> queryUnique(Object tx, Object parentKey, String kind, Filter... filters) {
     final Iterable<Map<String, Object>> iterable = queryIterable(tx, kind, false, 0, 1,
-      null, null, null, false, null, false, filters);
+      parentKey, null, null, false, null, false, filters);
     final Iterator<Map<String, Object>> iterator = iterable.iterator();
     return iterator.hasNext() ? iterator.next() : null;
   }
@@ -130,13 +130,13 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public InMemoryKey toKey(String kind, Long lId) {
-    return InMemoryKey.of(kind, null != lId ? lId.toString() : null);
+  public InMemoryKey toKey(Object parentKey, String kind, Long lId) {
+    return InMemoryKey.of((InMemoryKey) parentKey, kind, null != lId ? lId.toString() : null);
   }
 
   @Override
-  public InMemoryKey toKey(String kind, String sId) {
-    return InMemoryKey.of(kind, sId);
+  public InMemoryKey toKey(Object parentKey, String kind, String sId) {
+    return InMemoryKey.of((InMemoryKey) parentKey, kind, sId);
   }
 
   @Override
@@ -147,6 +147,11 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   @Override
   public String toStringKey(Object key) {
     return null != key ? ((InMemoryKey) key).getName() : null;
+  }
+
+  @Override
+  public InMemoryKey toParentKey(Object key) {
+    return null != key ? ((InMemoryKey) key).getParentKey() : null;
   }
 
   protected Map<String, Map<String, Object>> kindStore(InMemoryKey key) {

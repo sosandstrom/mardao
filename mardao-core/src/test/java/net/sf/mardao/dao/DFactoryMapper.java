@@ -29,19 +29,25 @@ public class DFactoryMapper implements Mapper<DFactory, String> {
   }
 
   @Override
+  public Object getParentKey(DFactory entity) {
+    return null;
+  }
+
+  @Override
   public String getKind() {
     return DFactory.class.getSimpleName();
   }
 
   @Override
-  public Object toKey(String sId) {
-    return supplier.toKey(DFactory.class.getSimpleName(), sId);
+  public Object toKey(Object parentKey, String sId) {
+    return supplier.toKey(parentKey, DFactory.class.getSimpleName(), sId);
   }
 
   @Override
   public Object toWriteValue(DFactory entity) {
     final String id = getId(entity);
-    final Object key = toKey(id);
+    final Object parentKey = getParentKey(entity);
+    final Object key = toKey(parentKey, id);
     final Object value = supplier.createWriteValue(key);
     supplier.setString(value, COLUMN_PROVIDERID, entity.getProviderId());
     return value;

@@ -38,6 +38,10 @@ public class AbstractDao<T, ID extends Serializable> {
   }
 
   public <R> R withTransaction(TransFunc<R> transFunc, boolean commit) throws IOException {
+    return withTransaction(transFunc, commit, this.supplier);
+  }
+
+  public static <R> R withTransaction(TransFunc<R> transFunc, boolean commit, Supplier supplier) throws IOException {
     final Object transaction = supplier.beginTransaction();
     // TransactionHolder holder = new TransactionHolder(transaction, new Date());
     pushTransaction(transaction);
@@ -82,16 +86,28 @@ public class AbstractDao<T, ID extends Serializable> {
   // --- CRUD methods ---
 
   public int count() {
-    return supplier.count(getCurrentTransaction(), mapper.getKind(), null, null);
+    return count(null);
+  }
+
+  public int count(Object parentKey) {
+    return supplier.count(getCurrentTransaction(), mapper.getKind(), parentKey, null);
   }
 
   public void delete(ID id) throws IOException {
-    Object key = mapper.toKey(id);
+    delete(null, id);
+  }
+
+  public void delete(Object parentKey, ID id) throws IOException {
+    Object key = mapper.toKey(parentKey, id);
     supplier.deleteValue(getCurrentTransaction(), key);
   }
 
   public T get(ID id) throws IOException {
-    Object key = mapper.toKey(id);
+    return get(null, id);
+  }
+
+  public T get(Object parentKey, ID id) throws IOException {
+    Object key = mapper.toKey(parentKey, id);
     Object value = supplier.readValue(getCurrentTransaction(), key);
     if (null == value) {
       return null;
@@ -102,7 +118,8 @@ public class AbstractDao<T, ID extends Serializable> {
 
   public ID put(T entity) throws IOException {
     ID id = mapper.getId(entity);
-    Object key = mapper.toKey(id);
+    Object parentKey = mapper.getParentKey(entity);
+    Object key = mapper.toKey(parentKey, id);
     Object value = mapper.toWriteValue(entity);
     updateAuditInfo(value);
     key = supplier.writeValue(getCurrentTransaction(), key, value);
@@ -112,16 +129,17 @@ public class AbstractDao<T, ID extends Serializable> {
 
   // --- query methods ---
 
-  protected Iterable<T> queryByField(String fieldName, Object fieldValue) {
+  protected Iterable<T> queryByField(Object ancestorKey, String fieldName, Object fieldValue) {
     Iterable values = supplier.queryIterable(getCurrentTransaction(), mapper.getKind(), false, 0, -1,
-      null, null,
+      ancestorKey, null,
       null, false, null, false,
       Filter.equalsFilter(fieldName, fieldValue));
     return new MappingIterable<T, ID>(mapper, values.iterator());
   }
 
-  protected T queryUniqueByField(String fieldName, Object fieldValue) {
-    final Object value = supplier.queryUnique(getCurrentTransaction(), mapper.getKind(), Filter.equalsFilter(fieldName, fieldValue));
+  protected T queryUniqueByField(Object parentKey, String fieldName, Object fieldValue) {
+    final Object value = supplier.queryUnique(getCurrentTransaction(), parentKey, mapper.getKind(),
+      Filter.equalsFilter(fieldName, fieldValue));
     if (null == value) {
       return null;
     }
@@ -132,6 +150,14 @@ public class AbstractDao<T, ID extends Serializable> {
 
   public ID getId(Object key) {
     return mapper.fromKey(key);
+  }
+
+  public Object getKey(ID id) {
+    return getKey(null, id);
+  }
+
+  public Object getKey(Object parentKey, ID id) {
+    return mapper.toKey(parentKey, id);
   }
 
   public static void setPrincipalName(String name) {

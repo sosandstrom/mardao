@@ -14,9 +14,10 @@ public interface Mapper<T, ID extends Serializable> {
   String getCreatedByColumnName();
   String getCreatedDateColumnName();
   ID getId(T entity);
+  Object getParentKey(T entity);
   String getKind();
   String getUpdatedByColumnName();
   String getUpdatedDateColumnName();
-  Object toKey(ID id);
+  Object toKey(Object parentKey, ID id);
   Object toWriteValue(T entity);
 }

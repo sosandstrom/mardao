@@ -45,19 +45,25 @@ public class DUserMapper implements Mapper<DUser, Long> {
   }
 
   @Override
+  public Object getParentKey(DUser entity) {
+    return null;
+  }
+
+  @Override
   public String getKind() {
     return DUser.class.getSimpleName();
   }
 
   @Override
-  public Object toKey(Long lId) {
-    return supplier.toKey(DUser.class.getSimpleName(), lId);
+  public Object toKey(Object parentKey, Long lId) {
+    return supplier.toKey(parentKey, DUser.class.getSimpleName(), lId);
   }
 
   @Override
   public Object toWriteValue(DUser entity) {
     final Long id = getId(entity);
-    final Object key = toKey(id);
+    final Object parentKey = getParentKey(entity);
+    final Object key = toKey(parentKey, id);
     final Object value = supplier.createWriteValue(key);
     supplier.setLong(value, Field.ID.getFieldName(), entity.getId());
     supplier.setString(value, Field.DISPLAYNAME.getFieldName(), entity.getDisplayName());

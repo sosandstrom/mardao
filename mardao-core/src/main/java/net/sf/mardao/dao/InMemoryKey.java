@@ -6,19 +6,21 @@ package net.sf.mardao.dao;
  * @author osandstrom Date: 2014-09-21 Time: 18:09
  */
 public class InMemoryKey {
+  private final InMemoryKey parentKey;
   private final String kind;
   private final String name;
 
-  public InMemoryKey(String kind, String name) {
+  public InMemoryKey(InMemoryKey parentKey, String kind, String name) {
     if (null == kind || null == name) {
       throw new IllegalArgumentException("Cannot be null " + kind + " or " + name);
     }
+    this.parentKey = parentKey;
     this.kind = kind;
     this.name = name;
   }
 
-  public static InMemoryKey of(String kind, String name) {
-    return new InMemoryKey(kind, name);
+  public static InMemoryKey of(InMemoryKey parentKey, String kind, String name) {
+    return new InMemoryKey(parentKey, kind, name);
   }
 
   @Override
@@ -30,12 +32,18 @@ public class InMemoryKey {
       return false;
     }
     InMemoryKey other = (InMemoryKey) obj;
-    return this.kind.equals(other.kind) && this.name.equals(other.name);
+    if (null == this.parentKey) {
+      if (null != other.parentKey) {
+        return false;
+      }
+      return this.kind.equals(other.kind) && this.name.equals(other.name);
+    }
+    return this.parentKey.equals(other.parentKey) && this.kind.equals(other.kind) && this.name.equals(other.name);
   }
 
   @Override
   public int hashCode() {
-    return 31*kind.hashCode() + name.hashCode();
+    return (null != parentKey ? 31*31*parentKey.hashCode() : 0) + 31*kind.hashCode() + name.hashCode();
   }
 
   public String getKind() {
@@ -44,5 +52,9 @@ public class InMemoryKey {
 
   public String getName() {
     return name;
+  }
+
+  public InMemoryKey getParentKey() {
+    return parentKey;
   }
 }

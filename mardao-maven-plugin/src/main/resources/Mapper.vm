@@ -90,9 +90,18 @@ public class ${entity.simpleName}Mapper
 #end
   }
 
-@Override
+  @Override
   public ${entity.pk.simpleType} getId(${entity.simpleName} entity) {
     return entity != null ? entity.get${entity.pk.nameFirst}() : null;
+  }
+
+  @Override
+  public Object getParentKey(${entity.simpleName} entity) {
+#if( $entity.parent )
+    return null != entity ? entity.get${entity.parent.nameFirst}() : null;
+#else
+    return null;
+#end
   }
 
   @Override
@@ -101,14 +110,15 @@ public class ${entity.simpleName}Mapper
   }
 
   @Override
-  public Object toKey(${entity.pk.simpleType} id) {
-    return supplier.toKey(${entity.pk.simpleType}.class.getSimpleName(), id);
+  public Object toKey(Object parentKey, ${entity.pk.simpleType} id) {
+    return supplier.toKey(parentKey, ${entity.pk.simpleType}.class.getSimpleName(), id);
   }
 
   @Override
   public Object toWriteValue(${entity.simpleName} entity) {
     final ${entity.pk.simpleType} id = getId(entity);
-    final Object key = toKey(id);
+    final Object parentKey = getParentKey(entity);
+    final Object key = toKey(parentKey, id);
     final Object value = supplier.createWriteValue(key);
 
     // set the primary key:

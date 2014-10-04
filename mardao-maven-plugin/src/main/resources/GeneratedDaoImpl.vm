@@ -52,8 +52,13 @@ public class Generated${entity.simpleName}DaoImpl
    * @param ${field.name} the unique attribute
    * @return the unique ${entity.simpleName} for the specified ${field.name}
    */
+#if( $entity.parent )
+  public ${entity.simpleName} findBy${field.nameFirst}(Object ${entity.parent.name}Key, ${fieldType} ${field.name}) {
+    return queryUniqueByField(${entity.parent.name}Key, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
+#else
   public ${entity.simpleName} findBy${field.nameFirst}(${fieldType} ${field.name}) {
-    return queryUniqueByField(${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
+    return queryUniqueByField(null, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
+#end
   }
 
 ##/**
@@ -68,8 +73,13 @@ public class Generated${entity.simpleName}DaoImpl
    * @param ${field.name} the specified attribute
    * @return an Iterable of ${entity.simpleName}s for the specified ${field.name}
    */
+#if( $entity.parent )
+  public Iterable<${entity.simpleName}> queryBy${field.nameFirst}(Object ${entity.parent.name}Key, ${fieldType} ${field.name}) {
+    return queryByField(${entity.parent.name}Key, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
+#else
   public Iterable<${entity.simpleName}> queryBy${field.nameFirst}(${fieldType} ${field.name}) {
-    return queryByField(${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
+    return queryByField(null, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
+#end
   }
 
 #end

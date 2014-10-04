@@ -62,7 +62,7 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
                                         Object ancestorKey, Object simpleKey,
                                         String primaryOrderBy, boolean primaryIsAscending,
                                         String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
-    final PreparedQuery pq = prepare(kind, keysOnly, (Key)ancestorKey, (Key)simpleKey,
+    final PreparedQuery pq = prepare(kind, keysOnly, (Key) ancestorKey, (Key) simpleKey,
       primaryOrderBy, primaryIsAscending,
       secondaryOrderBy, secondaryIsAscending, null, filters);
 
@@ -71,8 +71,8 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public Entity queryUnique(Transaction tx, String kind, Filter... filters) {
-    final PreparedQuery pq = prepare(kind, false, null, null,
+  public Entity queryUnique(Transaction tx, Object ancestorKey, String kind, Filter... filters) {
+    final PreparedQuery pq = prepare(kind, false, (Key) ancestorKey, null,
       null, false, null, false,
       null, filters);
     final Entity entity = pq.asSingleEntity();
@@ -94,13 +94,13 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public Key toKey(String kind, Long lId) {
-    return KeyFactory.createKey(null, kind, lId);
+  public Key toKey(Object parentKey, String kind, Long lId) {
+    return KeyFactory.createKey((Key) parentKey, kind, lId);
   }
 
   @Override
-  public Key toKey(String kind, String sId) {
-    return KeyFactory.createKey(null, kind, sId);
+  public Key toKey(Object parentKey, String kind, String sId) {
+    return KeyFactory.createKey((Key) parentKey, kind, sId);
   }
 
   @Override
@@ -111,6 +111,11 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   @Override
   public String toStringKey(Object key) {
     return null != key ? ((Key) key).getName() : null;
+  }
+
+  @Override
+  public Key toParentKey(Object key) {
+    return null != key ? ((Key) key).getParent() : null;
   }
 
   @Override

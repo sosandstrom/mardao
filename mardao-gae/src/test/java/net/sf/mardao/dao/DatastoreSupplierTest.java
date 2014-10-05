@@ -1,6 +1,7 @@
 package net.sf.mardao.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 
+import net.sf.mardao.domain.DUser;
 /**
  * Tests for DatastoreSupplier.
  *
@@ -43,6 +45,24 @@ public class DatastoreSupplierTest extends AbstractDaoTest {
     int count = userDao.count();
     assertTrue(Integer.toString(count), 114 <= count);
     assertEquals(1, factoryDao.count());
+  }
+
+  @Override
+  @Test
+  public void testQueryByField() throws IOException {
+    createQueryFixtures();
+
+    Iterable<DUser> users = userDao.queryByDisplayName("mod7_2");
+    int count = 0;
+    for (DUser u : users) {
+      count++;
+      assertEquals("mod7_2", u.getDisplayName());
+      assertEquals(2, u.getId() % 7);
+    }
+    assertTrue(Integer.toString(count), 8 <= count);
+
+    users = userDao.queryByDisplayName(null);
+    assertFalse(users.iterator().hasNext());
   }
 
   @After

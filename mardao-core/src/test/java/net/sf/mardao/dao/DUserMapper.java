@@ -2,6 +2,7 @@ package net.sf.mardao.dao;
 
 import java.util.Date;
 
+import net.sf.mardao.domain.AbstractEntityBuilder;
 import net.sf.mardao.domain.DUser;
 
 /**
@@ -107,5 +108,37 @@ public class DUserMapper implements Mapper<DUser, Long> {
   @Override
   public String getUpdatedDateColumnName() {
     return null;
+  }
+
+  public static DUserBuilder newBuilder() {
+    return new DUserBuilder();
+  }
+
+  public static class DUserBuilder extends AbstractEntityBuilder<DUser> {
+
+    @Override
+    protected DUser newInstance() {
+      return new DUser();
+    }
+
+    public DUserBuilder id(Long id) {
+      entity.setId(id);
+      return this;
+    }
+
+    public DUserBuilder displayName(String displayName) {
+      entity.setDisplayName(displayName);
+      return this;
+    }
+
+    public DUserBuilder email(String email) {
+      entity.setEmail(email);
+      return this;
+    }
+
+    public DUserBuilder birthDate(Date birthDate) {
+      entity.setBirthDate(birthDate);
+      return this;
+    }
   }
 }

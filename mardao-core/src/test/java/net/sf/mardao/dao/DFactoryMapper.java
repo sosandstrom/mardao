@@ -1,9 +1,6 @@
 package net.sf.mardao.dao;
 
-import java.util.Date;
-
 import net.sf.mardao.domain.DFactory;
-import net.sf.mardao.domain.DUser;
 
 /**
  * To test AbstractDao.

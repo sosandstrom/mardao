@@ -51,6 +51,11 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
+  public Collection getCollection(Map<String, Object> value, String column) {
+    return (Collection) value.get(column);
+  }
+
+  @Override
   public Date getDate(Map<String, Object> value, String column) {
     return (Date) value.get(column);
   }
@@ -63,6 +68,11 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   @Override
   public String getString(Map<String, Object> core, String column) {
     return (String) core.get(column);
+  }
+
+  @Override
+  public void setCollection(Object value, String column, Collection c) {
+    ((Map<String, Object>) value).put(column, c);
   }
 
   @Override

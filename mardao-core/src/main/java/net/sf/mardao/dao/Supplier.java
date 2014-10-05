@@ -1,6 +1,7 @@
 package net.sf.mardao.dao;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 
 import net.sf.mardao.core.filter.Filter;
@@ -23,10 +24,12 @@ public interface Supplier<K, RV, WV, T> {
   String toStringKey(Object key);
   K toParentKey(Object key);
 
+  Collection getCollection(RV value, String column);
   Date getDate(RV value, String column);
   Long getLong(RV value, String column);
   String getString(RV value, String column);
 
+  void setCollection(Object value, String column, Collection c);
   void setDate(Object value, String column, Date d);
   void setLong(Object value, String column, Long l);
   void setString(Object value, String column, String s);

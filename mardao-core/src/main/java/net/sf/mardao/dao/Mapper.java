@@ -3,6 +3,8 @@ package net.sf.mardao.dao;
 import java.io.Serializable;
 import java.util.Date;
 
+import net.sf.mardao.domain.AbstractEntityBuilder;
+
 /**
  * Maps from Read to Domain to Write Key/Values.
  *

@@ -119,6 +119,11 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
+  public Collection getCollection(Entity value, String column) {
+    return (Collection) value.getProperty(column);
+  }
+
+  @Override
   public Date getDate(Entity value, String column) {
     return (Date) value.getProperty(column);
   }
@@ -131,6 +136,11 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   @Override
   public String getString(Entity value, String column) {
     return (String) value.getProperty(column);
+  }
+
+  @Override
+  public void setCollection(Object value, String column, Collection c) {
+    ((Entity) value).setProperty(column, c);
   }
 
   @Override

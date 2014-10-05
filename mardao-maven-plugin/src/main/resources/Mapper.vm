@@ -1,8 +1,12 @@
 #set( $allFields = $entity.allFields )
 package ${daoBasePackage};
 
+import java.util.Collection;
+import java.util.Date;
+
 import net.sf.mardao.dao.Mapper;
 import net.sf.mardao.dao.Supplier;
+import net.sf.mardao.domain.AbstractEntityBuilder;
 import ${entity.className};
 
 /**
@@ -140,4 +144,27 @@ public class ${entity.simpleName}Mapper
     return value;
   }
 
+  public static ${entity.simpleName}Builder newBuilder() {
+    return new ${entity.simpleName}Builder();
+  }
+
+  public static class ${entity.simpleName}Builder extends AbstractEntityBuilder<${entity.simpleName}> {
+
+    @Override
+    protected ${entity.simpleName} newInstance() {
+      return new ${entity.simpleName}();
+    }
+
+    public ${entity.simpleName}Builder ${entity.pk.name}(${entity.pk.simpleType} ${entity.pk.name}) {
+      entity.set${entity.pk.nameFirst}(${entity.pk.name});
+      return this;
+    }
+
+#foreach( $field in $allFields )
+    public ${entity.simpleName}Builder ${field.name}(${field.simpleType} ${field.name}) {
+      entity.set${field.nameFirst}(${field.name});
+      return this;
+    }
+#end
+  }
 }

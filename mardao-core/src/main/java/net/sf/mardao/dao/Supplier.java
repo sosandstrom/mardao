@@ -27,6 +27,8 @@ public interface Supplier<K, RV, WV, T> {
   Collection getCollection(RV value, String column);
   Date getDate(RV value, String column);
   Long getLong(RV value, String column);
+  K getKey(RV value, String column);
+  K getParentKey(RV value, String column);
   String getString(RV value, String column);
 
   void setCollection(Object value, String column, Collection c);

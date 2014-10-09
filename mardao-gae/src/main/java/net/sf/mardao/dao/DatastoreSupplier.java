@@ -134,6 +134,16 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
+  public Key getKey(Entity value, String column) {
+    return value.getKey();
+  }
+
+  @Override
+  public Key getParentKey(Entity value, String column) {
+    return value.getParent();
+  }
+
+  @Override
   public String getString(Entity value, String column) {
     return (String) value.getProperty(column);
   }

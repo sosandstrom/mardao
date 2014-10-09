@@ -1,12 +1,16 @@
 package net.sf.mardao.dao;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.sf.mardao.core.filter.Filter;
 
@@ -16,6 +20,11 @@ import net.sf.mardao.core.filter.Filter;
  * @author osandstrom Date: 2014-09-03 Time: 20:48
  */
 public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Object>, Map<String, Object>, Object> {
+
+  public static final String NAME_PARENT_KEY = "__parentKey";
+  public static final String NAME_KEY = "__Key";
+
+  static final Logger LOGGER = LoggerFactory.getLogger(InMemorySupplier.class);
 
   private final Map<String, Map<String, Map<String, Object>>> store = new TreeMap<String, Map<String, Map<String, Object>>>();
 
@@ -66,6 +75,16 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
+  public InMemoryKey getKey(Map<String, Object> value, String column) {
+    return (InMemoryKey) value.get(NAME_KEY);
+  }
+
+  @Override
+  public InMemoryKey getParentKey(Map<String, Object> value, String column) {
+    return (InMemoryKey) value.get(NAME_PARENT_KEY);
+  }
+
+  @Override
   public String getString(Map<String, Object> core, String column) {
     return (String) core.get(column);
   }
@@ -92,12 +111,19 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
 
   @Override
   public Map<String, Object> createWriteValue(InMemoryKey parentKey, String kind, Long id) {
-    return new TreeMap<String, Object>();
+    return createWriteValue(parentKey, toKey(parentKey, kind, id));
+  }
+
+  private Map<String, Object> createWriteValue(InMemoryKey parentKey, InMemoryKey key) {
+    final TreeMap<String, Object> value = new TreeMap<String, Object>();
+    value.put(NAME_KEY, key);
+    value.put(NAME_PARENT_KEY, parentKey);
+    return value;
   }
 
   @Override
   public Map<String, Object> createWriteValue(InMemoryKey parentKey, String kind, String id) {
-    return new TreeMap<String, Object>();
+    return createWriteValue(parentKey, toKey(parentKey, kind, id));
   }
 
   @Override
@@ -145,6 +171,7 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
       key = InMemoryKey.of(key.getParentKey(), key.getKind(), Long.toString(Math.round(Math.random() * Long.MAX_VALUE)));
     }
     kindStore(key).put(key.getName(), core);
+    LOGGER.debug("put {} -> {}", key, core);
     return key;
   }
 

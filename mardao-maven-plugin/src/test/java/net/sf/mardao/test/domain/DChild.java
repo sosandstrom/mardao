@@ -13,18 +13,18 @@ import net.sf.mardao.core.Parent;
 @Entity
 public class DChild {
 
-  @Parent(kind="DUser")
-  private Object userKey;
+  @Parent(kind="DEntity")
+  private Object parentEntityKey;
 
   @Id
   private String accessToken;
 
-  public Object getUserKey() {
-    return userKey;
+  public Object getParentEntityKey() {
+    return parentEntityKey;
   }
 
-  public void setUserKey(Object userKey) {
-    this.userKey = userKey;
+  public void setParentEntityKey(Object parentEntityKey) {
+    this.parentEntityKey = parentEntityKey;
   }
 
   public String getAccessToken() {

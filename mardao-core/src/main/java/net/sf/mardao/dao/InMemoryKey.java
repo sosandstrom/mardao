@@ -57,4 +57,9 @@ public class InMemoryKey {
   public InMemoryKey getParentKey() {
     return parentKey;
   }
+
+  @Override
+  public String toString() {
+    return "Key{ parent:" + parentKey + ", kind:" + kind + ", name:" + name + "}";
+  }
 }

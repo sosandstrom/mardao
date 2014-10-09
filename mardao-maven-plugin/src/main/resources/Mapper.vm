@@ -21,6 +21,9 @@ public class ${entity.simpleName}Mapper
   private final Supplier supplier;
 
   public enum Field {
+#if( $entity.parent )
+    ${entity.parent.nameUpper}("${entity.parent.name}"),
+#end
     ${entity.pk.nameUpper}("${entity.pk.name}")#foreach( $field in $allFields ),
     ${field.nameUpper}("${field.columnName}")#end;
 
@@ -49,8 +52,14 @@ public class ${entity.simpleName}Mapper
     final ${entity.simpleName} entity = new ${entity.simpleName}();
 
     // set primary key:
-    entity.set${entity.pk.nameFirst}(supplier.get${entity.pk.simpleType}(value, Field.${entity.pk.nameUpper}.getFieldName()));
+    final Object key = supplier.getKey(value, Field.${entity.pk.nameUpper}.getFieldName());
+    entity.set${entity.pk.nameFirst}(supplier.to${entity.pk.simpleType}Key(key));
 
+#if( $entity.parent )
+    // set parent key:
+    entity.set${entity.parent.nameFirst}(supplier.getParentKey(value, Field.${entity.parent.nameUpper}.getFieldName()));
+
+#end
     // set all fields:
 #foreach( $field in $allFields )
     entity.set${field.nameFirst}(supplier.get${field.simpleType}(value, Field.${field.nameUpper}.getFieldName()));
@@ -149,9 +158,6 @@ public class ${entity.simpleName}Mapper
     final ${entity.pk.simpleType} id = getId(entity);
     final Object parentKey = getParentKey(entity);
     final Object value = supplier.createWriteValue(parentKey, getKind(), id);
-
-    // set the primary key:
-    supplier.set${entity.pk.simpleType}(value, Field.${entity.pk.nameUpper}.getFieldName(), entity.get${entity.pk.nameFirst}());
 
     // set all fields:
 #foreach( $field in $allFields )

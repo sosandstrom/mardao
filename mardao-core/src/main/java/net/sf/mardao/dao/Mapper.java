@@ -21,6 +21,7 @@ public interface Mapper<T, ID extends Serializable> {
   String getUpdatedByColumnName();
   String getUpdatedDateColumnName();
   Object toKey(Object parentKey, ID id);
+  void updateEntityPostWrite(T entity, Object key, Object value);
   void setParentKey(T entity, Object parentKey);
   Object toWriteValue(T entity);
 }

@@ -91,7 +91,12 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public Map<String, Object> createWriteValue(InMemoryKey key) {
+  public Map<String, Object> createWriteValue(InMemoryKey parentKey, String kind, Long id) {
+    return new TreeMap<String, Object>();
+  }
+
+  @Override
+  public Map<String, Object> createWriteValue(InMemoryKey parentKey, String kind, String id) {
     return new TreeMap<String, Object>();
   }
 
@@ -135,6 +140,10 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
 
   @Override
   public InMemoryKey writeValue(Object tx, InMemoryKey key, Map<String, Object> core) throws IOException {
+    // assign long key?
+    if (null == key.getName()) {
+      key = InMemoryKey.of(key.getParentKey(), key.getKind(), Long.toString(Math.round(Math.random() * Long.MAX_VALUE)));
+    }
     kindStore(key).put(key.getName(), core);
     return key;
   }

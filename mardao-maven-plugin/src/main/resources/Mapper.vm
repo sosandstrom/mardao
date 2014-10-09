@@ -115,11 +115,28 @@ public class ${entity.simpleName}Mapper
 #else
     // this entity has no parent
 #end
+  }
+
+  @Override
+  public void updateEntityPostWrite(${entity.simpleName} entity, Object key, Object value) {
+    entity.set${entity.pk.nameFirst}(supplier.to${entity.pk.simpleType}Key(key));
+#if( $entity.createdBy )
+    entity.set${entity.createdBy.nameFirst}(supplier.getString(value, Field.${entity.createdBy.nameUpper}.getFieldName()));
+#end
+#if( $entity.createdDate )
+    entity.set${entity.createdDate.nameFirst}(supplier.getDate(value, Field.${entity.createdDate.nameUpper}.getFieldName()));
+#end
+#if( $entity.updatedBy )
+    entity.set${entity.updatedBy.nameFirst}(supplier.getString(value, Field.${entity.updatedBy.nameUpper}.getFieldName()));
+#end
+#if( $entity.updatedDate )
+    entity.set${entity.updatedDate.nameFirst}(supplier.getDate(value, Field.${entity.updatedDate.nameUpper}.getFieldName()));
+#end
 }
 
 @Override
   public String getKind() {
-    return ${entity.pk.simpleType}.class.getSimpleName();
+    return ${entity.simpleName}.class.getSimpleName();
   }
 
   @Override
@@ -131,8 +148,7 @@ public class ${entity.simpleName}Mapper
   public Object toWriteValue(${entity.simpleName} entity) {
     final ${entity.pk.simpleType} id = getId(entity);
     final Object parentKey = getParentKey(entity);
-    final Object key = toKey(parentKey, id);
-    final Object value = supplier.createWriteValue(key);
+    final Object value = supplier.createWriteValue(parentKey, getKind(), id);
 
     // set the primary key:
     supplier.set${entity.pk.simpleType}(value, Field.${entity.pk.nameUpper}.getFieldName(), entity.get${entity.pk.nameFirst}());

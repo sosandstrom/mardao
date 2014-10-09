@@ -33,6 +33,16 @@ public class AbstractDaoTest {
   }
 
   @Test
+  public void testCreateGenerateId() throws IOException {
+    DUser actual = new DUser();
+    actual.setDisplayName("Hello There");
+    userDao.put(actual);
+    assertNotNull(actual.getId());
+    assertEquals(PRINCIPAL_SET_UP, actual.getCreatedBy());
+    assertNotNull(actual.getBirthDate());
+  }
+
+  @Test
   public void testWriteReadUser() throws IOException {
     Long id = userDao.withCommitTransaction(new TransFunc<Long>() {
       @Override
@@ -142,8 +152,7 @@ public class AbstractDaoTest {
 
   @Test
   public void testAuditInfoCreated() {
-    Object key = supplier.toKey(null, "DUser", 1L);
-    Object actual = supplier.createWriteValue(key);
+    Object actual = supplier.createWriteValue(null, "DUser", 1L);
     Date date = new Date();
     userDao.updateAuditInfo(actual, "first", date,
       "createdBy", "birthDate", null, null);
@@ -158,8 +167,7 @@ public class AbstractDaoTest {
 
   @Test
   public void testAuditInfoUpdated() {
-    Object key = supplier.toKey(null, "DUser", 1L);
-    Object actual = supplier.createWriteValue(key);
+    Object actual = supplier.createWriteValue(null, "DUser", 1L);
     Date date = new Date();
     userDao.updateAuditInfo(actual, "first", date,
       null, null, "createdBy", "birthDate");

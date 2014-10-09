@@ -34,7 +34,8 @@ public interface Supplier<K, RV, WV, T> {
   void setLong(Object value, String column, Long l);
   void setString(Object value, String column, String s);
 
-  WV createWriteValue(K key);
+  WV createWriteValue(K parentKey, String kind, Long id);
+  WV createWriteValue(K parentKey, String kind, String id);
 
   // --- transaction methods ---
 

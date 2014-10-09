@@ -56,6 +56,13 @@ public class DUserMapper implements Mapper<DUser, Long> {
   }
 
   @Override
+  public void updateEntityPostWrite(DUser entity, Object key, Object value) {
+    entity.setId(supplier.toLongKey(key));
+    entity.setCreatedBy(supplier.getString(value, Field.CREATEDBY.getFieldName()));
+    entity.setBirthDate(supplier.getDate(value, Field.BIRTHDATE.getFieldName()));
+  }
+
+  @Override
   public String getKind() {
     return DUser.class.getSimpleName();
   }
@@ -69,8 +76,7 @@ public class DUserMapper implements Mapper<DUser, Long> {
   public Object toWriteValue(DUser entity) {
     final Long id = getId(entity);
     final Object parentKey = getParentKey(entity);
-    final Object key = toKey(parentKey, id);
-    final Object value = supplier.createWriteValue(key);
+    final Object value = supplier.createWriteValue(parentKey, getKind(), id);
     supplier.setLong(value, Field.ID.getFieldName(), entity.getId());
     supplier.setString(value, Field.DISPLAYNAME.getFieldName(), entity.getDisplayName());
     supplier.setString(value, Field.EMAIL.getFieldName(), entity.getEmail());
@@ -81,13 +87,13 @@ public class DUserMapper implements Mapper<DUser, Long> {
 
   @Override
   public DUser fromReadValue(Object core) {
-    final DUser domain = new DUser();
-    domain.setId(supplier.getLong(core, Field.ID.getFieldName()));
-    domain.setDisplayName(supplier.getString(core, Field.DISPLAYNAME.getFieldName()));
-    domain.setEmail(supplier.getString(core, Field.EMAIL.getFieldName()));
-    domain.setCreatedBy(supplier.getString(core, Field.CREATEDBY.getFieldName()));
-    domain.setBirthDate(supplier.getDate(core, Field.BIRTHDATE.getFieldName()));
-    return domain;
+    final DUser entity = new DUser();
+    entity.setId(supplier.getLong(core, Field.ID.getFieldName()));
+    entity.setDisplayName(supplier.getString(core, Field.DISPLAYNAME.getFieldName()));
+    entity.setEmail(supplier.getString(core, Field.EMAIL.getFieldName()));
+    entity.setCreatedBy(supplier.getString(core, Field.CREATEDBY.getFieldName()));
+    entity.setBirthDate(supplier.getDate(core, Field.BIRTHDATE.getFieldName()));
+    return entity;
   }
 
   @Override

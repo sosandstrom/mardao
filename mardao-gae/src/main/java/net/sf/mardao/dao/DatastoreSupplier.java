@@ -95,12 +95,12 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
 
   @Override
   public Key toKey(Object parentKey, String kind, Long lId) {
-    return KeyFactory.createKey((Key) parentKey, kind, lId);
+    return null != lId ? KeyFactory.createKey((Key) parentKey, kind, lId) : null;
   }
 
   @Override
   public Key toKey(Object parentKey, String kind, String sId) {
-    return KeyFactory.createKey((Key) parentKey, kind, sId);
+    return null != sId ? KeyFactory.createKey((Key) parentKey, kind, sId) : null;
   }
 
   @Override
@@ -159,8 +159,13 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public Entity createWriteValue(Key key) {
-    return new Entity(key);
+  public Entity createWriteValue(Key parentKey, String kind, Long id) {
+    return null != id ? new Entity(kind, id, parentKey) : new Entity(kind, parentKey);
+  }
+
+  @Override
+  public Entity createWriteValue(Key parentKey, String kind, String id) {
+    return null != id ? new Entity(kind, id, parentKey) : new Entity(kind, parentKey);
   }
 
   private DatastoreService getSyncService() {

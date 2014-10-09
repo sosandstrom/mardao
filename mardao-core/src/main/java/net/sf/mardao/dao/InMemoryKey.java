@@ -11,8 +11,8 @@ public class InMemoryKey {
   private final String name;
 
   public InMemoryKey(InMemoryKey parentKey, String kind, String name) {
-    if (null == kind || null == name) {
-      throw new IllegalArgumentException("Cannot be null " + kind + " or " + name);
+    if (null == kind) {
+      throw new IllegalArgumentException("Kind cannot be null");
     }
     this.parentKey = parentKey;
     this.kind = kind;

@@ -124,6 +124,7 @@ public class AbstractDao<T, ID extends Serializable> {
     updateAuditInfo(value);
     key = supplier.writeValue(getCurrentTransaction(), key, value);
     id = mapper.fromKey(key);
+    mapper.updateEntityPostWrite(entity, key, value);
     return id;
   }
 

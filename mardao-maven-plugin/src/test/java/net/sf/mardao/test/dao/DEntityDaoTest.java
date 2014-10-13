@@ -22,10 +22,11 @@ import net.sf.mardao.test.domain.DEntity;
 public class DEntityDaoTest {
 
   private DEntityDaoBean dao;
+  private Supplier supplier;
 
   @Before
   public void setUp() {
-    Supplier supplier = new InMemorySupplier();
+    supplier = new InMemorySupplier();
     dao = new DEntityDaoBean(supplier);
   }
 
@@ -51,4 +52,9 @@ public class DEntityDaoTest {
     assertEquals("xHjqLåäö123", actual.getDisplayName());
   }
 
+  @Test
+  public void testKind() {
+    DEntityMapper mapper = new DEntityMapper(supplier);
+    assertEquals(DEntity.class.getSimpleName(), mapper.getKind());
+  }
 }

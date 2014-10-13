@@ -150,7 +150,7 @@ public class ${entity.simpleName}Mapper
 
   @Override
   public Object toKey(Object parentKey, ${entity.pk.simpleType} id) {
-    return supplier.toKey(parentKey, ${entity.pk.simpleType}.class.getSimpleName(), id);
+    return supplier.toKey(parentKey, getKind(), id);
   }
 
   @Override

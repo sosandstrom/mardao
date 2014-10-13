@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -25,6 +28,8 @@ import net.sf.mardao.core.filter.Filter;
  * @author osandstrom Date: 2014-09-13 Time: 17:43
  */
 public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transaction> {
+
+  static final Logger LOGGER = LoggerFactory.getLogger(DatastoreSupplier.class);
 
   private DatastoreService syncService;
 
@@ -82,7 +87,8 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   @Override
   public Entity readValue(Transaction tx, Key key) throws IOException {
     try {
-      return getSyncService().get(tx, key);
+      final Entity value = getSyncService().get(tx, key);
+      return value;
     } catch (EntityNotFoundException e) {
       return null;
     }

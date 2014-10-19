@@ -2,10 +2,13 @@ package net.sf.mardao.dao;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Stack;
 
 import net.sf.mardao.MappingIterable;
+import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
 
 /**
@@ -145,6 +148,27 @@ public class AbstractDao<T, ID extends Serializable> {
       return null;
     }
     return mapper.fromReadValue(value);
+  }
+
+  protected CursorPage<T> queryPage(boolean keysOnly, int requestedPageSize, Object ancestorKey,
+                          String primaryOrderBy, boolean primaryIsAscending,
+                          String secondaryOrderBy, boolean secondaryIsAscending,
+                          Collection<String> projections,
+                          String cursorString,
+                          Filter... filters) {
+    CursorPage page = supplier.queryPage(getCurrentTransaction(), mapper.getKind(), false,
+      requestedPageSize, ancestorKey,
+      primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
+      projections, cursorString,
+      filters);
+
+    ArrayList<T> entities = new ArrayList<T>(page.getItems().size());
+    for (Object value : page.getItems()) {
+      T entity = mapper.fromReadValue(value);
+      entities.add(entity);
+    }
+    page.setItems(entities);
+    return page;
   }
 
   // --- utility methods ---

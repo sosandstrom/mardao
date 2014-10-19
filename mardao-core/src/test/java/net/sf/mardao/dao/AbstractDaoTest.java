@@ -8,6 +8,8 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 
+import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.filter.Filter;
 import net.sf.mardao.domain.DFactory;
 import net.sf.mardao.domain.DUser;
 
@@ -185,6 +187,26 @@ public class AbstractDaoTest {
       null, null, "createdBy", "birthDate");
     assertEquals("second", supplier.getString(actual, "createdBy"));
     assertEquals(date1, supplier.getDate(actual, "birthDate"));
+  }
+
+  @Test
+  public void testQueryPage() throws IOException {
+    createQueryFixtures();
+    Filter filter = Filter.equalsFilter(DUserMapper.Field.DISPLAYNAME.getFieldName(), "mod7_3");
+    CursorPage<DUser> firstPage = userDao.queryPage(false, 5, null,
+      null, false, null, false,
+      null, null,
+      filter);
+    assertEquals(Integer.valueOf(9), firstPage.getTotalSize());
+    assertNotNull(firstPage.getCursorKey());
+    assertEquals(5, firstPage.getItems().size());
+
+    CursorPage<DUser> secondPage = userDao.queryPage(false, 5, null,
+      null, false, null, false,
+      null, firstPage.getCursorKey(), filter);
+    assertNull(secondPage.getTotalSize());
+    assertNull(secondPage.getCursorKey());
+    assertEquals(4, secondPage.getItems().size());
   }
 
   protected void createQueryFixtures() throws IOException {

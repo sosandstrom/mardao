@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 
+import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
 
 /**
@@ -55,4 +56,12 @@ public interface Supplier<K, RV, WV, T> {
                               Filter... filters);
 
   RV queryUnique(T tx, Object parentKey, String kind, Filter... filters);
+
+  CursorPage<RV> queryPage(T tx, String kind, boolean keysOnly,
+                           int requestedPageSize, K ancestorKey,
+                          String primaryOrderBy, boolean primaryIsAscending,
+                          String secondaryOrderBy, boolean secondaryIsAscending,
+                          Collection<String> projections,
+                          String cursorString,
+                          Filter... filters);
 }

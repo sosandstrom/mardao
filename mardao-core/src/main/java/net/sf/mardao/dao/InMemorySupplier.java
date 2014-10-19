@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
 
 /**
@@ -165,6 +166,36 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
+  public CursorPage<Map<String, Object>> queryPage(Object tx, String kind, boolean keysOnly,
+                                                   int requestedPageSize, InMemoryKey ancestorKey,
+                                                   String primaryOrderBy, boolean primaryIsAscending,
+                                                   String secondaryOrderBy, boolean secondaryIsAscending,
+                                                   Collection<String> projections, String cursorString,
+                                                   Filter... filters) {
+    CursorPage<Map<String, Object>> page = new CursorPage<Map<String, Object>>();
+    Collection<Map<String, Object>> values = new ArrayList<Map<String, Object>>();
+    page.setItems(values);
+    if (null == cursorString) {
+      page.setTotalSize(filterValues(kindStore(kind).values(), filters).size());
+    }
+
+    boolean foundCursor = null == cursorString;
+    for (Map.Entry<String, Map<String, Object>> entry : kindStore(kind).entrySet()) {
+      if (!foundCursor) {
+        foundCursor = entry.getKey().toString().equals(cursorString);
+      }
+      else if (matchAll(entry.getValue(), filters)) {
+        values.add(entry.getValue());
+        if (requestedPageSize == values.size()) {
+          page.setCursorKey(entry.getKey().toString());
+          break;
+        }
+      }
+    }
+    return page;
+  }
+
+  @Override
   public InMemoryKey writeValue(Object tx, InMemoryKey key, Map<String, Object> core) throws IOException {
     // assign long key?
     if (null == key.getName()) {
@@ -211,6 +242,18 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
       store.put(kind, ks);
     }
     return ks;
+  }
+
+  protected static boolean matchAll(Map<String, Object> v, Filter... filters) {
+    if (null == filters) {
+      return true;
+    }
+    for (Filter f : filters) {
+      if (!match(v, f)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   protected static boolean match(Map<String, Object> v, Filter f) {

@@ -7,6 +7,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -17,9 +18,11 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.TransactionOptions;
 
+import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
 
 /**
@@ -75,6 +78,43 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
     return _iterable;
   }
 
+  @Override
+  public CursorPage<Entity> queryPage(Transaction tx, String kind, boolean keysOnly,
+                                         int requestedPageSize, Key ancestorKey,
+                                    String primaryOrderBy, boolean primaryIsAscending,
+                                    String secondaryOrderBy, boolean secondaryIsAscending,
+                                    Collection<String> projections,
+                                    String cursorString,
+                                    Filter... filters) {
+
+    final PreparedQuery pq = prepare(kind, keysOnly, ancestorKey, null,
+      primaryOrderBy, primaryIsAscending,
+      secondaryOrderBy, secondaryIsAscending,
+      projections, filters);
+
+    final QueryResultList<Entity> iterable = asQueryResultList(pq, requestedPageSize, (String) cursorString);
+
+    final CursorPage<Entity> cursorPage = new CursorPage<Entity>();
+
+    // if first page and populate totalSize, fetch this with async query:
+    if (null == cursorString) {
+      int count = count(tx, kind, ancestorKey, null, filters);
+      cursorPage.setTotalSize(count);
+    }
+
+    cursorPage.setItems(iterable);
+
+    // only if next is available
+    if (iterable.size() == requestedPageSize) {
+
+      // only if page size != total size
+      if (null == cursorPage.getTotalSize() || iterable.size() < cursorPage.getTotalSize()) {
+        cursorPage.setCursorKey(iterable.getCursor().toWebSafeString());
+      }
+    }
+
+    return cursorPage;
+  }
   @Override
   public Entity queryUnique(Transaction tx, Object ancestorKey, String kind, Filter... filters) {
     final PreparedQuery pq = prepare(kind, false, (Key) ancestorKey, null,
@@ -256,6 +296,16 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
     }
 
     return pq.asQueryResultIterable(fetchOptions);
+  }
+
+  protected QueryResultList<Entity> asQueryResultList(PreparedQuery pq, int pageSize, String cursorString) {
+    FetchOptions fetchOptions = FetchOptions.Builder.withLimit(pageSize);
+
+    if (null != cursorString) {
+      fetchOptions.startCursor(Cursor.fromWebSafeString(cursorString));
+    }
+
+    return pq.asQueryResultList(fetchOptions);
   }
 
   protected static com.google.appengine.api.datastore.Query.Filter createFilter(Filter mardaoFilter) {

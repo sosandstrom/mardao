@@ -45,7 +45,7 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public int count(Object tx, String kind, Object ancestorKey, Object simpleKey, Filter... filters) {
+  public int count(Object tx, String kind, InMemoryKey ancestorKey, InMemoryKey simpleKey, Filter... filters) {
     final Collection<Map<String, Object>> filtered = filterValues(kindStore(kind).values());
     return filtered.size();
   }
@@ -91,23 +91,23 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public void setCollection(Object value, String column, Collection c) {
-    ((Map<String, Object>) value).put(column, c);
+  public void setCollection(Map<String, Object> value, String column, Collection c) {
+    value.put(column, c);
   }
 
   @Override
-  public void setDate(Object value, String column, Date d) {
-    ((Map<String, Object>) value).put(column, d);
+  public void setDate(Map<String, Object> value, String column, Date d) {
+    value.put(column, d);
   }
 
   @Override
-  public void setLong(Object value, String column, Long l) {
-    ((Map<String, Object>) value).put(column, l);
+  public void setLong(Map<String, Object> value, String column, Long l) {
+    value.put(column, l);
   }
 
   @Override
-  public void setString(Object value, String column, String s) {
-    ((Map<String, Object>) value).put(column, s);
+  public void setString(Map<String, Object> value, String column, String s) {
+    value.put(column, s);
   }
 
   @Override
@@ -129,7 +129,7 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
 
   @Override
   public Iterable<Map<String, Object>> queryIterable(Object tx, String kind, boolean keysOnly, int offset, int limit,
-                                                     Object ancestorKey, Object simpleKey,
+                                                     InMemoryKey ancestorKey, InMemoryKey simpleKey,
                                                      String primaryOrderBy, boolean primaryIsAscending,
                                                      String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
     // this will do for now
@@ -158,7 +158,7 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public Map<String, Object> queryUnique(Object tx, Object parentKey, String kind, Filter... filters) {
+  public Map<String, Object> queryUnique(Object tx, InMemoryKey parentKey, String kind, Filter... filters) {
     final Iterable<Map<String, Object>> iterable = queryIterable(tx, kind, false, 0, 1,
       parentKey, null, null, false, null, false, filters);
     final Iterator<Map<String, Object>> iterator = iterable.iterator();
@@ -207,28 +207,28 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public InMemoryKey toKey(Object parentKey, String kind, Long lId) {
-    return InMemoryKey.of((InMemoryKey) parentKey, kind, null != lId ? lId.toString() : null);
+  public InMemoryKey toKey(InMemoryKey parentKey, String kind, Long lId) {
+    return InMemoryKey.of(parentKey, kind, null != lId ? lId.toString() : null);
   }
 
   @Override
-  public InMemoryKey toKey(Object parentKey, String kind, String sId) {
-    return InMemoryKey.of((InMemoryKey) parentKey, kind, sId);
+  public InMemoryKey toKey(InMemoryKey parentKey, String kind, String sId) {
+    return InMemoryKey.of(parentKey, kind, sId);
   }
 
   @Override
-  public Long toLongKey(Object key) {
-    return null != key ? Long.parseLong(((InMemoryKey) key).getName()) : null;
+  public Long toLongKey(InMemoryKey key) {
+    return null != key ? Long.parseLong(key.getName()) : null;
   }
 
   @Override
-  public String toStringKey(Object key) {
-    return null != key ? ((InMemoryKey) key).getName() : null;
+  public String toStringKey(InMemoryKey key) {
+    return null != key ? key.getName() : null;
   }
 
   @Override
-  public InMemoryKey toParentKey(Object key) {
-    return null != key ? ((InMemoryKey) key).getParentKey() : null;
+  public InMemoryKey toParentKey(InMemoryKey key) {
+    return null != key ? key.getParentKey() : null;
   }
 
   protected Map<String, Map<String, Object>> kindStore(InMemoryKey key) {

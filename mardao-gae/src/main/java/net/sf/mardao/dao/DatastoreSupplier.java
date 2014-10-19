@@ -55,8 +55,8 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public int count(Transaction tx, String kind, Object ancestorKey, Object simpleKey, Filter... filters) {
-    final PreparedQuery pq = prepare(kind, true, (Key) ancestorKey, (Key) simpleKey, null, false, null, false, null, filters);
+  public int count(Transaction tx, String kind, Key ancestorKey, Key simpleKey, Filter... filters) {
+    final PreparedQuery pq = prepare(kind, true, ancestorKey, simpleKey, null, false, null, false, null, filters);
     return pq.countEntities(FetchOptions.Builder.withDefaults());
   }
 
@@ -67,10 +67,10 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
 
   @Override
   public Iterable<Entity> queryIterable(Transaction tx, String kind, boolean keysOnly, int offset, int limit,
-                                        Object ancestorKey, Object simpleKey,
+                                        Key ancestorKey, Key simpleKey,
                                         String primaryOrderBy, boolean primaryIsAscending,
                                         String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
-    final PreparedQuery pq = prepare(kind, keysOnly, (Key) ancestorKey, (Key) simpleKey,
+    final PreparedQuery pq = prepare(kind, keysOnly, ancestorKey, simpleKey,
       primaryOrderBy, primaryIsAscending,
       secondaryOrderBy, secondaryIsAscending, null, filters);
 
@@ -92,7 +92,7 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
       secondaryOrderBy, secondaryIsAscending,
       projections, filters);
 
-    final QueryResultList<Entity> iterable = asQueryResultList(pq, requestedPageSize, (String) cursorString);
+    final QueryResultList<Entity> iterable = asQueryResultList(pq, requestedPageSize, cursorString);
 
     final CursorPage<Entity> cursorPage = new CursorPage<Entity>();
 
@@ -116,8 +116,8 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
     return cursorPage;
   }
   @Override
-  public Entity queryUnique(Transaction tx, Object ancestorKey, String kind, Filter... filters) {
-    final PreparedQuery pq = prepare(kind, false, (Key) ancestorKey, null,
+  public Entity queryUnique(Transaction tx, Key ancestorKey, String kind, Filter... filters) {
+    final PreparedQuery pq = prepare(kind, false, ancestorKey, null,
       null, false, null, false,
       null, filters);
     final Entity entity = pq.asSingleEntity();
@@ -140,28 +140,28 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public Key toKey(Object parentKey, String kind, Long lId) {
-    return null != lId ? KeyFactory.createKey((Key) parentKey, kind, lId) : null;
+  public Key toKey(Key parentKey, String kind, Long lId) {
+    return null != lId ? KeyFactory.createKey(parentKey, kind, lId) : null;
   }
 
   @Override
-  public Key toKey(Object parentKey, String kind, String sId) {
-    return null != sId ? KeyFactory.createKey((Key) parentKey, kind, sId) : null;
+  public Key toKey(Key parentKey, String kind, String sId) {
+    return null != sId ? KeyFactory.createKey(parentKey, kind, sId) : null;
   }
 
   @Override
-  public Long toLongKey(Object key) {
-    return null != key ? ((Key) key).getId() : null;
+  public Long toLongKey(Key key) {
+    return null != key ? key.getId() : null;
   }
 
   @Override
-  public String toStringKey(Object key) {
-    return null != key ? ((Key) key).getName() : null;
+  public String toStringKey(Key key) {
+    return null != key ? key.getName() : null;
   }
 
   @Override
-  public Key toParentKey(Object key) {
-    return null != key ? ((Key) key).getParent() : null;
+  public Key toParentKey(Key key) {
+    return null != key ? key.getParent() : null;
   }
 
   @Override
@@ -195,23 +195,23 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public void setCollection(Object value, String column, Collection c) {
-    ((Entity) value).setProperty(column, c);
+  public void setCollection(Entity value, String column, Collection c) {
+    value.setProperty(column, c);
   }
 
   @Override
-  public void setDate(Object value, String column, Date d) {
-    ((Entity) value).setProperty(column, d);
+  public void setDate(Entity value, String column, Date d) {
+    value.setProperty(column, d);
   }
 
   @Override
-  public void setLong(Object value, String column, Long l) {
-    ((Entity) value).setProperty(column, l);
+  public void setLong(Entity value, String column, Long l) {
+    value.setProperty(column, l);
   }
 
   @Override
-  public void setString(Object value, String column, String s) {
-    ((Entity) value).setProperty(column, s);
+  public void setString(Entity value, String column, String s) {
+    value.setProperty(column, s);
   }
 
   @Override

@@ -53,8 +53,8 @@ public class Generated${entity.simpleName}DaoImpl
    * @return the unique ${entity.simpleName} for the specified ${field.name}
    */
 #if( $entity.parent )
-  public ${entity.simpleName} findBy${field.nameFirst}(Object ${entity.parent.name}Key, ${fieldType} ${field.name}) {
-    return queryUniqueByField(${entity.parent.name}Key, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
+  public ${entity.simpleName} findBy${field.nameFirst}(Object ${entity.parent.name}, ${fieldType} ${field.name}) {
+    return queryUniqueByField(${entity.parent.name}, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
 #else
   public ${entity.simpleName} findBy${field.nameFirst}(${fieldType} ${field.name}) {
     return queryUniqueByField(null, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
@@ -74,8 +74,8 @@ public class Generated${entity.simpleName}DaoImpl
    * @return an Iterable of ${entity.simpleName}s for the specified ${field.name}
    */
 #if( $entity.parent )
-  public Iterable<${entity.simpleName}> queryBy${field.nameFirst}(Object ${entity.parent.name}Key, ${fieldType} ${field.name}) {
-    return queryByField(${entity.parent.name}Key, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
+  public Iterable<${entity.simpleName}> queryBy${field.nameFirst}(Object ${entity.parent.name}, ${fieldType} ${field.name}) {
+    return queryByField(${entity.parent.name}, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
 #else
   public Iterable<${entity.simpleName}> queryBy${field.nameFirst}(${fieldType} ${field.name}) {
     return queryByField(null, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name});
@@ -83,5 +83,19 @@ public class Generated${entity.simpleName}DaoImpl
   }
 
 #end
+#end
+
+// ----------------------- query methods -------------------------------
+
+#if( $entity.parent )
+  public CursorPage<${entity.simpleName}> queryPage(int requestedPageSize, Object ${entity.parent.name}, String cursorString) {
+    return queryPage(false, requestedPageSize, ${entity.parent.name},
+      null, false, null, false, null, cursorString);
+  }
+#else
+  public CursorPage<${entity.simpleName}> queryPage(int requestedPageSize, String cursorString) {
+    return queryPage(false, requestedPageSize, null,
+      null, false, null, false, null, cursorString);
+  }
 #end
 }

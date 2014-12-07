@@ -2,10 +2,7 @@ package net.sf.mardao.dao;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Stack;
+import java.util.*;
 
 import net.sf.mardao.MappingIterable;
 import net.sf.mardao.core.CursorPage;
@@ -105,6 +102,14 @@ public class AbstractDao<T, ID extends Serializable> {
     supplier.deleteValue(getCurrentTransaction(), key);
   }
 
+  public void delete(Iterable<ID> ids) throws IOException {
+    Collection<Object> keys = new ArrayList<Object>();
+    for (ID id : ids) {
+      keys.add(mapper.toKey(null, id));
+    }
+    supplier.deleteValues(getCurrentTransaction(), keys);
+  }
+
   public T get(ID id) throws IOException {
     return get(null, id);
   }
@@ -170,6 +175,44 @@ public class AbstractDao<T, ID extends Serializable> {
     page.setItems(entities);
     return page;
   }
+
+  protected Iterable<T> queryIterable(boolean keysOnly, int offset, int limit, Object ancestorKey,
+                                      String primaryOrderBy, boolean primaryIsAscending,
+                                      String secondaryOrderBy, boolean secondaryIsAscending,
+                                      Filter... filters) {
+
+    final Iterable iterable = supplier.queryIterable(getCurrentTransaction(), mapper.getKind(), false,
+            offset, limit, ancestorKey, null,
+            primaryOrderBy, primaryIsAscending,
+            secondaryOrderBy, secondaryIsAscending,
+            filters);
+
+    return new Iterable<T>() {
+      @Override
+      public Iterator<T> iterator() {
+
+        final Iterator wrappedIterator = iterable.iterator();
+        return new Iterator<T>() {
+          @Override
+          public boolean hasNext() {
+            return wrappedIterator.hasNext();
+          }
+
+          @Override
+          public T next() {
+            return mapper.fromReadValue(wrappedIterator.next());
+          }
+
+          @Override
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
+        };
+      }
+    };
+
+  }
+
 
   // --- utility methods ---
 

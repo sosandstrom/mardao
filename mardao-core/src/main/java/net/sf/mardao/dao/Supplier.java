@@ -15,6 +15,7 @@ import net.sf.mardao.core.filter.Filter;
 public interface Supplier<K, RV, WV, T> {
   int count(T tx, String kind, K ancestorKey, K simpleKey, Filter... filters);
   void deleteValue(T tx, K key) throws IOException;
+    void deleteValues(T tx, Collection<K> keys) throws IOException;
   RV readValue(T tx, K key) throws IOException;
   K writeValue(T tx, K key, WV value) throws IOException;
 
@@ -31,11 +32,17 @@ public interface Supplier<K, RV, WV, T> {
   K getKey(RV value, String column);
   K getParentKey(RV value, String column);
   String getString(RV value, String column);
+  Integer getInteger(RV value, String column);
+  Boolean getBoolean(RV value, String column);
+  Float getFloat(RV value, String column);
 
   void setCollection(WV value, String column, Collection c);
   void setDate(WV value, String column, Date d);
   void setLong(WV value, String column, Long l);
   void setString(WV value, String column, String s);
+  void setInteger(WV value, String column, Integer i);
+  void setBoolean(WV value, String column, Boolean b);
+  void setFloat(WV value, String column, Float f);
 
   WV createWriteValue(K parentKey, String kind, Long id);
   WV createWriteValue(K parentKey, String kind, String id);
@@ -64,4 +71,5 @@ public interface Supplier<K, RV, WV, T> {
                           Collection<String> projections,
                           String cursorString,
                           Filter... filters);
+
 }

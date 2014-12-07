@@ -14,6 +14,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 
 import net.sf.mardao.domain.DUser;
+
 /**
  * Tests for DatastoreSupplier.
  *

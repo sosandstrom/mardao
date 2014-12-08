@@ -76,7 +76,7 @@
                 <version>2.2.2</version>
                 <configuration>
                     <mavenExecutorId>forked-path</mavenExecutorId>
-                    <preparationGoals>clean install</preparationGoals>
+                    <preparationGoals>clean compile</preparationGoals>
                 </configuration>
             </plugin>
         </plugins>

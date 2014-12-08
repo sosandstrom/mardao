@@ -1,8 +1,10 @@
 package net.sf.mardao.dao;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +65,11 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   @Override
   public void deleteValue(Transaction tx, Key key) throws IOException {
     getSyncService().delete(key);
+  }
+
+  @Override
+  public void deleteValues(Transaction tx, Collection<Key> keys) throws IOException {
+    getSyncService().delete(keys);
   }
 
   @Override
@@ -195,6 +202,22 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
+  public Integer getInteger(Entity value, String column) {
+    Long longValue = (Long)value.getProperty(column);
+    return null != longValue ? longValue.intValue() : null;
+  }
+
+  @Override
+  public Boolean getBoolean(Entity value, String column) {
+    return (Boolean) value.getProperty(column);
+  }
+
+  @Override
+  public Float getFloat(Entity value, String column) {
+    return (Float) value.getProperty(column);
+  }
+
+  @Override
   public void setCollection(Entity value, String column, Collection c) {
     value.setProperty(column, c);
   }
@@ -212,6 +235,21 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   @Override
   public void setString(Entity value, String column, String s) {
     value.setProperty(column, s);
+  }
+
+  @Override
+  public void setInteger(Entity value, String column, Integer i) {
+    value.setProperty(column, i);
+  }
+
+  @Override
+  public void setBoolean(Entity value, String column, Boolean b) {
+    value.setProperty(column, b);
+  }
+
+  @Override
+  public void setFloat(Entity value, String column, Float f) {
+    value.setProperty(column, f);
   }
 
   @Override
@@ -252,16 +290,25 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
       q.setKeysOnly();
     }
 
+    // filter query:
+    final List<Query.Filter> queryFilters = new ArrayList<Query.Filter>(filters.length);
+
     // filter on keyName:
     if (null != simpleKey) {
-      q.addFilter(Entity.KEY_RESERVED_PROPERTY, Query.FilterOperator.EQUAL, simpleKey);
+      queryFilters.add(new Query.FilterPredicate(Entity.KEY_RESERVED_PROPERTY, Query.FilterOperator.EQUAL, simpleKey));
     }
 
-    // filter query:
-    if (null != filters) {
-      for(Filter f : filters) {
-        q.setFilter(createFilter(f));
+    // additional filters
+    if (filters.length > 0) {
+      for (Filter f: filters) {
+        queryFilters.add(createFilter(f));
       }
+    }
+
+    if (queryFilters.size() == 1) {
+      q.setFilter(queryFilters.get(0));
+    } else if (queryFilters.size() > 1) {
+      q.setFilter(Query.CompositeFilterOperator.and(queryFilters));
     }
 
     // sort query?
@@ -314,6 +361,10 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
         return new Query.FilterPredicate(mardaoFilter.getColumn(), Query.FilterOperator.EQUAL, mardaoFilter.getOperand());
       case IN:
         return new Query.FilterPredicate(mardaoFilter.getColumn(), Query.FilterOperator.IN, mardaoFilter.getOperand());
+      case GREATER_THAN:
+        return new Query.FilterPredicate(mardaoFilter.getColumn(), Query.FilterOperator.GREATER_THAN, mardaoFilter.getOperand());
+      case LESS_THAN:
+        return new Query.FilterPredicate(mardaoFilter.getColumn(), Query.FilterOperator.GREATER_THAN, mardaoFilter.getOperand());
       default:
         throw new UnsupportedOperationException("No such Filter Operator " + mardaoFilter.getOperator());
     }

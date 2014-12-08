@@ -56,6 +56,13 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
+  public void deleteValues(Object tx, Collection<InMemoryKey> keys) throws IOException {
+    for (InMemoryKey key : keys) {
+      deleteValue(tx, key);
+    }
+  }
+
+  @Override
   public Map<String, Object> readValue(Object tx, InMemoryKey key) throws IOException {
     return kindStore(key).get(key.getName());
   }
@@ -91,6 +98,21 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
+  public Integer getInteger(Map<String, Object> core, String column) {
+    return (Integer) core.get(column);
+  }
+
+  @Override
+  public Boolean getBoolean(Map<String, Object> core, String column) {
+    return (Boolean) core.get(column);
+  }
+
+  @Override
+  public Float getFloat(Map<String, Object> core, String column) {
+    return (Float) core.get(column);
+  }
+
+  @Override
   public void setCollection(Map<String, Object> value, String column, Collection c) {
     value.put(column, c);
   }
@@ -108,6 +130,21 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   @Override
   public void setString(Map<String, Object> value, String column, String s) {
     value.put(column, s);
+  }
+
+  @Override
+  public void setInteger(Map<String, Object> value, String column, Integer i) {
+    value.put(column, i);
+  }
+
+  @Override
+  public void setBoolean(Map<String, Object> value, String column, Boolean b) {
+    value.put(column, b);
+  }
+
+  @Override
+  public void setFloat(Map<String, Object> value, String column, Float f) {
+    value.put(column, f);
   }
 
   @Override

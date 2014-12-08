@@ -16,6 +16,19 @@ public class Filter {
       return new Filter(column, FilterOperator.EQUALS, operand);
     }
 
+    /** Builds an InFilter */
+    public static Filter inFilter(String column, Object operand) {
+      return new Filter(column, FilterOperator.IN, operand);
+    }
+
+    public static Filter greaterThan(String column, Object operand) {
+        return new Filter(column, FilterOperator.GREATER_THAN, operand);
+    }
+
+    public static Filter lessThan(String column, Object operand) {
+        return new Filter(column, FilterOperator.LESS_THAN, operand);
+    }
+
     public String toString() {
         return column + " " + operator + " " + operand;
     }

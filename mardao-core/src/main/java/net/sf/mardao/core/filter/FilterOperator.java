@@ -7,5 +7,7 @@ package net.sf.mardao.core.filter;
  */
 public enum FilterOperator {
   EQUALS,
-  IN;
+  IN,
+  GREATER_THAN,
+  LESS_THAN
 }

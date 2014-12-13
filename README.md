@@ -2,7 +2,7 @@
 
 Latest Stable Version: 2.3.6
 
-License: http://www.gnu.org/licenses/lgpl.html
+License: http://www.gnu.org/licenses/gpl-3.0.html
 
 Mardao is an ORM and DAO generator, packaged as a maven plugin.
 It generates DAO classes using your annotated domain classes as input.

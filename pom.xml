@@ -4,7 +4,7 @@
 
     <groupId>net.sf.mardao</groupId>
     <artifactId>mardao-parent</artifactId>
-    <version>3.0.5-SNAPSHOT</version>
+    <version>3.0.5</version>
 
     <packaging>pom</packaging>
 

@@ -87,15 +87,5 @@ public class Generated${entity.simpleName}DaoImpl
 
 // ----------------------- query methods -------------------------------
 
-#if( $entity.parent )
-  public CursorPage<${entity.simpleName}> queryPage(int requestedPageSize, Object ${entity.parent.name}, String cursorString) {
-    return queryPage(false, requestedPageSize, ${entity.parent.name},
-      null, false, null, false, null, cursorString);
-  }
-#else
-  public CursorPage<${entity.simpleName}> queryPage(int requestedPageSize, String cursorString) {
-    return queryPage(false, requestedPageSize, null,
-      null, false, null, false, null, cursorString);
-  }
-#end
+
 }

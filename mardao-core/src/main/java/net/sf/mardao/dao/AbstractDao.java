@@ -155,6 +155,16 @@ public class AbstractDao<T, ID extends Serializable> {
     return mapper.fromReadValue(value);
   }
 
+  public CursorPage<T> queryPage(int requestedPageSize, String cursorString) {
+    return queryPage(false, requestedPageSize, null,
+        null, false, null, false, null, cursorString);
+  }
+
+  public CursorPage<T> queryPage(Object ancestorKey, int requestedPageSize, String cursorString) {
+    return queryPage(false, requestedPageSize, ancestorKey,
+        null, false, null, false, null, cursorString);
+  }
+
   protected CursorPage<T> queryPage(boolean keysOnly, int requestedPageSize, Object ancestorKey,
                           String primaryOrderBy, boolean primaryIsAscending,
                           String secondaryOrderBy, boolean secondaryIsAscending,

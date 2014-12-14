@@ -85,6 +85,37 @@
 
     <profiles>
         <profile>
+            <id>license</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>download-licenses</id>
+                                <goals>
+                                    <goal>download-licenses</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>update-file-header</id>
+                                <goals>
+                                    <goal>update-file-header</goal>
+                                </goals>
+                                <phase>process-sources</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <licenseName>gpl_v3</licenseName>
+                            <inceptionYear>2010</inceptionYear>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>release-sign-artifacts</id>
             <activation>
                 <property>
@@ -183,35 +214,19 @@
         </developer>
     </developers>
 
+    <organization>
+        <name>Wadpam</name>
+        <url>http://www.wadpam.com</url>
+    </organization>
+
     <licenses>
         <license>
-            <name>GNU Lesser General Public License</name>
-            <url>http://www.gnu.org/licenses/lgpl.html</url>
+            <name>GNU General Public License version 3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
             <distribution>repo</distribution>
             <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
-
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-changes-plugin</artifactId>
-                <version>2.3</version>
-                <inherited>false</inherited>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>changes-report</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-                <configuration>
-                    <issueLinkTemplate>http://sourceforge.net/support/tracker.php?aid=%ISSUE%</issueLinkTemplate>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>
 
     <issueManagement>
         <system>github</system>

@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/sosandstrom/mardao.svg?branch=master)](https://travis-ci.org/sosandstrom/mardao)
+
 ### Mardao Architect's Java DAO generator
 
 Latest Stable Version: 2.3.6

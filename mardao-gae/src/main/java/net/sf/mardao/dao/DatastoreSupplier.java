@@ -29,9 +29,24 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import com.google.appengine.api.datastore.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.appengine.api.datastore.Cursor;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.appengine.api.datastore.QueryResultList;
+import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.datastore.TransactionOptions;
+import com.google.appengine.api.datastore.Blob;
 
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;

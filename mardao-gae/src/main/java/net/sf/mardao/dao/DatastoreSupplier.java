@@ -23,28 +23,15 @@ package net.sf.mardao.dao;
  */
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import com.google.appengine.api.datastore.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.appengine.api.datastore.Cursor;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.QueryResultIterable;
-import com.google.appengine.api.datastore.QueryResultList;
-import com.google.appengine.api.datastore.Transaction;
-import com.google.appengine.api.datastore.TransactionOptions;
 
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
@@ -240,6 +227,12 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
+  public ByteBuffer getByteBuffer(Entity value, String column) {
+    Blob blob = (Blob) value.getProperty(column);
+    return ByteBuffer.wrap(blob.getBytes());
+  }
+
+  @Override
   public void setCollection(Entity value, String column, Collection c) {
     value.setProperty(column, c);
   }
@@ -272,6 +265,11 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   @Override
   public void setFloat(Entity value, String column, Float f) {
     value.setProperty(column, f);
+  }
+
+  @Override
+  public void setByteBuffer(Entity value, String column, ByteBuffer b) {
+    value.setProperty(column, new Blob(b.array()));
   }
 
   @Override

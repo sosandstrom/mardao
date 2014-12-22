@@ -260,6 +260,10 @@ public class AbstractDao<T, ID extends Serializable> {
     return mapper.toKey(parentKey, id);
   }
 
+  public String getKind() {
+    return mapper.getKind();
+  }
+
   public void setParentKey(T entity, Object parentKey) {
     mapper.setParentKey(entity, parentKey);
   }

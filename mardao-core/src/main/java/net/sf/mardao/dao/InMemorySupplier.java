@@ -24,6 +24,7 @@ package net.sf.mardao.dao;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -135,6 +136,11 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
+  public ByteBuffer getByteBuffer(Map<String, Object> core, String column) {
+    return (ByteBuffer) core.get(column);
+  }
+
+  @Override
   public void setCollection(Map<String, Object> value, String column, Collection c) {
     value.put(column, c);
   }
@@ -167,6 +173,11 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   @Override
   public void setFloat(Map<String, Object> value, String column, Float f) {
     value.put(column, f);
+  }
+
+  @Override
+  public void setByteBuffer(Map<String, Object> value, String column, ByteBuffer b) {
+    value.put(column, b);
   }
 
   @Override

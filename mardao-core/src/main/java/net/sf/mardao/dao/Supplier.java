@@ -23,6 +23,7 @@ package net.sf.mardao.dao;
  */
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Date;
 
@@ -57,6 +58,7 @@ public interface Supplier<K, RV, WV, T> {
   Integer getInteger(RV value, String column);
   Boolean getBoolean(RV value, String column);
   Float getFloat(RV value, String column);
+  ByteBuffer getByteBuffer(RV value, String column);
 
   void setCollection(WV value, String column, Collection c);
   void setDate(WV value, String column, Date d);
@@ -65,6 +67,7 @@ public interface Supplier<K, RV, WV, T> {
   void setInteger(WV value, String column, Integer i);
   void setBoolean(WV value, String column, Boolean b);
   void setFloat(WV value, String column, Float f);
+  void setByteBuffer(WV value, String column, ByteBuffer b);
 
   WV createWriteValue(K parentKey, String kind, Long id);
   WV createWriteValue(K parentKey, String kind, String id);

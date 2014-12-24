@@ -23,6 +23,7 @@ package net.sf.mardao.dao;
  */
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -45,6 +46,7 @@ import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.TransactionOptions;
+import com.google.appengine.api.datastore.Blob;
 
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
@@ -240,6 +242,12 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
+  public ByteBuffer getByteBuffer(Entity value, String column) {
+    Blob blob = (Blob) value.getProperty(column);
+    return ByteBuffer.wrap(blob.getBytes());
+  }
+
+  @Override
   public void setCollection(Entity value, String column, Collection c) {
     value.setProperty(column, c);
   }
@@ -272,6 +280,11 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   @Override
   public void setFloat(Entity value, String column, Float f) {
     value.setProperty(column, f);
+  }
+
+  @Override
+  public void setByteBuffer(Entity value, String column, ByteBuffer b) {
+    value.setProperty(column, new Blob(b.array()));
   }
 
   @Override

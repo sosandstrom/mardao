@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.Future;
 
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
@@ -38,9 +39,12 @@ import net.sf.mardao.core.filter.Filter;
 public interface Supplier<K, RV, WV, T> {
   int count(T tx, String kind, K ancestorKey, K simpleKey, Filter... filters);
   void deleteValue(T tx, K key) throws IOException;
-    void deleteValues(T tx, Collection<K> keys) throws IOException;
+  void deleteValues(T tx, Collection<K> keys) throws IOException;
   RV readValue(T tx, K key) throws IOException;
   K writeValue(T tx, K key, WV value) throws IOException;
+
+  Future<RV> readFuture(T tx, K key) throws IOException;
+  Future<K> writeFuture(T tx, K key, WV value) throws IOException;
 
   K toKey(K parentKey, String kind, Long lId);
   K toKey(K parentKey, String kind, String sId);

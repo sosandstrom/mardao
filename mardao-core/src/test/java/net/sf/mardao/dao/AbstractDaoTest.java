@@ -26,6 +26,8 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -88,6 +90,26 @@ public class AbstractDaoTest {
         return userDao.get(327L);
       }
     });
+    assertNotNull(actual);
+    assertEquals(Long.valueOf(327L), actual.getId());
+    assertEquals("xHjqLåäö123", actual.getDisplayName());
+  }
+
+  @Test
+  public void testWriteReadFuture() throws IOException, ExecutionException, InterruptedException {
+    DUser entity = new DUser();
+    entity.setId(327L);
+    entity.setDisplayName("xHjqLåäö123");
+
+    DUser actual = userDao.get(327L);
+    assertNull(actual);
+
+    Future<Long> future = userDao.putAsync(entity);
+    Long id = future.get();
+    assertEquals(Long.valueOf(327L), id);
+
+    Future<DUser> read = userDao.getAsync(null, 327L);
+    actual = read.get();
     assertNotNull(actual);
     assertEquals(Long.valueOf(327L), actual.getId());
     assertEquals("xHjqLåäö123", actual.getDisplayName());

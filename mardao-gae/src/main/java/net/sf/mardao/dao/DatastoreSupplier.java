@@ -398,6 +398,8 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
         return new Query.FilterPredicate(mardaoFilter.getColumn(), Query.FilterOperator.IN, mardaoFilter.getOperand());
       case GREATER_THAN:
         return new Query.FilterPredicate(mardaoFilter.getColumn(), Query.FilterOperator.GREATER_THAN, mardaoFilter.getOperand());
+      case GREATER_THAN_OR_EQUALS:
+        return new Query.FilterPredicate(mardaoFilter.getColumn(), Query.FilterOperator.GREATER_THAN_OR_EQUAL, mardaoFilter.getOperand());
       case LESS_THAN:
         return new Query.FilterPredicate(mardaoFilter.getColumn(), Query.FilterOperator.GREATER_THAN, mardaoFilter.getOperand());
       default:

@@ -31,6 +31,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +91,30 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   @Override
   public Map<String, Object> readValue(Object tx, InMemoryKey key) throws IOException {
     return kindStore(key).get(key.getName());
+  }
+
+  @Override
+  public Future<Map<String, Object>> readFuture(final Object tx, final InMemoryKey key) throws IOException {
+    FutureTask<Map<String, Object>> task = new FutureTask<Map<String, Object>>(new Callable<Map<String, Object>>() {
+      @Override
+      public Map<String, Object> call() throws Exception {
+        return readValue(tx, key);
+      }
+    });
+    new Thread(task).start();
+    return task;
+  }
+
+  @Override
+  public Future<InMemoryKey> writeFuture(final Object tx, final InMemoryKey key, final Map<String, Object> value) throws IOException {
+    FutureTask<InMemoryKey> task = new FutureTask<InMemoryKey>(new Callable<InMemoryKey>() {
+      @Override
+      public InMemoryKey call() throws Exception {
+        return writeValue(tx, key, value);
+      }
+    });
+    new Thread(task).start();
+    return task;
   }
 
   @Override

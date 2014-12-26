@@ -22,17 +22,18 @@ package net.sf.mardao.core;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
  *
  * @author os
  */
-public class CursorPage<T extends Object> {
+public class CursorPage<T extends Object> implements Serializable {
     
     /** requested page size, not acutal */
     @Deprecated
-    private int requestedPageSize;
+    private transient int requestedPageSize;
     
     /** provide this to get next page */
     private String cursorKey;

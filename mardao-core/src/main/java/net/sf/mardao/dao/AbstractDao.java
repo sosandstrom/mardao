@@ -25,9 +25,12 @@ package net.sf.mardao.dao;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.Future;
 
 import net.sf.mardao.MappingIterable;
 import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.KeyFuture;
+import net.sf.mardao.core.EntityFuture;
 import net.sf.mardao.core.filter.Filter;
 
 /**
@@ -245,6 +248,23 @@ public class AbstractDao<T, ID extends Serializable> {
 
   }
 
+  // --- async methods ---
+
+  public Future<T> getAsync(Object parentKey, ID id) throws IOException {
+    Object key = mapper.toKey(parentKey, id);
+    Future<?> future = supplier.readFuture(getCurrentTransaction(), key);
+    return new EntityFuture<T>(mapper, future);
+  }
+
+  public Future<ID> putAsync(T entity) throws IOException {
+    ID id = mapper.getId(entity);
+    Object parentKey = mapper.getParentKey(entity);
+    Object key = mapper.toKey(parentKey, id);
+    Object value = mapper.toWriteValue(entity);
+    updateAuditInfo(value);
+    Future<?> future = supplier.writeFuture(getCurrentTransaction(), key, value);
+    return new KeyFuture(mapper, future, entity, value);
+  }
 
   // --- utility methods ---
 
@@ -258,6 +278,10 @@ public class AbstractDao<T, ID extends Serializable> {
 
   public Object getKey(Object parentKey, ID id) {
     return mapper.toKey(parentKey, id);
+  }
+
+  public String getKind() {
+    return mapper.getKind();
   }
 
   public void setParentKey(T entity, Object parentKey) {

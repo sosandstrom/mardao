@@ -47,6 +47,10 @@ public class Filter {
         return new Filter(column, FilterOperator.GREATER_THAN, operand);
     }
 
+    public static Filter greaterThanOrEquals(String column, Object operand) {
+        return new Filter(column, FilterOperator.GREATER_THAN_OR_EQUALS, operand);
+    }
+
     public static Filter lessThan(String column, Object operand) {
         return new Filter(column, FilterOperator.LESS_THAN, operand);
     }

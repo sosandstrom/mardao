@@ -22,10 +22,10 @@ package net.sf.mardao.test.domain;
  * #L%
  */
 
+import net.sf.mardao.domain.AbstractLongEntity;
+
 import javax.persistence.Basic;
 import javax.persistence.Entity;
-
-import net.sf.mardao.core.domain.AbstractLongEntity;
 
 /**
  * To test all audit features.

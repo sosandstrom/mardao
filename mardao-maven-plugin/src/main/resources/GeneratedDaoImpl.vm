@@ -85,7 +85,10 @@ public class Generated${entity.simpleName}DaoImpl
 #end
 #end
 
-// ----------------------- query methods -------------------------------
+// ----------------------- ${entity.simpleName} builder -------------------------------
 
+  public static ${entity.simpleName}Mapper.Builder newBuilder() {
+    return ${entity.simpleName}Mapper.newBuilder();
+  }
 
 }

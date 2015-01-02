@@ -167,27 +167,34 @@ public class ${entity.simpleName}Mapper
     return value;
   }
 
-  public static ${entity.simpleName}Builder newBuilder() {
-    return new ${entity.simpleName}Builder();
+  public static Builder newBuilder() {
+    return new Builder();
   }
 
-  public static class ${entity.simpleName}Builder extends AbstractEntityBuilder<${entity.simpleName}> {
+  public static class Builder extends AbstractEntityBuilder<${entity.simpleName}> {
 
-    @Override
-    protected ${entity.simpleName} newInstance() {
-      return new ${entity.simpleName}();
+    protected Builder() {
+      super(new ${entity.simpleName}());
     }
 
-    public ${entity.simpleName}Builder ${entity.pk.name}(${entity.pk.simpleType} ${entity.pk.name}) {
+    public Builder ${entity.pk.name}(${entity.pk.simpleType} ${entity.pk.name}) {
       entity.set${entity.pk.nameFirst}(${entity.pk.name});
       return this;
     }
 
+#if( $entity.parent )
+    public Builder ${entity.parent.name}(${entity.parent.simpleType} ${entity.parent.name}) {
+      entity.set${entity.parent.nameFirst}(${entity.parent.name});
+      return this;
+    }
+
+#end
 #foreach( $field in $allFields )
-    public ${entity.simpleName}Builder ${field.name}(${field.simpleType} ${field.name}) {
+    public Builder ${field.name}(${field.simpleType} ${field.name}) {
       entity.set${field.nameFirst}(${field.name});
       return this;
     }
+
 #end
   }
 }

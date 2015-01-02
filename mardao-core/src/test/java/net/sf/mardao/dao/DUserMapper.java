@@ -144,9 +144,8 @@ public class DUserMapper implements Mapper<DUser, Long> {
 
   public static class DUserBuilder extends AbstractEntityBuilder<DUser> {
 
-    @Override
-    protected DUser newInstance() {
-      return new DUser();
+    protected DUserBuilder() {
+      super(new DUser());
     }
 
     public DUserBuilder id(Long id) {

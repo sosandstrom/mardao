@@ -31,11 +31,9 @@ public abstract class AbstractEntityBuilder<T> {
 
   protected final T entity;
 
-  protected AbstractEntityBuilder() {
-    entity = newInstance();
+  protected AbstractEntityBuilder(T entity) {
+    this.entity = entity;
   }
-
-  protected abstract T newInstance();
 
   public T build() {
     return entity;

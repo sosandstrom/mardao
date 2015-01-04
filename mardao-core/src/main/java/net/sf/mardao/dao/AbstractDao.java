@@ -38,7 +38,7 @@ import net.sf.mardao.core.filter.Filter;
  *
  * @author osandstrom Date: 2014-09-03 Time: 19:44
  */
-public class AbstractDao<T, ID extends Serializable> {
+public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
 
   /** set this, to have createdBy and updatedBy set */
   private static final ThreadLocal<String> principalName = new ThreadLocal<String>();
@@ -149,6 +149,9 @@ public class AbstractDao<T, ID extends Serializable> {
     return entity;
   }
 
+  @Cached
+  @Crud
+  @Override
   public ID put(T entity) throws IOException {
     ID id = mapper.getId(entity);
     Object parentKey = mapper.getParentKey(entity);
@@ -180,6 +183,9 @@ public class AbstractDao<T, ID extends Serializable> {
     return mapper.fromReadValue(value);
   }
 
+  @Cached
+  @Crud
+  @Override
   public CursorPage<T> queryPage(int requestedPageSize, String cursorString) {
     return queryPage(false, requestedPageSize, null,
         null, false, null, false, null, cursorString);

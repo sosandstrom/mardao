@@ -118,6 +118,9 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return supplier.count(getCurrentTransaction(), mapper.getKind(), parentKey, null);
   }
 
+  @Cached
+  @Crud
+  @Override
   public void delete(ID id) throws IOException {
     delete(null, id);
   }
@@ -135,6 +138,9 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     supplier.deleteValues(getCurrentTransaction(), keys);
   }
 
+  @Cached
+  @Crud
+  @Override
   public T get(ID id) throws IOException {
     return get(null, id);
   }

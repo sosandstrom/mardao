@@ -118,13 +118,13 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return supplier.count(getCurrentTransaction(), mapper.getKind(), parentKey, null);
   }
 
-  @Cached
-  @Crud
-  @Override
   public void delete(ID id) throws IOException {
     delete(null, id);
   }
 
+  @Cached
+  @Crud
+  @Override
   public void delete(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
     supplier.deleteValue(getCurrentTransaction(), key);
@@ -138,13 +138,13 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     supplier.deleteValues(getCurrentTransaction(), keys);
   }
 
-  @Cached
-  @Crud
-  @Override
   public T get(ID id) throws IOException {
     return get(null, id);
   }
 
+  @Cached
+  @Crud
+  @Override
   public T get(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
     Object value = supplier.readValue(getCurrentTransaction(), key);
@@ -189,14 +189,13 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return mapper.fromReadValue(value);
   }
 
+  public CursorPage<T> queryPage(int requestedPageSize, String cursorString) {
+    return queryPage(null, requestedPageSize, cursorString);
+  }
+
   @Cached
   @Crud
   @Override
-  public CursorPage<T> queryPage(int requestedPageSize, String cursorString) {
-    return queryPage(false, requestedPageSize, null,
-        null, false, null, false, null, cursorString);
-  }
-
   public CursorPage<T> queryPage(Object ancestorKey, int requestedPageSize, String cursorString) {
     return queryPage(false, requestedPageSize, ancestorKey,
         null, false, null, false, null, cursorString);

@@ -15,4 +15,5 @@ public @interface Cached {
   String from() default "";
   long size() default -1;
   int expiresAfterSeconds() default -1;
+  boolean cachePages() default true;
 }

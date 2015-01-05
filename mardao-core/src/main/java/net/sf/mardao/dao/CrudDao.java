@@ -3,7 +3,7 @@ package net.sf.mardao.dao;
 import net.sf.mardao.core.CursorPage;
 
 import java.io.IOException;
-import java.io.Serializable;import java.lang.String;
+import java.io.Serializable;
 
 /**
  * Core crud methods.
@@ -15,11 +15,11 @@ public interface CrudDao<T, ID extends Serializable> {
     ID put(T entity) throws IOException;
 
     @Crud
-    T get(ID id) throws IOException;
+    T get(Object parentKey, ID id) throws IOException;
 
     @Crud
-    void delete(ID id) throws IOException;
+    void delete(Object parentKey, ID id) throws IOException;
 
     @Crud
-    CursorPage<T> queryPage(int requestedPageSize, String cursorString);
+    CursorPage<T> queryPage(Object ancestorKey, int requestedPageSize, String cursorString);
 }

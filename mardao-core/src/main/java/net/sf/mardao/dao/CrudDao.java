@@ -12,7 +12,10 @@ import java.io.Serializable;
 public interface CrudDao<T, ID extends Serializable> {
 
     @Crud
-    ID put(T entity) throws IOException;
+    int count(Object parentKey);
+
+    @Crud
+    ID put(Object parentKey, ID id, T entity) throws IOException;
 
     @Crud
     T get(Object parentKey, ID id) throws IOException;

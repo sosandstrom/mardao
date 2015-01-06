@@ -114,6 +114,8 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return count(null);
   }
 
+  @Crud
+  @Override
   public int count(Object parentKey) {
     return supplier.count(getCurrentTransaction(), mapper.getKind(), parentKey, null);
   }
@@ -158,9 +160,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
   @Cached
   @Crud
   @Override
-  public ID put(T entity) throws IOException {
-    ID id = mapper.getId(entity);
-    Object parentKey = mapper.getParentKey(entity);
+  public ID put(Object parentKey, ID id, T entity) throws IOException {
     Object key = mapper.toKey(parentKey, id);
     Object value = mapper.toWriteValue(entity);
     updateAuditInfo(value);
@@ -168,6 +168,12 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     id = mapper.fromKey(key);
     mapper.updateEntityPostWrite(entity, key, value);
     return id;
+  }
+
+  public ID put(T entity) throws IOException {
+    ID id = mapper.getId(entity);
+    Object parentKey = mapper.getParentKey(entity);
+    return put(parentKey, id, entity);
   }
 
   // --- query methods ---

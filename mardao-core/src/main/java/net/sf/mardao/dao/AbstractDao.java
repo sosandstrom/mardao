@@ -38,7 +38,7 @@ import net.sf.mardao.core.filter.Filter;
  *
  * @author osandstrom Date: 2014-09-03 Time: 19:44
  */
-public class AbstractDao<T, ID extends Serializable> {
+public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
 
   /** set this, to have createdBy and updatedBy set */
   private static final ThreadLocal<String> principalName = new ThreadLocal<String>();
@@ -114,6 +114,8 @@ public class AbstractDao<T, ID extends Serializable> {
     return count(null);
   }
 
+  @Crud
+  @Override
   public int count(Object parentKey) {
     return supplier.count(getCurrentTransaction(), mapper.getKind(), parentKey, null);
   }
@@ -122,6 +124,9 @@ public class AbstractDao<T, ID extends Serializable> {
     delete(null, id);
   }
 
+  @Cached
+  @Crud
+  @Override
   public void delete(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
     supplier.deleteValue(getCurrentTransaction(), key);
@@ -139,6 +144,9 @@ public class AbstractDao<T, ID extends Serializable> {
     return get(null, id);
   }
 
+  @Cached
+  @Crud
+  @Override
   public T get(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
     Object value = supplier.readValue(getCurrentTransaction(), key);
@@ -149,9 +157,10 @@ public class AbstractDao<T, ID extends Serializable> {
     return entity;
   }
 
-  public ID put(T entity) throws IOException {
-    ID id = mapper.getId(entity);
-    Object parentKey = mapper.getParentKey(entity);
+  @Cached
+  @Crud
+  @Override
+  public ID put(Object parentKey, ID id, T entity) throws IOException {
     Object key = mapper.toKey(parentKey, id);
     Object value = mapper.toWriteValue(entity);
     updateAuditInfo(value);
@@ -159,6 +168,12 @@ public class AbstractDao<T, ID extends Serializable> {
     id = mapper.fromKey(key);
     mapper.updateEntityPostWrite(entity, key, value);
     return id;
+  }
+
+  public ID put(T entity) throws IOException {
+    ID id = mapper.getId(entity);
+    Object parentKey = mapper.getParentKey(entity);
+    return put(parentKey, id, entity);
   }
 
   // --- query methods ---
@@ -181,10 +196,12 @@ public class AbstractDao<T, ID extends Serializable> {
   }
 
   public CursorPage<T> queryPage(int requestedPageSize, String cursorString) {
-    return queryPage(false, requestedPageSize, null,
-        null, false, null, false, null, cursorString);
+    return queryPage(null, requestedPageSize, cursorString);
   }
 
+  @Cached
+  @Crud
+  @Override
   public CursorPage<T> queryPage(Object ancestorKey, int requestedPageSize, String cursorString) {
     return queryPage(false, requestedPageSize, ancestorKey,
         null, false, null, false, null, cursorString);

@@ -241,7 +241,7 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   @Override
   public ByteBuffer getByteBuffer(Entity value, String column) {
     Blob blob = (Blob) value.getProperty(column);
-    return ByteBuffer.wrap(blob.getBytes());
+    return null != blob ? ByteBuffer.wrap(blob.getBytes()) : null;
   }
 
   @Override
@@ -281,7 +281,7 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
 
   @Override
   public void setByteBuffer(Entity value, String column, ByteBuffer b) {
-    value.setProperty(column, new Blob(b.array()));
+    value.setProperty(column, null != b ? new Blob(b.array()) : null);
   }
 
   @Override

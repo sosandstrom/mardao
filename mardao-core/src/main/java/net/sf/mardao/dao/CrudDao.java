@@ -2,6 +2,9 @@ package net.sf.mardao.dao;
 
 import net.sf.mardao.core.CursorPage;
 
+import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheRemove;
+import javax.cache.annotation.CacheResult;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -11,18 +14,16 @@ import java.io.Serializable;
  */
 public interface CrudDao<T, ID extends Serializable> {
 
-    @Crud
     int count(Object parentKey);
 
-    @Crud
+    @CachePut
     ID put(Object parentKey, ID id, T entity) throws IOException;
 
-    @Crud
+    @CacheResult
     T get(Object parentKey, ID id) throws IOException;
 
-    @Crud
+    @CacheRemove
     void delete(Object parentKey, ID id) throws IOException;
 
-    @Crud
     CursorPage<T> queryPage(Object ancestorKey, int requestedPageSize, String cursorString);
 }

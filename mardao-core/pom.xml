@@ -33,6 +33,11 @@
       <artifactId>geronimo-jpa_3.0_spec</artifactId>
     </dependency>
     <dependency>
+      <groupId>javax.cache</groupId>
+      <artifactId>cache-api</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>

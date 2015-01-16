@@ -33,6 +33,10 @@ import net.sf.mardao.core.KeyFuture;
 import net.sf.mardao.core.EntityFuture;
 import net.sf.mardao.core.filter.Filter;
 
+import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheRemove;
+import javax.cache.annotation.CacheResult;
+
 /**
  * Generated Daos extends this base class.
  *
@@ -114,7 +118,6 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return count(null);
   }
 
-  @Crud
   @Override
   public int count(Object parentKey) {
     return supplier.count(getCurrentTransaction(), mapper.getKind(), parentKey, null);
@@ -124,8 +127,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     delete(null, id);
   }
 
-  @Cached
-  @Crud
+  @CacheRemove
   @Override
   public void delete(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
@@ -144,8 +146,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return get(null, id);
   }
 
-  @Cached
-  @Crud
+  @CacheResult
   @Override
   public T get(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
@@ -157,8 +158,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return entity;
   }
 
-  @Cached
-  @Crud
+  @CachePut
   @Override
   public ID put(Object parentKey, ID id, T entity) throws IOException {
     Object key = mapper.toKey(parentKey, id);
@@ -199,8 +199,6 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return queryPage(null, requestedPageSize, cursorString);
   }
 
-  @Cached
-  @Crud
   @Override
   public CursorPage<T> queryPage(Object ancestorKey, int requestedPageSize, String cursorString) {
     return queryPage(false, requestedPageSize, ancestorKey,

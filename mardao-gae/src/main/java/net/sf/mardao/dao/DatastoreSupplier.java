@@ -235,7 +235,8 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
 
   @Override
   public Float getFloat(Entity value, String column) {
-    return (Float) value.getProperty(column);
+    Double doubleValue = (Double) value.getProperty(column);
+    return null != doubleValue ? doubleValue.floatValue() : null;
   }
 
   @Override

@@ -25,6 +25,17 @@ import ${field.entity.className};
 #foreach( $field in $entity.manyToManys )	 
 import ${field.entity.className};
 #end
+#if ( $entity.shouldCache() )
+import net.sf.mardao.core.Cached;
+import net.sf.mardao.core.CacheConfig;
+import java.io.IOException;
+import javax.cache.annotation.CacheResult;
+import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheRemove;
+import javax.cache.annotation.CacheKey;
+import javax.cache.annotation.CacheValue;
+#end
+
 
 /**
  * The ${entity.simpleName} domain-object specific finders and methods go in this POJO.
@@ -38,6 +49,39 @@ public class Generated${entity.simpleName}DaoImpl
   public Generated${entity.simpleName}DaoImpl(Supplier supplier) {
     super(new ${entity.simpleName}Mapper(supplier), supplier);
   }
+
+// ----------------------- Caching -------------------------------------
+
+#if( $entity.shouldCache() )
+  // Cache crud methods
+  @CacheResult
+  @Override
+  public ${entity.simpleName} get(@CacheKey Object parentKey, @CacheKey ${entity.pk.type} id) throws IOException {
+    return super.get(parentKey, id);
+  }
+
+  @CachePut
+  @Override
+  public ${entity.pk.type} put(@CacheKey Object parentKey, @CacheKey ${entity.pk.type} id, @CacheValue ${entity.simpleName} entity) throws IOException {
+    return super.put(parentKey, id, entity);
+  }
+
+  @CacheRemove
+  @Override
+  public void delete(@CacheKey Object parentKey, @CacheKey ${entity.pk.type} id) throws IOException {
+    super.delete(parentKey, id);
+  }
+
+#if( $entity.shouldCachePages() )
+  // Cache page query. Use separate namespace and a shorter expiration time (5min)
+  @CacheConfig(expiresAfterSeconds = 300)
+  @CacheResult(cacheName = "${entity.simpleName}.queryPage")
+  @Override
+  public CursorPage<${entity.simpleName}> queryPage(@CacheKey Object ancestorKey, @CacheKey int requestedPageSize, @CacheKey String cursorString) {
+    return super.queryPage(ancestorKey, requestedPageSize, cursorString);
+  }
+#end
+#end
 
 // ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )

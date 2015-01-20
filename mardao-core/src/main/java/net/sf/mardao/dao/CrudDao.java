@@ -11,18 +11,13 @@ import java.io.Serializable;
  */
 public interface CrudDao<T, ID extends Serializable> {
 
-    @Crud
     int count(Object parentKey);
 
-    @Crud
     ID put(Object parentKey, ID id, T entity) throws IOException;
 
-    @Crud
     T get(Object parentKey, ID id) throws IOException;
 
-    @Crud
     void delete(Object parentKey, ID id) throws IOException;
 
-    @Crud
     CursorPage<T> queryPage(Object ancestorKey, int requestedPageSize, String cursorString);
 }

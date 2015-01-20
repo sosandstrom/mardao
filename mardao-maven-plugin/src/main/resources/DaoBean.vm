@@ -3,6 +3,9 @@ package ${daoPackage};
 import com.google.inject.Inject;
 
 import net.sf.mardao.dao.Supplier;
+#if ( $entity.shouldCache() )
+import javax.cache.annotation.CacheDefaults;
+#end
 
 /**
  * Implementation of Business Methods related to entity ${entity.simpleName}.
@@ -12,6 +15,9 @@ import net.sf.mardao.dao.Supplier;
  * Generated on ${currentDate}.
  * @author mardao DAO generator (${helper.class.name})
  */
+#if ( $entity.shouldCache() )
+@CacheDefaults(cacheName = "${entity.simpleName}")
+#end
 public class ${entity.simpleName}DaoBean 
 	extends Generated${entity.simpleName}DaoImpl
 {

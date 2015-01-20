@@ -1,4 +1,4 @@
-package net.sf.mardao.dao;
+package net.sf.mardao.core;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,14 +6,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotate a class or method as possible to cache.
- * Created by sosandstrom on 2015-01-02.
+ * Annotation the domain object to enable caching of CRUD operations.
+ *
+ * @author mattiaslevin
  */
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
 public @interface Cached {
-  String from() default "";
-  long size() default -1;
-  int expiresAfterSeconds() default -1;
+
+  /**
+   * Cache query page.
+   */
   boolean cachePages() default false;
+
 }

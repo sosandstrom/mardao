@@ -114,7 +114,6 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return count(null);
   }
 
-  @Crud
   @Override
   public int count(Object parentKey) {
     return supplier.count(getCurrentTransaction(), mapper.getKind(), parentKey, null);
@@ -124,8 +123,6 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     delete(null, id);
   }
 
-  @Cached
-  @Crud
   @Override
   public void delete(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
@@ -144,8 +141,6 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return get(null, id);
   }
 
-  @Cached
-  @Crud
   @Override
   public T get(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
@@ -157,8 +152,6 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return entity;
   }
 
-  @Cached
-  @Crud
   @Override
   public ID put(Object parentKey, ID id, T entity) throws IOException {
     Object key = mapper.toKey(parentKey, id);
@@ -199,8 +192,6 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return queryPage(null, requestedPageSize, cursorString);
   }
 
-  @Cached
-  @Crud
   @Override
   public CursorPage<T> queryPage(Object ancestorKey, int requestedPageSize, String cursorString) {
     return queryPage(false, requestedPageSize, ancestorKey,

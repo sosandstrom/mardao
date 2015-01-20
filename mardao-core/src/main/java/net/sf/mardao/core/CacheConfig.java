@@ -1,6 +1,5 @@
 package net.sf.mardao.core;
 
-import javax.cache.annotation.CacheKeyGenerator;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

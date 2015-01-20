@@ -33,10 +33,6 @@ import net.sf.mardao.core.KeyFuture;
 import net.sf.mardao.core.EntityFuture;
 import net.sf.mardao.core.filter.Filter;
 
-import javax.cache.annotation.CachePut;
-import javax.cache.annotation.CacheRemove;
-import javax.cache.annotation.CacheResult;
-
 /**
  * Generated Daos extends this base class.
  *

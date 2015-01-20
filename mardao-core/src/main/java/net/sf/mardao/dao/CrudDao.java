@@ -2,9 +2,6 @@ package net.sf.mardao.dao;
 
 import net.sf.mardao.core.CursorPage;
 
-import javax.cache.annotation.CachePut;
-import javax.cache.annotation.CacheRemove;
-import javax.cache.annotation.CacheResult;
 import java.io.IOException;
 import java.io.Serializable;
 

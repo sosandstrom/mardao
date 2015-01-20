@@ -18,11 +18,6 @@ import java.lang.annotation.Target;
 public @interface CacheConfig {
 
   /**
-   * Cache name.
-   */
-  String name() default "";
-
-  /**
    * Size of the cache.
    */
   long size() default -1;
@@ -31,10 +26,5 @@ public @interface CacheConfig {
    * Cache expiration.
    */
   int expiresAfterSeconds() default -1;
-
-  /**
-   * The class that will be used to generate the cache key.
-   */
-  Class<? extends CacheKeyGenerator> keyGenerator() default CacheKeyGenerator.class;
 
 }

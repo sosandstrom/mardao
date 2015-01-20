@@ -74,8 +74,8 @@ public class Generated${entity.simpleName}DaoImpl
 
 #if( $entity.shouldCachePages() )
   // Cache page query. Use separate namespace and a shorter expiration time (5min)
-  @CacheResult
-  @CacheConfig(name = "${entity.simpleName}.queryPage", expiresAfterSeconds = 300)
+  @CacheConfig(expiresAfterSeconds = 300)
+  @CacheResult(cacheName = "${entity.simpleName}.queryPage")
   @Override
   public CursorPage<${entity.simpleName}> queryPage(@CacheKey Object ancestorKey, @CacheKey int requestedPageSize, @CacheKey String cursorString) {
     return super.queryPage(ancestorKey, requestedPageSize, cursorString);

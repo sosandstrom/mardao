@@ -63,7 +63,7 @@ public class DCachedEntityDaoTest {
 
   @Test
   public void testClassAnnotation() throws Exception {
-    assertTrue(DCachedEntityDaoBean.class.isAnnotationPresent(CacheConfig.class));
+    assertTrue(DCachedEntityDaoBean.class.isAnnotationPresent(CacheDefaults.class));
   }
 
   @Test

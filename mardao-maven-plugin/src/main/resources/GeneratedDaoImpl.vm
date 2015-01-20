@@ -45,9 +45,6 @@ import javax.cache.annotation.CacheValue;
  * Generated on ${currentDate}.
  * @author mardao DAO generator (${helper.class.name})
  */
-#if ( $entity.shouldCache() )
-@CacheDefaults(cacheName = "${entity.simpleName}")
-#end
 public class Generated${entity.simpleName}DaoImpl
   extends AbstractDao<${entity.simpleName}, ${entity.pk.type}> {
 

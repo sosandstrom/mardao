@@ -19,6 +19,4 @@ public @interface Cached {
    */
   boolean cachePages() default false;
 
-  // TODO Consider add support for unique constraint fields
-
 }

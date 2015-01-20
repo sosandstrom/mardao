@@ -33,6 +33,8 @@ import javax.cache.annotation.CachePut;
 import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheRemoveAll;
 import javax.cache.annotation.CacheDefaults;
+import javax.cache.annotation.CacheKey;
+import javax.cache.annotation.CacheValue;
 #end
 
 
@@ -59,19 +61,19 @@ public class Generated${entity.simpleName}DaoImpl
   // Cache crud methods
   @CacheResult
   @Override
-  public ${entity.simpleName} get(Object parentKey, ${entity.pk.type} id) throws IOException {
+  public ${entity.simpleName} get(@CacheKey Object parentKey, @CacheKey ${entity.pk.type} id) throws IOException {
     return super.get(parentKey, id);
   }
 
   @CachePut
   @Override
-  public ${entity.pk.type} put(Object parentKey, ${entity.pk.type} id, ${entity.simpleName} entity) throws IOException {
+  public ${entity.pk.type} put(@CacheKey Object parentKey, @CacheKey ${entity.pk.type} id, @CacheValue ${entity.simpleName} entity) throws IOException {
     return super.put(parentKey, id, entity);
   }
 
   @CacheRemove
   @Override
-  public void delete(Object parentKey, ${entity.pk.type} id) throws IOException {
+  public void delete(@CacheKey Object parentKey, @CacheKey ${entity.pk.type} id) throws IOException {
     super.delete(parentKey, id);
   }
 
@@ -79,7 +81,7 @@ public class Generated${entity.simpleName}DaoImpl
   // Cache page query
   @CacheResult
   @Override
-  public CursorPage<${entity.simpleName}> queryPage(Object ancestorKey, int requestedPageSize, String cursorString) {
+  public CursorPage<${entity.simpleName}> queryPage(@CacheKey Object ancestorKey, @CacheKey int requestedPageSize, @CacheKey String cursorString) {
     return super.queryPage(ancestorKey, requestedPageSize, cursorString);
   }
 #end

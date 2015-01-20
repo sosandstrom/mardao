@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 
 import net.sf.mardao.dao.Supplier;
 #if ( $entity.shouldCache() )
-import javax.cache.annotation.CacheDefaults;
+import net.sf.mardao.core.CacheConfig;
 #end
 
 /**
@@ -16,7 +16,7 @@ import javax.cache.annotation.CacheDefaults;
  * @author mardao DAO generator (${helper.class.name})
  */
 #if ( $entity.shouldCache() )
-@CacheDefaults(cacheName = "${entity.simpleName}")
+@CacheConfig(name = "${entity.simpleName}")
 #end
 public class ${entity.simpleName}DaoBean 
 	extends Generated${entity.simpleName}DaoImpl

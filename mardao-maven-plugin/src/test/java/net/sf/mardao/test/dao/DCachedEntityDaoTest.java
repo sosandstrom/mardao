@@ -1,9 +1,7 @@
 package net.sf.mardao.test.dao;
 
-import com.google.common.collect.ImmutableList;
 import edu.emory.mathcs.backport.java.util.Arrays;
-import net.sf.mardao.dao.InMemorySupplier;
-import net.sf.mardao.dao.Supplier;
+import net.sf.mardao.core.CacheConfig;
 import net.sf.mardao.test.domain.DCachedEntity;
 import org.junit.After;
 import org.junit.Before;
@@ -12,11 +10,10 @@ import org.junit.Test;
 import javax.cache.annotation.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class DCachedEntityDaoTest {
 
@@ -66,12 +63,16 @@ public class DCachedEntityDaoTest {
 
   @Test
   public void testClassAnnotation() throws Exception {
-    assertTrue(DCachedEntityDaoBean.class.isAnnotationPresent(CacheDefaults.class));
+    assertTrue(DCachedEntityDaoBean.class.isAnnotationPresent(CacheConfig.class));
   }
 
   @Test
   public void testPageAnnotation() throws Exception {
-    // TODO
+
+    // The read page method should not be annotated
+    Method readMethod = DCachedEntityDaoBean.class.getMethod("queryPage", Object.class, Integer.TYPE, String.class);
+    assertFalse(readMethod.isAnnotationPresent(CacheResult.class));
+
   }
 
 }

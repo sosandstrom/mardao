@@ -44,7 +44,7 @@ import net.sf.mardao.core.GeoLocation;
 import net.sf.mardao.core.Parent;
 import net.sf.mardao.core.UpdatedBy;
 import net.sf.mardao.core.UpdatedDate;
-import net.sf.mardao.dao.Cached;
+import net.sf.mardao.core.Cached;
 import net.sf.mardao.domain.Entity;
 import net.sf.mardao.domain.Field;
 import net.sf.mardao.domain.Group;

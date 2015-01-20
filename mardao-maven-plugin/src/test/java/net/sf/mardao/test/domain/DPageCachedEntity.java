@@ -5,12 +5,12 @@ import net.sf.mardao.core.Cached;
 import javax.persistence.Entity;
 
 /**
- * A cached entity.
+ * A page cached entity.
  *
  * @author mattiaslevin
  */
 @Entity
-@Cached
-public class DCachedEntity extends DEntity {
+@Cached(cachePages = true)
+public class DPageCachedEntity extends DCachedEntity {
 
 }

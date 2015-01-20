@@ -1,4 +1,4 @@
-package net.sf.mardao.dao;
+package net.sf.mardao.core;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 public @interface Cached {
 
   /**
-   * Cache query page operation.
+   * Cache query page.
    */
   boolean cachePages() default false;
 

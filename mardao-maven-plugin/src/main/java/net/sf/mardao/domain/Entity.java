@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import net.sf.mardao.dao.Cached;
+import net.sf.mardao.core.Cached;
 import net.sf.mardao.plugin.ProcessDomainMojo;
 
 /**

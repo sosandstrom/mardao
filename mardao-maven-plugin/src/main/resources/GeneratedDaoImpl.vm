@@ -26,17 +26,15 @@ import ${field.entity.className};
 import ${field.entity.className};
 #end
 #if ( $entity.shouldCache() )
-import net.sf.mardao.dao.Cached;
+import net.sf.mardao.core.Cached;
+import net.sf.mardao.core.CacheConfig;
 import java.io.IOException;
 import javax.cache.annotation.CacheResult;
 import javax.cache.annotation.CachePut;
 import javax.cache.annotation.CacheRemove;
-import javax.cache.annotation.CacheRemoveAll;
-import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheValue;
 #end
-
 
 
 /**
@@ -75,14 +73,14 @@ public class Generated${entity.simpleName}DaoImpl
   }
 
 #if( $entity.shouldCachePages() )
-  // Cache page query
+  // Cache page query. Use separate namespace and a shorter expiration time (5min)
   @CacheResult
+  @CacheConfig(name = "${entity.simpleName}.queryPage", expiresAfterSeconds = 300)
   @Override
   public CursorPage<${entity.simpleName}> queryPage(@CacheKey Object ancestorKey, @CacheKey int requestedPageSize, @CacheKey String cursorString) {
     return super.queryPage(ancestorKey, requestedPageSize, cursorString);
   }
 #end
-
 #end
 
 // ----------------------- field finders -------------------------------

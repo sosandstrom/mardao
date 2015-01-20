@@ -31,6 +31,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import net.sf.mardao.dao.Cached;
 import net.sf.mardao.plugin.ProcessDomainMojo;
 
 /**
@@ -59,6 +61,7 @@ public class Entity implements Comparable<Entity> {
     private Field                    createdBy;
     private Field                    updatedDate;
     private Field                    updatedBy;
+    private Cached                   cached;
 
     public Class getClazz() {
         return clazz;
@@ -196,6 +199,15 @@ public class Entity implements Comparable<Entity> {
         return tableName;
     }
 
+    /** Caching */
+    public boolean shouldCache() {
+        return null != cached;
+    }
+
+    public boolean shouldCachePages() {
+        return null != cached && cached.cachePages();
+    }
+
     public Set<Field> getOneToOnes() {
         return oneToOnes;
     }
@@ -275,5 +287,13 @@ public class Entity implements Comparable<Entity> {
 
     public void setGeoLocation(Field geoLocation) {
         this.geoLocation = geoLocation;
+    }
+
+    public Cached getCached() {
+        return cached;
+    }
+
+    public void setCached(Cached cached) {
+        this.cached = cached;
     }
 }

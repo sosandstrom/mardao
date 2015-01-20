@@ -16,13 +16,10 @@ public interface CrudDao<T, ID extends Serializable> {
 
     int count(Object parentKey);
 
-    @CachePut
     ID put(Object parentKey, ID id, T entity) throws IOException;
 
-    @CacheResult
     T get(Object parentKey, ID id) throws IOException;
 
-    @CacheRemove
     void delete(Object parentKey, ID id) throws IOException;
 
     CursorPage<T> queryPage(Object ancestorKey, int requestedPageSize, String cursorString);

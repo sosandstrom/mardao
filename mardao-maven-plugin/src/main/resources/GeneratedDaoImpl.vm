@@ -25,6 +25,17 @@ import ${field.entity.className};
 #foreach( $field in $entity.manyToManys )	 
 import ${field.entity.className};
 #end
+#if ( $entity.shouldCache() )
+import net.sf.mardao.dao.Cached;
+import java.io.IOException;
+import javax.cache.annotation.CacheResult;
+import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheRemove;
+import javax.cache.annotation.CacheRemoveAll;
+import javax.cache.annotation.CacheDefaults;
+#end
+
+
 
 /**
  * The ${entity.simpleName} domain-object specific finders and methods go in this POJO.
@@ -32,12 +43,48 @@ import ${field.entity.className};
  * Generated on ${currentDate}.
  * @author mardao DAO generator (${helper.class.name})
  */
+#if ( $entity.shouldCache() )
+@CacheDefaults(cacheName = "${entity.simpleName}")
+#end
 public class Generated${entity.simpleName}DaoImpl
   extends AbstractDao<${entity.simpleName}, ${entity.pk.type}> {
 
   public Generated${entity.simpleName}DaoImpl(Supplier supplier) {
     super(new ${entity.simpleName}Mapper(supplier), supplier);
   }
+
+// ----------------------- Caching -------------------------------------
+
+#if( $entity.shouldCache() )
+  // Cache crud methods
+  @CacheResult
+  @Override
+  public ${entity.simpleName} get(Object parentKey, ${entity.pk.type} id) throws IOException {
+    return super.get(parentKey, id);
+  }
+
+  @CachePut
+  @Override
+  public ${entity.pk.type} put(Object parentKey, ${entity.pk.type} id, ${entity.simpleName} entity) throws IOException {
+    return super.put(parentKey, id, entity);
+  }
+
+  @CacheRemove
+  @Override
+  public void delete(Object parentKey, ${entity.pk.type} id) throws IOException {
+    super.delete(parentKey, id);
+  }
+
+#if( $entity.shouldCachePages() )
+  // Cache page query
+  @CacheResult
+  @Override
+  public CursorPage<${entity.simpleName}> queryPage(Object ancestorKey, int requestedPageSize, String cursorString) {
+    return super.queryPage(ancestorKey, requestedPageSize, cursorString);
+  }
+#end
+
+#end
 
 // ----------------------- field finders -------------------------------
 #foreach( $field in $entity.fields )

@@ -46,7 +46,7 @@ import javax.cache.annotation.CacheValue;
 public class Generated${entity.simpleName}DaoImpl
   extends AbstractDao<${entity.simpleName}, ${entity.pk.type}> {
 
-  public Generated${entity.simpleName}DaoImpl(Supplier supplier) {
+  public Generated${entity.simpleName}DaoImpl(Supplier<Object, Object, Object, Object> supplier) {
     super(new ${entity.simpleName}Mapper(supplier), supplier);
   }
 

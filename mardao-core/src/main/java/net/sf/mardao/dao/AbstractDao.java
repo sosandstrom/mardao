@@ -42,12 +42,12 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
 
   /** set this, to have createdBy and updatedBy set */
   private static final ThreadLocal<String> principalName = new ThreadLocal<String>();
-  private static final ThreadLocal<Stack> TRANSACTION_STACKS = new ThreadLocal<Stack>();
+  private static final ThreadLocal<Stack<Object>> TRANSACTION_STACKS = new ThreadLocal<Stack<Object>>();
 
   private final Mapper<T, ID> mapper;
-  private final Supplier supplier;
+  private final Supplier<Object, Object, Object, Object> supplier;
 
-  protected AbstractDao(Mapper<T, ID> mapper, Supplier supplier) {
+  protected AbstractDao(Mapper<T, ID> mapper, Supplier<Object, Object, Object, Object> supplier) {
     this.mapper = mapper;
     this.supplier = supplier;
   }
@@ -66,7 +66,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return withTransaction(transFunc, commit, this.supplier);
   }
 
-  public static <R> R withTransaction(TransFunc<R> transFunc, boolean commit, Supplier supplier) throws IOException {
+  public static <R> R withTransaction(TransFunc<R> transFunc, boolean commit, Supplier<Object, Object, Object, Object> supplier) throws IOException {
     final Object transaction = supplier.beginTransaction();
     // TransactionHolder holder = new TransactionHolder(transaction, new Date());
     pushTransaction(transaction);
@@ -84,9 +84,9 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
   }
 
   private static void pushTransaction(final Object transaction) {
-    Stack stack = TRANSACTION_STACKS.get();
+    Stack<Object> stack = TRANSACTION_STACKS.get();
     if (null == stack) {
-      stack = new Stack();
+      stack = new Stack<Object>();
       TRANSACTION_STACKS.set(stack);
     }
     stack.push(transaction);
@@ -204,7 +204,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
                           Collection<String> projections,
                           String cursorString,
                           Filter... filters) {
-    CursorPage page = supplier.queryPage(getCurrentTransaction(), mapper.getKind(), false,
+    CursorPage<Object> page = supplier.queryPage(getCurrentTransaction(), mapper.getKind(), false,
       requestedPageSize, ancestorKey,
       primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
       projections, cursorString,
@@ -215,8 +215,12 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
       T entity = mapper.fromReadValue(value);
       entities.add(entity);
     }
-    page.setItems(entities);
-    return page;
+
+    CursorPage<T> returnValue = new CursorPage<T>();
+    returnValue.setItems(entities);
+    returnValue.setCursorKey(page.getCursorKey());
+    returnValue.setTotalSize(page.getTotalSize());
+    return returnValue;
   }
 
   protected Iterable<T> queryIterable(boolean keysOnly, int offset, int limit, Object ancestorKey,
@@ -270,8 +274,8 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     Object key = mapper.toKey(parentKey, id);
     Object value = mapper.toWriteValue(entity);
     updateAuditInfo(value);
-    Future<?> future = supplier.writeFuture(getCurrentTransaction(), key, value);
-    return new KeyFuture(mapper, future, entity, value);
+    Future<Object> future = supplier.writeFuture(getCurrentTransaction(), key, value);
+    return new KeyFuture<T, ID>(mapper, future, entity, value);
   }
 
   // --- utility methods ---

@@ -23,7 +23,7 @@ public class ${entity.simpleName}DaoBean
 {
 
   @Inject
-  public ${entity.simpleName}DaoBean(Supplier supplier) {
+  public ${entity.simpleName}DaoBean(Supplier<Object, Object, Object, Object> supplier) {
     super(supplier);
   }
 

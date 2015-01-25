@@ -22,6 +22,10 @@ package net.sf.mardao.dao;
  * #L%
  */
 
+import com.google.appengine.api.datastore.*;
+import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.filter.Filter;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -30,21 +34,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 
-import com.google.appengine.api.datastore.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.sf.mardao.core.CursorPage;
-import net.sf.mardao.core.filter.Filter;
-
 /**
  * Stores entities in Google App Engine's Datastore.
  *
  * @author osandstrom Date: 2014-09-13 Time: 17:43
  */
 public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transaction> {
-
-  static final Logger LOGGER = LoggerFactory.getLogger(DatastoreSupplier.class);
 
   private DatastoreService syncService;
   private AsyncDatastoreService asyncService;

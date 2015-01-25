@@ -32,6 +32,6 @@ import net.sf.mardao.domain.DUser;
  */
 public class DFactoryDao extends AbstractDao<DFactory, String> {
   public DFactoryDao(Supplier supplier) {
-    super(new DFactoryMapper(supplier), supplier);
+    super(new DFactoryMapper(supplier), (Supplier<Object, Object, Object, Object>) supplier);
   }
 }

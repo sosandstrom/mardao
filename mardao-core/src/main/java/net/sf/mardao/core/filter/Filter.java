@@ -55,6 +55,10 @@ public class Filter {
         return new Filter(column, FilterOperator.LESS_THAN, operand);
     }
 
+    public static Filter notEqualsFilter(String column, Object operand) {
+      return new Filter(column, FilterOperator.NOT_EQUALS, operand);
+    }
+
     public String toString() {
         return column + " " + operator + " " + operand;
     }

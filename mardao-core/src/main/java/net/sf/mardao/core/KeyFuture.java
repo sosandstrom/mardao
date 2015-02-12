@@ -14,11 +14,11 @@ import java.util.concurrent.TimeoutException;
 public class KeyFuture<T, ID extends Serializable> implements Future<ID> {
 
     private final Mapper<T, ID> mapper;
-    private final Future<?> future;
+    private final Future<Object> future;
     private final T entity;
     private final Object value;
 
-    public KeyFuture(Mapper<T, ID> mapper, Future<?> future, T entity, Object value) {
+    public KeyFuture(Mapper<T, ID> mapper, Future<Object> future, T entity, Object value) {
         this.mapper = mapper;
         this.future = future;
         this.entity = entity;

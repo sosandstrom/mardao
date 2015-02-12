@@ -22,24 +22,15 @@ package net.sf.mardao.dao;
  * #L%
  */
 
+import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.filter.Filter;
+
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.sf.mardao.core.CursorPage;
-import net.sf.mardao.core.filter.Filter;
 
 /**
  * Stores entities in-memory using a new TreeMap&lt;InMemoryKey, Map&lt;String, Object&gt;&gt;.
@@ -50,8 +41,6 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
 
   public static final String NAME_PARENT_KEY = "__parentKey";
   public static final String NAME_KEY = "__Key";
-
-  static final Logger LOGGER = LoggerFactory.getLogger(InMemorySupplier.class);
 
   private final Map<String, Map<String, Map<String, Object>>> store = new TreeMap<String, Map<String, Map<String, Object>>>();
 
@@ -299,7 +288,6 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
       key = InMemoryKey.of(key.getParentKey(), key.getKind(), Long.toString(Math.round(Math.random() * Long.MAX_VALUE)));
     }
     kindStore(key).put(key.getName(), core);
-    LOGGER.debug("put {} -> {}", key, core);
     return key;
   }
 

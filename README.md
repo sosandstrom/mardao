@@ -20,6 +20,14 @@ or the Open Pockets blog at
 
 # Release History
 
+### Tag release with
+
+	 mvn gimple:gimple
+
+### Deploy release with
+
+	 mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dmaven.test.skip=true && mvn deploy -PpluginTest,release-sign-artifacts -Dgpg.passphrase=
+
 ## Release 3.0.4
 
 * First 3.x release, introducing Mapper and Supplier.

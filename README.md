@@ -2,7 +2,7 @@
 
 ### Mardao Architect's Java DAO generator
 
-Latest Stable Version: 2.3.6
+Latest Stable Version: 3.0.13
 
 License: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -27,6 +27,12 @@ or the Open Pockets blog at
 ### Deploy release with
 
 	 mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Dmaven.test.skip=true && mvn deploy -PpluginTest,release-sign-artifacts -Dgpg.passphrase=
+	 
+## Release 3.0.13
+Friday, 2015-02-13
+
+* added more filters
+* Reduced dependencies
 
 ## Release 3.0.4
 

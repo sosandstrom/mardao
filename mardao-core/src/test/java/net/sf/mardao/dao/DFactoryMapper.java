@@ -24,6 +24,8 @@ package net.sf.mardao.dao;
 
 import net.sf.mardao.domain.DFactory;
 
+import java.io.Serializable;
+
 /**
  * To test AbstractDao.
  *
@@ -63,6 +65,11 @@ public class DFactoryMapper implements Mapper<DFactory, String> {
   }
 
   @Override
+  public void setPrimaryKey(Object writeValue, Object primaryKey) {
+    supplier.setString(writeValue, COLUMN_PROVIDERID, supplier.toStringKey(primaryKey));
+  }
+
+  @Override
   public String getKind() {
     return DFactory.class.getSimpleName();
   }
@@ -76,7 +83,7 @@ public class DFactoryMapper implements Mapper<DFactory, String> {
   public Object toWriteValue(DFactory entity) {
     final String id = getId(entity);
     final Object parentKey = getParentKey(entity);
-    final Object value = supplier.createWriteValue(parentKey, getKind(), id);
+    final Object value = supplier.createWriteValue(this, parentKey, id, entity);
     supplier.setString(value, COLUMN_PROVIDERID, entity.getProviderId());
     return value;
   }
@@ -99,6 +106,16 @@ public class DFactoryMapper implements Mapper<DFactory, String> {
   }
 
   @Override
+  public String getPrimaryKeyColumnName() {
+    return COLUMN_PROVIDERID;
+  }
+
+  @Override
+  public String getParentKeyColumnName() {
+    return null;
+  }
+
+  @Override
   public String getUpdatedByColumnName() {
     return null;
   }
@@ -106,5 +123,10 @@ public class DFactoryMapper implements Mapper<DFactory, String> {
   @Override
   public String getUpdatedDateColumnName() {
     return null;
+  }
+
+  @Override
+  public String getWriteSQL(Serializable id) {
+    return null == id ? "" : "UPDATE TABLE DFactory SET () VALUES () WHERE providerId=:providerId";
   }
 }

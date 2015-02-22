@@ -37,7 +37,7 @@ import java.util.concurrent.FutureTask;
  *
  * @author osandstrom Date: 2014-09-03 Time: 20:48
  */
-public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Object>, Map<String, Object>, Object> {
+public class InMemorySupplier extends AbstractSupplier<InMemoryKey, Map<String, Object>, Map<String, Object>, Object> {
 
   public static final String NAME_PARENT_KEY = "__parentKey";
   public static final String NAME_KEY = "__Key";
@@ -60,8 +60,8 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public int count(Object tx, String kind, InMemoryKey ancestorKey, InMemoryKey simpleKey, Filter... filters) {
-    final Collection<Map<String, Object>> filtered = filterValues(kindStore(kind).values());
+  public int count(Object tx, Mapper mapper, InMemoryKey ancestorKey, InMemoryKey simpleKey, Filter... filters) {
+    final Collection<Map<String, Object>> filtered = filterValues(kindStore(mapper.getKind()).values());
     return filtered.size();
   }
 
@@ -157,48 +157,13 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public void setCollection(Map<String, Object> value, String column, Collection c) {
-    value.put(column, c);
+  protected void setObject(Map<String, Object> value, String column, Object o) {
+    value.put(column, o);
   }
 
   @Override
-  public void setDate(Map<String, Object> value, String column, Date d) {
-    value.put(column, d);
-  }
-
-  @Override
-  public void setLong(Map<String, Object> value, String column, Long l) {
-    value.put(column, l);
-  }
-
-  @Override
-  public void setString(Map<String, Object> value, String column, String s) {
-    value.put(column, s);
-  }
-
-  @Override
-  public void setInteger(Map<String, Object> value, String column, Integer i) {
-    value.put(column, i);
-  }
-
-  @Override
-  public void setBoolean(Map<String, Object> value, String column, Boolean b) {
-    value.put(column, b);
-  }
-
-  @Override
-  public void setFloat(Map<String, Object> value, String column, Float f) {
-    value.put(column, f);
-  }
-
-  @Override
-  public void setByteBuffer(Map<String, Object> value, String column, ByteBuffer b) {
-    value.put(column, b);
-  }
-
-  @Override
-  public Map<String, Object> createWriteValue(InMemoryKey parentKey, String kind, Long id) {
-    return createWriteValue(parentKey, toKey(parentKey, kind, id));
+  public Map<String, Object> createWriteValue(Mapper mapper, InMemoryKey parentKey, Long id, Object entity) {
+    return createWriteValue(parentKey, toKey(parentKey, mapper.getKind(), id));
   }
 
   private Map<String, Object> createWriteValue(InMemoryKey parentKey, InMemoryKey key) {
@@ -209,8 +174,8 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public Map<String, Object> createWriteValue(InMemoryKey parentKey, String kind, String id) {
-    return createWriteValue(parentKey, toKey(parentKey, kind, id));
+  public Map<String, Object> createWriteValue(Mapper mapper, InMemoryKey parentKey, String id, Object entity) {
+    return createWriteValue(parentKey, toKey(parentKey, mapper.getKind(), id));
   }
 
   @Override
@@ -252,7 +217,7 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public CursorPage<Map<String, Object>> queryPage(Object tx, String kind, boolean keysOnly,
+  public CursorPage<Map<String, Object>> queryPage(Object tx, Mapper mapper, boolean keysOnly,
                                                    int requestedPageSize, InMemoryKey ancestorKey,
                                                    String primaryOrderBy, boolean primaryIsAscending,
                                                    String secondaryOrderBy, boolean secondaryIsAscending,
@@ -262,11 +227,11 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
     Collection<Map<String, Object>> values = new ArrayList<Map<String, Object>>();
     page.setItems(values);
     if (null == cursorString) {
-      page.setTotalSize(filterValues(kindStore(kind).values(), filters).size());
+      page.setTotalSize(filterValues(kindStore(mapper.getKind()).values(), filters).size());
     }
 
     boolean foundCursor = null == cursorString;
-    for (Map.Entry<String, Map<String, Object>> entry : kindStore(kind).entrySet()) {
+    for (Map.Entry<String, Map<String, Object>> entry : kindStore(mapper.getKind()).entrySet()) {
       if (!foundCursor) {
         foundCursor = entry.getKey().toString().equals(cursorString);
       }

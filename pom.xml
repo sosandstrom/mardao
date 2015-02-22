@@ -15,6 +15,7 @@
     <modules>
         <module>mardao-core</module>
         <module>mardao-maven-plugin</module>
+        <module>mardao-jdbc</module>
         <module>mardao-gae</module>
     </modules>
 

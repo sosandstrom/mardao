@@ -116,7 +116,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
 
   @Override
   public int count(Object parentKey) {
-    return supplier.count(getCurrentTransaction(), mapper.getKind(), parentKey, null);
+    return supplier.count(getCurrentTransaction(), mapper, parentKey, null);
   }
 
   public void delete(ID id) throws IOException {
@@ -204,7 +204,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
                           Collection<String> projections,
                           String cursorString,
                           Filter... filters) {
-    CursorPage<Object> page = supplier.queryPage(getCurrentTransaction(), mapper.getKind(), false,
+    CursorPage<Object> page = supplier.queryPage(getCurrentTransaction(), mapper, false,
       requestedPageSize, ancestorKey,
       primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
       projections, cursorString,
@@ -314,12 +314,12 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
                                final String createdByColumnName, final String createdDateColumnName,
                                final String updatedByColumnName, final String updatedDateColumnName) {
     // createdBy
-    if (null != createdByColumnName && null == supplier.getString(value, createdByColumnName)) {
+    if (null != createdByColumnName && null == supplier.getWriteString(value, createdByColumnName)) {
       supplier.setString(value, createdByColumnName, principalName);
     }
 
     // createdDate
-    if (null != createdDateColumnName && null == supplier.getDate(value, createdDateColumnName)) {
+    if (null != createdDateColumnName && null == supplier.getWriteDate(value, createdDateColumnName)) {
       supplier.setDate(value, createdDateColumnName, date);
     }
 

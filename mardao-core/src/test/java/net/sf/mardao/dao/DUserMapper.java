@@ -22,6 +22,7 @@ package net.sf.mardao.dao;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.Date;
 
 import net.sf.mardao.domain.AbstractEntityBuilder;
@@ -78,10 +79,15 @@ public class DUserMapper implements Mapper<DUser, Long> {
   }
 
   @Override
+  public void setPrimaryKey(Object writeValue, Object primaryKey) {
+    supplier.setLong(writeValue, Field.ID.getFieldName(), supplier.toLongKey(primaryKey));
+  }
+
+  @Override
   public void updateEntityPostWrite(DUser entity, Object key, Object value) {
     entity.setId(supplier.toLongKey(key));
-    entity.setCreatedBy(supplier.getString(value, Field.CREATEDBY.getFieldName()));
-    entity.setBirthDate(supplier.getDate(value, Field.BIRTHDATE.getFieldName()));
+    entity.setCreatedBy(supplier.getWriteString(value, Field.CREATEDBY.getFieldName()));
+    entity.setBirthDate(supplier.getWriteDate(value, Field.BIRTHDATE.getFieldName()));
   }
 
   @Override
@@ -98,13 +104,17 @@ public class DUserMapper implements Mapper<DUser, Long> {
   public Object toWriteValue(DUser entity) {
     final Long id = getId(entity);
     final Object parentKey = getParentKey(entity);
-    final Object value = supplier.createWriteValue(parentKey, getKind(), id);
+    final Object value = supplier.createWriteValue(this, parentKey, id, entity);
+    setValues(entity, value);
+    return value;
+  }
+
+  public void setValues(DUser entity, Object value) {
     supplier.setLong(value, Field.ID.getFieldName(), entity.getId());
     supplier.setString(value, Field.DISPLAYNAME.getFieldName(), entity.getDisplayName());
     supplier.setString(value, Field.EMAIL.getFieldName(), entity.getEmail());
     supplier.setString(value, Field.CREATEDBY.getFieldName(), entity.getCreatedBy());
     supplier.setDate(value, Field.BIRTHDATE.getFieldName(), entity.getBirthDate());
-    return value;
   }
 
   @Override
@@ -129,6 +139,16 @@ public class DUserMapper implements Mapper<DUser, Long> {
   }
 
   @Override
+  public String getPrimaryKeyColumnName() {
+    return Field.ID.getFieldName();
+  }
+
+  @Override
+  public String getParentKeyColumnName() {
+    return null;
+  }
+
+  @Override
   public String getUpdatedByColumnName() {
     return null;
   }
@@ -136,6 +156,11 @@ public class DUserMapper implements Mapper<DUser, Long> {
   @Override
   public String getUpdatedDateColumnName() {
     return null;
+  }
+
+  @Override
+  public String getWriteSQL(Serializable id) {
+    return null == id ? "" : "UPDATE TABLE DUser SET (displayName,email,createdBy,birthDate) VALUES (:displayName,:email,:createdBy,:birthDate) WHERE id=:id";
   }
 
   public static DUserBuilder newBuilder() {

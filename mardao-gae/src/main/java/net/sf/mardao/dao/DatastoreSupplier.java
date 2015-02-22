@@ -39,7 +39,7 @@ import java.util.concurrent.Future;
  *
  * @author osandstrom Date: 2014-09-13 Time: 17:43
  */
-public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transaction> {
+public class DatastoreSupplier extends AbstractSupplier<Key, Entity, Entity, Transaction> {
 
   private DatastoreService syncService;
   private AsyncDatastoreService asyncService;
@@ -63,8 +63,8 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public int count(Transaction tx, String kind, Key ancestorKey, Key simpleKey, Filter... filters) {
-    final PreparedQuery pq = prepare(kind, true, ancestorKey, simpleKey, null, false, null, false, null, filters);
+  public int count(Transaction tx, Mapper mapper, Key ancestorKey, Key simpleKey, Filter... filters) {
+    final PreparedQuery pq = prepare(mapper.getKind(), true, ancestorKey, simpleKey, null, false, null, false, null, filters);
     return pq.countEntities(FetchOptions.Builder.withDefaults());
   }
 
@@ -92,7 +92,7 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public CursorPage<Entity> queryPage(Transaction tx, String kind, boolean keysOnly,
+  public CursorPage<Entity> queryPage(Transaction tx, Mapper mapper, boolean keysOnly,
                                          int requestedPageSize, Key ancestorKey,
                                     String primaryOrderBy, boolean primaryIsAscending,
                                     String secondaryOrderBy, boolean secondaryIsAscending,
@@ -100,7 +100,7 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
                                     String cursorString,
                                     Filter... filters) {
 
-    final PreparedQuery pq = prepare(kind, keysOnly, ancestorKey, null,
+    final PreparedQuery pq = prepare(mapper.getKind(), keysOnly, ancestorKey, null,
       primaryOrderBy, primaryIsAscending,
       secondaryOrderBy, secondaryIsAscending,
       projections, filters);
@@ -111,7 +111,7 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
 
     // if first page and populate totalSize, fetch this with async query:
     if (null == cursorString) {
-      int count = count(tx, kind, ancestorKey, null, filters);
+      int count = count(tx, mapper, ancestorKey, null, filters);
       cursorPage.setTotalSize(count);
     }
 
@@ -241,38 +241,13 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public void setCollection(Entity value, String column, Collection c) {
-    value.setProperty(column, c);
-  }
-
-  @Override
-  public void setDate(Entity value, String column, Date d) {
-    value.setProperty(column, d);
-  }
-
-  @Override
-  public void setLong(Entity value, String column, Long l) {
-    value.setProperty(column, l);
+  protected void setObject(Entity value, String column, Object o) {
+    value.setProperty(column, o);
   }
 
   @Override
   public void setString(Entity value, String column, String s) {
-    value.setProperty(column, s);
-  }
-
-  @Override
-  public void setInteger(Entity value, String column, Integer i) {
-    value.setProperty(column, i);
-  }
-
-  @Override
-  public void setBoolean(Entity value, String column, Boolean b) {
-    value.setProperty(column, b);
-  }
-
-  @Override
-  public void setFloat(Entity value, String column, Float f) {
-    value.setProperty(column, f);
+    value.setProperty(column, null == s || s.length() <= 500 ? s : new Text(s));
   }
 
   @Override
@@ -281,13 +256,13 @@ public class DatastoreSupplier implements Supplier<Key, Entity, Entity, Transact
   }
 
   @Override
-  public Entity createWriteValue(Key parentKey, String kind, Long id) {
-    return null != id ? new Entity(kind, id, parentKey) : new Entity(kind, parentKey);
+  public Entity createWriteValue(Mapper mapper, Key parentKey, Long id, Object entity) {
+    return null != id ? new Entity(mapper.getKind(), id, parentKey) : new Entity(mapper.getKind(), parentKey);
   }
 
   @Override
-  public Entity createWriteValue(Key parentKey, String kind, String id) {
-    return null != id ? new Entity(kind, id, parentKey) : new Entity(kind, parentKey);
+  public Entity createWriteValue(Mapper mapper, Key parentKey, String id, Object entity) {
+    return null != id ? new Entity(mapper.getKind(), id, parentKey) : new Entity(mapper.getKind(), parentKey);
   }
 
   private DatastoreService getSyncService() {

@@ -198,7 +198,8 @@ public class AbstractDaoTest {
 
   @Test
   public void testAuditInfoCreated() {
-    Object actual = supplier.createWriteValue(null, "DUser", 1L);
+    DUserMapper mapper = new DUserMapper(supplier);
+    Object actual = supplier.createWriteValue(mapper, null, 1L, null);
     Date date = new Date();
     userDao.updateAuditInfo(actual, "first", date,
       "createdBy", "birthDate", null, null);
@@ -213,7 +214,8 @@ public class AbstractDaoTest {
 
   @Test
   public void testAuditInfoUpdated() {
-    Object actual = supplier.createWriteValue(null, "DUser", 1L);
+    DUserMapper mapper = new DUserMapper(supplier);
+    Object actual = supplier.createWriteValue(mapper, null, 1L, null);
     Date date = new Date();
     userDao.updateAuditInfo(actual, "first", date,
       null, null, "createdBy", "birthDate");

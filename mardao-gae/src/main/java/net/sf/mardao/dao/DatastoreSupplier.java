@@ -138,12 +138,12 @@ public class DatastoreSupplier extends AbstractSupplier<Key, Entity, Entity, Tra
   }
 
   @Override
-  public Future<Entity> readFuture(Transaction tx, Key key) throws IOException {
+  public Future<Entity> readFuture(Transaction tx, Mapper mapper, Key key) throws IOException {
     return getAsyncService().get(tx, key);
   }
 
   @Override
-  public Entity readValue(Transaction tx, Key key) throws IOException {
+  public Entity readValue(Transaction tx, Mapper mapper, Key key) throws IOException {
     try {
       final Entity value = getSyncService().get(tx, key);
       return value;

@@ -84,7 +84,7 @@ public class JdbcSupplierTest extends AbstractDaoTest {
 
     DFactory f = new DFactory();
     f.setProviderId("facebook");
-    factoryDao.put(f);
+    factoryDao.insert(null, f.getProviderId(), f);
     AbstractDao.setPrincipalName(PRINCIPAL_SET_UP);
   }
 
@@ -122,6 +122,15 @@ public class JdbcSupplierTest extends AbstractDaoTest {
 
   @After
   public void tearDown() {
-
+    dropDatabaseTables(dataSource);
   }
+
+  public static void dropDatabaseTables(DataSource dataSource) {
+    final JdbcTemplate template = new JdbcTemplate(dataSource);
+    String sql = "DROP TABLE DUser";
+    template.execute(sql);
+    sql = "DROP TABLE DFactory";
+    template.execute(sql);
+  }
+
 }

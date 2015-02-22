@@ -78,16 +78,16 @@ public class InMemorySupplier extends AbstractSupplier<InMemoryKey, Map<String, 
   }
 
   @Override
-  public Map<String, Object> readValue(Object tx, InMemoryKey key) throws IOException {
+  public Map<String, Object> readValue(Object tx, Mapper mapper, InMemoryKey key) throws IOException {
     return kindStore(key).get(key.getName());
   }
 
   @Override
-  public Future<Map<String, Object>> readFuture(final Object tx, final InMemoryKey key) throws IOException {
+  public Future<Map<String, Object>> readFuture(final Object tx, final Mapper mapper, final InMemoryKey key) throws IOException {
     FutureTask<Map<String, Object>> task = new FutureTask<Map<String, Object>>(new Callable<Map<String, Object>>() {
       @Override
       public Map<String, Object> call() throws Exception {
-        return readValue(tx, key);
+        return readValue(tx, mapper, key);
       }
     });
     new Thread(task).start();

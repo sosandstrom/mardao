@@ -144,7 +144,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
   @Override
   public T get(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
-    Object value = supplier.readValue(getCurrentTransaction(), key);
+    Object value = supplier.readValue(getCurrentTransaction(), mapper, key);
     if (null == value) {
       return null;
     }
@@ -167,6 +167,17 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     ID id = mapper.getId(entity);
     Object parentKey = mapper.getParentKey(entity);
     return put(parentKey, id, entity);
+  }
+
+  @Override
+  public ID insert(Object parentKey, ID id, T entity) throws IOException {
+    Object key = mapper.toKey(parentKey, id);
+    Object value = mapper.toWriteValue(entity);
+    updateAuditInfo(value);
+    key = supplier.insertValue(getCurrentTransaction(), key, value);
+    id = mapper.fromKey(key);
+    mapper.updateEntityPostWrite(entity, key, value);
+    return id;
   }
 
   // --- query methods ---
@@ -264,7 +275,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
 
   public Future<T> getAsync(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
-    Future<?> future = supplier.readFuture(getCurrentTransaction(), key);
+    Future<?> future = supplier.readFuture(getCurrentTransaction(), mapper, key);
     return new EntityFuture<T>(mapper, future);
   }
 

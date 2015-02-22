@@ -50,36 +50,62 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
     }
 
     @Override
-    public SqlRowSet readValue(Connection tx, JdbcKey key) throws IOException {
-        final String sql = ""; // FIXME: mapper.getReadSQL();
+    public SqlRowSet readValue(Connection tx, Mapper mapper, JdbcKey key) throws IOException {
+        final StringBuilder sql = new StringBuilder("SELECT * FROM ")
+                .append(key.getKind())
+                .append(" WHERE ")
+                .append(mapper.getPrimaryKeyColumnName())
+                .append("=?");
+//                .append(mapper.getPrimaryKeyColumnName());
         ArrayList arguments = new ArrayList();
-        jdbcTemplate.queryForRowSet(sql, arguments.toArray());
-        return null;
+        arguments.add(null != key.getName() ? key.getName() : key.getId());
+
+        if (null != mapper.getParentKeyColumnName()) {
+            sql.append(" AND ")
+                    .append(mapper.getParentKeyColumnName())
+                    .append("=?");
+//                    .append(mapper.getParentKeyColumnName());
+            arguments.add(null == key.getParentKey() ? null :
+                    (null != key.getParentKey().getName() ? key.getParentKey().getName() : key.getParentKey().getId()));
+        }
+
+        return jdbcTemplate.queryForRowSet(sql.toString(), arguments.toArray());
     }
 
     @Override
     public JdbcKey writeValue(Connection tx, JdbcKey key, JdbcWriteValue value) throws IOException {
-        final Mapper mapper = value.mapper;
         if (null == key.getName() && null == key.getId()) {
 
             // INSERT
-            final long id = incrementer.nextLongValue();
-            key = toKey(key.getParentKey(), key.getKind(), id);
-            JdbcWriteValue generatedValue = createWriteValue(mapper, key.getParentKey(), id, value.entity);
-            mapper.setPrimaryKey(generatedValue, key);
-            SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource).withTableName(mapper.getKind());
-            insert.execute(generatedValue.parameterMap);
+            return insertValue(tx, key, value);
         }
-        else {
-            // UPDATE
-            String sql = "";
-            jdbcTemplate.update(sql);
-        }
+
+        // UPDATE
+        final Mapper mapper = value.mapper;
+        String sql = "";
+        jdbcTemplate.update(sql);
+
         return key;
     }
 
     @Override
-    public Future<SqlRowSet> readFuture(Connection tx, JdbcKey key) throws IOException {
+    public JdbcKey insertValue(Connection tx, JdbcKey key, JdbcWriteValue value) throws IOException {
+        final Mapper mapper = value.mapper;
+
+        if (null == key.getName() && null == key.getId()) {
+            final long id = incrementer.nextLongValue();
+            key = toKey(key.getParentKey(), key.getKind(), id);
+            value = createWriteValue(mapper, key.getParentKey(), id, value.entity);
+            mapper.setPrimaryKey(value, key);
+        }
+
+        SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource).withTableName(mapper.getKind());
+        insert.execute(value.parameterMap);
+        return key;
+    }
+
+    @Override
+    public Future<SqlRowSet> readFuture(Connection tx, Mapper mapper, JdbcKey key) throws IOException {
         return null;
     }
 

@@ -1,13 +1,21 @@
 package net.sf.mardao.dao;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Created by sosandstrom on 2015-02-22.
  */
 public abstract class AbstractSupplier<K, RV, WV, T> implements Supplier<K, RV, WV, T> {
+
+    @Override
+    public K insertValue(T tx, K key, WV value) throws IOException {
+        return writeValue(tx, key, value);
+    }
+
     @Override
     public Collection getWriteCollection(WV value, String column) {
         return getCollection((RV) value, column);

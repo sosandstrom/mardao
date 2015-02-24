@@ -188,18 +188,8 @@ public class DatastoreSupplier extends AbstractSupplier<Key, Entity, Entity, Tra
   }
 
   @Override
-  public Collection getCollection(Entity value, String column) {
-    return (Collection) value.getProperty(column);
-  }
-
-  @Override
-  public Date getDate(Entity value, String column) {
-    return (Date) value.getProperty(column);
-  }
-
-  @Override
-  public Long getLong(Entity value, String column) {
-    return (Long) value.getProperty(column);
+  protected Object getReadObject(Entity value, String column) {
+    return value.getProperty(column);
   }
 
   @Override
@@ -213,19 +203,9 @@ public class DatastoreSupplier extends AbstractSupplier<Key, Entity, Entity, Tra
   }
 
   @Override
-  public String getString(Entity value, String column) {
-    return (String) value.getProperty(column);
-  }
-
-  @Override
   public Integer getInteger(Entity value, String column) {
     Long longValue = (Long)value.getProperty(column);
     return null != longValue ? longValue.intValue() : null;
-  }
-
-  @Override
-  public Boolean getBoolean(Entity value, String column) {
-    return (Boolean) value.getProperty(column);
   }
 
   @Override

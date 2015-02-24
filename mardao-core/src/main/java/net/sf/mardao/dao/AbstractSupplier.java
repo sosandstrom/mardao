@@ -16,54 +16,111 @@ public abstract class AbstractSupplier<K, RV, WV, T> implements Supplier<K, RV, 
         return writeValue(tx, key, value);
     }
 
+    protected abstract Object getReadObject(RV value, String column);
+
+    @Override
+    public ByteBuffer getByteBuffer(RV value, String column) {
+        return (ByteBuffer) getReadObject(value, column);
+    }
+
+    @Override
+    public Float getFloat(RV value, String column) {
+        return (Float) getReadObject(value, column);
+    }
+
+    @Override
+    public Boolean getBoolean(RV value, String column) {
+        return (Boolean) getReadObject(value, column);
+    }
+
+    @Override
+    public Integer getInteger(RV value, String column) {
+        return (Integer) getReadObject(value, column);
+    }
+
+    @Override
+    public String getString(RV value, String column) {
+        return (String) getReadObject(value, column);
+    }
+
+    @Override
+    public K getParentKey(RV value, String column) {
+        return (K) getReadObject(value, column);
+    }
+
+    @Override
+    public K getKey(RV value, String column) {
+        return (K) getReadObject(value, column);
+    }
+
+    @Override
+    public Long getLong(RV value, String column) {
+        return (Long) getReadObject(value, column);
+    }
+
+    @Override
+    public Date getDate(RV value, String column) {
+        return (Date) getReadObject(value, column);
+    }
+
+    @Override
+    public Collection getCollection(RV value, String column) {
+        return (Collection) getReadObject(value, column);
+    }
+
+
+    protected Object getWriteObject(WV value, String column) {
+        return getReadObject((RV) value, column);
+    }
+
     @Override
     public Collection getWriteCollection(WV value, String column) {
-        return getCollection((RV) value, column);
+        return (Collection) getWriteObject(value, column);
     }
 
     @Override
     public Date getWriteDate(WV value, String column) {
-        return getDate((RV) value, column);
+        return (Date) getWriteObject(value, column);
     }
 
     @Override
     public Long getWriteLong(WV value, String column) {
-        return getLong((RV) value, column);
+        return (Long) getWriteObject(value, column);
     }
 
     @Override
     public K getWriteKey(WV value, String column) {
-        return getKey((RV) value, column);
+        return (K) getWriteObject(value, column);
     }
 
     @Override
     public K getWriteParentKey(WV value, String column) {
-        return getParentKey((RV) value, column);
+        return (K) getWriteObject(value, column);
     }
 
     @Override
     public String getWriteString(WV value, String column) {
-        return getString((RV) value, column);
+        return (String) getWriteObject(value, column);
     }
 
     @Override
     public Integer getWriteInteger(WV value, String column) {
-        return getInteger((RV) value, column);
+        return (Integer) getWriteObject(value, column);
     }
 
     @Override
     public Boolean getWriteBoolean(WV value, String column) {
-        return getBoolean((RV) value, column);
+        return (Boolean) getWriteObject(value, column);
     }
 
     @Override
     public Float getWriteFloat(WV value, String column) {
-        return getFloat((RV) value, column);
+        return (Float) getWriteObject(value, column);
     }
 
     @Override
     public ByteBuffer getWriteByteBuffer(WV value, String column) {
-        return getByteBuffer((RV) value, column);
+        return (ByteBuffer) getWriteObject(value, column);
     }
 
     protected abstract void setObject(WV value, String column, Object o);

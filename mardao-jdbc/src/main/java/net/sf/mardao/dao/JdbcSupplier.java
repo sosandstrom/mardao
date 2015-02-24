@@ -140,103 +140,13 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
     }
 
     @Override
-    public Collection getCollection(SqlRowSet value, String column) {
-        return null;
+    protected Object getReadObject(SqlRowSet value, String column) {
+        return value.getObject(column);
     }
 
     @Override
-    public Date getDate(SqlRowSet value, String column) {
-        return null;
-    }
-
-    @Override
-    public Long getLong(SqlRowSet value, String column) {
-        return null;
-    }
-
-    @Override
-    public JdbcKey getKey(SqlRowSet value, String column) {
-        return null;
-    }
-
-    @Override
-    public JdbcKey getParentKey(SqlRowSet value, String column) {
-        return null;
-    }
-
-    @Override
-    public String getString(SqlRowSet value, String column) {
-        return null;
-    }
-
-    @Override
-    public Integer getInteger(SqlRowSet value, String column) {
-        return null;
-    }
-
-    @Override
-    public Boolean getBoolean(SqlRowSet value, String column) {
-        return null;
-    }
-
-    @Override
-    public Float getFloat(SqlRowSet value, String column) {
-        return null;
-    }
-
-    @Override
-    public ByteBuffer getByteBuffer(SqlRowSet value, String column) {
-        return null;
-    }
-
-    @Override
-    public Collection getWriteCollection(JdbcWriteValue value, String column) {
-        return null;
-    }
-
-    @Override
-    public Date getWriteDate(JdbcWriteValue value, String column) {
-        return null;
-    }
-
-    @Override
-    public Long getWriteLong(JdbcWriteValue value, String column) {
-        return null;
-    }
-
-    @Override
-    public JdbcKey getWriteKey(JdbcWriteValue value, String column) {
-        return null;
-    }
-
-    @Override
-    public JdbcKey getWriteParentKey(JdbcWriteValue value, String column) {
-        return null;
-    }
-
-    @Override
-    public String getWriteString(JdbcWriteValue value, String column) {
-        return null;
-    }
-
-    @Override
-    public Integer getWriteInteger(JdbcWriteValue value, String column) {
-        return null;
-    }
-
-    @Override
-    public Boolean getWriteBoolean(JdbcWriteValue value, String column) {
-        return null;
-    }
-
-    @Override
-    public Float getWriteFloat(JdbcWriteValue value, String column) {
-        return null;
-    }
-
-    @Override
-    public ByteBuffer getWriteByteBuffer(JdbcWriteValue value, String column) {
-        return null;
+    protected Object getWriteObject(JdbcWriteValue value, String column) {
+        return value.parameterMap.get(column);
     }
 
     @Override

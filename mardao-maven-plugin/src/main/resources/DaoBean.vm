@@ -1,7 +1,5 @@
 package ${daoPackage};
 
-import com.google.inject.Inject;
-
 import net.sf.mardao.dao.Supplier;
 #if ( $entity.shouldCache() )
 import javax.cache.annotation.CacheDefaults;
@@ -22,7 +20,6 @@ public class ${entity.simpleName}DaoBean
 	extends Generated${entity.simpleName}DaoImpl
 {
 
-  @Inject
   public ${entity.simpleName}DaoBean(Supplier<Object, Object, Object, Object> supplier) {
     super(supplier);
   }

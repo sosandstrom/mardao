@@ -107,18 +107,8 @@ public class InMemorySupplier extends AbstractSupplier<InMemoryKey, Map<String, 
   }
 
   @Override
-  public Collection getCollection(Map<String, Object> value, String column) {
-    return (Collection) value.get(column);
-  }
-
-  @Override
-  public Date getDate(Map<String, Object> value, String column) {
-    return (Date) value.get(column);
-  }
-
-  @Override
-  public Long getLong(Map<String, Object> core, String column) {
-    return (Long) core.get(column);
+  protected Object getReadObject(Map<String, Object> value, String column) {
+    return value.get(column);
   }
 
   @Override
@@ -129,31 +119,6 @@ public class InMemorySupplier extends AbstractSupplier<InMemoryKey, Map<String, 
   @Override
   public InMemoryKey getParentKey(Map<String, Object> value, String column) {
     return (InMemoryKey) value.get(NAME_PARENT_KEY);
-  }
-
-  @Override
-  public String getString(Map<String, Object> core, String column) {
-    return (String) core.get(column);
-  }
-
-  @Override
-  public Integer getInteger(Map<String, Object> core, String column) {
-    return (Integer) core.get(column);
-  }
-
-  @Override
-  public Boolean getBoolean(Map<String, Object> core, String column) {
-    return (Boolean) core.get(column);
-  }
-
-  @Override
-  public Float getFloat(Map<String, Object> core, String column) {
-    return (Float) core.get(column);
-  }
-
-  @Override
-  public ByteBuffer getByteBuffer(Map<String, Object> core, String column) {
-    return (ByteBuffer) core.get(column);
   }
 
   @Override

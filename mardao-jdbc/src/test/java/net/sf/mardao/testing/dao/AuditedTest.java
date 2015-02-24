@@ -27,6 +27,7 @@ import net.sf.mardao.dao.JdbcSupplier;
 import net.sf.mardao.testing.domain.DAudited;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
@@ -41,6 +42,7 @@ import static org.junit.Assert.*;
  *
  * @author osandstrom Date: 2014-10-09 Time: 19:25
  */
+@Ignore
 public class AuditedTest {
   public static final String PRINCIPAL_SET_UP = "setUp";
   public static final String PRINCIPAL_UPDATE = "Updater";

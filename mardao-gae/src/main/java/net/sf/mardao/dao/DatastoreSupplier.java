@@ -27,6 +27,7 @@ import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -163,13 +164,11 @@ public class DatastoreSupplier extends AbstractSupplier<Key, Entity, Entity, Tra
   }
 
   @Override
-  public Key toKey(Key parentKey, String kind, Long lId) {
-    return null != lId ? KeyFactory.createKey(parentKey, kind, lId) : null;
-  }
-
-  @Override
-  public Key toKey(Key parentKey, String kind, String sId) {
-    return null != sId ? KeyFactory.createKey(parentKey, kind, sId) : null;
+  public Key toKey(Key parentKey, String kind, Serializable id) {
+    if (null == id) {
+      return null;
+    }
+    return id instanceof String ? KeyFactory.createKey(parentKey, kind, (String) id) : KeyFactory.createKey(parentKey, kind, (Long) id);
   }
 
   @Override

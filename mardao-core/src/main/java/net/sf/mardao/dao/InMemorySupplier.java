@@ -26,6 +26,7 @@ import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -222,13 +223,8 @@ public class InMemorySupplier extends AbstractSupplier<InMemoryKey, Map<String, 
   }
 
   @Override
-  public InMemoryKey toKey(InMemoryKey parentKey, String kind, Long lId) {
-    return InMemoryKey.of(parentKey, kind, null != lId ? lId.toString() : null);
-  }
-
-  @Override
-  public InMemoryKey toKey(InMemoryKey parentKey, String kind, String sId) {
-    return InMemoryKey.of(parentKey, kind, sId);
+  public InMemoryKey toKey(InMemoryKey parentKey, String kind, Serializable id) {
+    return InMemoryKey.of(parentKey, kind, null != id ? id.toString() : null);
   }
 
   @Override

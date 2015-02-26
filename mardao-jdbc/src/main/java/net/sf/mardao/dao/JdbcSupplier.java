@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -69,7 +70,8 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
                     (null != key.getParentKey().getName() ? key.getParentKey().getName() : key.getParentKey().getId()));
         }
 
-        return jdbcTemplate.queryForRowSet(sql.toString(), arguments.toArray());
+        final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql.toString(), arguments.toArray());
+        return sqlRowSet.next() ? sqlRowSet : null;
     }
 
     @Override
@@ -115,13 +117,11 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
     }
 
     @Override
-    public JdbcKey toKey(JdbcKey parentKey, String kind, Long lId) {
-        return JdbcKey.of(parentKey, kind, lId);
-    }
-
-    @Override
-    public JdbcKey toKey(JdbcKey parentKey, String kind, String sId) {
-        return JdbcKey.of(parentKey, kind, sId);
+    public JdbcKey toKey(JdbcKey parentKey, String kind, Serializable id) {
+        if (id instanceof String) {
+            return JdbcKey.of(parentKey, kind, (String) id);
+        }
+        return JdbcKey.of(parentKey, kind, (Long) id);
     }
 
     @Override
@@ -157,6 +157,12 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
     @Override
     protected void setObject(JdbcWriteValue value, String column, Object o) {
         value.parameterMap.put(column, o);
+    }
+
+    @Override
+    public JdbcKey getKey(SqlRowSet value, String column) {
+        final Serializable id = (Serializable) getReadObject(value, column);
+        return toKey(null, JdbcSupplier.class.getSimpleName(), id);
     }
 
     @Override

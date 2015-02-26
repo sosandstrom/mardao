@@ -211,16 +211,16 @@ public class DBasicDaoTest {
 //      assertNull(actual);
 //      assertEquals(117, userDao.count());
 //  }
-//
-//  @Test
-//  public void testCreated() throws IOException {
-//    createQueryFixtures();
-//    DUser actual =  userDao.get(42L);
-//
-//    assertEquals(PRINCIPAL_FIXTURE, actual.getCreatedBy());
-//    assertNotNull(actual.getBirthDate());
-//  }
-//
+
+  @Test
+  public void testCreated() throws IOException {
+    createQueryFixtures();
+    DBasic actual =  basicDao.get(42L);
+
+    assertEquals(PRINCIPAL_FIXTURE, actual.getCreatedBy());
+    assertNotNull(actual.getCreatedDate());
+  }
+
 //  @Test
 //  public void testAuditInfoCreated() {
 //    DUserMapper mapper = new DUserMapper(supplier);

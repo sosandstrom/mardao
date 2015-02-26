@@ -23,6 +23,7 @@ package net.sf.mardao.dao;
  */
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Date;
@@ -47,8 +48,8 @@ public interface Supplier<K, RV, WV, T> {
   Future<RV> readFuture(T tx, Mapper mapper, K key) throws IOException;
   Future<K> writeFuture(T tx, K key, WV value) throws IOException;
 
-  K toKey(K parentKey, String kind, Long lId);
-  K toKey(K parentKey, String kind, String sId);
+  K toKey(K parentKey, String kind, Serializable id);
+//  K toKey(K parentKey, String kind, String sId);
 
   Long toLongKey(K key);
   String toStringKey(K key);

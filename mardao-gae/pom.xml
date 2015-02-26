@@ -18,7 +18,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>mardao-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.appengine</groupId>
@@ -27,6 +26,10 @@
       <scope>provided</scope>
     </dependency>
     <!-- Test scope dependencies: -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mardao-test</artifactId>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

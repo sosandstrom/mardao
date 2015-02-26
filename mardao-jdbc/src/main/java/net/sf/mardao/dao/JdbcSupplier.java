@@ -171,6 +171,32 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
     }
 
     @Override
+    public void setPrimaryKey(JdbcWriteValue value, Mapper mapper, String column, JdbcKey primaryKey, Object Entity) {
+        if (null != primaryKey) {
+            if (null != primaryKey.getName()) {
+                setString(value, column, primaryKey.getName());
+                return;
+            }
+            if (null != primaryKey.getId()) {
+                setLong(value, column, primaryKey.getId());
+            }
+        }
+    }
+
+    @Override
+    public void setParentKey(JdbcWriteValue value, Mapper mapper, String column, JdbcKey parentKey, Object Entity) {
+        if (null != parentKey) {
+            if (null != parentKey.getName()) {
+                setString(value, column, parentKey.getName());
+                return;
+            }
+            if (null != parentKey.getId()) {
+                setLong(value, column, parentKey.getId());
+            }
+        }
+    }
+
+    @Override
     public Connection beginTransaction() {
         return null;
     }

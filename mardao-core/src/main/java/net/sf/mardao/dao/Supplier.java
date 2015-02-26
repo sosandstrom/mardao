@@ -87,6 +87,8 @@ public interface Supplier<K, RV, WV, T> {
 
   WV createWriteValue(Mapper mapper, K parentKey, Long id, Object entity);
   WV createWriteValue(Mapper mapper, K parentKey, String id, Object entity);
+  void setPrimaryKey(WV value, Mapper mapper, String column, K primaryKey, Object Entity);
+  void setParentKey(WV value, Mapper mapper, String column, K parentKey, Object Entity);
 
   // --- transaction methods ---
 

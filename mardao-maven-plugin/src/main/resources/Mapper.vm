@@ -179,6 +179,11 @@ public class ${entity.simpleName}Mapper
     final ${entity.pk.simpleType} id = getId(entity);
     final Object parentKey = getParentKey(entity);
     final Object value = supplier.createWriteValue(this, parentKey, id, entity);
+    // some suppliers cannot set the keys in above method
+    supplier.setPrimaryKey(value, this, Field.${entity.pk.nameUpper}.getFieldName(), toKey(parentKey, id), entity);
+#if( $entity.parent )
+    supplier.setParentKey(value, this, Field.${entity.parent.nameUpper}.getFieldName(), parentKey, entity);
+#end
 
     // set all fields:
 #foreach( $field in $allFields )

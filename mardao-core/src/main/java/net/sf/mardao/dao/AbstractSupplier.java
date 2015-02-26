@@ -16,6 +16,16 @@ public abstract class AbstractSupplier<K, RV, WV, T> implements Supplier<K, RV, 
         return writeValue(tx, key, value);
     }
 
+    /** Void for most suppliers */
+    @Override
+    public void setPrimaryKey(WV value, Mapper mapper, String column, K primaryKey, Object Entity) {
+    }
+
+    /** Void for most suppliers */
+    @Override
+    public void setParentKey(WV value, Mapper mapper, String column, K parentKey, Object Entity) {
+    }
+
     protected abstract Object getReadObject(RV value, String column);
 
     @Override

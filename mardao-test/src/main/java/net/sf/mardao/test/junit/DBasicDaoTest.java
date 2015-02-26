@@ -193,14 +193,13 @@ public class DBasicDaoTest {
 //    assertEquals(Long.valueOf(47), u47.getId());
 //    assertEquals("user_47@example.com", u47.getEmail());
 //  }
-//
-//  @Test
-//  public void testCount() throws IOException {
-//      createQueryFixtures();
-//      assertEquals(118, userDao.count());
-//      assertEquals(1, factoryDao.count());
-//  }
-//
+
+  @Test
+  public void testCount() throws IOException {
+      createQueryFixtures();
+      assertEquals(118, basicDao.count());
+  }
+
 //  @Test
 //  public void testDelete() throws IOException {
 //      createQueryFixtures();

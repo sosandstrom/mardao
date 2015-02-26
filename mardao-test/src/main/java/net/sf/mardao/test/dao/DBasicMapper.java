@@ -13,7 +13,7 @@ import net.sf.mardao.test.domain.DBasic;
 /**
  * The DBasic domain-object specific mapping methods go here.
  *
- * Generated on 2015-02-24T19:51:12.400+0100.
+ * Generated on 2015-02-26T19:49:44.080+0100.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public class DBasicMapper
@@ -140,6 +140,8 @@ public class DBasicMapper
     final Long id = getId(entity);
     final Object parentKey = getParentKey(entity);
     final Object value = supplier.createWriteValue(this, parentKey, id, entity);
+    // some suppliers cannot set the keys in above method
+    supplier.setPrimaryKey(value, this, Field.ID.getFieldName(), toKey(parentKey, id), entity);
 
     // set all fields:
     supplier.setString(value, Field.CREATEDBY.getFieldName(), entity.getCreatedBy());

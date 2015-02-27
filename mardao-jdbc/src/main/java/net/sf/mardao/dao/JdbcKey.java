@@ -22,8 +22,6 @@ package net.sf.mardao.dao;
  * #L%
  */
 
-import java.util.Objects;
-
 /**
  * Key class for {@link JdbcSupplier}.
  *
@@ -75,9 +73,9 @@ public class JdbcKey {
       if (null != other.parentKey) {
         return false;
       }
-      return this.kind.equals(other.kind) && Objects.equals(this.name, other.name) && Objects.equals(this.id, other.id);
+      return this.kind.equals(other.kind) && objectsEqual(this.name, other.name) && objectsEqual(this.id, other.id);
     }
-    return this.parentKey.equals(other.parentKey) && this.kind.equals(other.kind) && Objects.equals(this.name, other.name) && Objects.equals(this.id, other.id);
+    return this.parentKey.equals(other.parentKey) && this.kind.equals(other.kind) && objectsEqual(this.name, other.name) && objectsEqual(this.id, other.id);
   }
 
   @Override
@@ -104,5 +102,9 @@ public class JdbcKey {
   @Override
   public String toString() {
     return "Key{ parent:" + parentKey + ", kind:" + kind + ", name:" + name + ", id:" + id + "}";
+  }
+
+  public static boolean objectsEqual(Object one, Object other) {
+    return null != one ? one.equals(other) : null == other;
   }
 }

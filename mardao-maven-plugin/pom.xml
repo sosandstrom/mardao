@@ -169,10 +169,10 @@
             <version>1.5</version>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mardao-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <!-- Test scope dependencies: -->
         <dependency>

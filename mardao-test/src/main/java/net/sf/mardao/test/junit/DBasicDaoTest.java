@@ -199,7 +199,8 @@ public class DBasicDaoTest {
   @Test
   public void testCount() throws IOException {
       createQueryFixtures();
-      assertTrue(117 <= basicDao.count());
+      Integer count = basicDao.count();
+      assertTrue(count.toString(), 116 <= count && count <= 118);
   }
 
 //  @Test

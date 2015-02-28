@@ -1,4 +1,4 @@
-package net.sf.mardao.dao;
+package net.sf.mardao.junit.domain;
 
 /*
  * #%L
@@ -22,23 +22,25 @@ package net.sf.mardao.dao;
  * #L%
  */
 
-import net.sf.mardao.domain.DUser;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 /**
- * To test AbstractDao.
+ * Created with IntelliJ IDEA.
  *
- * @author osandstrom Date: 2014-09-03 Time: 20:11
+ * @author osandstrom Date: 2014-09-13 Time: 17:24
  */
-public class DUserDao extends AbstractDao<DUser, Long> {
-  public DUserDao(Supplier supplier) {
-    super(new DUserMapper(supplier), supplier);
+@Entity
+public class DFactory {
+
+  @Id
+  private String providerId;
+
+  public String getProviderId() {
+    return providerId;
   }
 
-  public Iterable<DUser> queryByDisplayName(String displayName) {
-    return queryByField(null, DUserMapper.Field.DISPLAYNAME.getFieldName(), displayName);
-  }
-
-  public DUser findByEmail(String email) {
-    return queryUniqueByField(null, DUserMapper.Field.EMAIL.getFieldName(), email);
+  public void setProviderId(String providerId) {
+    this.providerId = providerId;
   }
 }

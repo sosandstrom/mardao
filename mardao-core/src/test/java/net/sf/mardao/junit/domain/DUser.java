@@ -1,4 +1,4 @@
-package net.sf.mardao.domain;
+package net.sf.mardao.junit.domain;
 
 /*
  * #%L

@@ -22,20 +22,22 @@ package net.sf.mardao.dao;
  * #L%
  */
 
-import static org.junit.Assert.*;
+import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.filter.Filter;
+import net.sf.mardao.junit.dao.DFactoryDaoBean;
+import net.sf.mardao.junit.dao.DUserDaoBean;
+import net.sf.mardao.junit.dao.DUserMapper;
+import net.sf.mardao.junit.domain.DFactory;
+import net.sf.mardao.junit.domain.DUser;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import net.sf.mardao.core.CursorPage;
-import net.sf.mardao.core.filter.Filter;
-import net.sf.mardao.domain.DFactory;
-import net.sf.mardao.domain.DUser;
+import static org.junit.Assert.*;
 
 /**
  * Tests for AbstractDao.
@@ -46,15 +48,15 @@ public class AbstractDaoTest {
 
   public static final String PRINCIPAL_FIXTURE = "fixture";
   public static final String PRINCIPAL_SET_UP = "setUp";
-  protected DUserDao userDao;
-  protected DFactoryDao factoryDao;
+  protected DUserDaoBean userDao;
+  protected DFactoryDaoBean factoryDao;
   protected Supplier supplier;
 
   @Before
   public void setUp() {
     supplier = new InMemorySupplier();
-    userDao = new DUserDao(supplier);
-    factoryDao = new DFactoryDao(supplier);
+    userDao = new DUserDaoBean(supplier);
+    factoryDao = new DFactoryDaoBean(supplier);
     AbstractDao.setPrincipalName(PRINCIPAL_SET_UP);
   }
 

@@ -25,7 +25,6 @@ package net.sf.mardao.junit;
 import net.sf.mardao.dao.JdbcSupplier;
 import net.sf.mardao.dao.Supplier;
 import net.sf.mardao.test.junit.DBasicDaoTest;
-import net.sf.mardao.testing.dao.InMemoryDataFieldMaxValueIncrementer;
 import org.junit.After;
 import org.junit.Before;
 import org.springframework.jdbc.core.JdbcTemplate;

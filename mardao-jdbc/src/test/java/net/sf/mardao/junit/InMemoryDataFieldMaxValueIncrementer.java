@@ -1,4 +1,4 @@
-package net.sf.mardao.testing.dao;
+package net.sf.mardao.junit;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;

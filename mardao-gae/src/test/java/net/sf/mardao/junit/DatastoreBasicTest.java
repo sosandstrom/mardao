@@ -24,20 +24,11 @@ package net.sf.mardao.junit;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import net.sf.mardao.dao.AbstractDao;
 import net.sf.mardao.dao.DatastoreSupplier;
 import net.sf.mardao.dao.Supplier;
 import net.sf.mardao.test.junit.DBasicDaoTest;
-import net.sf.mardao.testing.dao.DAuditedDaoBean;
-import net.sf.mardao.testing.domain.DAudited;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.Date;
-
-import static org.junit.Assert.*;
 
 /**
  * To test DatastoreSupplier.

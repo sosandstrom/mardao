@@ -118,14 +118,19 @@ public class DUserMapper implements Mapper<DUser, Long> {
   }
 
   @Override
-  public DUser fromReadValue(Object core) {
+  public <RV> DUser fromReadValue(RV value, Supplier<Object, RV, ?, ?> specificSupplier) {
     final DUser entity = new DUser();
-    entity.setId(supplier.getLong(core, Field.ID.getFieldName()));
-    entity.setDisplayName(supplier.getString(core, Field.DISPLAYNAME.getFieldName()));
-    entity.setEmail(supplier.getString(core, Field.EMAIL.getFieldName()));
-    entity.setCreatedBy(supplier.getString(core, Field.CREATEDBY.getFieldName()));
-    entity.setBirthDate(supplier.getDate(core, Field.BIRTHDATE.getFieldName()));
+    entity.setId(specificSupplier.getLong(value, Field.ID.getFieldName()));
+    entity.setDisplayName(specificSupplier.getString(value, Field.DISPLAYNAME.getFieldName()));
+    entity.setEmail(specificSupplier.getString(value, Field.EMAIL.getFieldName()));
+    entity.setCreatedBy(specificSupplier.getString(value, Field.CREATEDBY.getFieldName()));
+    entity.setBirthDate(specificSupplier.getDate(value, Field.BIRTHDATE.getFieldName()));
     return entity;
+  }
+
+  @Override
+  public DUser fromReadValue(Object core) {
+    return fromReadValue(core, supplier);
   }
 
   @Override

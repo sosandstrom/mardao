@@ -86,6 +86,7 @@ public interface Supplier<K, RV, WV, T> {
   void setFloat(WV value, String column, Float f);
   void setByteBuffer(WV value, String column, ByteBuffer b);
 
+  Object createEntity(Mapper mapper, RV readValue);
   WV createWriteValue(Mapper mapper, K parentKey, Long id, Object entity);
   WV createWriteValue(Mapper mapper, K parentKey, String id, Object entity);
   void setPrimaryKey(WV value, Mapper mapper, String column, K primaryKey, Object Entity);

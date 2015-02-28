@@ -203,6 +203,12 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return queryPage(null, requestedPageSize, cursorString);
   }
 
+  protected CursorPage<T> queryPageByField(Object parentKey, String fieldName, Object fieldValue, int requestedPageSize, String cursorString) {
+    return queryPage(false, requestedPageSize, parentKey,
+            null, false, null, false,
+            null, cursorString, Filter.equalsFilter(fieldName, fieldValue));
+  }
+
   @Override
   public CursorPage<T> queryPage(Object ancestorKey, int requestedPageSize, String cursorString) {
     return queryPage(false, requestedPageSize, ancestorKey,

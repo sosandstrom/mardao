@@ -35,6 +35,7 @@ import net.sf.mardao.domain.AbstractEntityBuilder;
 public interface Mapper<T, ID extends Serializable> {
   ID fromKey(Object key);
   T fromReadValue(Object value);
+  <RV> T fromReadValue(RV value, Supplier<Object, RV, ?, ?> supplier);
   String getCreatedByColumnName();
   String getCreatedDateColumnName();
   ID getId(T entity);

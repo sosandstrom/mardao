@@ -13,7 +13,7 @@ import net.sf.mardao.test.domain.DBasic;
 /**
  * The DBasic domain-object specific mapping methods go here.
  *
- * Generated on 2015-02-26T20:44:31.190+0100.
+ * Generated on 2015-02-27T21:08:08.487+0100.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public class DBasicMapper
@@ -51,18 +51,28 @@ public class DBasicMapper
 
   @Override
   public DBasic fromReadValue(Object value) {
-    final DBasic entity = new DBasic();
+    return fromReadValue(value, supplier);
+  }
+
+  @Override
+  public <RV> DBasic fromReadValue(RV value, Supplier<Object, RV, ?, ?> specificSupplier) {
+    DBasic entity = (DBasic) specificSupplier.createEntity(this, value);
+    if (null != entity) {
+      return entity;
+    }
+
+    entity = new DBasic();
 
     // set primary key:
-    final Object key = supplier.getKey(value, Field.ID.getFieldName());
-    entity.setId(supplier.toLongKey(key));
+    final Object key = specificSupplier.getKey(value, Field.ID.getFieldName());
+    entity.setId(specificSupplier.toLongKey(key));
 
     // set all fields:
-    entity.setCreatedBy(supplier.getString(value, Field.CREATEDBY.getFieldName()));
-    entity.setCreatedDate(supplier.getDate(value, Field.CREATEDDATE.getFieldName()));
-    entity.setDisplayName(supplier.getString(value, Field.DISPLAYNAME.getFieldName()));
-    entity.setUpdatedBy(supplier.getString(value, Field.UPDATEDBY.getFieldName()));
-    entity.setUpdatedDate(supplier.getDate(value, Field.UPDATEDDATE.getFieldName()));
+    entity.setCreatedBy(specificSupplier.getString(value, Field.CREATEDBY.getFieldName()));
+    entity.setCreatedDate(specificSupplier.getDate(value, Field.CREATEDDATE.getFieldName()));
+    entity.setDisplayName(specificSupplier.getString(value, Field.DISPLAYNAME.getFieldName()));
+    entity.setUpdatedBy(specificSupplier.getString(value, Field.UPDATEDBY.getFieldName()));
+    entity.setUpdatedDate(specificSupplier.getDate(value, Field.UPDATEDDATE.getFieldName()));
     return entity;
   }
 

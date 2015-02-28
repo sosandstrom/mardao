@@ -2,26 +2,23 @@ package net.sf.mardao.dao;
 
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
+import net.sf.mardao.core.filter.FilterOperator;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.Future;
 
 /**
  * Created by sosandstrom on 2015-02-21.
  */
-public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWriteValue, Connection> {
+public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteValue, Connection> {
 
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
@@ -36,7 +33,8 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
     @Override
     public int count(Connection tx, Mapper mapper, JdbcKey ancestorKey, JdbcKey simpleKey, Filter... filters) {
         ArrayList arguments = new ArrayList();
-        final String sql = "SELECT COUNT(" + mapper.getPrimaryKeyColumnName() + ") FROM " + mapper.getKind();
+        final String sql = buildSelectSQL(mapper, Arrays.asList( "COUNT(" + mapper.getPrimaryKeyColumnName() + ")"),
+                null, null, arguments, filters);
         return jdbcTemplate.queryForInt(sql, arguments.toArray());
     }
 
@@ -51,27 +49,71 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
     }
 
     @Override
-    public SqlRowSet readValue(Connection tx, Mapper mapper, JdbcKey key) throws IOException {
-        final StringBuilder sql = new StringBuilder("SELECT * FROM ")
-                .append(key.getKind())
-                .append(" WHERE ")
-                .append(mapper.getPrimaryKeyColumnName())
-                .append("=?");
-//                .append(mapper.getPrimaryKeyColumnName());
-        ArrayList arguments = new ArrayList();
-        arguments.add(null != key.getName() ? key.getName() : key.getId());
+    public Object readValue(Connection tx, Mapper mapper, JdbcKey key) throws IOException {
+        ArrayList<Filter> filters = new ArrayList<Filter>();
+        filters.add(Filter.equalsFilter(mapper.getPrimaryKeyColumnName(),
+                null != key.getName() ? key.getName() : key.getId()));
 
         if (null != mapper.getParentKeyColumnName()) {
-            sql.append(" AND ")
-                    .append(mapper.getParentKeyColumnName())
-                    .append("=?");
-//                    .append(mapper.getParentKeyColumnName());
-            arguments.add(null == key.getParentKey() ? null :
-                    (null != key.getParentKey().getName() ? key.getParentKey().getName() : key.getParentKey().getId()));
+            filters.add(Filter.equalsFilter(mapper.getParentKeyColumnName(),
+                    null == key.getParentKey() ? null :
+                            (null != key.getParentKey().getName() ? key.getParentKey().getName() : key.getParentKey().getId())));
         }
 
-        final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql.toString(), arguments.toArray());
-        return sqlRowSet.next() ? sqlRowSet : null;
+        ArrayList arguments = new ArrayList();
+        final String sql = buildSelectSQL(mapper, null, null, null, arguments, filters.toArray(new Filter[filters.size()]));
+
+        RowMapper rowMapper = new JdbcRowMapper(mapper, new JdbcResultSetSupplier());
+        return jdbcTemplate.queryForObject(sql, rowMapper, arguments.toArray());
+    }
+
+    private String buildSelectSQL(Mapper mapper, Iterable<String> projectionsList,
+                                  Integer offset, Integer limit, Collection<Object> params, Filter... filters) {
+        String projections = "*";
+        if (null != projectionsList) {
+            StringBuilder sb = new StringBuilder();
+            for (String col : projectionsList) {
+                if (0 < sb.length()) {
+                    sb.append(',');
+                }
+                sb.append(col);
+            }
+            projections = sb.toString();
+        }
+
+        final StringBuilder sql = new StringBuilder("SELECT ")
+                .append(projections)
+                .append(" FROM ")
+                .append(mapper.getKind());
+        if (null != filters) {
+            boolean isFirst = true;
+            for (Filter f : filters) {
+
+                sql.append(isFirst ? " WHERE " : " AND ");
+                isFirst = false;
+                sql.append(f.getColumn());
+                sql.append(getOpsAsSQL(f.getOperator(), f.getOperand()));
+                if (null != f.getOperand() || !FilterOperator.EQUALS.equals(f.getOperator())) {
+                    params.add(f.getOperand());
+                }
+            }
+        }
+
+        if (null != limit && 0 < limit) {
+            sql.append(" LIMIT ").append(limit);
+            if (null != offset && 0 < offset) {
+                sql.append(" OFFSET ").append(offset);
+            }
+        }
+
+        return sql.toString();
+    }
+
+    private String getOpsAsSQL(FilterOperator operator, Object operand) {
+        switch (operator) {
+            case EQUALS: return null == operand ? " IS NULL" : " =?";
+        }
+        throw new IllegalArgumentException("Unsupported FilterOperator " + operator);
     }
 
     @Override
@@ -107,7 +149,7 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
     }
 
     @Override
-    public Future<SqlRowSet> readFuture(Connection tx, Mapper mapper, JdbcKey key) throws IOException {
+    public Future<Object> readFuture(Connection tx, Mapper mapper, JdbcKey key) throws IOException {
         return null;
     }
 
@@ -140,8 +182,8 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
     }
 
     @Override
-    protected Object getReadObject(SqlRowSet value, String column) {
-        return value.getObject(column);
+    protected Object getReadObject(Object value, String column) {
+        throw new IllegalArgumentException("Not supported for this Supplier");
     }
 
     @Override
@@ -160,9 +202,14 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
     }
 
     @Override
-    public JdbcKey getKey(SqlRowSet value, String column) {
+    public JdbcKey getKey(Object value, String column) {
         final Serializable id = (Serializable) getReadObject(value, column);
         return toKey(null, JdbcSupplier.class.getSimpleName(), id);
+    }
+
+    @Override
+    public Object createEntity(Mapper mapper, Object readValue) {
+        return readValue;
     }
 
     @Override
@@ -218,24 +265,53 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, SqlRowSet, JdbcWrite
     }
 
     @Override
-    public Iterable<SqlRowSet> queryIterable(Connection tx, String kind, boolean keysOnly, int offset, int limit, JdbcKey ancestorKey, JdbcKey simpleKey, String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
+    public Iterable<Object> queryIterable(Connection tx, String kind, boolean keysOnly, int offset, int limit, JdbcKey ancestorKey, JdbcKey simpleKey, String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
         return null;
     }
 
     @Override
-    public SqlRowSet queryUnique(Connection tx, JdbcKey parentKey, String kind, Filter... filters) {
+    public Object queryUnique(Connection tx, JdbcKey parentKey, String kind, Filter... filters) {
         return null;
     }
 
     @Override
-    public CursorPage<SqlRowSet> queryPage(Connection tx, final Mapper mapper, boolean keysOnly, int requestedPageSize, JdbcKey ancestorKey, String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, Collection<String> projections, String cursorString, Filter... filters) {
-        final String sql = ""; // FIXME: mapper.getQuerySQL();
-        ArrayList arguments = new ArrayList();
-        // FIXME: build arguments from filters
-        Object[] args = arguments.toArray();
-        final CursorPage<SqlRowSet> jdbcPage = new CursorPage<SqlRowSet>();
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, args);
-        jdbcPage.setItems(Arrays.asList(sqlRowSet));
-        return jdbcPage;
+    public CursorPage<Object> queryPage(Connection tx, final Mapper mapper, boolean keysOnly, int requestedPageSize, JdbcKey ancestorKey,
+                                           String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending,
+                                           Collection<String> projections, String cursorString, Filter... filters) {
+
+        // TODO: add ancestor filter
+//        if (null != ancestorKey && null != mapper.getParentKeyColumnName()) {
+//            columns.add(mapper.getParentKeyColumnName());
+//            arguments.add(null != ancestorKey.getName() ? ancestorKey.getName() : ancestorKey.getId());
+//        }
+
+        final int offset = null != cursorString ? Integer.parseInt(cursorString) : 0;
+        final ArrayList arguments = new ArrayList();
+        final String sql = buildSelectSQL(mapper, projections, offset, requestedPageSize,
+                arguments, filters);
+
+        RowMapper rowMapper = new JdbcRowMapper(mapper, new JdbcResultSetSupplier());
+        final List items = jdbcTemplate.query(sql, rowMapper, arguments.toArray());
+
+        final CursorPage<Object> cursorPage = new CursorPage<Object>();
+
+        // if first page and populate totalSize, fetch this with async query:
+        if (null == cursorString) {
+            int count = count(tx, mapper, ancestorKey, null, filters);
+            cursorPage.setTotalSize(count);
+        }
+
+        cursorPage.setItems(items);
+
+        // only if next is available
+        if (items.size() == requestedPageSize) {
+
+            // only if page size != total size
+            if (null == cursorPage.getTotalSize() || items.size() < cursorPage.getTotalSize()) {
+                cursorPage.setCursorKey(Integer.toString(offset + items.size()));
+            }
+        }
+
+        return cursorPage;
     }
 }

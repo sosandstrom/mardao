@@ -21,7 +21,7 @@ import net.sf.mardao.test.domain.DBasic;
 /**
  * The DBasic domain-object specific finders and methods go in this POJO.
  * 
- * Generated on 2015-02-26T20:44:31.190+0100.
+ * Generated on 2015-02-27T21:08:08.487+0100.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public class GeneratedDBasicDaoImpl
@@ -45,12 +45,34 @@ public class GeneratedDBasicDaoImpl
   }
 
   /**
+   * query-page-by method for field createdBy
+   * @param createdBy the specified attribute
+   * @return a CursorPage of DBasics for the specified createdBy
+   */
+  public CursorPage<DBasic> queryPageByCreatedBy(java.lang.String createdBy,
+      int requestedPageSize, String cursorString) {
+    return queryPageByField(null, DBasicMapper.Field.CREATEDBY.getFieldName(), createdBy,
+      requestedPageSize, cursorString);
+  }
+
+  /**
    * query-by method for field createdDate
    * @param createdDate the specified attribute
    * @return an Iterable of DBasics for the specified createdDate
    */
   public Iterable<DBasic> queryByCreatedDate(java.util.Date createdDate) {
     return queryByField(null, DBasicMapper.Field.CREATEDDATE.getFieldName(), createdDate);
+  }
+
+  /**
+   * query-page-by method for field createdDate
+   * @param createdDate the specified attribute
+   * @return a CursorPage of DBasics for the specified createdDate
+   */
+  public CursorPage<DBasic> queryPageByCreatedDate(java.util.Date createdDate,
+      int requestedPageSize, String cursorString) {
+    return queryPageByField(null, DBasicMapper.Field.CREATEDDATE.getFieldName(), createdDate,
+      requestedPageSize, cursorString);
   }
 
   /**
@@ -63,6 +85,17 @@ public class GeneratedDBasicDaoImpl
   }
 
   /**
+   * query-page-by method for field displayName
+   * @param displayName the specified attribute
+   * @return a CursorPage of DBasics for the specified displayName
+   */
+  public CursorPage<DBasic> queryPageByDisplayName(java.lang.String displayName,
+      int requestedPageSize, String cursorString) {
+    return queryPageByField(null, DBasicMapper.Field.DISPLAYNAME.getFieldName(), displayName,
+      requestedPageSize, cursorString);
+  }
+
+  /**
    * query-by method for field updatedBy
    * @param updatedBy the specified attribute
    * @return an Iterable of DBasics for the specified updatedBy
@@ -72,12 +105,34 @@ public class GeneratedDBasicDaoImpl
   }
 
   /**
+   * query-page-by method for field updatedBy
+   * @param updatedBy the specified attribute
+   * @return a CursorPage of DBasics for the specified updatedBy
+   */
+  public CursorPage<DBasic> queryPageByUpdatedBy(java.lang.String updatedBy,
+      int requestedPageSize, String cursorString) {
+    return queryPageByField(null, DBasicMapper.Field.UPDATEDBY.getFieldName(), updatedBy,
+      requestedPageSize, cursorString);
+  }
+
+  /**
    * query-by method for field updatedDate
    * @param updatedDate the specified attribute
    * @return an Iterable of DBasics for the specified updatedDate
    */
   public Iterable<DBasic> queryByUpdatedDate(java.util.Date updatedDate) {
     return queryByField(null, DBasicMapper.Field.UPDATEDDATE.getFieldName(), updatedDate);
+  }
+
+  /**
+   * query-page-by method for field updatedDate
+   * @param updatedDate the specified attribute
+   * @return a CursorPage of DBasics for the specified updatedDate
+   */
+  public CursorPage<DBasic> queryPageByUpdatedDate(java.util.Date updatedDate,
+      int requestedPageSize, String cursorString) {
+    return queryPageByField(null, DBasicMapper.Field.UPDATEDDATE.getFieldName(), updatedDate,
+      requestedPageSize, cursorString);
   }
 
 

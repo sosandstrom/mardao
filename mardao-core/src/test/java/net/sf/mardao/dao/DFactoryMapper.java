@@ -90,8 +90,13 @@ public class DFactoryMapper implements Mapper<DFactory, String> {
 
   @Override
   public DFactory fromReadValue(Object core) {
+    return fromReadValue(core, supplier);
+  }
+
+  @Override
+  public <RV> DFactory fromReadValue(RV value, Supplier<Object, RV, ?, ?> specificSupplier) {
     final DFactory domain = new DFactory();
-    domain.setProviderId(supplier.getString(core, COLUMN_PROVIDERID));
+    domain.setProviderId(specificSupplier.getString(value, COLUMN_PROVIDERID));
     return domain;
   }
 

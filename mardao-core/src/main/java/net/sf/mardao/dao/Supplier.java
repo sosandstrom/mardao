@@ -23,6 +23,7 @@ package net.sf.mardao.dao;
  */
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Date;
@@ -37,17 +38,18 @@ import net.sf.mardao.core.filter.Filter;
  * @author osandstrom Date: 2014-09-03 Time: 19:50
  */
 public interface Supplier<K, RV, WV, T> {
-  int count(T tx, String kind, K ancestorKey, K simpleKey, Filter... filters);
+  int count(T tx, Mapper mapper, K ancestorKey, K simpleKey, Filter... filters);
   void deleteValue(T tx, K key) throws IOException;
   void deleteValues(T tx, Collection<K> keys) throws IOException;
-  RV readValue(T tx, K key) throws IOException;
+  RV readValue(T tx, Mapper mapper, K key) throws IOException;
   K writeValue(T tx, K key, WV value) throws IOException;
+  K insertValue(T tx, K key, WV value) throws IOException;
 
-  Future<RV> readFuture(T tx, K key) throws IOException;
+  Future<RV> readFuture(T tx, Mapper mapper, K key) throws IOException;
   Future<K> writeFuture(T tx, K key, WV value) throws IOException;
 
-  K toKey(K parentKey, String kind, Long lId);
-  K toKey(K parentKey, String kind, String sId);
+  K toKey(K parentKey, String kind, Serializable id);
+//  K toKey(K parentKey, String kind, String sId);
 
   Long toLongKey(K key);
   String toStringKey(K key);
@@ -64,6 +66,17 @@ public interface Supplier<K, RV, WV, T> {
   Float getFloat(RV value, String column);
   ByteBuffer getByteBuffer(RV value, String column);
 
+  Collection getWriteCollection(WV value, String column);
+  Date getWriteDate(WV value, String column);
+  Long getWriteLong(WV value, String column);
+  K getWriteKey(WV value, String column);
+  K getWriteParentKey(WV value, String column);
+  String getWriteString(WV value, String column);
+  Integer getWriteInteger(WV value, String column);
+  Boolean getWriteBoolean(WV value, String column);
+  Float getWriteFloat(WV value, String column);
+  ByteBuffer getWriteByteBuffer(WV value, String column);
+
   void setCollection(WV value, String column, Collection c);
   void setDate(WV value, String column, Date d);
   void setLong(WV value, String column, Long l);
@@ -73,8 +86,11 @@ public interface Supplier<K, RV, WV, T> {
   void setFloat(WV value, String column, Float f);
   void setByteBuffer(WV value, String column, ByteBuffer b);
 
-  WV createWriteValue(K parentKey, String kind, Long id);
-  WV createWriteValue(K parentKey, String kind, String id);
+  Object createEntity(Mapper mapper, RV readValue);
+  WV createWriteValue(Mapper mapper, K parentKey, Long id, Object entity);
+  WV createWriteValue(Mapper mapper, K parentKey, String id, Object entity);
+  void setPrimaryKey(WV value, Mapper mapper, String column, K primaryKey, Object Entity);
+  void setParentKey(WV value, Mapper mapper, String column, K parentKey, Object Entity);
 
   // --- transaction methods ---
 
@@ -93,7 +109,7 @@ public interface Supplier<K, RV, WV, T> {
 
   RV queryUnique(T tx, K parentKey, String kind, Filter... filters);
 
-  CursorPage<RV> queryPage(T tx, String kind, boolean keysOnly,
+  CursorPage<RV> queryPage(T tx, Mapper mapper, boolean keysOnly,
                            int requestedPageSize, K ancestorKey,
                           String primaryOrderBy, boolean primaryIsAscending,
                           String secondaryOrderBy, boolean secondaryIsAscending,

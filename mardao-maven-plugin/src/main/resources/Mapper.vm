@@ -1,6 +1,7 @@
 #set( $allFields = $entity.allFields )
 package ${daoBasePackage};
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.nio.ByteBuffer;
@@ -50,20 +51,30 @@ public class ${entity.simpleName}Mapper
 
   @Override
   public ${entity.simpleName} fromReadValue(Object value) {
-    final ${entity.simpleName} entity = new ${entity.simpleName}();
+    return fromReadValue(value, supplier);
+  }
+
+  @Override
+  public <RV> ${entity.simpleName} fromReadValue(RV value, Supplier<Object, RV, ?, ?> specificSupplier) {
+    ${entity.simpleName} entity = (${entity.simpleName}) specificSupplier.createEntity(this, value);
+    if (null != entity) {
+      return entity;
+    }
+
+    entity = new ${entity.simpleName}();
 
     // set primary key:
-    final Object key = supplier.getKey(value, Field.${entity.pk.nameUpper}.getFieldName());
-    entity.set${entity.pk.nameFirst}(supplier.to${entity.pk.simpleType}Key(key));
+    final Object key = specificSupplier.getKey(value, Field.${entity.pk.nameUpper}.getFieldName());
+    entity.set${entity.pk.nameFirst}(specificSupplier.to${entity.pk.simpleType}Key(key));
 
 #if( $entity.parent )
     // set parent key:
-    entity.set${entity.parent.nameFirst}(supplier.getParentKey(value, Field.${entity.parent.nameUpper}.getFieldName()));
+    entity.set${entity.parent.nameFirst}(specificSupplier.getParentKey(value, Field.${entity.parent.nameUpper}.getFieldName()));
 
 #end
     // set all fields:
 #foreach( $field in $allFields )
-    entity.set${field.nameFirst}(supplier.get${field.simpleType}(value, Field.${field.nameUpper}.getFieldName()));
+    entity.set${field.nameFirst}(specificSupplier.get${field.simpleType}(value, Field.${field.nameUpper}.getFieldName()));
 #end
     return entity;
   }
@@ -81,6 +92,20 @@ public class ${entity.simpleName}Mapper
   public String getCreatedDateColumnName() {
 #if( $entity.createdDate )
     return Field.${entity.createdDate.nameUpper}.getFieldName();
+#else
+    return null;
+#end
+  }
+
+  @Override
+  public String getPrimaryKeyColumnName() {
+    return Field.${entity.pk.nameUpper}.getFieldName();
+  }
+
+  @Override
+  public String getParentKeyColumnName() {
+#if( $entity.parent )
+    return Field.${entity.parent.nameUpper}.getFieldName();
 #else
     return null;
 #end
@@ -128,19 +153,24 @@ public class ${entity.simpleName}Mapper
   }
 
   @Override
+  public void setPrimaryKey(Object writeValue, Object primaryKey) {
+    supplier.set${entity.pk.simpleType}(writeValue, Field.${entity.pk.nameUpper}.getFieldName(), supplier.to${entity.pk.simpleType}Key(primaryKey));
+  }
+
+  @Override
   public void updateEntityPostWrite(${entity.simpleName} entity, Object key, Object value) {
     entity.set${entity.pk.nameFirst}(supplier.to${entity.pk.simpleType}Key(key));
 #if( $entity.createdBy )
-    entity.set${entity.createdBy.nameFirst}(supplier.getString(value, Field.${entity.createdBy.nameUpper}.getFieldName()));
+    entity.set${entity.createdBy.nameFirst}(supplier.getWriteString(value, Field.${entity.createdBy.nameUpper}.getFieldName()));
 #end
 #if( $entity.createdDate )
-    entity.set${entity.createdDate.nameFirst}(supplier.getDate(value, Field.${entity.createdDate.nameUpper}.getFieldName()));
+    entity.set${entity.createdDate.nameFirst}(supplier.getWriteDate(value, Field.${entity.createdDate.nameUpper}.getFieldName()));
 #end
 #if( $entity.updatedBy )
-    entity.set${entity.updatedBy.nameFirst}(supplier.getString(value, Field.${entity.updatedBy.nameUpper}.getFieldName()));
+    entity.set${entity.updatedBy.nameFirst}(supplier.getWriteString(value, Field.${entity.updatedBy.nameUpper}.getFieldName()));
 #end
 #if( $entity.updatedDate )
-    entity.set${entity.updatedDate.nameFirst}(supplier.getDate(value, Field.${entity.updatedDate.nameUpper}.getFieldName()));
+    entity.set${entity.updatedDate.nameFirst}(supplier.getWriteDate(value, Field.${entity.updatedDate.nameUpper}.getFieldName()));
 #end
 }
 
@@ -158,7 +188,12 @@ public class ${entity.simpleName}Mapper
   public Object toWriteValue(${entity.simpleName} entity) {
     final ${entity.pk.simpleType} id = getId(entity);
     final Object parentKey = getParentKey(entity);
-    final Object value = supplier.createWriteValue(parentKey, getKind(), id);
+    final Object value = supplier.createWriteValue(this, parentKey, id, entity);
+    // some suppliers cannot set the keys in above method
+    supplier.setPrimaryKey(value, this, Field.${entity.pk.nameUpper}.getFieldName(), toKey(parentKey, id), entity);
+#if( $entity.parent )
+    supplier.setParentKey(value, this, Field.${entity.parent.nameUpper}.getFieldName(), parentKey, entity);
+#end
 
     // set all fields:
 #foreach( $field in $allFields )
@@ -166,6 +201,14 @@ public class ${entity.simpleName}Mapper
 #end
     return value;
   }
+
+  @Override
+  public String getWriteSQL(Serializable id) {
+    // FIXME: implement
+    return null == id ? "" : "UPDATE TABLE DUser SET (displayName,email,createdBy,birthDate) VALUES (:displayName,:email,:createdBy,:birthDate) WHERE id=:id";
+  }
+
+
 
   public static Builder newBuilder() {
     return new Builder();

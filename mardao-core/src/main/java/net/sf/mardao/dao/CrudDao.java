@@ -13,6 +13,8 @@ public interface CrudDao<T, ID extends Serializable> {
 
     int count(Object parentKey);
 
+    ID insert(Object parentKey, ID id, T entity) throws IOException;
+
     ID put(Object parentKey, ID id, T entity) throws IOException;
 
     T get(Object parentKey, ID id) throws IOException;

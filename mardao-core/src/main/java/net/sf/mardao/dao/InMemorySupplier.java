@@ -26,6 +26,7 @@ import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -37,7 +38,7 @@ import java.util.concurrent.FutureTask;
  *
  * @author osandstrom Date: 2014-09-03 Time: 20:48
  */
-public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Object>, Map<String, Object>, Object> {
+public class InMemorySupplier extends AbstractSupplier<InMemoryKey, Map<String, Object>, Map<String, Object>, Object> {
 
   public static final String NAME_PARENT_KEY = "__parentKey";
   public static final String NAME_KEY = "__Key";
@@ -60,8 +61,8 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public int count(Object tx, String kind, InMemoryKey ancestorKey, InMemoryKey simpleKey, Filter... filters) {
-    final Collection<Map<String, Object>> filtered = filterValues(kindStore(kind).values());
+  public int count(Object tx, Mapper mapper, InMemoryKey ancestorKey, InMemoryKey simpleKey, Filter... filters) {
+    final Collection<Map<String, Object>> filtered = filterValues(kindStore(mapper.getKind()).values());
     return filtered.size();
   }
 
@@ -78,16 +79,16 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public Map<String, Object> readValue(Object tx, InMemoryKey key) throws IOException {
+  public Map<String, Object> readValue(Object tx, Mapper mapper, InMemoryKey key) throws IOException {
     return kindStore(key).get(key.getName());
   }
 
   @Override
-  public Future<Map<String, Object>> readFuture(final Object tx, final InMemoryKey key) throws IOException {
+  public Future<Map<String, Object>> readFuture(final Object tx, final Mapper mapper, final InMemoryKey key) throws IOException {
     FutureTask<Map<String, Object>> task = new FutureTask<Map<String, Object>>(new Callable<Map<String, Object>>() {
       @Override
       public Map<String, Object> call() throws Exception {
-        return readValue(tx, key);
+        return readValue(tx, mapper, key);
       }
     });
     new Thread(task).start();
@@ -107,18 +108,8 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public Collection getCollection(Map<String, Object> value, String column) {
-    return (Collection) value.get(column);
-  }
-
-  @Override
-  public Date getDate(Map<String, Object> value, String column) {
-    return (Date) value.get(column);
-  }
-
-  @Override
-  public Long getLong(Map<String, Object> core, String column) {
-    return (Long) core.get(column);
+  protected Object getReadObject(Map<String, Object> value, String column) {
+    return value.get(column);
   }
 
   @Override
@@ -132,73 +123,13 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public String getString(Map<String, Object> core, String column) {
-    return (String) core.get(column);
+  protected void setObject(Map<String, Object> value, String column, Object o) {
+    value.put(column, o);
   }
 
   @Override
-  public Integer getInteger(Map<String, Object> core, String column) {
-    return (Integer) core.get(column);
-  }
-
-  @Override
-  public Boolean getBoolean(Map<String, Object> core, String column) {
-    return (Boolean) core.get(column);
-  }
-
-  @Override
-  public Float getFloat(Map<String, Object> core, String column) {
-    return (Float) core.get(column);
-  }
-
-  @Override
-  public ByteBuffer getByteBuffer(Map<String, Object> core, String column) {
-    return (ByteBuffer) core.get(column);
-  }
-
-  @Override
-  public void setCollection(Map<String, Object> value, String column, Collection c) {
-    value.put(column, c);
-  }
-
-  @Override
-  public void setDate(Map<String, Object> value, String column, Date d) {
-    value.put(column, d);
-  }
-
-  @Override
-  public void setLong(Map<String, Object> value, String column, Long l) {
-    value.put(column, l);
-  }
-
-  @Override
-  public void setString(Map<String, Object> value, String column, String s) {
-    value.put(column, s);
-  }
-
-  @Override
-  public void setInteger(Map<String, Object> value, String column, Integer i) {
-    value.put(column, i);
-  }
-
-  @Override
-  public void setBoolean(Map<String, Object> value, String column, Boolean b) {
-    value.put(column, b);
-  }
-
-  @Override
-  public void setFloat(Map<String, Object> value, String column, Float f) {
-    value.put(column, f);
-  }
-
-  @Override
-  public void setByteBuffer(Map<String, Object> value, String column, ByteBuffer b) {
-    value.put(column, b);
-  }
-
-  @Override
-  public Map<String, Object> createWriteValue(InMemoryKey parentKey, String kind, Long id) {
-    return createWriteValue(parentKey, toKey(parentKey, kind, id));
+  public Map<String, Object> createWriteValue(Mapper mapper, InMemoryKey parentKey, Long id, Object entity) {
+    return createWriteValue(parentKey, toKey(parentKey, mapper.getKind(), id));
   }
 
   private Map<String, Object> createWriteValue(InMemoryKey parentKey, InMemoryKey key) {
@@ -209,8 +140,8 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public Map<String, Object> createWriteValue(InMemoryKey parentKey, String kind, String id) {
-    return createWriteValue(parentKey, toKey(parentKey, kind, id));
+  public Map<String, Object> createWriteValue(Mapper mapper, InMemoryKey parentKey, String id, Object entity) {
+    return createWriteValue(parentKey, toKey(parentKey, mapper.getKind(), id));
   }
 
   @Override
@@ -252,7 +183,7 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public CursorPage<Map<String, Object>> queryPage(Object tx, String kind, boolean keysOnly,
+  public CursorPage<Map<String, Object>> queryPage(Object tx, Mapper mapper, boolean keysOnly,
                                                    int requestedPageSize, InMemoryKey ancestorKey,
                                                    String primaryOrderBy, boolean primaryIsAscending,
                                                    String secondaryOrderBy, boolean secondaryIsAscending,
@@ -262,11 +193,11 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
     Collection<Map<String, Object>> values = new ArrayList<Map<String, Object>>();
     page.setItems(values);
     if (null == cursorString) {
-      page.setTotalSize(filterValues(kindStore(kind).values(), filters).size());
+      page.setTotalSize(filterValues(kindStore(mapper.getKind()).values(), filters).size());
     }
 
     boolean foundCursor = null == cursorString;
-    for (Map.Entry<String, Map<String, Object>> entry : kindStore(kind).entrySet()) {
+    for (Map.Entry<String, Map<String, Object>> entry : kindStore(mapper.getKind()).entrySet()) {
       if (!foundCursor) {
         foundCursor = entry.getKey().toString().equals(cursorString);
       }
@@ -292,13 +223,8 @@ public class InMemorySupplier implements Supplier<InMemoryKey, Map<String, Objec
   }
 
   @Override
-  public InMemoryKey toKey(InMemoryKey parentKey, String kind, Long lId) {
-    return InMemoryKey.of(parentKey, kind, null != lId ? lId.toString() : null);
-  }
-
-  @Override
-  public InMemoryKey toKey(InMemoryKey parentKey, String kind, String sId) {
-    return InMemoryKey.of(parentKey, kind, sId);
+  public InMemoryKey toKey(InMemoryKey parentKey, String kind, Serializable id) {
+    return InMemoryKey.of(parentKey, kind, null != id ? id.toString() : null);
   }
 
   @Override

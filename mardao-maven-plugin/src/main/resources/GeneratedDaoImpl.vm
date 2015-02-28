@@ -126,6 +126,24 @@ public class Generated${entity.simpleName}DaoImpl
 #end
   }
 
+  /**
+   * query-page-by method for field ${field.name}
+   * @param ${field.name} the specified attribute
+   * @return a CursorPage of ${entity.simpleName}s for the specified ${field.name}
+   */
+#if( $entity.parent )
+  public CursorPage<${entity.simpleName}> queryPageBy${field.nameFirst}(Object ${entity.parent.name}, ${fieldType} ${field.name},
+      int requestedPageSize, String cursorString) {
+    return queryPageByField(${entity.parent.name}, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name},
+      requestedPageSize, cursorString);
+#else
+  public CursorPage<${entity.simpleName}> queryPageBy${field.nameFirst}(${fieldType} ${field.name},
+      int requestedPageSize, String cursorString) {
+    return queryPageByField(null, ${entity.simpleName}Mapper.Field.${field.nameUpper}.getFieldName(), ${field.name},
+      requestedPageSize, cursorString);
+#end
+  }
+
 #end
 #end
 

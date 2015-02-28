@@ -116,7 +116,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
 
   @Override
   public int count(Object parentKey) {
-    return supplier.count(getCurrentTransaction(), mapper.getKind(), parentKey, null);
+    return supplier.count(getCurrentTransaction(), mapper, parentKey, null);
   }
 
   public void delete(ID id) throws IOException {
@@ -144,7 +144,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
   @Override
   public T get(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
-    Object value = supplier.readValue(getCurrentTransaction(), key);
+    Object value = supplier.readValue(getCurrentTransaction(), mapper, key);
     if (null == value) {
       return null;
     }
@@ -167,6 +167,17 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     ID id = mapper.getId(entity);
     Object parentKey = mapper.getParentKey(entity);
     return put(parentKey, id, entity);
+  }
+
+  @Override
+  public ID insert(Object parentKey, ID id, T entity) throws IOException {
+    Object key = mapper.toKey(parentKey, id);
+    Object value = mapper.toWriteValue(entity);
+    updateAuditInfo(value);
+    key = supplier.insertValue(getCurrentTransaction(), key, value);
+    id = mapper.fromKey(key);
+    mapper.updateEntityPostWrite(entity, key, value);
+    return id;
   }
 
   // --- query methods ---
@@ -192,6 +203,12 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     return queryPage(null, requestedPageSize, cursorString);
   }
 
+  protected CursorPage<T> queryPageByField(Object parentKey, String fieldName, Object fieldValue, int requestedPageSize, String cursorString) {
+    return queryPage(false, requestedPageSize, parentKey,
+            null, false, null, false,
+            null, cursorString, Filter.equalsFilter(fieldName, fieldValue));
+  }
+
   @Override
   public CursorPage<T> queryPage(Object ancestorKey, int requestedPageSize, String cursorString) {
     return queryPage(false, requestedPageSize, ancestorKey,
@@ -204,7 +221,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
                           Collection<String> projections,
                           String cursorString,
                           Filter... filters) {
-    CursorPage<Object> page = supplier.queryPage(getCurrentTransaction(), mapper.getKind(), false,
+    CursorPage<Object> page = supplier.queryPage(getCurrentTransaction(), mapper, false,
       requestedPageSize, ancestorKey,
       primaryOrderBy, primaryIsAscending, secondaryOrderBy, secondaryIsAscending,
       projections, cursorString,
@@ -264,7 +281,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
 
   public Future<T> getAsync(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
-    Future<?> future = supplier.readFuture(getCurrentTransaction(), key);
+    Future<?> future = supplier.readFuture(getCurrentTransaction(), mapper, key);
     return new EntityFuture<T>(mapper, future);
   }
 
@@ -314,12 +331,12 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
                                final String createdByColumnName, final String createdDateColumnName,
                                final String updatedByColumnName, final String updatedDateColumnName) {
     // createdBy
-    if (null != createdByColumnName && null == supplier.getString(value, createdByColumnName)) {
+    if (null != createdByColumnName && null == supplier.getWriteString(value, createdByColumnName)) {
       supplier.setString(value, createdByColumnName, principalName);
     }
 
     // createdDate
-    if (null != createdDateColumnName && null == supplier.getDate(value, createdDateColumnName)) {
+    if (null != createdDateColumnName && null == supplier.getWriteDate(value, createdDateColumnName)) {
       supplier.setDate(value, createdDateColumnName, date);
     }
 

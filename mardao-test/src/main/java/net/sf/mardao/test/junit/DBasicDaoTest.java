@@ -200,7 +200,7 @@ public class DBasicDaoTest {
   public void testCount() throws IOException {
       createQueryFixtures();
       Integer count = basicDao.count();
-      assertTrue(count.toString(), 116 <= count && count <= 118);
+      assertTrue(count.toString(), 115 <= count && count <= 118);
   }
 
 //  @Test

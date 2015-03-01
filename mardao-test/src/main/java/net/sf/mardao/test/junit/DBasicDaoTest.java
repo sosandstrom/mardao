@@ -27,6 +27,7 @@ import net.sf.mardao.core.filter.Filter;
 import net.sf.mardao.dao.AbstractDao;
 import net.sf.mardao.dao.InMemorySupplier;
 import net.sf.mardao.dao.Supplier;
+import net.sf.mardao.dao.TransFunc;
 import net.sf.mardao.test.dao.DBasicDaoBean;
 import net.sf.mardao.test.dao.DBasicMapper;
 import net.sf.mardao.test.domain.DBasic;
@@ -96,33 +97,34 @@ public class DBasicDaoTest {
     assertNotNull(actual.getUpdatedDate());
   }
 
-//  @Test
-//  public void testWriteReadBasic() throws IOException {
-//    Long id = userDao.withCommitTransaction(new TransFunc<Long>() {
-//      @Override
-//      public Long apply() throws IOException {
-//        DUser entity = new DUser();
-//        entity.setId(327L);
-//        entity.setDisplayName("xHjqLåäö123");
-//
-//        DUser actual = userDao.get(327L);
-//        assertNull(actual);
-//
-//        return userDao.put(entity);
-//      }
-//    });
-//    assertEquals(Long.valueOf(327L), id);
-//    DUser actual = userDao.withCommitTransaction(new TransFunc<DUser>() {
-//      @Override
-//      public DUser apply() throws IOException {
-//        return userDao.get(327L);
-//      }
-//    });
-//    assertNotNull(actual);
-//    assertEquals(Long.valueOf(327L), actual.getId());
-//    assertEquals("xHjqLåäö123", actual.getDisplayName());
-//  }
-//
+  @Test
+  public void testWriteReadBasic() throws IOException {
+    Long id = basicDao.withCommitTransaction(new TransFunc<Long>() {
+      @Override
+      public Long apply() throws IOException {
+        DBasic entity = DBasicMapper.newBuilder()
+            .id(327L)
+            .displayName("xHjqLåäö123")
+            .build();
+
+        DBasic actual = basicDao.get(327L);
+        assertNull("Expected no value, as we have not inserted yet", actual);
+
+        return basicDao.insert(null, 327L, entity);
+      }
+    });
+    assertEquals(Long.valueOf(327L), id);
+    DBasic actual = basicDao.withCommitTransaction(new TransFunc<DBasic>() {
+      @Override
+      public DBasic apply() throws IOException {
+        return basicDao.get(327L);
+      }
+    });
+    assertNotNull("Expected value", actual);
+    assertEquals(Long.valueOf(327L), actual.getId());
+    assertEquals("xHjqLåäö123", actual.getDisplayName());
+  }
+
 //  @Test
 //  public void testWriteReadFuture() throws IOException, ExecutionException, InterruptedException {
 //    DUser entity = new DUser();
@@ -220,6 +222,7 @@ public class DBasicDaoTest {
     createQueryFixtures();
     DBasic actual =  basicDao.get(42L);
 
+    assertEquals(Long.valueOf(42), actual.getId());
     assertEquals(PRINCIPAL_FIXTURE, actual.getCreatedBy());
     assertNotNull(actual.getCreatedDate());
   }

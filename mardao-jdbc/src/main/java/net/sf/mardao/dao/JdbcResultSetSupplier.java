@@ -16,4 +16,14 @@ public class JdbcResultSetSupplier extends SupplierAdapter<Object, ResultSet, Vo
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public Long toLongKey(Object key) {
+        return (Long) key;
+    }
+
+    @Override
+    public String toStringKey(Object key) {
+        return (String) key;
+    }
 }

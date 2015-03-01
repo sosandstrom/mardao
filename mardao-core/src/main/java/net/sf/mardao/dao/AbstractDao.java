@@ -126,7 +126,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
   @Override
   public void delete(Object parentKey, ID id) throws IOException {
     Object key = mapper.toKey(parentKey, id);
-    supplier.deleteValue(getCurrentTransaction(), key);
+    supplier.deleteValue(getCurrentTransaction(), mapper, key);
   }
 
   public void delete(Iterable<ID> ids) throws IOException {
@@ -134,7 +134,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     for (ID id : ids) {
       keys.add(mapper.toKey(null, id));
     }
-    supplier.deleteValues(getCurrentTransaction(), keys);
+    supplier.deleteValues(getCurrentTransaction(), mapper, keys);
   }
 
   public T get(ID id) throws IOException {

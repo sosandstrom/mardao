@@ -3,6 +3,7 @@ package net.sf.mardao.dao;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.filter.Filter;
 import net.sf.mardao.core.filter.FilterOperator;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.Future;
@@ -20,6 +22,7 @@ import java.util.concurrent.Future;
  */
 public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteValue, Connection> {
 
+    public static final String METHOD_SELECT = "SELECT ";
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
     private final DataFieldMaxValueIncrementer incrementer;
@@ -33,23 +36,44 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     @Override
     public int count(Connection tx, Mapper mapper, JdbcKey ancestorKey, JdbcKey simpleKey, Filter... filters) {
         ArrayList arguments = new ArrayList();
-        final String sql = buildSelectSQL(mapper, Arrays.asList( "COUNT(" + mapper.getPrimaryKeyColumnName() + ")"),
-                null, null, arguments, filters);
+        final String sql = buildSQL(mapper, METHOD_SELECT,
+                Arrays.asList("COUNT(" + mapper.getPrimaryKeyColumnName() + ")"), null, null, arguments, filters);
         return jdbcTemplate.queryForInt(sql, arguments.toArray());
     }
 
     @Override
-    public void deleteValue(Connection tx, JdbcKey key) throws IOException {
+    public void deleteValue(Connection tx, Mapper mapper, JdbcKey key) throws IOException {
+        ArrayList<Filter> filters = buildKeyFilters(mapper, key);
 
+        final ArrayList arguments = new ArrayList();
+        final String sql = buildSQL(mapper, "DELETE ", Arrays.asList(""),
+                null, null, arguments, filters.toArray(new Filter[filters.size()]));
+
+        jdbcTemplate.update(sql, arguments.toArray());
     }
 
     @Override
-    public void deleteValues(Connection tx, Collection<JdbcKey> keys) throws IOException {
+    public void deleteValues(Connection tx, Mapper mapper, Collection<JdbcKey> keys) throws IOException {
 
     }
 
     @Override
     public Object readValue(Connection tx, Mapper mapper, JdbcKey key) throws IOException {
+        ArrayList<Filter> filters = buildKeyFilters(mapper, key);
+
+        ArrayList arguments = new ArrayList();
+        final String sql = buildSQL(mapper, METHOD_SELECT, null, null, null, arguments, filters.toArray(new Filter[filters.size()]));
+
+        RowMapper rowMapper = new JdbcRowMapper(mapper, new JdbcResultSetSupplier());
+        try {
+            return jdbcTemplate.queryForObject(sql, rowMapper, arguments.toArray());
+        }
+        catch (EmptyResultDataAccessException whenMissing) {
+            return null;
+        }
+    }
+
+    private ArrayList<Filter> buildKeyFilters(Mapper mapper, JdbcKey key) {
         ArrayList<Filter> filters = new ArrayList<Filter>();
         filters.add(Filter.equalsFilter(mapper.getPrimaryKeyColumnName(),
                 null != key.getName() ? key.getName() : key.getId()));
@@ -59,16 +83,11 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
                     null == key.getParentKey() ? null :
                             (null != key.getParentKey().getName() ? key.getParentKey().getName() : key.getParentKey().getId())));
         }
-
-        ArrayList arguments = new ArrayList();
-        final String sql = buildSelectSQL(mapper, null, null, null, arguments, filters.toArray(new Filter[filters.size()]));
-
-        RowMapper rowMapper = new JdbcRowMapper(mapper, new JdbcResultSetSupplier());
-        return jdbcTemplate.queryForObject(sql, rowMapper, arguments.toArray());
+        return filters;
     }
 
-    private String buildSelectSQL(Mapper mapper, Iterable<String> projectionsList,
-                                  Integer offset, Integer limit, Collection<Object> params, Filter... filters) {
+    private String buildSQL(Mapper mapper, String method, Iterable<String> projectionsList,
+                            Integer offset, Integer limit, Collection<Object> params, Filter... filters) {
         String projections = "*";
         if (null != projectionsList) {
             StringBuilder sb = new StringBuilder();
@@ -81,7 +100,7 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
             projections = sb.toString();
         }
 
-        final StringBuilder sql = new StringBuilder("SELECT ")
+        final StringBuilder sql = new StringBuilder(method)
                 .append(projections)
                 .append(" FROM ")
                 .append(mapper.getKind());
@@ -287,8 +306,8 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
 
         final int offset = null != cursorString ? Integer.parseInt(cursorString) : 0;
         final ArrayList arguments = new ArrayList();
-        final String sql = buildSelectSQL(mapper, projections, offset, requestedPageSize,
-                arguments, filters);
+        final String sql = buildSQL(mapper, METHOD_SELECT, projections, offset,
+                requestedPageSize, arguments, filters);
 
         RowMapper rowMapper = new JdbcRowMapper(mapper, new JdbcResultSetSupplier());
         final List items = jdbcTemplate.query(sql, rowMapper, arguments.toArray());

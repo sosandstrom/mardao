@@ -28,12 +28,12 @@ public class SupplierAdapter<K, RV, WV, TR> extends AbstractSupplier<K, RV, WV, 
     }
 
     @Override
-    public void deleteValue(TR tx, K key) throws IOException {
+    public void deleteValue(TR tx, Mapper mapper, K key) throws IOException {
 
     }
 
     @Override
-    public void deleteValues(TR tx, Collection<K> keys) throws IOException {
+    public void deleteValues(TR tx, Mapper mapper, Collection<K> keys) throws IOException {
 
     }
 

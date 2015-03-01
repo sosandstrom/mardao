@@ -203,17 +203,17 @@ public class DBasicDaoTest {
       assertTrue(count.toString(), 115 <= count && count <= 118);
   }
 
-//  @Test
-//  public void testDelete() throws IOException {
-//      createQueryFixtures();
-//      DUser actual = userDao.get(42L);
-//      assertNotNull(actual);
-//
-//      userDao.delete(42L);
-//      actual = userDao.get(42L);
-//      assertNull(actual);
-//      assertEquals(117, userDao.count());
-//  }
+  @Test
+  public void testDelete() throws IOException {
+      createQueryFixtures();
+      DBasic actual = basicDao.get(42L);
+      assertNotNull(actual);
+
+      basicDao.delete(42L);
+      actual = basicDao.get(42L);
+      assertNull(actual);
+      assertEquals(117, basicDao.count());
+  }
 
   @Test
   public void testCreated() throws IOException {

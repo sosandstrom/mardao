@@ -100,14 +100,14 @@ public interface Supplier<K, RV, WV, T> {
 
   // --- query methods ---
 
-  Iterable<RV> queryIterable(T tx, String kind, boolean keysOnly,
+  Iterable<RV> queryIterable(T tx, final Mapper mapper, boolean keysOnly,
                               int offset, int limit,
                               K ancestorKey, K simpleKey,
                               String primaryOrderBy, boolean primaryIsAscending,
                               String secondaryOrderBy, boolean secondaryIsAscending,
                               Filter... filters);
 
-  RV queryUnique(T tx, K parentKey, String kind, Filter... filters);
+  RV queryUnique(T tx, Mapper mapper, K parentKey, Filter... filters);
 
   CursorPage<RV> queryPage(T tx, Mapper mapper, boolean keysOnly,
                            int requestedPageSize, K ancestorKey,

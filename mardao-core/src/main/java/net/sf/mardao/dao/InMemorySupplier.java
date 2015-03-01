@@ -145,12 +145,12 @@ public class InMemorySupplier extends AbstractSupplier<InMemoryKey, Map<String, 
   }
 
   @Override
-  public Iterable<Map<String, Object>> queryIterable(Object tx, String kind, boolean keysOnly, int offset, int limit,
+  public Iterable<Map<String, Object>> queryIterable(Object tx, Mapper mapper, boolean keysOnly, int offset, int limit,
                                                      InMemoryKey ancestorKey, InMemoryKey simpleKey,
                                                      String primaryOrderBy, boolean primaryIsAscending,
                                                      String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
     // this will do for now
-    Collection<Map<String, Object>> remaining = kindStore(kind).values();
+    Collection<Map<String, Object>> remaining = kindStore(mapper.getKind()).values();
 
     return filterValues(remaining, filters);
   }
@@ -175,8 +175,8 @@ public class InMemorySupplier extends AbstractSupplier<InMemoryKey, Map<String, 
   }
 
   @Override
-  public Map<String, Object> queryUnique(Object tx, InMemoryKey parentKey, String kind, Filter... filters) {
-    final Iterable<Map<String, Object>> iterable = queryIterable(tx, kind, false, 0, 1,
+  public Map<String, Object> queryUnique(Object tx, Mapper mapper, InMemoryKey parentKey, Filter... filters) {
+    final Iterable<Map<String, Object>> iterable = queryIterable(tx, mapper, false, 0, 1,
       parentKey, null, null, false, null, false, filters);
     final Iterator<Map<String, Object>> iterator = iterable.iterator();
     return iterator.hasNext() ? iterator.next() : null;

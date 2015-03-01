@@ -284,12 +284,24 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     }
 
     @Override
-    public Iterable<Object> queryIterable(Connection tx, String kind, boolean keysOnly, int offset, int limit, JdbcKey ancestorKey, JdbcKey simpleKey, String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
-        return null;
+    public Iterable<Object> queryIterable(Connection tx, final Mapper mapper, boolean keysOnly, int offset, int limit, JdbcKey ancestorKey, JdbcKey simpleKey, String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
+        // TODO: add ancestor filter
+//        if (null != ancestorKey && null != mapper.getParentKeyColumnName()) {
+//            columns.add(mapper.getParentKeyColumnName());
+//            arguments.add(null != ancestorKey.getName() ? ancestorKey.getName() : ancestorKey.getId());
+//        }
+
+        final ArrayList arguments = new ArrayList();
+        final String sql = buildSQL(mapper, METHOD_SELECT, null, offset,
+                limit, arguments, filters);
+
+        RowMapper rowMapper = new JdbcRowMapper(mapper, new JdbcResultSetSupplier());
+        final List items = jdbcTemplate.query(sql, rowMapper, arguments.toArray());
+        return items;
     }
 
     @Override
-    public Object queryUnique(Connection tx, JdbcKey parentKey, String kind, Filter... filters) {
+    public Object queryUnique(Connection tx, Mapper mapper, JdbcKey parentKey, Filter... filters) {
         return null;
     }
 

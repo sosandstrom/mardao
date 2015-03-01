@@ -103,12 +103,12 @@ public class SupplierAdapter<K, RV, WV, TR> extends AbstractSupplier<K, RV, WV, 
     }
 
     @Override
-    public Iterable<RV> queryIterable(TR tx, String kind, boolean keysOnly, int offset, int limit, K ancestorKey, K simpleKey, String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
+    public Iterable<RV> queryIterable(TR tx, Mapper mapper, boolean keysOnly, int offset, int limit, K ancestorKey, K simpleKey, String primaryOrderBy, boolean primaryIsAscending, String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
         return null;
     }
 
     @Override
-    public RV queryUnique(TR tx, K parentKey, String kind, Filter... filters) {
+    public RV queryUnique(TR tx, Mapper mapper, K parentKey, Filter... filters) {
         return null;
     }
 

@@ -35,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Date;
 
 import static org.junit.Assert.*;
 
@@ -168,24 +169,24 @@ public class DBasicDaoTest {
 //      }
 //    });
 //  }
-//
-//  @Test
-//  public void testQueryByField() throws IOException {
-//      createQueryFixtures();
-//
-//      Iterable<DUser> users = userDao.queryByDisplayName("mod7_2");
-//      int count = 0;
-//      for (DUser u : users) {
-//        count++;
-//        assertEquals("mod7_2", u.getDisplayName());
-//        assertEquals(2, u.getId() % 7);
-//      }
-//      assertEquals(9, count);
-//
-//      users = userDao.queryByDisplayName(null);
-//      assertFalse(users.iterator().hasNext());
-//  }
-//
+
+  @Test
+  public void testQueryByField() throws IOException {
+      createQueryFixtures();
+
+      Iterable<DBasic> users = basicDao.queryByDisplayName("mod7_2");
+      int count = 0;
+      for (DBasic u : users) {
+        count++;
+        assertEquals("mod7_2", u.getDisplayName());
+        assertEquals(2, u.getId() % 7);
+      }
+      assertEquals(9, count);
+
+      users = basicDao.queryByDisplayName(null);
+      assertFalse(users.iterator().hasNext());
+  }
+
 //  @Test
 //  public void testFindUniqueByField() throws IOException {
 //    createQueryFixtures();
@@ -226,45 +227,6 @@ public class DBasicDaoTest {
     assertEquals(PRINCIPAL_FIXTURE, actual.getCreatedBy());
     assertNotNull(actual.getCreatedDate());
   }
-
-//  @Test
-//  public void testAuditInfoCreated() {
-//    DUserMapper mapper = new DUserMapper(supplier);
-//    Object actual = supplier.createWriteValue(mapper, null, 1L, null);
-//    Date date = new Date();
-//    userDao.updateAuditInfo(actual, "first", date,
-//      "createdBy", "birthDate", null, null);
-//    assertEquals("first", supplier.getString(actual, "createdBy"));
-//    assertEquals(date, supplier.getDate(actual, "birthDate"));
-//
-//    userDao.updateAuditInfo(actual, "second", new Date(0L),
-//      "createdBy", "birthDate", null, null);
-//    assertEquals("first", supplier.getString(actual, "createdBy"));
-//    assertEquals(date, supplier.getDate(actual, "birthDate"));
-//  }
-//
-//  @Test
-//  public void testAuditInfoUpdated() {
-//    DUserMapper mapper = new DUserMapper(supplier);
-//    Object actual = supplier.createWriteValue(mapper, null, 1L, null);
-//    Date date = new Date();
-//    userDao.updateAuditInfo(actual, "first", date,
-//            null, null, "createdBy", "birthDate");
-//    assertEquals("first", supplier.getString(actual, "createdBy"));
-//    assertEquals(date, supplier.getDate(actual, "birthDate"));
-//
-//    Date date1 = new Date(0L);
-//    userDao.updateAuditInfo(actual, "second", date1,
-//      null, null, "createdBy", "birthDate");
-//    assertEquals("second", supplier.getString(actual, "createdBy"));
-//    assertEquals(date1, supplier.getDate(actual, "birthDate"));
-//
-//    // do not mess up
-//    userDao.updateAuditInfo(actual, null, null,
-//            null, null, "createdBy", "birthDate");
-//    assertEquals("second", supplier.getString(actual, "createdBy"));
-//    assertEquals(date1, supplier.getDate(actual, "birthDate"));
-//  }
 
   @Test
   public void testQueryPage() throws IOException {

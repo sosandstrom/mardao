@@ -80,11 +80,11 @@ public class DatastoreSupplier extends AbstractSupplier<Key, Entity, Entity, Tra
   }
 
   @Override
-  public Iterable<Entity> queryIterable(Transaction tx, String kind, boolean keysOnly, int offset, int limit,
+  public Iterable<Entity> queryIterable(Transaction tx, Mapper mapper, boolean keysOnly, int offset, int limit,
                                         Key ancestorKey, Key simpleKey,
                                         String primaryOrderBy, boolean primaryIsAscending,
                                         String secondaryOrderBy, boolean secondaryIsAscending, Filter... filters) {
-    final PreparedQuery pq = prepare(kind, keysOnly, ancestorKey, simpleKey,
+    final PreparedQuery pq = prepare(mapper.getKind(), keysOnly, ancestorKey, simpleKey,
       primaryOrderBy, primaryIsAscending,
       secondaryOrderBy, secondaryIsAscending, null, filters);
 
@@ -130,8 +130,8 @@ public class DatastoreSupplier extends AbstractSupplier<Key, Entity, Entity, Tra
     return cursorPage;
   }
   @Override
-  public Entity queryUnique(Transaction tx, Key ancestorKey, String kind, Filter... filters) {
-    final PreparedQuery pq = prepare(kind, false, ancestorKey, null,
+  public Entity queryUnique(Transaction tx, Mapper mapper, Key ancestorKey, Filter... filters) {
+    final PreparedQuery pq = prepare(mapper.getKind(), false, ancestorKey, null,
       null, false, null, false,
       null, filters);
     final Entity entity = pq.asSingleEntity();

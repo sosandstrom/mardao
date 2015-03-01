@@ -183,7 +183,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
   // --- query methods ---
 
   protected Iterable<T> queryByField(Object ancestorKey, String fieldName, Object fieldValue) {
-    Iterable values = supplier.queryIterable(getCurrentTransaction(), mapper.getKind(), false, 0, -1,
+    Iterable values = supplier.queryIterable(getCurrentTransaction(), mapper, false, 0, -1,
       ancestorKey, null,
       null, false, null, false,
       Filter.equalsFilter(fieldName, fieldValue));
@@ -191,7 +191,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
   }
 
   protected T queryUniqueByField(Object parentKey, String fieldName, Object fieldValue) {
-    final Object value = supplier.queryUnique(getCurrentTransaction(), parentKey, mapper.getKind(),
+    final Object value = supplier.queryUnique(getCurrentTransaction(), mapper, parentKey,
       Filter.equalsFilter(fieldName, fieldValue));
     if (null == value) {
       return null;
@@ -245,7 +245,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
                                       String secondaryOrderBy, boolean secondaryIsAscending,
                                       Filter... filters) {
 
-    final Iterable iterable = supplier.queryIterable(getCurrentTransaction(), mapper.getKind(), false,
+    final Iterable iterable = supplier.queryIterable(getCurrentTransaction(), mapper, false,
             offset, limit, ancestorKey, null,
             primaryOrderBy, primaryIsAscending,
             secondaryOrderBy, secondaryIsAscending,

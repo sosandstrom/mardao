@@ -70,12 +70,12 @@ public class DatastoreSupplier extends AbstractSupplier<Key, Entity, Entity, Tra
   }
 
   @Override
-  public void deleteValue(Transaction tx, Key key) throws IOException {
+  public void deleteValue(Transaction tx, Mapper mapper, Key key) throws IOException {
     getSyncService().delete(key);
   }
 
   @Override
-  public void deleteValues(Transaction tx, Collection<Key> keys) throws IOException {
+  public void deleteValues(Transaction tx, Mapper mapper, Collection<Key> keys) throws IOException {
     getSyncService().delete(keys);
   }
 

@@ -67,14 +67,14 @@ public class InMemorySupplier extends AbstractSupplier<InMemoryKey, Map<String, 
   }
 
   @Override
-  public void deleteValue(Object tx, InMemoryKey key) throws IOException {
+  public void deleteValue(Object tx, Mapper mapper, InMemoryKey key) throws IOException {
     kindStore(key).remove(key.getName());
   }
 
   @Override
-  public void deleteValues(Object tx, Collection<InMemoryKey> keys) throws IOException {
+  public void deleteValues(Object tx, Mapper mapper, Collection<InMemoryKey> keys) throws IOException {
     for (InMemoryKey key : keys) {
-      deleteValue(tx, key);
+      deleteValue(tx, mapper, key);
     }
   }
 

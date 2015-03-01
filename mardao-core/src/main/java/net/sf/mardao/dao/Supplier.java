@@ -39,8 +39,8 @@ import net.sf.mardao.core.filter.Filter;
  */
 public interface Supplier<K, RV, WV, T> {
   int count(T tx, Mapper mapper, K ancestorKey, K simpleKey, Filter... filters);
-  void deleteValue(T tx, K key) throws IOException;
-  void deleteValues(T tx, Collection<K> keys) throws IOException;
+  void deleteValue(T tx, Mapper mapper, K key) throws IOException;
+  void deleteValues(T tx, Mapper mapper, Collection<K> keys) throws IOException;
   RV readValue(T tx, Mapper mapper, K key) throws IOException;
   K writeValue(T tx, K key, WV value) throws IOException;
   K insertValue(T tx, K key, WV value) throws IOException;

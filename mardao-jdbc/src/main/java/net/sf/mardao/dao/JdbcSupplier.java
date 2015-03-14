@@ -147,8 +147,9 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
 
         // UPDATE
         final Mapper mapper = value.mapper;
-        String sql = mapper.getWriteSQL(id);
-        jdbcTemplate.update(sql);
+        final ArrayList arguments = new ArrayList();
+        String sql = mapper.getWriteSQL(id, value, arguments);
+        jdbcTemplate.update(sql, arguments.toArray());
 
         return key;
     }
@@ -208,8 +209,9 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     }
 
     @Override
-    protected Object getWriteObject(JdbcWriteValue value, String column) {
-        return value.parameterMap.get(column);
+    public Object getWriteObject(Object value, String column) {
+        final JdbcWriteValue writeValue = (JdbcWriteValue) value;
+        return writeValue.parameterMap.get(column);
     }
 
     @Override

@@ -223,12 +223,11 @@ public class ${entity.simpleName}Mapper
   }
 
   @Override
-  public String getWriteSQL(Serializable id) {
+  public String getWriteSQL(Serializable id, Object writeValue, Collection arguments) {
     final StringBuilder sql = new StringBuilder("UPDATE ")
         .append(getKind())
-        .append(" SET (");
+        .append(" SET ");
 
-    final StringBuilder values = new StringBuilder();
     boolean first = true;
     for (Field f : Field.values()) {
         if (!getPrimaryKeyField().equals(f) &&
@@ -238,18 +237,23 @@ public class ${entity.simpleName}Mapper
                 first = false;
            }
            else {
-                sql.append(',');
-                values.append(',');
+                sql.append(", ");
            }
            sql.append(f.getFieldName())
             .append("=?");
-           values.append('?');
+           if (null != arguments && null != writeValue) {
+            Object arg = supplier.getWriteObject(writeValue, f.getFieldName());
+            arguments.add(arg);
+           }
         }
     }
 
-    sql.append(") WHERE ")
+    sql.append(" WHERE ")
         .append(getPrimaryKeyColumnName())
         .append("=?");
+    if (null != arguments) {
+        arguments.add(id);
+    }
     return sql.toString();
   }
 

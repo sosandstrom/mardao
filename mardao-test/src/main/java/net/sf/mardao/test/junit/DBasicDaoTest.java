@@ -152,6 +152,9 @@ public class DBasicDaoTest {
     public void testUpdate() throws IOException {
         createQueryFixtures();
         DBasic expected = basicDao.get(42L);
+        assertEquals(PRINCIPAL_FIXTURE, expected.getUpdatedBy());
+        final Date createdDate = expected.getCreatedDate();
+        final Date updatedDate = expected.getUpdatedDate();
         expected.setDisplayName("UpdatedDisplayName");
         Long key = basicDao.put(expected);
         assertEquals(Long.valueOf(42), key);
@@ -159,10 +162,10 @@ public class DBasicDaoTest {
         DBasic actual = basicDao.get(key);
         assertEquals(expected.getDisplayName(), actual.getDisplayName());
         assertEquals(expected.getCreatedBy(), actual.getCreatedBy());
-        assertEquals(expected.getCreatedDate(), actual.getCreatedDate());
+        assertEquals(createdDate, actual.getCreatedDate());
 
-        assertNotEquals(expected.getUpdatedBy(), actual.getUpdatedBy());
-        assertNotEquals(expected.getUpdatedDate(), actual.getUpdatedDate());
+        assertNotEquals(PRINCIPAL_FIXTURE, actual.getUpdatedBy());
+        assertNotEquals(updatedDate, actual.getUpdatedDate());
     }
 
     @Test

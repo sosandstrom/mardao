@@ -83,8 +83,8 @@ public abstract class AbstractSupplier<K, RV, WV, T> implements Supplier<K, RV, 
         return (Collection) getReadObject(value, column);
     }
 
-
-    protected Object getWriteObject(WV value, String column) {
+    @Override
+    public Object getWriteObject(Object value, String column) {
         return getReadObject((RV) value, column);
     }
 

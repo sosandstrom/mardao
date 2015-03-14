@@ -13,7 +13,7 @@ import net.sf.mardao.test.domain.DBasic;
 /**
  * The DBasic domain-object specific mapping methods go here.
  *
- * Generated on 2015-03-14T10:33:18.052+0100.
+ * Generated on 2015-03-14T19:26:25.456+0100.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public class DBasicMapper
@@ -175,12 +175,11 @@ public class DBasicMapper
   }
 
   @Override
-  public String getWriteSQL(Serializable id) {
+  public String getWriteSQL(Serializable id, Object writeValue, Collection arguments) {
     final StringBuilder sql = new StringBuilder("UPDATE ")
         .append(getKind())
-        .append(" SET (");
+        .append(" SET ");
 
-    final StringBuilder values = new StringBuilder();
     boolean first = true;
     for (Field f : Field.values()) {
         if (!getPrimaryKeyField().equals(f) &&
@@ -190,18 +189,23 @@ public class DBasicMapper
                 first = false;
            }
            else {
-                sql.append(',');
-                values.append(',');
+                sql.append(", ");
            }
            sql.append(f.getFieldName())
             .append("=?");
-           values.append('?');
+           if (null != arguments && null != writeValue) {
+            Object arg = supplier.getWriteObject(writeValue, f.getFieldName());
+            arguments.add(arg);
+           }
         }
     }
 
-    sql.append(") WHERE ")
+    sql.append(" WHERE ")
         .append(getPrimaryKeyColumnName())
         .append("=?");
+    if (null != arguments) {
+        arguments.add(id);
+    }
     return sql.toString();
   }
 

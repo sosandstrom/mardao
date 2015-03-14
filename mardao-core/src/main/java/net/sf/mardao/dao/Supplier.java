@@ -66,6 +66,7 @@ public interface Supplier<K, RV, WV, T> {
   Float getFloat(RV value, String column);
   ByteBuffer getByteBuffer(RV value, String column);
 
+  Object getWriteObject(Object value, String column);
   Collection getWriteCollection(WV value, String column);
   Date getWriteDate(WV value, String column);
   Long getWriteLong(WV value, String column);

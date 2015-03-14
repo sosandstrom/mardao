@@ -144,7 +144,7 @@ public class DFactoryMapper
   }
 
   @Override
-  public String getWriteSQL(Serializable id) {
+  public String getWriteSQL(Serializable id, Object writeValue, Collection arguments) {
     // FIXME: implement
     return null == id ? "" : "UPDATE TABLE DUser SET (displayName,email,createdBy,birthDate) VALUES (:displayName,:email,:createdBy,:birthDate) WHERE id=:id";
   }

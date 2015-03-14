@@ -137,7 +137,9 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
 
     @Override
     public JdbcKey writeValue(Connection tx, JdbcKey key, JdbcWriteValue value) throws IOException {
-        if (null == key.getName() && null == key.getId()) {
+        Serializable id = null == key ? null :
+                (null != key.getName() ? key.getName() : key.getId());
+        if (null == id) {
 
             // INSERT
             return insertValue(tx, key, value);
@@ -145,7 +147,7 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
 
         // UPDATE
         final Mapper mapper = value.mapper;
-        String sql = "";
+        String sql = mapper.getWriteSQL(id);
         jdbcTemplate.update(sql);
 
         return key;

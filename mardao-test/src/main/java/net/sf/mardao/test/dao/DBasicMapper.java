@@ -13,7 +13,7 @@ import net.sf.mardao.test.domain.DBasic;
 /**
  * The DBasic domain-object specific mapping methods go here.
  *
- * Generated on 2015-02-27T21:08:08.487+0100.
+ * Generated on 2015-03-14T10:33:18.052+0100.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public class DBasicMapper
@@ -76,14 +76,26 @@ public class DBasicMapper
     return entity;
   }
 
+    public Field getCreatedByField() {
+    return Field.CREATEDBY;
+    }
+
   @Override
   public String getCreatedByColumnName() {
     return Field.CREATEDBY.getFieldName();
   }
 
+    public Field getCreatedDateField() {
+    return Field.CREATEDDATE;
+    }
+
   @Override
   public String getCreatedDateColumnName() {
     return Field.CREATEDDATE.getFieldName();
+  }
+
+  public Field getPrimaryKeyField() {
+    return Field.ID;
   }
 
   @Override
@@ -164,8 +176,33 @@ public class DBasicMapper
 
   @Override
   public String getWriteSQL(Serializable id) {
-    // FIXME: implement
-    return null == id ? "" : "UPDATE TABLE DUser SET (displayName,email,createdBy,birthDate) VALUES (:displayName,:email,:createdBy,:birthDate) WHERE id=:id";
+    final StringBuilder sql = new StringBuilder("UPDATE ")
+        .append(getKind())
+        .append(" SET (");
+
+    final StringBuilder values = new StringBuilder();
+    boolean first = true;
+    for (Field f : Field.values()) {
+        if (!getPrimaryKeyField().equals(f) &&
+            !getCreatedByField().equals(f) &&
+            !getCreatedDateField().equals(f)) {
+           if (first) {
+                first = false;
+           }
+           else {
+                sql.append(',');
+                values.append(',');
+           }
+           sql.append(f.getFieldName())
+            .append("=?");
+           values.append('?');
+        }
+    }
+
+    sql.append(") WHERE ")
+        .append(getPrimaryKeyColumnName())
+        .append("=?");
+    return sql.toString();
   }
 
 

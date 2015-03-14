@@ -46,85 +46,87 @@ import static org.junit.Assert.*;
  */
 public class DBasicDaoTest {
 
-  public static final String PRINCIPAL_FIXTURE = "fixture";
-  public static final String PRINCIPAL_SET_UP = "setUp";
-  protected DBasicDaoBean basicDao;
-  protected Supplier supplier;
+    public static final String PRINCIPAL_FIXTURE = "fixture";
+    public static final String PRINCIPAL_SET_UP = "setUp";
+    protected DBasicDaoBean basicDao;
+    protected Supplier supplier;
 
-  /** Override to test specific supplier */
-  protected Supplier createSupplier() {
-    return new InMemorySupplier();
-  }
-
-  @Before
-  public void setUp() {
-    supplier = createSupplier();
-    basicDao = new DBasicDaoBean(supplier);
-    AbstractDao.setPrincipalName(PRINCIPAL_SET_UP);
-  }
-
-
-  protected void createQueryFixtures() throws IOException {
-
-    AbstractDao.setPrincipalName(PRINCIPAL_FIXTURE);
-
-    for (int i = 1; i < 60; i++) {
-      DBasic u = DBasicDaoBean.newBuilder()
-              .id(Long.valueOf(i))
-              .displayName("mod7_" + (i % 7))
-              .build();
-      basicDao.insert(null, Long.valueOf(i), u);
-
-      u = DBasicDaoBean.newBuilder()
-              .id(Long.valueOf(1000 + i))
-              .displayName("user_" + i)
-              .build();
-      basicDao.insert(null, u.getId(), u);
+    /**
+     * Override to test specific supplier
+     */
+    protected Supplier createSupplier() {
+        return new InMemorySupplier();
     }
 
-    AbstractDao.setPrincipalName(PRINCIPAL_SET_UP);
-  }
+    @Before
+    public void setUp() {
+        supplier = createSupplier();
+        basicDao = new DBasicDaoBean(supplier);
+        AbstractDao.setPrincipalName(PRINCIPAL_SET_UP);
+    }
 
-  @Test
-  public void testCreateGenerateId() throws IOException {
-    DBasic actual = DBasicDaoBean.newBuilder()
-            .displayName("Hello There")
-            .build();
-    basicDao.insert(null, null, actual);
 
-    assertNotNull(actual.getId());
-    assertEquals(PRINCIPAL_SET_UP, actual.getCreatedBy());
-    assertNotNull(actual.getCreatedDate());
-    assertNotNull(actual.getUpdatedDate());
-  }
+    protected void createQueryFixtures() throws IOException {
 
-  @Test
-  public void testWriteReadBasic() throws IOException {
-    Long id = basicDao.withCommitTransaction(new TransFunc<Long>() {
-      @Override
-      public Long apply() throws IOException {
-        DBasic entity = DBasicMapper.newBuilder()
-            .id(327L)
-            .displayName("xHjqLåäö123")
-            .build();
+        AbstractDao.setPrincipalName(PRINCIPAL_FIXTURE);
 
-        DBasic actual = basicDao.get(327L);
-        assertNull("Expected no value, as we have not inserted yet", actual);
+        for (int i = 1; i < 60; i++) {
+            DBasic u = DBasicDaoBean.newBuilder()
+                    .id(Long.valueOf(i))
+                    .displayName("mod7_" + (i % 7))
+                    .build();
+            basicDao.insert(null, Long.valueOf(i), u);
 
-        return basicDao.insert(null, 327L, entity);
-      }
-    });
-    assertEquals(Long.valueOf(327L), id);
-    DBasic actual = basicDao.withCommitTransaction(new TransFunc<DBasic>() {
-      @Override
-      public DBasic apply() throws IOException {
-        return basicDao.get(327L);
-      }
-    });
-    assertNotNull("Expected value", actual);
-    assertEquals(Long.valueOf(327L), actual.getId());
-    assertEquals("xHjqLåäö123", actual.getDisplayName());
-  }
+            u = DBasicDaoBean.newBuilder()
+                    .id(Long.valueOf(1000 + i))
+                    .displayName("user_" + i)
+                    .build();
+            basicDao.insert(null, u.getId(), u);
+        }
+
+        AbstractDao.setPrincipalName(PRINCIPAL_SET_UP);
+    }
+
+    @Test
+    public void testCreateGenerateId() throws IOException {
+        DBasic actual = DBasicDaoBean.newBuilder()
+                .displayName("Hello There")
+                .build();
+        basicDao.insert(null, null, actual);
+
+        assertNotNull(actual.getId());
+        assertEquals(PRINCIPAL_SET_UP, actual.getCreatedBy());
+        assertNotNull(actual.getCreatedDate());
+        assertNotNull(actual.getUpdatedDate());
+    }
+
+    @Test
+    public void testWriteReadBasic() throws IOException {
+        Long id = basicDao.withCommitTransaction(new TransFunc<Long>() {
+            @Override
+            public Long apply() throws IOException {
+                DBasic entity = DBasicMapper.newBuilder()
+                        .id(327L)
+                        .displayName("xHjqLåäö123")
+                        .build();
+
+                DBasic actual = basicDao.get(327L);
+                assertNull("Expected no value, as we have not inserted yet", actual);
+
+                return basicDao.insert(null, 327L, entity);
+            }
+        });
+        assertEquals(Long.valueOf(327L), id);
+        DBasic actual = basicDao.withCommitTransaction(new TransFunc<DBasic>() {
+            @Override
+            public DBasic apply() throws IOException {
+                return basicDao.get(327L);
+            }
+        });
+        assertNotNull("Expected value", actual);
+        assertEquals(Long.valueOf(327L), actual.getId());
+        assertEquals("xHjqLåäö123", actual.getDisplayName());
+    }
 
 //  @Test
 //  public void testWriteReadFuture() throws IOException, ExecutionException, InterruptedException {
@@ -145,47 +147,40 @@ public class DBasicDaoTest {
 //    assertEquals(Long.valueOf(327L), actual.getId());
 //    assertEquals("xHjqLåäö123", actual.getDisplayName());
 //  }
-//
-//  @Test
-//  public void testWriteReadFactory() throws IOException {
-//    final String name = factoryDao.withCommitTransaction(new TransFunc<String>() {
-//      @Override
-//      public String apply() throws IOException {
-//        DFactory entity = new DFactory();
-//        entity.setProviderId("mardao");
-//
-//        String id = factoryDao.put(entity);
-//        return id;
-//      }
-//    });
-//    assertEquals("mardao", name);
-//    factoryDao.withRollbackTransaction(new TransFunc<Void>() {
-//      @Override
-//      public Void apply() throws IOException {
-//        DFactory actual = factoryDao.get(name);
-//        assertNotNull(actual);
-//        assertEquals("mardao", actual.getProviderId());
-//        return null;
-//      }
-//    });
-//  }
 
-  @Test
-  public void testQueryByField() throws IOException {
-      createQueryFixtures();
+    @Test
+    public void testUpdate() throws IOException {
+        createQueryFixtures();
+        DBasic expected = basicDao.get(42L);
+        expected.setDisplayName("UpdatedDisplayName");
+        Long key = basicDao.put(expected);
+        assertEquals(Long.valueOf(42), key);
 
-      Iterable<DBasic> users = basicDao.queryByDisplayName("mod7_2");
-      int count = 0;
-      for (DBasic u : users) {
-        count++;
-        assertEquals("mod7_2", u.getDisplayName());
-        assertEquals(2, u.getId() % 7);
-      }
-      assertEquals(9, count);
+        DBasic actual = basicDao.get(key);
+        assertEquals(expected.getDisplayName(), actual.getDisplayName());
+        assertEquals(expected.getCreatedBy(), actual.getCreatedBy());
+        assertEquals(expected.getCreatedDate(), actual.getCreatedDate());
 
-      users = basicDao.queryByDisplayName(null);
-      assertFalse(users.iterator().hasNext());
-  }
+        assertNotEquals(expected.getUpdatedBy(), actual.getUpdatedBy());
+        assertNotEquals(expected.getUpdatedDate(), actual.getUpdatedDate());
+    }
+
+    @Test
+    public void testQueryByField() throws IOException {
+        createQueryFixtures();
+
+        Iterable<DBasic> users = basicDao.queryByDisplayName("mod7_2");
+        int count = 0;
+        for (DBasic u : users) {
+            count++;
+            assertEquals("mod7_2", u.getDisplayName());
+            assertEquals(2, u.getId() % 7);
+        }
+        assertEquals(9, count);
+
+        users = basicDao.queryByDisplayName(null);
+        assertFalse(users.iterator().hasNext());
+    }
 
 //  @Test
 //  public void testFindUniqueByField() throws IOException {
@@ -199,46 +194,46 @@ public class DBasicDaoTest {
 //    assertEquals("user_47@example.com", u47.getEmail());
 //  }
 
-  @Test
-  public void testCount() throws IOException {
-      createQueryFixtures();
-      Integer count = basicDao.count();
-      assertTrue(count.toString(), 115 <= count && count <= 118);
-  }
+    @Test
+    public void testCount() throws IOException {
+        createQueryFixtures();
+        Integer count = basicDao.count();
+        assertTrue(count.toString(), 115 <= count && count <= 118);
+    }
 
-  @Test
-  public void testDelete() throws IOException {
-      createQueryFixtures();
-      DBasic actual = basicDao.get(42L);
-      assertNotNull(actual);
+    @Test
+    public void testDelete() throws IOException {
+        createQueryFixtures();
+        DBasic actual = basicDao.get(42L);
+        assertNotNull(actual);
 
-      basicDao.delete(42L);
-      actual = basicDao.get(42L);
-      assertNull(actual);
-      assertEquals(117, basicDao.count());
-  }
+        basicDao.delete(42L);
+        actual = basicDao.get(42L);
+        assertNull(actual);
+        assertEquals(117, basicDao.count());
+    }
 
-  @Test
-  public void testCreated() throws IOException {
-    createQueryFixtures();
-    DBasic actual =  basicDao.get(42L);
+    @Test
+    public void testCreated() throws IOException {
+        createQueryFixtures();
+        DBasic actual = basicDao.get(42L);
 
-    assertEquals(Long.valueOf(42), actual.getId());
-    assertEquals(PRINCIPAL_FIXTURE, actual.getCreatedBy());
-    assertNotNull(actual.getCreatedDate());
-  }
+        assertEquals(Long.valueOf(42), actual.getId());
+        assertEquals(PRINCIPAL_FIXTURE, actual.getCreatedBy());
+        assertNotNull(actual.getCreatedDate());
+    }
 
-  @Test
-  public void testQueryPage() throws IOException {
-    createQueryFixtures();
-    CursorPage<DBasic> firstPage = basicDao.queryPageByDisplayName("mod7_3", 5, null);
-    assertEquals(Integer.valueOf(9), firstPage.getTotalSize());
-    assertNotNull(firstPage.getCursorKey());
-    assertEquals(5, firstPage.getItems().size());
+    @Test
+    public void testQueryPage() throws IOException {
+        createQueryFixtures();
+        CursorPage<DBasic> firstPage = basicDao.queryPageByDisplayName("mod7_3", 5, null);
+        assertEquals(Integer.valueOf(9), firstPage.getTotalSize());
+        assertNotNull(firstPage.getCursorKey());
+        assertEquals(5, firstPage.getItems().size());
 
-    CursorPage<DBasic> secondPage = basicDao.queryPageByDisplayName("mod7_3", 5, firstPage.getCursorKey());
-    assertNull(secondPage.getTotalSize());
-    assertNull(secondPage.getCursorKey());
-    assertEquals(4, secondPage.getItems().size());
-  }
+        CursorPage<DBasic> secondPage = basicDao.queryPageByDisplayName("mod7_3", 5, firstPage.getCursorKey());
+        assertNull(secondPage.getTotalSize());
+        assertNull(secondPage.getCursorKey());
+        assertEquals(4, secondPage.getItems().size());
+    }
 }

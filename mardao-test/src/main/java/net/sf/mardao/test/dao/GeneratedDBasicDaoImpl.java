@@ -21,7 +21,7 @@ import net.sf.mardao.test.domain.DBasic;
 /**
  * The DBasic domain-object specific finders and methods go in this POJO.
  * 
- * Generated on 2015-02-27T21:08:08.487+0100.
+ * Generated on 2015-03-14T19:26:25.456+0100.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public class GeneratedDBasicDaoImpl

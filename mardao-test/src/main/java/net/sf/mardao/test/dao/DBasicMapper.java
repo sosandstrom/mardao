@@ -3,6 +3,8 @@ package net.sf.mardao.test.dao;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
 import java.nio.ByteBuffer;
 
 import net.sf.mardao.dao.Mapper;
@@ -13,7 +15,7 @@ import net.sf.mardao.test.domain.DBasic;
 /**
  * The DBasic domain-object specific mapping methods go here.
  *
- * Generated on 2015-03-14T19:26:25.456+0100.
+ * Generated on 2015-03-15T15:02:52.737+0100.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public class DBasicMapper
@@ -38,6 +40,16 @@ public class DBasicMapper
     public String getFieldName() {
       return fieldName;
     }
+  }
+
+  private static final Map<String, Class> BASIC_FIELDS = new TreeMap<String, Class>();
+
+  static {
+    BASIC_FIELDS.put(Field.DISPLAYNAME.getFieldName(), String.class);
+  }
+
+  public Map<String, Class> getBasicFields() {
+    return BASIC_FIELDS;
   }
 
   public DBasicMapper(Supplier supplier) {
@@ -174,7 +186,7 @@ public class DBasicMapper
     return value;
   }
 
-  @Override
+//  @Override
   public String getWriteSQL(Serializable id, Object writeValue, Collection arguments) {
     final StringBuilder sql = new StringBuilder("UPDATE ")
         .append(getKind())
@@ -208,7 +220,6 @@ public class DBasicMapper
     }
     return sql.toString();
   }
-
 
 
   public static Builder newBuilder() {

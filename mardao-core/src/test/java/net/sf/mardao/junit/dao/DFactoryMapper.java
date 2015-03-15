@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.TreeMap;
 
 import net.sf.mardao.dao.Mapper;
 import net.sf.mardao.dao.Supplier;
@@ -34,6 +36,13 @@ public class DFactoryMapper
       return fieldName;
     }
   }
+
+    @Override
+    public Map<String, Class> getBasicFields() {
+        TreeMap<String,Class> map = new TreeMap<String,Class>();
+        map.put(Field.PROVIDERID.getFieldName(), String.class);
+        return map;
+    }
 
   public DFactoryMapper(Supplier supplier) {
     this.supplier = supplier;
@@ -142,14 +151,6 @@ public class DFactoryMapper
     // set all fields:
     return value;
   }
-
-  @Override
-  public String getWriteSQL(Serializable id, Object writeValue, Collection arguments) {
-    // FIXME: implement
-    return null == id ? "" : "UPDATE TABLE DUser SET (displayName,email,createdBy,birthDate) VALUES (:displayName,:email,:createdBy,:birthDate) WHERE id=:id";
-  }
-
-
 
   public static Builder newBuilder() {
     return new Builder();

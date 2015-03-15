@@ -4,6 +4,8 @@ package ${daoBasePackage};
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
 import java.nio.ByteBuffer;
 
 import net.sf.mardao.dao.Mapper;
@@ -38,6 +40,23 @@ public class ${entity.simpleName}Mapper
     public String getFieldName() {
       return fieldName;
     }
+  }
+
+  private static final Map<String, Class> BASIC_FIELDS = new TreeMap<String, Class>();
+
+  static {
+#foreach( $field in $allFields )
+#if( (!$entity.createdBy || $field != $entity.createdBy) &&
+     (!$entity.createdDate || $field != $entity.createdDate) &&
+     (!$entity.updatedBy || $field != $entity.updatedBy) &&
+     (!$entity.updatedDate || $field != $entity.updatedDate))
+    BASIC_FIELDS.put(Field.${field.nameUpper}.getFieldName(), ${field.simpleType}.class);
+#end
+#end
+  }
+
+  public Map<String, Class> getBasicFields() {
+    return BASIC_FIELDS;
   }
 
   public ${entity.simpleName}Mapper(Supplier supplier) {
@@ -222,7 +241,7 @@ public class ${entity.simpleName}Mapper
     return value;
   }
 
-  @Override
+//  @Override
   public String getWriteSQL(Serializable id, Object writeValue, Collection arguments) {
     final StringBuilder sql = new StringBuilder("UPDATE ")
         .append(getKind())
@@ -256,7 +275,6 @@ public class ${entity.simpleName}Mapper
     }
     return sql.toString();
   }
-
 
 
   public static Builder newBuilder() {

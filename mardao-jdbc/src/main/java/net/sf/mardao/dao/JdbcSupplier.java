@@ -135,6 +135,50 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
         throw new IllegalArgumentException("Unsupported FilterOperator " + operator);
     }
 
+    protected String getWriteSQL(Mapper mapper, Serializable id, Object writeValue, Collection arguments) {
+        final StringBuilder sql = new StringBuilder("UPDATE ")
+                .append(mapper.getKind())
+                .append(" SET ");
+
+        boolean first = true;
+        for (Object entry : mapper.getBasicFields().entrySet()) {
+            final String columnName = ((Map.Entry<String, Class>) entry).getKey();
+            first = addColumnAndArgument(writeValue, arguments, sql, first, columnName);
+        }
+
+        // audit fields are not basic:
+        if (null != mapper.getUpdatedByColumnName()) {
+            first = addColumnAndArgument(writeValue, arguments, sql, first, mapper.getUpdatedByColumnName());
+        }
+        if (null != mapper.getUpdatedDateColumnName()) {
+            first = addColumnAndArgument(writeValue, arguments, sql, first, mapper.getUpdatedDateColumnName());
+        }
+
+        sql.append(" WHERE ")
+                .append(mapper.getPrimaryKeyColumnName())
+                .append("=?");
+        if (null != arguments) {
+            arguments.add(id);
+        }
+        return sql.toString();
+    }
+
+    private boolean addColumnAndArgument(Object writeValue, Collection arguments, StringBuilder sql, boolean first, String columnName) {
+        if (first) {
+            first = false;
+        }
+        else {
+            sql.append(", ");
+        }
+        sql.append(columnName)
+                .append("=?");
+        if (null != arguments && null != writeValue) {
+            Object arg = getWriteObject(writeValue, columnName);
+            arguments.add(arg);
+        }
+        return first;
+    }
+
     @Override
     public JdbcKey writeValue(Connection tx, JdbcKey key, JdbcWriteValue value) throws IOException {
         Serializable id = null == key ? null :
@@ -148,7 +192,7 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
         // UPDATE
         final Mapper mapper = value.mapper;
         final ArrayList arguments = new ArrayList();
-        String sql = mapper.getWriteSQL(id, value, arguments);
+        String sql = getWriteSQL(mapper, id, value, arguments);
         jdbcTemplate.update(sql, arguments.toArray());
 
         return key;
@@ -233,6 +277,10 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     @Override
     public Object createEntity(Mapper mapper, Object readValue) {
         return readValue;
+    }
+
+    protected void createTable(Mapper mapper, JdbcDialect jdbcDialect) {
+        // FIXME: implement
     }
 
     @Override

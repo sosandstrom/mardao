@@ -1,6 +1,6 @@
 package net.sf.mardao.dao;
 
-import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.*;
 import net.sf.mardao.core.filter.Filter;
 import net.sf.mardao.core.filter.FilterOperator;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
 
+import javax.persistence.Basic;
+import javax.persistence.Id;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.Serializable;
@@ -26,11 +28,19 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
     private final DataFieldMaxValueIncrementer incrementer;
+    protected final JdbcDialect jdbcDialect;
 
-    public JdbcSupplier(DataSource dataSource, DataFieldMaxValueIncrementer incrementer) {
+    private static final Properties defaultTypes = new Properties();
+    private static final Properties mysqlTypes = new Properties(defaultTypes);
+    private static final Properties h2Types = new Properties(defaultTypes);
+    private static final Map<JdbcDialect, Properties> types = new HashMap<JdbcDialect, Properties>();
+
+    public JdbcSupplier(DataSource dataSource, DataFieldMaxValueIncrementer incrementer,
+                        JdbcDialect jdbcDialect) {
         this.dataSource = dataSource;
         this.incrementer = incrementer;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcDialect = jdbcDialect;
     }
 
     @Override
@@ -279,8 +289,63 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
         return readValue;
     }
 
-    protected void createTable(Mapper mapper, JdbcDialect jdbcDialect) {
-        // FIXME: implement
+    @Override
+    public void createTable(Mapper mapper) {
+        final String sql = getCreateSQL(mapper, jdbcDialect);
+        System.out.println(sql);
+        jdbcTemplate.execute(sql);
+    }
+
+    private String getCreateSQL(Mapper mapper, JdbcDialect jdbcDialect) {
+        final StringBuffer sql = new StringBuffer("CREATE TABLE ")
+                .append(mapper.getKind())
+                .append(" (");
+        boolean first = true;
+        final Properties typeMap = getTypesProps(jdbcDialect);
+
+        // primary key
+        ColumnField col = (ColumnField) mapper.getSpecialFields().get(Id.class);
+        first = addCreateColumn(sql, col, first, typeMap);
+
+        // audit fields
+        first = addCreateColumn(sql, (ColumnField) mapper.getSpecialFields().get(CreatedBy.class), first, typeMap);
+        first = addCreateColumn(sql, (ColumnField) mapper.getSpecialFields().get(CreatedDate.class), first, typeMap);
+        first = addCreateColumn(sql, (ColumnField) mapper.getSpecialFields().get(UpdatedBy.class), first, typeMap);
+        first = addCreateColumn(sql, (ColumnField) mapper.getSpecialFields().get(UpdatedDate.class), first, typeMap);
+
+        // basic fields
+        for (Object entry : mapper.getBasicFields().entrySet()) {
+            Map.Entry<String, ColumnField> f = (Map.Entry<String, ColumnField>) entry;
+            first = addCreateColumn(sql, f.getValue(), first, typeMap);
+        }
+
+        sql.append(')');
+        if (JdbcDialect.MySQL.equals(jdbcDialect)) {
+            sql.append(" ENGINE=InnoDB DEFAULT CHARSET=utf8");
+        }
+        sql.append(';');
+        return sql.toString();
+    }
+
+    private boolean addCreateColumn(StringBuffer sql, ColumnField col, final boolean first, Properties typeMap) {
+        if (null == col) {
+            return first;
+        }
+
+        if (!first) {
+            sql.append(", ");
+        }
+
+        String key = Id.class.equals(col.getAnnotation()) ? "Id" + col.getClazz().getSimpleName() :
+            (Basic.class.equals(col.getAnnotation()) ? col.getClazz().getSimpleName() : col.getAnnotation().getSimpleName());
+        final String type = typeMap.getProperty(key);
+        if (null == type) {
+            throw new IllegalArgumentException("No SQL type for " + key);
+        }
+        sql.append(col.getColumnName())
+                .append(' ')
+                .append(type);
+        return false;
     }
 
     @Override
@@ -396,5 +461,35 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
         }
 
         return cursorPage;
+    }
+
+    /** Add a type for your DB's dialect */
+    public static void setDbType(JdbcDialect dialect, String key, String type) {
+        Properties props = getTypesProps(dialect);
+        props.setProperty(key, type);
+    }
+
+    private static Properties getTypesProps(JdbcDialect dialect) {
+        Properties props = types.get(dialect);
+        if (null == props) {
+            props = new Properties(defaultTypes);
+            types.put(dialect, props);
+        }
+        return props;
+    }
+
+    static {
+        setDbType(JdbcDialect.DEFAULT_DIALECT, "IdLong", "BIGINT");
+        setDbType(JdbcDialect.DEFAULT_DIALECT, "IdString", "VARCHAR(255)");
+        setDbType(JdbcDialect.DEFAULT_DIALECT, CreatedBy.class.getSimpleName(), "VARCHAR(255)");
+        setDbType(JdbcDialect.DEFAULT_DIALECT, CreatedDate.class.getSimpleName(), "TIMESTAMP");
+        setDbType(JdbcDialect.DEFAULT_DIALECT, UpdatedBy.class.getSimpleName(), "VARCHAR(255)");
+        setDbType(JdbcDialect.DEFAULT_DIALECT, UpdatedDate.class.getSimpleName(), "TIMESTAMP");
+        setDbType(JdbcDialect.DEFAULT_DIALECT, String.class.getSimpleName(), "VARCHAR");
+        setDbType(JdbcDialect.DEFAULT_DIALECT, Long.class.getSimpleName(), "BIGINT");
+        setDbType(JdbcDialect.DEFAULT_DIALECT, Date.class.getSimpleName(), "TIMESTAMP");
+
+        setDbType(JdbcDialect.H2, "IdLong", "BIGINT PRIMARY KEY");
+        setDbType(JdbcDialect.H2, "IdString", "VARCHAR(255) PRIMARY KEY");
     }
 }

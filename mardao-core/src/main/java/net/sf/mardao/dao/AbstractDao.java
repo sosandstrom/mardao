@@ -50,6 +50,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
   protected AbstractDao(Mapper<T, ID> mapper, Supplier<Object, Object, Object, Object> supplier) {
     this.mapper = mapper;
     this.supplier = supplier;
+    supplier.createTable(mapper);
   }
 
   // --- transactional methods ---

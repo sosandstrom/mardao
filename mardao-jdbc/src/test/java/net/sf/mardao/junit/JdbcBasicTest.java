@@ -22,6 +22,7 @@ package net.sf.mardao.junit;
  * #L%
  */
 
+import net.sf.mardao.dao.JdbcDialect;
 import net.sf.mardao.dao.JdbcSupplier;
 import net.sf.mardao.dao.Supplier;
 import net.sf.mardao.test.junit.DBasicDaoTest;
@@ -46,13 +47,13 @@ public class JdbcBasicTest extends DBasicDaoTest {
 
   @Override
   protected Supplier createSupplier() {
-    return new JdbcSupplier(dataSource, incrementer);
+    return new JdbcSupplier(dataSource, incrementer, JdbcDialect.H2);
   }
 
   @Before
   @Override
   public void setUp() {
-    createDatabaseTables(dataSource);
+    //createDatabaseTables(dataSource);
     super.setUp();
   }
 

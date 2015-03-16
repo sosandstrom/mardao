@@ -7,10 +7,16 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.sf.mardao.core.ColumnField;
+import net.sf.mardao.core.CreatedBy;
+import net.sf.mardao.core.CreatedDate;
 import net.sf.mardao.dao.Mapper;
 import net.sf.mardao.dao.Supplier;
 import net.sf.mardao.domain.AbstractEntityBuilder;
 import net.sf.mardao.junit.domain.DUser;
+
+import javax.persistence.Basic;
+import javax.persistence.Id;
 
 /**
  * The DUser domain-object specific mapping methods go here.
@@ -42,14 +48,28 @@ public class DUserMapper
   }
 
     @Override
-    public Map<String, Class> getBasicFields() {
-        TreeMap<String,Class> map = new TreeMap<String,Class>();
-        map.put(Field.DISPLAYNAME.getFieldName(), String.class);
-        map.put(Field.EMAIL.getFieldName(), String.class);
+    public Map<String, ColumnField> getBasicFields() {
+        TreeMap<String,ColumnField> map = new TreeMap<String,ColumnField>();
+        map.put(Field.DISPLAYNAME.getFieldName(),
+                new ColumnField(Field.DISPLAYNAME.getFieldName(), String.class, Basic.class));
+        map.put(Field.EMAIL.getFieldName(),
+                new ColumnField(Field.EMAIL.getFieldName(), String.class, Basic.class));
         return map;
     }
 
-  public DUserMapper(Supplier supplier) {
+    @Override
+    public Map<Class, ColumnField> getSpecialFields() {
+        Map<Class, ColumnField> map = new TreeMap<Class, ColumnField>();
+        map.put(Id.class,
+                new ColumnField(Field.ID.getFieldName(), Long.class, Id.class));
+        map.put(CreatedBy.class,
+                new ColumnField(Field.CREATEDBY.getFieldName(), String.class, CreatedBy.class));
+        map.put(CreatedDate.class,
+                new ColumnField(Field.BIRTHDATE.getFieldName(), Date.class, CreatedDate.class));
+        return map;
+    }
+
+    public DUserMapper(Supplier supplier) {
     this.supplier = supplier;
   }
 

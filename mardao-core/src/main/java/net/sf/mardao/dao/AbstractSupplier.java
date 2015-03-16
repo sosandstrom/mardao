@@ -12,6 +12,11 @@ import java.util.Map;
 public abstract class AbstractSupplier<K, RV, WV, T> implements Supplier<K, RV, WV, T> {
 
     @Override
+    public void createTable(Mapper mapper) {
+
+    }
+
+    @Override
     public Object createEntity(Mapper mapper, RV readValue) {
         return null;
     }

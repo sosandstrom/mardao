@@ -118,4 +118,6 @@ public interface Supplier<K, RV, WV, T> {
                           String cursorString,
                           Filter... filters);
 
+  // --- manage db methods ---
+  void createTable(Mapper mapper);
 }

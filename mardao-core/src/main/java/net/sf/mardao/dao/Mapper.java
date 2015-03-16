@@ -23,11 +23,9 @@ package net.sf.mardao.dao;
  */
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 
-import net.sf.mardao.domain.AbstractEntityBuilder;
+import net.sf.mardao.core.ColumnField;
 
 /**
  * Maps from Read to Domain to Write Key/Values.
@@ -53,6 +51,6 @@ public interface Mapper<T, ID extends Serializable> {
   void setPrimaryKey(Object writeValue, Object primaryKey);
   Object toWriteValue(T entity);
 //  String getWriteSQL(Serializable id, Object writeValue, Collection arguments);
-  Map<String, Class> getBasicFields();
-//  void setValues(T entity, Object value);
+  Map<String, ColumnField> getBasicFields();
+  Map<Class, ColumnField> getSpecialFields();
 }

@@ -5,9 +5,19 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.nio.ByteBuffer;
 
+import javax.persistence.Basic;
+import javax.persistence.Id;
+
+import net.sf.mardao.core.ColumnField;
+import net.sf.mardao.core.CreatedBy;
+import net.sf.mardao.core.CreatedDate;
+import net.sf.mardao.core.Parent;
+import net.sf.mardao.core.UpdatedBy;
+import net.sf.mardao.core.UpdatedDate;
 import net.sf.mardao.dao.Mapper;
 import net.sf.mardao.dao.Supplier;
 import net.sf.mardao.domain.AbstractEntityBuilder;
@@ -42,21 +52,50 @@ public class ${entity.simpleName}Mapper
     }
   }
 
-  private static final Map<String, Class> BASIC_FIELDS = new TreeMap<String, Class>();
+  private static final Map<String, ColumnField> BASIC_FIELDS = new TreeMap<String, ColumnField>();
+  private static final Map<Class, ColumnField> SPECIAL_FIELDS = new HashMap<Class, ColumnField>();
+  private static final Map<String, ColumnField> ALL_FIELDS = new TreeMap<String, ColumnField>();
 
   static {
+    SPECIAL_FIELDS.put(Id.class,
+        new ColumnField(Field.${entity.pk.nameUpper}.getFieldName(), ${entity.pk.simpleType}.class, Id.class));
+#if( $entity.parent )
+    SPECIAL_FIELDS.put(Parent.class,
+        new ColumnField(Field.${entity.parent.nameUpper}.getFieldName(), ${entity.parent.simpleType}.class, Parent.class));
+#end
 #foreach( $field in $allFields )
-#if( (!$entity.createdBy || $field != $entity.createdBy) &&
-     (!$entity.createdDate || $field != $entity.createdDate) &&
-     (!$entity.updatedBy || $field != $entity.updatedBy) &&
-     (!$entity.updatedDate || $field != $entity.updatedDate))
-    BASIC_FIELDS.put(Field.${field.nameUpper}.getFieldName(), ${field.simpleType}.class);
+#if( $entity.createdBy && $field == $entity.createdBy )
+    SPECIAL_FIELDS.put(CreatedBy.class,
+        new ColumnField(Field.${field.nameUpper}.getFieldName(), ${field.simpleType}.class, CreatedBy.class));
+#elseif( $entity.createdDate && $field == $entity.createdDate )
+    SPECIAL_FIELDS.put(CreatedDate.class,
+        new ColumnField(Field.${field.nameUpper}.getFieldName(), ${field.simpleType}.class, CreatedDate.class));
+#elseif( $entity.updatedBy && $field == $entity.updatedBy )
+    SPECIAL_FIELDS.put(UpdatedBy.class,
+        new ColumnField(Field.${field.nameUpper}.getFieldName(), ${field.simpleType}.class, UpdatedBy.class));
+#elseif( $entity.updatedDate && $field == $entity.updatedDate )
+    SPECIAL_FIELDS.put(UpdatedDate.class,
+        new ColumnField(Field.${field.nameUpper}.getFieldName(), ${field.simpleType}.class, UpdatedDate.class));
+#else
+    BASIC_FIELDS.put(Field.${field.nameUpper}.getFieldName(),
+        new ColumnField(Field.${field.nameUpper}.getFieldName(), ${field.simpleType}.class, Basic.class));
 #end
 #end
+
+    ALL_FIELDS.putAll(BASIC_FIELDS);
+    for (ColumnField sf : SPECIAL_FIELDS.values()) {
+        ALL_FIELDS.put(sf.getColumnName(), sf);
+    }
   }
 
-  public Map<String, Class> getBasicFields() {
+  @Override
+  public Map<String, ColumnField> getBasicFields() {
     return BASIC_FIELDS;
+  }
+
+  @Override
+  public Map<Class, ColumnField> getSpecialFields() {
+    return SPECIAL_FIELDS;
   }
 
   public ${entity.simpleName}Mapper(Supplier supplier) {

@@ -30,10 +30,8 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     private final DataFieldMaxValueIncrementer incrementer;
     protected final JdbcDialect jdbcDialect;
 
-    private static final Properties defaultTypes = new Properties();
-    private static final Properties mysqlTypes = new Properties(defaultTypes);
-    private static final Properties h2Types = new Properties(defaultTypes);
     private static final Map<JdbcDialect, Properties> types = new HashMap<JdbcDialect, Properties>();
+    private static final Properties defaultTypes = new Properties();
 
     public JdbcSupplier(DataSource dataSource, DataFieldMaxValueIncrementer incrementer,
                         JdbcDialect jdbcDialect) {
@@ -479,6 +477,8 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     }
 
     static {
+        types.put(JdbcDialect.DEFAULT_DIALECT, defaultTypes);
+
         setDbType(JdbcDialect.DEFAULT_DIALECT, "IdLong", "BIGINT");
         setDbType(JdbcDialect.DEFAULT_DIALECT, "IdString", "VARCHAR(255)");
         setDbType(JdbcDialect.DEFAULT_DIALECT, CreatedBy.class.getSimpleName(), "VARCHAR(255)");

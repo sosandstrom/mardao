@@ -317,6 +317,13 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
             first = addCreateColumn(sql, f.getValue(), first, typeMap);
         }
 
+        // add constraints
+        if (JdbcDialect.MySQL.equals(jdbcDialect)) {
+            sql.append(", PRIMARY KEY (")
+                    .append(mapper.getPrimaryKeyColumnName())
+                    .append(')');
+        }
+
         sql.append(')');
         if (JdbcDialect.MySQL.equals(jdbcDialect)) {
             sql.append(" ENGINE=InnoDB DEFAULT CHARSET=utf8");
@@ -491,5 +498,6 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
 
         setDbType(JdbcDialect.H2, "IdLong", "BIGINT PRIMARY KEY");
         setDbType(JdbcDialect.H2, "IdString", "VARCHAR(255) PRIMARY KEY");
+        setDbType(JdbcDialect.MySQL, String.class.getSimpleName(), "VARCHAR(500)");
     }
 }

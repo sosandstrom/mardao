@@ -157,7 +157,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     Object key = mapper.toKey(parentKey, id);
     Object value = mapper.toWriteValue(entity);
     updateAuditInfo(value);
-    key = supplier.writeValue(getCurrentTransaction(), key, value);
+    key = supplier.writeValue(getCurrentTransaction(), mapper, key, value);
     id = mapper.fromKey(key);
     mapper.updateEntityPostWrite(entity, key, value);
     return id;
@@ -174,7 +174,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     Object key = mapper.toKey(parentKey, id);
     Object value = mapper.toWriteValue(entity);
     updateAuditInfo(value);
-    key = supplier.insertValue(getCurrentTransaction(), key, value);
+    key = supplier.insertValue(getCurrentTransaction(), mapper, key, value);
     id = mapper.fromKey(key);
     mapper.updateEntityPostWrite(entity, key, value);
     return id;
@@ -291,7 +291,7 @@ public class AbstractDao<T, ID extends Serializable> implements CrudDao<T, ID> {
     Object key = mapper.toKey(parentKey, id);
     Object value = mapper.toWriteValue(entity);
     updateAuditInfo(value);
-    Future<Object> future = supplier.writeFuture(getCurrentTransaction(), key, value);
+    Future<Object> future = supplier.writeFuture(getCurrentTransaction(), mapper, key, value);
     return new KeyFuture<T, ID>(mapper, future, entity, value);
   }
 

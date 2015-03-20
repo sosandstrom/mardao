@@ -42,11 +42,11 @@ public interface Supplier<K, RV, WV, T> {
   void deleteValue(T tx, Mapper mapper, K key) throws IOException;
   void deleteValues(T tx, Mapper mapper, Collection<K> keys) throws IOException;
   RV readValue(T tx, Mapper mapper, K key) throws IOException;
-  K writeValue(T tx, K key, WV value) throws IOException;
-  K insertValue(T tx, K key, WV value) throws IOException;
+  K writeValue(T tx, Mapper mapper, K key, WV value) throws IOException;
+  K insertValue(T tx, Mapper mapper, K key, WV value) throws IOException;
 
   Future<RV> readFuture(T tx, Mapper mapper, K key) throws IOException;
-  Future<K> writeFuture(T tx, K key, WV value) throws IOException;
+  Future<K> writeFuture(T tx, Mapper mapper, K key, WV value) throws IOException;
 
   K toKey(K parentKey, String kind, Serializable id);
 //  K toKey(K parentKey, String kind, String sId);
@@ -118,4 +118,6 @@ public interface Supplier<K, RV, WV, T> {
                           String cursorString,
                           Filter... filters);
 
+  // --- manage db methods ---
+  void createTable(Mapper mapper);
 }

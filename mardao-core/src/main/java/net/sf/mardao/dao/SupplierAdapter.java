@@ -43,7 +43,7 @@ public class SupplierAdapter<K, RV, WV, TR> extends AbstractSupplier<K, RV, WV, 
     }
 
     @Override
-    public K writeValue(TR tx, K key, WV value) throws IOException {
+    public K writeValue(TR tx, Mapper mapper, K key, WV value) throws IOException {
         return null;
     }
 
@@ -53,7 +53,7 @@ public class SupplierAdapter<K, RV, WV, TR> extends AbstractSupplier<K, RV, WV, 
     }
 
     @Override
-    public Future<K> writeFuture(TR tx, K key, WV value) throws IOException {
+    public Future<K> writeFuture(TR tx, Mapper mapper, K key, WV value) throws IOException {
         return null;
     }
 

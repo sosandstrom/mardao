@@ -3,8 +3,20 @@ package net.sf.mardao.test.dao;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.TreeMap;
 import java.nio.ByteBuffer;
 
+import javax.persistence.Basic;
+import javax.persistence.Id;
+
+import net.sf.mardao.core.ColumnField;
+import net.sf.mardao.core.CreatedBy;
+import net.sf.mardao.core.CreatedDate;
+import net.sf.mardao.core.Parent;
+import net.sf.mardao.core.UpdatedBy;
+import net.sf.mardao.core.UpdatedDate;
 import net.sf.mardao.dao.Mapper;
 import net.sf.mardao.dao.Supplier;
 import net.sf.mardao.domain.AbstractEntityBuilder;
@@ -13,7 +25,7 @@ import net.sf.mardao.test.domain.DBasic;
 /**
  * The DBasic domain-object specific mapping methods go here.
  *
- * Generated on 2015-03-14T19:26:25.456+0100.
+ * Generated on 2015-03-16T19:30:26.611+0100.
  * @author mardao DAO generator (net.sf.mardao.plugin.ProcessDomainMojo)
  */
 public class DBasicMapper
@@ -38,6 +50,40 @@ public class DBasicMapper
     public String getFieldName() {
       return fieldName;
     }
+  }
+
+  private static final Map<String, ColumnField> BASIC_FIELDS = new TreeMap<String, ColumnField>();
+  private static final Map<Class, ColumnField> SPECIAL_FIELDS = new HashMap<Class, ColumnField>();
+  private static final Map<String, ColumnField> ALL_FIELDS = new TreeMap<String, ColumnField>();
+
+  static {
+    SPECIAL_FIELDS.put(Id.class,
+        new ColumnField(Field.ID.getFieldName(), Long.class, Id.class));
+    SPECIAL_FIELDS.put(CreatedBy.class,
+        new ColumnField(Field.CREATEDBY.getFieldName(), String.class, CreatedBy.class));
+    SPECIAL_FIELDS.put(CreatedDate.class,
+        new ColumnField(Field.CREATEDDATE.getFieldName(), Date.class, CreatedDate.class));
+    BASIC_FIELDS.put(Field.DISPLAYNAME.getFieldName(),
+        new ColumnField(Field.DISPLAYNAME.getFieldName(), String.class, Basic.class));
+    SPECIAL_FIELDS.put(UpdatedBy.class,
+        new ColumnField(Field.UPDATEDBY.getFieldName(), String.class, UpdatedBy.class));
+    SPECIAL_FIELDS.put(UpdatedDate.class,
+        new ColumnField(Field.UPDATEDDATE.getFieldName(), Date.class, UpdatedDate.class));
+
+    ALL_FIELDS.putAll(BASIC_FIELDS);
+    for (ColumnField sf : SPECIAL_FIELDS.values()) {
+        ALL_FIELDS.put(sf.getColumnName(), sf);
+    }
+  }
+
+  @Override
+  public Map<String, ColumnField> getBasicFields() {
+    return BASIC_FIELDS;
+  }
+
+  @Override
+  public Map<Class, ColumnField> getSpecialFields() {
+    return SPECIAL_FIELDS;
   }
 
   public DBasicMapper(Supplier supplier) {
@@ -174,7 +220,7 @@ public class DBasicMapper
     return value;
   }
 
-  @Override
+//  @Override
   public String getWriteSQL(Serializable id, Object writeValue, Collection arguments) {
     final StringBuilder sql = new StringBuilder("UPDATE ")
         .append(getKind())
@@ -208,7 +254,6 @@ public class DBasicMapper
     }
     return sql.toString();
   }
-
 
 
   public static Builder newBuilder() {

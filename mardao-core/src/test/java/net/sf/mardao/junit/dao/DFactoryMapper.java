@@ -4,11 +4,17 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.TreeMap;
 
+import net.sf.mardao.core.ColumnField;
 import net.sf.mardao.dao.Mapper;
 import net.sf.mardao.dao.Supplier;
 import net.sf.mardao.domain.AbstractEntityBuilder;
 import net.sf.mardao.junit.domain.DFactory;
+
+import javax.persistence.Basic;
+import javax.persistence.Id;
 
 /**
  * The DFactory domain-object specific mapping methods go here.
@@ -35,7 +41,21 @@ public class DFactoryMapper
     }
   }
 
-  public DFactoryMapper(Supplier supplier) {
+    @Override
+    public Map<String, ColumnField> getBasicFields() {
+        TreeMap<String,ColumnField> map = new TreeMap<String,ColumnField>();
+        return map;
+    }
+
+    @Override
+    public Map<Class, ColumnField> getSpecialFields() {
+        TreeMap<Class, ColumnField> map = new TreeMap<Class, ColumnField>();
+        map.put(Id.class,
+                new ColumnField(Field.PROVIDERID.getFieldName(), String.class, Id.class));
+        return map;
+    }
+
+    public DFactoryMapper(Supplier supplier) {
     this.supplier = supplier;
   }
 
@@ -142,14 +162,6 @@ public class DFactoryMapper
     // set all fields:
     return value;
   }
-
-  @Override
-  public String getWriteSQL(Serializable id, Object writeValue, Collection arguments) {
-    // FIXME: implement
-    return null == id ? "" : "UPDATE TABLE DUser SET (displayName,email,createdBy,birthDate) VALUES (:displayName,:email,:createdBy,:birthDate) WHERE id=:id";
-  }
-
-
 
   public static Builder newBuilder() {
     return new Builder();

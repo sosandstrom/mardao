@@ -44,25 +44,17 @@ import static org.junit.Assert.*;
  *
  * @author osandstrom Date: 2014-09-12 Time: 20:17
  */
-public class DBasicDaoTest {
+public class DBasicDaoTest extends DaoTestBase{
 
-    public static final String PRINCIPAL_FIXTURE = "fixture";
-    public static final String PRINCIPAL_SET_UP = "setUp";
     protected DBasicDaoBean basicDao;
-    protected Supplier supplier;
-
-    /**
-     * Override to test specific supplier
-     */
-    protected Supplier createSupplier() {
-        return new InMemorySupplier();
-    }
 
     @Before
     public void setUp() {
-        supplier = createSupplier();
+        super.setUp();
         basicDao = new DBasicDaoBean(supplier);
-        AbstractDao.setPrincipalName(PRINCIPAL_SET_UP);
+        // for test creation of tables
+        DBasicMapper testMapper =  new DBasicMapper(supplier);
+        supplier.createTable(testMapper);
     }
 
 

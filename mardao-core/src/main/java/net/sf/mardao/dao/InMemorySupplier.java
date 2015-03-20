@@ -96,11 +96,11 @@ public class InMemorySupplier extends AbstractSupplier<InMemoryKey, Map<String, 
   }
 
   @Override
-  public Future<InMemoryKey> writeFuture(final Object tx, final InMemoryKey key, final Map<String, Object> value) throws IOException {
+  public Future<InMemoryKey> writeFuture(final Object tx, final Mapper mapper, final InMemoryKey key, final Map<String, Object> value) throws IOException {
     FutureTask<InMemoryKey> task = new FutureTask<InMemoryKey>(new Callable<InMemoryKey>() {
       @Override
       public InMemoryKey call() throws Exception {
-        return writeValue(tx, key, value);
+        return writeValue(tx, mapper, key, value);
       }
     });
     new Thread(task).start();
@@ -213,7 +213,7 @@ public class InMemorySupplier extends AbstractSupplier<InMemoryKey, Map<String, 
   }
 
   @Override
-  public InMemoryKey writeValue(Object tx, InMemoryKey key, Map<String, Object> core) throws IOException {
+  public InMemoryKey writeValue(Object tx, Mapper mapper, InMemoryKey key, Map<String, Object> core) throws IOException {
     // assign long key?
     if (null == key.getName()) {
       key = InMemoryKey.of(key.getParentKey(), key.getKind(), Long.toString(Math.round(Math.random() * Long.MAX_VALUE)));

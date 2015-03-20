@@ -53,7 +53,6 @@ public class JdbcBasicTest extends DBasicDaoTest {
   @Before
   @Override
   public void setUp() {
-    //createDatabaseTables(dataSource);
     super.setUp();
   }
 

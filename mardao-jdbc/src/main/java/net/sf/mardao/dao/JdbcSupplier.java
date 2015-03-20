@@ -1,8 +1,11 @@
 package net.sf.mardao.dao;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.mardao.core.*;
 import net.sf.mardao.core.filter.Filter;
 import net.sf.mardao.core.filter.FilterOperator;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -11,6 +14,7 @@ import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer
 
 import javax.persistence.Basic;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.Serializable;
@@ -25,6 +29,9 @@ import java.util.concurrent.Future;
 public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteValue, Connection> {
 
     public static final String METHOD_SELECT = "SELECT ";
+    public static final String CREATE_SEQUENCE = "CREATE_SEQUENCE";
+    public static final String INIT_SEQUENCE = "CREATE_SEQUENCE";
+
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
     private final DataFieldMaxValueIncrementer incrementer;
@@ -32,6 +39,7 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
 
     private static final Map<JdbcDialect, Properties> types = new HashMap<JdbcDialect, Properties>();
     private static final Properties defaultTypes = new Properties();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public JdbcSupplier(DataSource dataSource, DataFieldMaxValueIncrementer incrementer,
                         JdbcDialect jdbcDialect) {
@@ -188,17 +196,16 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     }
 
     @Override
-    public JdbcKey writeValue(Connection tx, JdbcKey key, JdbcWriteValue value) throws IOException {
+    public JdbcKey writeValue(Connection tx, Mapper mapper, JdbcKey key, JdbcWriteValue value) throws IOException {
         Serializable id = null == key ? null :
                 (null != key.getName() ? key.getName() : key.getId());
         if (null == id) {
 
             // INSERT
-            return insertValue(tx, key, value);
+            return insertValue(tx, mapper, key, value);
         }
 
         // UPDATE
-        final Mapper mapper = value.mapper;
         final ArrayList arguments = new ArrayList();
         String sql = getWriteSQL(mapper, id, value, arguments);
         jdbcTemplate.update(sql, arguments.toArray());
@@ -207,8 +214,7 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     }
 
     @Override
-    public JdbcKey insertValue(Connection tx, JdbcKey key, JdbcWriteValue value) throws IOException {
-        final Mapper mapper = value.mapper;
+    public JdbcKey insertValue(Connection tx, Mapper mapper, JdbcKey key, JdbcWriteValue value) throws IOException {
 
         if (null == key.getName() && null == key.getId()) {
             final long id = incrementer.nextLongValue();
@@ -228,7 +234,7 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     }
 
     @Override
-    public Future<JdbcKey> writeFuture(Connection tx, JdbcKey key, JdbcWriteValue value) throws IOException {
+    public Future<JdbcKey> writeFuture(Connection tx, Mapper mapper, JdbcKey key, JdbcWriteValue value) throws IOException {
         return null;
     }
 
@@ -261,6 +267,16 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     }
 
     @Override
+    public Collection getCollection(Object value, String column) {
+        final String s = getString(value, column);
+        try {
+            return MAPPER.readValue(s, Collection.class);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Deserializing collection", e);
+        }
+    }
+
+    @Override
     public Object getWriteObject(Object value, String column) {
         final JdbcWriteValue writeValue = (JdbcWriteValue) value;
         return writeValue.parameterMap.get(column);
@@ -268,7 +284,13 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
 
     @Override
     public void setCollection(JdbcWriteValue value, String column, Collection c) {
-        throw new IllegalArgumentException("Collections not supported yet.");
+        final String s;
+        try {
+            s = null != c ? null : MAPPER.writeValueAsString(c);
+            setString(value, column, s);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Serializing collection", e);
+        }
     }
 
     @Override
@@ -289,6 +311,17 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
 
     @Override
     public void createTable(Mapper mapper) {
+        try {
+            final Properties typeMap = getTypesProps(jdbcDialect);
+            String seq = typeMap.getProperty(CREATE_SEQUENCE);
+            jdbcTemplate.execute(seq);
+            seq = typeMap.getProperty(INIT_SEQUENCE);
+            if (null != seq) {
+                jdbcTemplate.execute(seq);
+            }
+        }
+        catch (DataAccessException any) {
+        }
         final String sql = getCreateSQL(mapper, jdbcDialect);
         System.out.println(sql);
         jdbcTemplate.execute(sql);
@@ -486,6 +519,7 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
     static {
         types.put(JdbcDialect.DEFAULT_DIALECT, defaultTypes);
 
+        setDbType(JdbcDialect.DEFAULT_DIALECT, INIT_SEQUENCE, "INSERT INTO id_sequence VALUES(0);");
         setDbType(JdbcDialect.DEFAULT_DIALECT, "IdLong", "BIGINT");
         setDbType(JdbcDialect.DEFAULT_DIALECT, "IdString", "VARCHAR(255)");
         setDbType(JdbcDialect.DEFAULT_DIALECT, CreatedBy.class.getSimpleName(), "VARCHAR(255)");
@@ -494,10 +528,14 @@ public class JdbcSupplier extends AbstractSupplier<JdbcKey, Object, JdbcWriteVal
         setDbType(JdbcDialect.DEFAULT_DIALECT, UpdatedDate.class.getSimpleName(), "TIMESTAMP");
         setDbType(JdbcDialect.DEFAULT_DIALECT, String.class.getSimpleName(), "VARCHAR");
         setDbType(JdbcDialect.DEFAULT_DIALECT, Long.class.getSimpleName(), "BIGINT");
+        setDbType(JdbcDialect.DEFAULT_DIALECT, Integer.class.getSimpleName(), "INTEGER");
         setDbType(JdbcDialect.DEFAULT_DIALECT, Date.class.getSimpleName(), "TIMESTAMP");
 
         setDbType(JdbcDialect.H2, "IdLong", "BIGINT PRIMARY KEY");
         setDbType(JdbcDialect.H2, "IdString", "VARCHAR(255) PRIMARY KEY");
+
+        setDbType(JdbcDialect.MySQL, CREATE_SEQUENCE, "CREATE TABLE id_sequence (highest BIGINT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
         setDbType(JdbcDialect.MySQL, String.class.getSimpleName(), "VARCHAR(500)");
+        setDbType(JdbcDialect.MySQL, Collection.class.getSimpleName(), "VARCHAR(500)");
     }
 }

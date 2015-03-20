@@ -22,8 +22,8 @@ public abstract class AbstractSupplier<K, RV, WV, T> implements Supplier<K, RV, 
     }
 
     @Override
-    public K insertValue(T tx, K key, WV value) throws IOException {
-        return writeValue(tx, key, value);
+    public K insertValue(T tx, Mapper mapper, K key, WV value) throws IOException {
+        return writeValue(tx, mapper, key, value);
     }
 
     /** Void for most suppliers */
